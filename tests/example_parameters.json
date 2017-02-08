@@ -9,21 +9,29 @@
                 "children": [
                     {
                         "type": "parameter",
-                        "name": "paramAAa"
+                        "name": "paramAAa",
+                        "minimum": null,
+                        "maximum": null
                     },
                     {
                         "type": "parameter",
-                        "name": "paramAAb"
+                        "name": "paramAAb",
+                        "minimum": null,
+                        "maximum": null
                     }
                 ]
             },
             {
                 "type": "parameter",
-                "name": "paramAa"
+                "name": "paramAa",
+                "minimum": null,
+                "maximum": null
             },
             {
                 "type": "parameter",
-                "name": "paramAb"
+                "name": "paramAb",
+                "minimum": null,
+                "maximum": null
             }
         ]
     },
@@ -38,11 +46,15 @@
             },
             {
                 "type": "parameter",
-                "name": "paramBa"
+                "name": "paramBa",
+                "minimum": null,
+                "maximum": null
             },
             {
                 "type": "parameter",
-                "name": "paramBb"
+                "name": "paramBb",
+                "minimum": null,
+                "maximum": null
             }
         ]
     }

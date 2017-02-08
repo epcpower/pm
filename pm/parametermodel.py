@@ -1,3 +1,4 @@
+import collections
 import json
 
 import attr
@@ -94,13 +95,11 @@ class Encoder(json.JSONEncoder):
             return obj
 
         elif isinstance(obj, Parameter):
-            d = attr.asdict(obj.parameter)
+            d = attr.asdict(obj.parameter, dict_factory=collections.OrderedDict)
             d['type'] = 'parameter'
 
-            return d
-
         elif isinstance(obj, Group):
-            d = attr.asdict(obj.group)
+            d = attr.asdict(obj.group, dict_factory=collections.OrderedDict)
 
             for child in obj.children:
                 d['children'].append(self.default(child))
@@ -110,7 +109,8 @@ class Encoder(json.JSONEncoder):
             if obj.tree_parent is None:
                 return d['children']
 
-            return d
+        d.move_to_end('type', last=False)
+        return d
 
 
 class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
