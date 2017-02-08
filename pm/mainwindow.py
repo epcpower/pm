@@ -5,6 +5,8 @@ import os
 from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
 
+import epyqlib.utils.qt
+
 import pm.parametermodel
 
 # See file COPYING in this source tree
@@ -34,8 +36,27 @@ class Window:
         sio = io.StringIO(ts.readAll())
         self.ui = PyQt5.uic.loadUi(sio)
 
-        self.model = pm.parametermodel.ParameterModel()
+        self.ui.action_open.triggered.connect(self.open)
+
+        self.set_model(pm.parametermodel.Model())
+
+    def set_model(self, model):
+        self.model = model
+
         self.proxy = QtCore.QSortFilterProxyModel()
         self.proxy.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
         self.proxy.setSourceModel(self.model)
         self.ui.tree_view.setModel(self.proxy)
+
+    def open(self):
+        filters = [
+            ('JSON', ['json']),
+            ('All Files', ['*'])
+        ]
+        filename = epyqlib.utils.qt.file_dialog(filters, parent=self.ui)
+
+        if filename is not None:
+            with open(filename) as f:
+                s = f.read()
+
+            self.set_model(pm.parametermodel.Model.from_json_string(s))

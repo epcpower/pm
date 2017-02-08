@@ -1,0 +1,49 @@
+[
+  {
+    "type": "group",
+    "name": "GroupA",
+    "children": [
+      {
+        "type": "group",
+        "name": "GroupAA",
+        "children": [
+          {
+            "type": "parameter",
+            "name": "paramAAa"
+          },
+          {
+            "type": "parameter",
+            "name": "paramAAb"
+          }
+        ]
+      },
+      {
+        "type": "parameter",
+        "name": "paramAa"
+      },
+      {
+        "type": "parameter",
+        "name": "paramAb"
+      }
+    ]
+  },
+  {
+    "type": "group",
+    "name": "GroupB",
+    "children": [
+      {
+        "type": "group",
+        "name": "GroupBA",
+        "children": []
+      },
+      {
+        "type": "parameter",
+        "name": "paramBa"
+      },
+      {
+        "type": "parameter",
+        "name": "paramBb"
+      }
+    ]
+  }
+]

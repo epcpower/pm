@@ -1,3 +1,5 @@
+import json
+
 import epyqlib.abstractcolumns
 import epyqlib.pyqabstractitemmodel
 import epyqlib.treenode
@@ -55,12 +57,54 @@ class Group(epyqlib.treenode.TreeNode):
         self.fields.name = self.group.name
 
 
-class ParameterModel(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
-    def __init__(self, parent=None):
-        root_group = pm.parameters.Group(name='root')
+class Decoder(json.JSONDecoder):
+    def __init__(self, *args, **kwargs):
+        super().__init__(object_hook=self.object_hook, *args, **kwargs)
 
-        super().__init__(root=Group(root_group), parent=parent)
+    def object_hook(self, obj):
+        obj_type = obj.get('type', None)
+
+        if isinstance(obj, list):
+            return obj
+
+        elif obj_type == 'parameter':
+            obj.pop('type')
+            parameter = pm.parameters.Parameter(**obj)
+            return Parameter(parameter=parameter)
+
+        elif obj_type == 'group':
+            obj.pop('type')
+            children = obj.pop('children')
+            group = pm.parameters.Group(**obj)
+            node = Group(group=group)
+
+            for child in children:
+                node.append_child(child)
+
+            return node
+
+        raise Exception('Unexpected object found: {}'.format(obj))
+
+
+class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
+    def __init__(self, root=None, parent=None):
+        if root is None:
+            root = pm.parameters.Group(name='root')
+            root = Group(group=root)
+
+        super().__init__(root=root, parent=parent)
 
         self.headers = Columns(
             name='Name'
         )
+
+    @classmethod
+    def from_json_string(cls, s):
+        root = pm.parameters.Group(name='root')
+        root = Group(group=root)
+
+        children = json.loads(s, cls=Decoder)
+        for child in children:
+            root.append_child(child)
+
+        return cls(root=root)
