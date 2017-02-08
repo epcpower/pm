@@ -52,7 +52,7 @@ def main(*args, logger):
         parent=window
     )
 
-    window.show()
+    window.ui.show()
 
     return app.exec()
 

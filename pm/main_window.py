@@ -11,10 +11,8 @@ __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
-class Window(QtWidgets.QMainWindow):
-    def __init__(self, ui_file, parent=None):
-        super().__init__(parent=parent)
-
+class Window:
+    def __init__(self, ui_file):
         # # TODO: CAMPid 980567566238416124867857834291346779
         # ico_file = os.path.join(QtCore.QFileInfo.absolutePath(QtCore.QFileInfo(__file__)), 'icon.ico')
         # ico = QtGui.QIcon(ico_file)
@@ -33,6 +31,6 @@ class Window(QtWidgets.QMainWindow):
         ui_file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text)
         ts = QtCore.QTextStream(ui_file)
         sio = io.StringIO(ts.readAll())
-        self.ui = PyQt5.uic.loadUi(sio, self)
+        self.ui = PyQt5.uic.loadUi(sio)
 
         # self.ui.action_about.triggered.connect(self.about_dialog)
