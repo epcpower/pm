@@ -73,3 +73,6 @@ class Window:
 
             with open(filename, 'w') as f:
                 f.write(s)
+
+                if not s.endswith('\n'):
+                    f.write('\n')
