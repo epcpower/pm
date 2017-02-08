@@ -1,0 +1,81 @@
+import argparse
+import functools
+import logging
+import sys
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+import epyqlib.utils.qt
+import pm.main_window
+
+# See file COPYING in this source tree
+__copyright__ = 'Copyright 2017, EPC Power Corp.'
+__license__ = 'GPLv2+'
+
+
+def parse_args(args):
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--verbose', '-v', action='count', default=0)
+    parser.add_argument('--file', '-f', type=argparse.FileType('rb'))
+
+    return parser.parse_args(args)
+
+
+def main(*args, logger):
+    app = QtWidgets.QApplication(sys.argv)
+
+    sys.excepthook = epyqlib.utils.qt.exception_message_box
+    QtCore.qInstallMessageHandler(epyqlib.utils.qt.message_handler)
+
+    app.setStyleSheet('QMessageBox {{ messagebox-text-interaction-flags: {}; }}'
+                      .format(QtCore.Qt.TextBrowserInteraction))
+
+    app.setOrganizationName('EPC Power Corp.')
+    app.setApplicationName('EPyQ')
+
+    args = parse_args(args=args)
+
+    if args.verbose >= 1:
+        logger.setLevel(logging.DEBUG)
+
+        if args.verbose >= 2:
+            # twisted.internet.defer.setDebugging(True)
+            pass
+
+            if args.verbose >= 3:
+                logging.getLogger().setLevel(logging.DEBUG)
+
+    window = pm.main_window.Window(ui_file='__main__.ui')
+
+    sys.excepthook = functools.partial(
+        epyqlib.utils.qt.exception_message_box,
+        parent=window
+    )
+
+    window.show()
+
+    return app.exec()
+
+
+def _entry_point():
+    import traceback
+
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    stream_handler = logging.StreamHandler()
+    file_handler = logging.FileHandler('pm.log')
+
+    for handler in (stream_handler, file_handler):
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
+
+    def excepthook(excType, excValue, tracebackobj):
+        logger.error('Uncaught exception hooked:\n' +
+            traceback.format_exception(excType, excValue, tracebackobj))
+
+    sys.excepthook = excepthook
+
+    return main(*sys.argv[1:], logger=logger)
