@@ -15,4 +15,4 @@ class Parameter:
 @attr.s
 class Group:
     name = attr.ib()
-    parameters = attr.ib(default=attr.Factory(list))
+    children = attr.ib(default=attr.Factory(list))

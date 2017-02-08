@@ -37,6 +37,13 @@ class Window:
         self.ui = PyQt5.uic.loadUi(sio)
 
         self.ui.action_open.triggered.connect(self.open)
+        self.ui.action_save_as.triggered.connect(self.save_as)
+
+        self.filters = [
+            ('JSON', ['json']),
+            ('All Files', ['*'])
+        ]
+
 
         self.set_model(pm.parametermodel.Model())
 
@@ -49,14 +56,20 @@ class Window:
         self.ui.tree_view.setModel(self.proxy)
 
     def open(self):
-        filters = [
-            ('JSON', ['json']),
-            ('All Files', ['*'])
-        ]
-        filename = epyqlib.utils.qt.file_dialog(filters, parent=self.ui)
+        filename = epyqlib.utils.qt.file_dialog(self.filters, parent=self.ui)
 
         if filename is not None:
             with open(filename) as f:
                 s = f.read()
 
             self.set_model(pm.parametermodel.Model.from_json_string(s))
+
+    def save_as(self):
+        filename = epyqlib.utils.qt.file_dialog(
+            self.filters, parent=self.ui, save=True)
+
+        if filename is not None:
+            s = self.model.to_json_string()
+
+            with open(filename, 'w') as f:
+                f.write(s)

@@ -9,20 +9,28 @@
                 "children": [
                     {
                         "type": "parameter",
+                        "maximum": null,
+                        "minimum": null,
                         "name": "paramAAa"
                     },
                     {
                         "type": "parameter",
+                        "maximum": null,
+                        "minimum": null,
                         "name": "paramAAb"
                     }
                 ]
             },
             {
                 "type": "parameter",
+                "maximum": null,
+                "minimum": null,
                 "name": "paramAa"
             },
             {
                 "type": "parameter",
+                "maximum": null,
+                "minimum": null,
                 "name": "paramAb"
             }
         ]
@@ -38,10 +46,14 @@
             },
             {
                 "type": "parameter",
+                "maximum": null,
+                "minimum": null,
                 "name": "paramBa"
             },
             {
                 "type": "parameter",
+                "maximum": null,
+                "minimum": null,
                 "name": "paramBb"
             }
         ]

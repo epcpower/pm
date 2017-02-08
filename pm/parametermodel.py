@@ -1,5 +1,7 @@
 import json
 
+import attr
+
 import epyqlib.abstractcolumns
 import epyqlib.pyqabstractitemmodel
 import epyqlib.treenode
@@ -86,6 +88,32 @@ class Decoder(json.JSONDecoder):
         raise Exception('Unexpected object found: {}'.format(obj))
 
 
+class Encoder(json.JSONEncoder):
+    def default(self, obj):
+        print(obj)
+        if isinstance(obj, list):
+            return obj
+
+        elif isinstance(obj, Parameter):
+            d = attr.asdict(obj.parameter)
+            d['type'] = 'parameter'
+
+            return d
+
+        elif isinstance(obj, Group):
+            d = attr.asdict(obj.group)
+
+            for child in obj.children:
+                d['children'].append(self.default(child))
+
+            d['type'] = 'group'
+
+            if obj.tree_parent is None:
+                return d['children']
+
+            return d
+
+
 class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
     def __init__(self, root=None, parent=None):
         if root is None:
@@ -108,3 +136,6 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
             root.append_child(child)
 
         return cls(root=root)
+
+    def to_json_string(self):
+        return json.dumps(self.root, cls=Encoder, indent=4)
