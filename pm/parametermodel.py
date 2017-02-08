@@ -90,7 +90,6 @@ class Decoder(json.JSONDecoder):
 
 class Encoder(json.JSONEncoder):
     def default(self, obj):
-        print(obj)
         if isinstance(obj, list):
             return obj
 
