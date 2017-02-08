@@ -5,6 +5,7 @@ import os
 from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
 
+import pm.parametermodel
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
@@ -33,4 +34,8 @@ class Window:
         sio = io.StringIO(ts.readAll())
         self.ui = PyQt5.uic.loadUi(sio)
 
-        # self.ui.action_about.triggered.connect(self.about_dialog)
+        self.model = pm.parametermodel.ParameterModel()
+        self.proxy = QtCore.QSortFilterProxyModel()
+        self.proxy.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.proxy.setSourceModel(self.model)
+        self.ui.tree_view.setModel(self.proxy)
