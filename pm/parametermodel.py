@@ -1,4 +1,5 @@
 import collections
+import decimal
 import json
 
 import attr
@@ -31,6 +32,8 @@ def from_fields(self, other):
     for a in attr.fields(type(other)):
         if not a.metadata.get('ignore', False):
             setattr(other, a.name, getattr(self.fields, a.name))
+
+    to_fields(self, other)
 
 
 class Parameter(epyqlib.treenode.TreeNode):
@@ -93,7 +96,11 @@ class Group(epyqlib.treenode.TreeNode):
 
 class Decoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
-        super().__init__(object_hook=self.object_hook, *args, **kwargs)
+        super().__init__(object_hook=self.object_hook,
+                         parse_float=decimal.Decimal,
+                         parse_int=decimal.Decimal,
+                         *args,
+                         **kwargs)
 
     def object_hook(self, obj):
         obj_type = obj.get('type', None)
@@ -129,6 +136,8 @@ class Encoder(json.JSONEncoder):
             d = attr.asdict(obj.parameter, dict_factory=collections.OrderedDict)
             d['type'] = 'parameter'
 
+            d.move_to_end('type', last=False)
+
         elif isinstance(obj, Group):
             d = attr.asdict(obj.group, dict_factory=collections.OrderedDict)
 
@@ -140,7 +149,15 @@ class Encoder(json.JSONEncoder):
             if obj.tree_parent is None:
                 return d['children']
 
-        d.move_to_end('type', last=False)
+            d.move_to_end('type', last=False)
+
+        elif isinstance(obj, decimal.Decimal):
+            i = int(obj)
+            if i == obj:
+                d = i
+            else:
+                d = float(obj)
+
         return d
 
 
@@ -174,6 +191,16 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
         flags |= QtCore.Qt.ItemIsEditable
 
         return flags
+
+    def data_display(self, index):
+        result = super().data_display(index)
+
+        return str(result)
+
+    def data_edit(self, index):
+        result = super().data_edit(index)
+
+        return str(result)
 
     def setData(self, index, data, role=None):
         if role == QtCore.Qt.EditRole:

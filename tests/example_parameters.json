@@ -10,14 +10,14 @@
                     {
                         "type": "parameter",
                         "name": "paramAAa",
-                        "minimum": null,
+                        "minimum": "3",
                         "maximum": null
                     },
                     {
                         "type": "parameter",
                         "name": "paramAAb",
-                        "minimum": 0,
-                        "maximum": 100
+                        "minimum": 5,
+                        "maximum": 6.6
                     }
                 ]
             },
