@@ -2,6 +2,7 @@ import collections
 import json
 
 import attr
+from PyQt5 import QtCore
 
 import epyqlib.abstractcolumns
 import epyqlib.pyqabstractitemmodel
@@ -20,10 +21,16 @@ class Columns(epyqlib.abstractcolumns.AbstractColumns):
 Columns.indexes = Columns.indexes()
 
 
-def from_fields(self, other):
+def to_fields(self, other):
     for a in attr.fields(type(other)):
         if not a.metadata.get('ignore', False):
             setattr(self.fields, a.name, getattr(other, a.name))
+
+
+def from_fields(self, other):
+    for a in attr.fields(type(other)):
+        if not a.metadata.get('ignore', False):
+            setattr(other, a.name, getattr(self.fields, a.name))
 
 
 class Parameter(epyqlib.treenode.TreeNode):
@@ -42,10 +49,17 @@ class Parameter(epyqlib.treenode.TreeNode):
     @parameter.setter
     def parameter(self, parameter):
         self._parameter = parameter
-        self.from_fields()
+        self.to_fields()
 
     def from_fields(self):
         from_fields(self, self.parameter)
+
+    def to_fields(self):
+        to_fields(self, self.parameter)
+
+    def set_data(self, column_index, value):
+        self.fields[column_index] = value
+        self.from_fields()
 
 
 class Group(epyqlib.treenode.TreeNode):
@@ -64,10 +78,17 @@ class Group(epyqlib.treenode.TreeNode):
     @group.setter
     def group(self, group):
         self._group = group
-        self.from_fields()
+        self.to_fields()
 
     def from_fields(self):
         from_fields(self, self.group)
+
+    def to_fields(self):
+        to_fields(self, self.group)
+
+    def set_data(self, column_index, value):
+        self.fields[column_index] = value
+        self.from_fields()
 
 
 class Decoder(json.JSONDecoder):
@@ -146,3 +167,23 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
     def to_json_string(self):
         return json.dumps(self.root, cls=Encoder, indent=4)
+
+    def flags(self, index):
+        flags = super().flags(index)
+
+        flags |= QtCore.Qt.ItemIsEditable
+
+        return flags
+
+    def setData(self, index, data, role=None):
+        if role == QtCore.Qt.EditRole:
+            node = self.node_from_index(index)
+            try:
+                node.set_data(index.column(), data)
+            except ValueError:
+                return False
+            else:
+                self.dataChanged.emit(index, index)
+                return True
+
+        return False
