@@ -49,7 +49,7 @@ def main(*args, logger):
 
     sys.excepthook = functools.partial(
         epyqlib.utils.qt.exception_message_box,
-        parent=window
+        parent=window.ui
     )
 
     window.ui.show()
