@@ -20,6 +20,12 @@ class Columns(epyqlib.abstractcolumns.AbstractColumns):
 Columns.indexes = Columns.indexes()
 
 
+def from_fields(self, other):
+    for a in attr.fields(type(other)):
+        if not a.metadata.get('ignore', False):
+            setattr(self.fields, a.name, getattr(other, a.name))
+
+
 class Parameter(epyqlib.treenode.TreeNode):
     def __init__(self, parameter, parent=None):
         super().__init__(parent=parent)
@@ -36,9 +42,10 @@ class Parameter(epyqlib.treenode.TreeNode):
     @parameter.setter
     def parameter(self, parameter):
         self._parameter = parameter
+        self.from_fields()
 
-        for name in Columns._members:
-            setattr(self.fields, name, getattr(self.parameter, name))
+    def from_fields(self):
+        from_fields(self, self.parameter)
 
 
 class Group(epyqlib.treenode.TreeNode):
@@ -57,8 +64,10 @@ class Group(epyqlib.treenode.TreeNode):
     @group.setter
     def group(self, group):
         self._group = group
+        self.from_fields()
 
-        self.fields.name = self.group.name
+    def from_fields(self):
+        from_fields(self, self.group)
 
 
 class Decoder(json.JSONDecoder):
