@@ -15,7 +15,7 @@ __license__ = 'GPLv2+'
 
 
 class Columns(epyqlib.abstractcolumns.AbstractColumns):
-    _members = ['name']
+    _members = ['name', 'minimum', 'maximum']
 
 Columns.indexes = Columns.indexes()
 
@@ -37,7 +37,8 @@ class Parameter(epyqlib.treenode.TreeNode):
     def parameter(self, parameter):
         self._parameter = parameter
 
-        self.fields.name = self.parameter.name
+        for name in Columns._members:
+            setattr(self.fields, name, getattr(self.parameter, name))
 
 
 class Group(epyqlib.treenode.TreeNode):
@@ -121,9 +122,7 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
         super().__init__(root=root, parent=parent)
 
-        self.headers = Columns(
-            name='Name'
-        )
+        self.headers = Columns.as_title_case()
 
     @classmethod
     def from_json_string(cls, s):

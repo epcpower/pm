@@ -16,8 +16,8 @@
                     {
                         "type": "parameter",
                         "name": "paramAAb",
-                        "minimum": null,
-                        "maximum": null
+                        "minimum": 0,
+                        "maximum": 100
                     }
                 ]
             },
