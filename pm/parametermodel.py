@@ -15,7 +15,7 @@ __license__ = 'GPLv2+'
 
 
 class Columns(epyqlib.abstractcolumns.AbstractColumns):
-    _members = ['name', 'minimum', 'maximum']
+    _members = [a.name for a in attr.fields(pm.parameters.Parameter)]
 
 Columns.indexes = Columns.indexes()
 
