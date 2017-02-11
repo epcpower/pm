@@ -23,6 +23,7 @@ def to_decimal_or_none(s):
 
 @attr.s
 class Parameter(epyqlib.treenode.TreeNode):
+    _type = attr.ib(default='parameter', init=False, metadata={'ignore': True})
     name = attr.ib()
     minimum = attr.ib(default=None, convert=to_decimal_or_none)
     maximum = attr.ib(default=None, convert=to_decimal_or_none)
@@ -47,6 +48,7 @@ class Parameter(epyqlib.treenode.TreeNode):
 
 @attr.s
 class Group(epyqlib.treenode.TreeNode):
+    _type = attr.ib(default='group', init=False, metadata={'ignore': True})
     name = attr.ib()
     children = attr.ib(default=attr.Factory(list), metadata={'ignore': True})
 
@@ -75,17 +77,17 @@ class Decoder(json.JSONDecoder):
                          **kwargs)
 
     def object_hook(self, obj):
-        obj_type = obj.get('type', None)
+        obj_type = obj.get('_type', None)
 
         if isinstance(obj, list):
             return obj
 
         elif obj_type == 'parameter':
-            obj.pop('type')
+            obj.pop('_type')
             return Parameter(**obj)
 
         elif obj_type == 'group':
-            obj.pop('type')
+            obj.pop('_type')
             children = obj.pop('children')
             node = Group(**obj)
 
@@ -105,17 +107,11 @@ class Encoder(json.JSONEncoder):
         elif isinstance(obj, Parameter):
             d = attr.asdict(obj, recurse=False, dict_factory=collections.OrderedDict)
 
-            d['type'] = 'parameter'
-            d.move_to_end('type', last=False)
-
         elif isinstance(obj, Group):
             d = attr.asdict(obj, recurse=False, dict_factory=collections.OrderedDict)
 
             if obj.tree_parent is None:
                 return [self.default(c) for c in d['children']]
-
-            d['type'] = 'group'
-            d.move_to_end('type', last=False)
 
         elif isinstance(obj, decimal.Decimal):
             i = int(obj)
