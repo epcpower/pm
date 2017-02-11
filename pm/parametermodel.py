@@ -9,89 +9,61 @@ import epyqlib.abstractcolumns
 import epyqlib.pyqabstractitemmodel
 import epyqlib.treenode
 
-import pm.parameters
-
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
-class Columns(epyqlib.abstractcolumns.AbstractColumns):
-    _members = [a.name for a in attr.fields(pm.parameters.Parameter)]
+def to_decimal_or_none(s):
+    if s is None:
+        return None
 
-Columns.indexes = Columns.indexes()
-
-
-def to_fields(self, other):
-    for a in attr.fields(type(other)):
-        if not a.metadata.get('ignore', False):
-            setattr(self.fields, a.name, getattr(other, a.name))
+    return decimal.Decimal(s)
 
 
-def from_fields(self, other):
-    for a in attr.fields(type(other)):
-        if not a.metadata.get('ignore', False):
-            setattr(other, a.name, getattr(self.fields, a.name))
-
-    to_fields(self, other)
-
-
+@attr.s
 class Parameter(epyqlib.treenode.TreeNode):
-    def __init__(self, parameter, parent=None):
-        super().__init__(parent=parent)
+    name = attr.ib()
+    minimum = attr.ib(default=None, convert=to_decimal_or_none)
+    maximum = attr.ib(default=None, convert=to_decimal_or_none)
 
-        self.fields = Columns()
+    columns = (a.name for a in (name, minimum, maximum))
 
-        self._parameter = None
-        self.parameter = parameter
+    def __attrs_post_init__(self):
+        super().__init__()
 
-    @property
-    def parameter(self):
-        return self._parameter
+    def get(self, index):
+        names = [a.name for a in attr.fields(type(self))
+                 if not a.metadata.get('ignore', False)]
 
-    @parameter.setter
-    def parameter(self, parameter):
-        self._parameter = parameter
-        self.to_fields()
-
-    def from_fields(self):
-        from_fields(self, self.parameter)
-
-    def to_fields(self):
-        to_fields(self, self.parameter)
+        return getattr(self, names[index])
 
     def set_data(self, column_index, value):
-        self.fields[column_index] = value
-        self.from_fields()
+        names = [a.name for a in attr.fields(type(self))
+                 if not a.metadata.get('ignore', False)]
+
+        setattr(self, names[column_index], value)
 
 
+@attr.s
 class Group(epyqlib.treenode.TreeNode):
-    def __init__(self, group, parent=None):
-        super().__init__(parent=parent)
+    name = attr.ib()
+    children = attr.ib(default=attr.Factory(list), metadata={'ignore': True})
 
-        self.fields = Columns()
+    def __attrs_post_init__(self):
+        super().__init__()
 
-        self._group = None
-        self.group = group
+    def get(self, index):
+        names = [a.name for a in attr.fields(type(self))
+                 if not a.metadata.get('ignore', False)]
 
-    @property
-    def group(self):
-        return self._group
-
-    @group.setter
-    def group(self, group):
-        self._group = group
-        self.to_fields()
-
-    def from_fields(self):
-        from_fields(self, self.group)
-
-    def to_fields(self):
-        to_fields(self, self.group)
+        return getattr(self, names[index])
 
     def set_data(self, column_index, value):
-        self.fields[column_index] = value
-        self.from_fields()
+        names = [a.name for a in attr.fields(type(self))
+                 if not a.metadata.get('ignore', False)]
+
+        setattr(self, names[column_index], value)
 
 
 class Decoder(json.JSONDecoder):
@@ -110,14 +82,12 @@ class Decoder(json.JSONDecoder):
 
         elif obj_type == 'parameter':
             obj.pop('type')
-            parameter = pm.parameters.Parameter(**obj)
-            return Parameter(parameter=parameter)
+            return Parameter(**obj)
 
         elif obj_type == 'group':
             obj.pop('type')
             children = obj.pop('children')
-            group = pm.parameters.Group(**obj)
-            node = Group(group=group)
+            node = Group(**obj)
 
             for child in children:
                 node.append_child(child)
@@ -133,22 +103,18 @@ class Encoder(json.JSONEncoder):
             return obj
 
         elif isinstance(obj, Parameter):
-            d = attr.asdict(obj.parameter, dict_factory=collections.OrderedDict)
-            d['type'] = 'parameter'
+            d = attr.asdict(obj, recurse=False, dict_factory=collections.OrderedDict)
 
+            d['type'] = 'parameter'
             d.move_to_end('type', last=False)
 
         elif isinstance(obj, Group):
-            d = attr.asdict(obj.group, dict_factory=collections.OrderedDict)
-
-            for child in obj.children:
-                d['children'].append(self.default(child))
-
-            d['type'] = 'group'
+            d = attr.asdict(obj, recurse=False, dict_factory=collections.OrderedDict)
 
             if obj.tree_parent is None:
-                return d['children']
+                return [self.default(c) for c in d['children']]
 
+            d['type'] = 'group'
             d.move_to_end('type', last=False)
 
         elif isinstance(obj, decimal.Decimal):
@@ -164,17 +130,16 @@ class Encoder(json.JSONEncoder):
 class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
     def __init__(self, root=None, parent=None):
         if root is None:
-            root = pm.parameters.Group(name='root')
-            root = Group(group=root)
+            root = Group(name='root')
 
-        super().__init__(root=root, parent=parent)
+        super().__init__(root=root, attrs=True, parent=parent)
 
-        self.headers = Columns.as_title_case()
+        self.headers = [a.name.title() for a in attr.fields(Parameter)
+                        if not a.metadata.get('ignore', False)]
 
     @classmethod
     def from_json_string(cls, s):
-        root = pm.parameters.Group(name='root')
-        root = Group(group=root)
+        root = Group(name='root')
 
         children = json.loads(s, cls=Decoder)
         for child in children:
