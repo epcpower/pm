@@ -19,14 +19,20 @@ def to_decimal_or_none(s):
     if s is None:
         return None
 
-    return decimal.Decimal(s)
+    try:
+        result = decimal.Decimal(s)
+    except decimal.InvalidOperation as e:
+        raise ValueError('Invalid number: {}'.format(repr(s))) from e
+
+    return result
 
 
 def ignored_attribute_filter(attribute):
     return not attribute.metadata.get('ignore', False)
 
 
-@epyqlib.utils.general.indexable_attrs(ignore=ignored_attribute_filter)
+@epyqlib.utils.general.indexable_attrs(ignore=ignored_attribute_filter,
+                                       convert_on_set=True)
 @attr.s
 class Parameter(epyqlib.treenode.TreeNode):
     _type = attr.ib(default='parameter', init=False, metadata={'ignore': True})
@@ -38,7 +44,8 @@ class Parameter(epyqlib.treenode.TreeNode):
         super().__init__()
 
 
-@epyqlib.utils.general.indexable_attrs(ignore=ignored_attribute_filter)
+@epyqlib.utils.general.indexable_attrs(ignore=ignored_attribute_filter,
+                                       convert_on_set=True)
 @attr.s
 class Group(epyqlib.treenode.TreeNode):
     _type = attr.ib(default='group', init=False, metadata={'ignore': True})
