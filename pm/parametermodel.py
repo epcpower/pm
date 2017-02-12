@@ -8,6 +8,7 @@ from PyQt5 import QtCore
 import epyqlib.abstractcolumns
 import epyqlib.pyqabstractitemmodel
 import epyqlib.treenode
+import epyqlib.utils.general
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
@@ -21,6 +22,11 @@ def to_decimal_or_none(s):
     return decimal.Decimal(s)
 
 
+def ignored_attribute_filter(attribute):
+    return not attribute.metadata.get('ignore', False)
+
+
+@epyqlib.utils.general.indexable_attrs(ignore=ignored_attribute_filter)
 @attr.s
 class Parameter(epyqlib.treenode.TreeNode):
     _type = attr.ib(default='parameter', init=False, metadata={'ignore': True})
@@ -28,24 +34,11 @@ class Parameter(epyqlib.treenode.TreeNode):
     minimum = attr.ib(default=None, convert=to_decimal_or_none)
     maximum = attr.ib(default=None, convert=to_decimal_or_none)
 
-    columns = (a.name for a in (name, minimum, maximum))
-
     def __attrs_post_init__(self):
         super().__init__()
 
-    def get(self, index):
-        names = [a.name for a in attr.fields(type(self))
-                 if not a.metadata.get('ignore', False)]
 
-        return getattr(self, names[index])
-
-    def set_data(self, column_index, value):
-        names = [a.name for a in attr.fields(type(self))
-                 if not a.metadata.get('ignore', False)]
-
-        setattr(self, names[column_index], value)
-
-
+@epyqlib.utils.general.indexable_attrs(ignore=ignored_attribute_filter)
 @attr.s
 class Group(epyqlib.treenode.TreeNode):
     _type = attr.ib(default='group', init=False, metadata={'ignore': True})
@@ -54,18 +47,6 @@ class Group(epyqlib.treenode.TreeNode):
 
     def __attrs_post_init__(self):
         super().__init__()
-
-    def get(self, index):
-        names = [a.name for a in attr.fields(type(self))
-                 if not a.metadata.get('ignore', False)]
-
-        return getattr(self, names[index])
-
-    def set_data(self, column_index, value):
-        names = [a.name for a in attr.fields(type(self))
-                 if not a.metadata.get('ignore', False)]
-
-        setattr(self, names[column_index], value)
 
 
 class Decoder(json.JSONDecoder):
@@ -167,7 +148,7 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
         if role == QtCore.Qt.EditRole:
             node = self.node_from_index(index)
             try:
-                node.set_data(index.column(), data)
+                node[index.column()] = data
             except ValueError:
                 return False
             else:
