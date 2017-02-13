@@ -188,13 +188,19 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
         node = self.node_from_index(index)
 
         if role == QtCore.Qt.EditRole:
-            try:
-                node[index.column()] = node.public_fields[index.column()].convert(data)
-            except ValueError:
-                return False
+            convert = node.public_fields[index.column()].convert
+            if convert is not None:
+                try:
+                    converted = convert(data)
+                except ValueError:
+                    return False
             else:
-                self.dataChanged.emit(index, index)
-                return True
+                converted = data
+
+            node[index.column()] = converted
+
+            self.dataChanged.emit(index, index)
+            return True
         elif role == QtCore.Qt.CheckStateRole:
             node[index.column()] = node.public_fields[index.column()].convert(data)
 
