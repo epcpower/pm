@@ -10,14 +10,16 @@
                     {
                         "_type": "parameter",
                         "name": "paramAAa",
-                        "minimum": "3",
-                        "maximum": null
+                        "minimum": 3,
+                        "maximum": null,
+                        "factory": true
                     },
                     {
                         "_type": "parameter",
                         "name": "paramAAb",
                         "minimum": 5,
-                        "maximum": 6.6
+                        "maximum": 6.6,
+                        "factory": true
                     }
                 ]
             },
@@ -25,13 +27,15 @@
                 "_type": "parameter",
                 "name": "paramAa",
                 "minimum": null,
-                "maximum": null
+                "maximum": null,
+                "factory": false
             },
             {
                 "_type": "parameter",
                 "name": "paramAb",
                 "minimum": null,
-                "maximum": null
+                "maximum": null,
+                "factory": false
             }
         ]
     },
@@ -48,13 +52,15 @@
                 "_type": "parameter",
                 "name": "paramBa",
                 "minimum": null,
-                "maximum": null
+                "maximum": null,
+                "factory": false
             },
             {
                 "_type": "parameter",
                 "name": "paramBb",
                 "minimum": null,
-                "maximum": null
+                "maximum": null,
+                "factory": false
             }
         ]
     }
