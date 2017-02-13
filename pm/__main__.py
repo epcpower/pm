@@ -16,7 +16,7 @@ __license__ = 'GPLv2+'
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('--verbose', '-v', action='count', default=0)
-    parser.add_argument('--file', '-f', type=argparse.FileType('rb'))
+    parser.add_argument('--file', '-f', type=argparse.FileType('r'))
 
     return parser.parse_args(args)
 
@@ -51,6 +51,10 @@ def main(*args, logger):
         epyqlib.utils.qt.exception_message_box,
         parent=window.ui
     )
+
+    if args.file is not None:
+        window.open(file=args.file)
+        args.file.close()
 
     window.ui.show()
 

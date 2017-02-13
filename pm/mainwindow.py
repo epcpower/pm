@@ -36,7 +36,7 @@ class Window:
         sio = io.StringIO(ts.readAll())
         self.ui = PyQt5.uic.loadUi(sio)
 
-        self.ui.action_open.triggered.connect(self.open)
+        self.ui.action_open.triggered.connect(lambda _: self.open())
         self.ui.action_save_as.triggered.connect(self.save_as)
 
         self.filters = [
@@ -55,14 +55,21 @@ class Window:
         self.proxy.setSourceModel(self.model)
         self.ui.tree_view.setModel(self.proxy)
 
-    def open(self):
-        filename = epyqlib.utils.qt.file_dialog(self.filters, parent=self.ui)
+    def open(self, file=None):
+        if file is None:
+            filename = epyqlib.utils.qt.file_dialog(self.filters, parent=self.ui)
 
-        if filename is not None:
+            if filename is None:
+                return
+
             with open(filename) as f:
                 s = f.read()
+        else:
+            s = file.read()
 
-            self.set_model(pm.parametermodel.Model.from_json_string(s))
+        self.set_model(pm.parametermodel.Model.from_json_string(s))
+
+        return
 
     def save_as(self):
         filename = epyqlib.utils.qt.file_dialog(
