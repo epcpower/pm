@@ -189,7 +189,7 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
         if role == QtCore.Qt.EditRole:
             try:
-                node[index.column()] = data
+                node[index.column()] = node.public_fields[index.column()].convert(data)
             except ValueError:
                 return False
             else:
