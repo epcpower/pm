@@ -44,16 +44,26 @@ class Window:
             ('All Files', ['*'])
         ]
 
-
+        self.model = None
         self.set_model(pm.parametermodel.Model())
+
+        self.ui.tree_view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.ui.tree_view.customContextMenuRequested.connect(
+            self.context_menu
+        )
+
+        self.selection_model = self.ui.tree_view.selectionModel()
+        self.selection_model.selectionChanged.connect(
+            self.selection_changed)
 
     def set_model(self, model):
         self.model = model
 
-        self.proxy = QtCore.QSortFilterProxyModel()
-        self.proxy.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
-        self.proxy.setSourceModel(self.model)
-        self.ui.tree_view.setModel(self.proxy)
+        # self.proxy = QtCore.QSortFilterProxyModel()
+        # self.proxy.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        # self.proxy.setSourceModel(self.model)
+        # self.ui.tree_view.setModel(self.proxy)
+        self.ui.tree_view.setModel(self.model)
 
     def open(self, file=None):
         if file is None:
@@ -83,3 +93,35 @@ class Window:
 
                 if not s.endswith('\n'):
                     f.write('\n')
+
+    def context_menu(self, position):
+        index = self.ui.tree_view.indexAt(position)
+
+        if not index.isValid():
+            return
+
+        node = self.model.node_from_index(index)
+
+        menu = QtWidgets.QMenu(parent=self.ui.tree_view)
+
+        add_group = menu.addAction('Add Group')
+        add_parameter = menu.addAction('Add Parameter')
+        delete = menu.addAction('Delete')
+
+        if isinstance(node, pm.parametermodel.Parameter):
+            add_group.setEnabled(False)
+            add_parameter.setEnabled(False)
+
+        action = menu.exec(self.ui.tree_view.viewport().mapToGlobal(position))
+
+        if action is None:
+            pass
+        elif action is add_group:
+            self.model.add_group(parent=node)
+        elif action is add_parameter:
+            self.model.add_parameter(parent=node)
+        elif action is delete:
+            self.model.delete(node=node)
+
+    def selection_changed(self, selected, deselected):
+        pass

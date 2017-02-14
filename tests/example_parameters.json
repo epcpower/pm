@@ -20,6 +20,13 @@
                         "minimum": 5,
                         "maximum": 6.6,
                         "factory": true
+                    },
+                    {
+                        "_type": "parameter",
+                        "name": "New Parameter",
+                        "minimum": null,
+                        "maximum": null,
+                        "factory": false
                     }
                 ]
             },
@@ -36,6 +43,19 @@
                 "minimum": null,
                 "maximum": null,
                 "factory": false
+            },
+            {
+                "_type": "group",
+                "name": "New Group",
+                "children": [
+                    {
+                        "_type": "parameter",
+                        "name": "New Parameter",
+                        "minimum": null,
+                        "maximum": null,
+                        "factory": false
+                    }
+                ]
             }
         ]
     },

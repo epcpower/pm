@@ -56,7 +56,8 @@ class Group(epyqlib.treenode.TreeNode):
     fill0 = epyqlib.utils.general.filler_attribute()
     fill1 = epyqlib.utils.general.filler_attribute()
     fill2 = epyqlib.utils.general.filler_attribute()
-    children = attr.ib(default=attr.Factory(list), metadata={'ignore': True})
+    children = attr.ib(default=attr.Factory(list), hash=False,
+                       metadata={'ignore': True})
 
     def __attrs_post_init__(self):
         super().__init__()
@@ -207,3 +208,27 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
             return True
 
         return False
+
+    def add_group(self, parent, group=None):
+        if group is None:
+            group = Group(name='New Group')
+
+        self.add_child(parent=parent, child=group)
+
+    def add_parameter(self, parent, parameter=None):
+        if parameter is None:
+            parameter = Parameter(name='New Parameter')
+
+        self.add_child(parent=parent, child=parameter)
+
+    def add_child(self, parent, child):
+        row = len(parent.children)
+        self.begin_insert_rows(parent, row, row)
+        parent.append_child(child)
+        self.end_insert_rows()
+
+    def delete(self, node):
+        row = node.tree_parent.row_of_child(node)
+        self.begin_remove_rows(node.tree_parent, row, row)
+        node.tree_parent.remove_child(child=node)
+        self.end_remove_rows()
