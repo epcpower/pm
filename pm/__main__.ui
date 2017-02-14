@@ -38,6 +38,7 @@
      <string>&amp;File</string>
     </property>
     <addaction name="action_open"/>
+    <addaction name="action_save"/>
     <addaction name="action_save_as"/>
    </widget>
    <addaction name="menu_File"/>
@@ -50,7 +51,12 @@
   </action>
   <action name="action_save_as">
    <property name="text">
-    <string>&amp;Save As...</string>
+    <string>Save &amp;As...</string>
+   </property>
+  </action>
+  <action name="action_save">
+   <property name="text">
+    <string>&amp;Save</string>
    </property>
   </action>
  </widget>

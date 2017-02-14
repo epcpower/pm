@@ -37,6 +37,7 @@ class Window:
         self.ui = PyQt5.uic.loadUi(sio)
 
         self.ui.action_open.triggered.connect(lambda _: self.open())
+        self.ui.action_save.triggered.connect(lambda _: self.save())
         self.ui.action_save_as.triggered.connect(self.save_as)
 
         self.filters = [
@@ -57,6 +58,8 @@ class Window:
         self.selection_model.selectionChanged.connect(
             self.selection_changed)
 
+        self.filename = None
+
     def set_model(self, model):
         self.model = model
 
@@ -76,23 +79,34 @@ class Window:
                 s = f.read()
         else:
             s = file.read()
+            filename = os.path.abspath(file.name)
 
         self.set_model(pm.parametermodel.Model.from_json_string(s))
+        self.filename = filename
 
         return
+
+    def save(self, filename=None):
+        if filename is None:
+            filename = self.filename
+
+        if filename is None:
+            return
+
+        s = self.model.to_json_string()
+
+        with open(filename, 'w') as f:
+            f.write(s)
+
+            if not s.endswith('\n'):
+                f.write('\n')
 
     def save_as(self):
         filename = epyqlib.utils.qt.file_dialog(
             self.filters, parent=self.ui, save=True)
 
         if filename is not None:
-            s = self.model.to_json_string()
-
-            with open(filename, 'w') as f:
-                f.write(s)
-
-                if not s.endswith('\n'):
-                    f.write('\n')
+            self.save(filename=filename)
 
     def context_menu(self, position):
         index = self.ui.tree_view.indexAt(position)
