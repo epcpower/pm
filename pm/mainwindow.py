@@ -45,6 +45,7 @@ class Window:
         ]
 
         self.model = None
+        self.proxy = None
         self.set_model(pm.parametermodel.Model())
 
         self.ui.tree_view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -59,11 +60,10 @@ class Window:
     def set_model(self, model):
         self.model = model
 
-        # self.proxy = QtCore.QSortFilterProxyModel()
-        # self.proxy.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
-        # self.proxy.setSourceModel(self.model)
-        # self.ui.tree_view.setModel(self.proxy)
-        self.ui.tree_view.setModel(self.model)
+        self.proxy = QtCore.QSortFilterProxyModel()
+        self.proxy.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.proxy.setSourceModel(self.model)
+        self.ui.tree_view.setModel(self.proxy)
 
     def open(self, file=None):
         if file is None:
@@ -96,6 +96,7 @@ class Window:
 
     def context_menu(self, position):
         index = self.ui.tree_view.indexAt(position)
+        index = self.ui.tree_view.model().mapToSource(index)
 
         if not index.isValid():
             return
