@@ -89,9 +89,11 @@ class Window:
             s = file.read()
             filename = os.path.abspath(file.name)
 
-        self.set_model(pm.parametermodel.Model.from_json_string(s))
+        model = pm.parametermodel.Model.from_json_string(s)
+        self.set_model(model)
         self.ui.tree_view.expandAll()
-        self.ui.tree_view.resizeColumnToContents(0)
+        for i, _ in enumerate(model.root):
+            self.ui.tree_view.resizeColumnToContents(i)
         self.filename = filename
 
         return
