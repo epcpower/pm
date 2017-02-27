@@ -1,5 +1,4 @@
 import io
-import json
 import logging
 import os
 
@@ -9,6 +8,7 @@ import PyQt5.uic
 
 import epyqlib.utils.qt
 
+import pm.attrsmodel
 import pm.parametermodel
 import pm.symbolmodel
 
@@ -19,9 +19,11 @@ __license__ = 'GPLv2+'
 
 @attr.s
 class ModelView:
-    model = attr.ib()
     view = attr.ib()
     filename = attr.ib()
+    header_type = attr.ib()
+    types = attr.ib()
+    model = attr.ib(default=None)
     proxy = attr.ib(default=None)
     selection = attr.ib(default=None)
 
@@ -98,22 +100,27 @@ class Window:
 
         view_models = {
             'parameters': ModelView(
-                model=pm.parametermodel.Model,
                 view=self.ui.parameter_view,
-                filename=filename
+                filename=filename,
+                header_type=pm.parametermodel.Parameter,
+                types=pm.parametermodel.types
             ),
             'symbols': ModelView(
-                model=pm.symbolmodel.Model,
                 view=self.ui.symbol_view,
-                filename=filename.replace('parameters', 'symbols')
+                filename=filename.replace('parameters', 'symbols'),
+                header_type=pm.symbolmodel.Message,
+                types=pm.symbolmodel.types
             )
         }
 
         for name, view_model in view_models.items():
             view = view_model.view
             with open(view_model.filename) as f:
-                view_model.model = view_model.model.from_json_string(
-                    f.read())
+                view_model.model = pm.attrsmodel.Model.from_json_string(
+                    f.read(),
+                    header_type=view_model.header_type,
+                    types=view_model.types
+                )
             self.set_model(name=name, view_model=view_model)
             view.expandAll()
             for i in range(view_model.model.columnCount(QtCore.QModelIndex())):
