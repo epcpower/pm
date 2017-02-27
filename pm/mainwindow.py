@@ -54,6 +54,14 @@ class Window:
             self.context_menu
         )
 
+        self.ui.tree_view.setSelectionMode(
+            QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.ui.tree_view.setDropIndicatorShown(True)
+        self.ui.tree_view.setDragEnabled(True)
+        self.ui.tree_view.setAcceptDrops(True)
+        self.ui.tree_view.setDragDropMode(
+            QtWidgets.QAbstractItemView.InternalMove)
+
         self.selection_model = self.ui.tree_view.selectionModel()
         self.selection_model.selectionChanged.connect(
             self.selection_changed)

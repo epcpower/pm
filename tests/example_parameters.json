@@ -54,6 +54,13 @@
                         "minimum": null,
                         "maximum": null,
                         "factory": false
+                    },
+                    {
+                        "_type": "parameter",
+                        "name": "New Parameter",
+                        "minimum": null,
+                        "maximum": null,
+                        "factory": false
                     }
                 ]
             }
@@ -78,6 +85,40 @@
             {
                 "_type": "parameter",
                 "name": "paramBb",
+                "minimum": null,
+                "maximum": null,
+                "factory": false
+            }
+        ]
+    },
+    {
+        "_type": "group",
+        "name": "New Group",
+        "children": [
+            {
+                "_type": "parameter",
+                "name": "New Parameter",
+                "minimum": null,
+                "maximum": null,
+                "factory": false
+            },
+            {
+                "_type": "parameter",
+                "name": "New Parameter",
+                "minimum": null,
+                "maximum": null,
+                "factory": false
+            },
+            {
+                "_type": "parameter",
+                "name": "New Parameter",
+                "minimum": null,
+                "maximum": null,
+                "factory": false
+            },
+            {
+                "_type": "parameter",
+                "name": "New Parameter",
                 "minimum": null,
                 "maximum": null,
                 "factory": false

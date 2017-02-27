@@ -1,6 +1,7 @@
 import collections
 import decimal
 import json
+import logging
 
 import attr
 from PyQt5 import QtCore
@@ -13,6 +14,9 @@ import epyqlib.utils.general
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
+
+
+logger = logging.getLogger()
 
 
 def to_decimal_or_none(s):
@@ -47,6 +51,9 @@ class Parameter(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
+    def can_drop_on(self):
+        return False
+
 
 @epyqlib.utils.general.indexable_attrs(ignore=ignored_attribute_filter)
 @attr.s
@@ -61,6 +68,9 @@ class Group(epyqlib.treenode.TreeNode):
 
     def __attrs_post_init__(self):
         super().__init__()
+
+    def can_drop_on(self):
+        return True
 
 
 class Decoder(json.JSONDecoder):
@@ -128,6 +138,8 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
         self.headers = [a.name.title() for a in Parameter('').public_fields]
 
+        self.mime_map = {}
+
     @classmethod
     def from_json_string(cls, s):
         root = Group(name='root')
@@ -156,6 +168,8 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
             flags |= QtCore.Qt.ItemIsUserCheckable
         elif node.public_fields[index.column()].metadata.get('editable', True):
             flags |= QtCore.Qt.ItemIsEditable
+
+        flags |= QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled
 
         return flags
 
@@ -232,3 +246,79 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
         self.begin_remove_rows(node.tree_parent, row, row)
         node.tree_parent.remove_child(child=node)
         self.end_remove_rows()
+
+    def supportedDropActions(self):
+        return QtCore.Qt.MoveAction
+
+    def mimeData(self, indexes):
+        import random
+
+        data = bytearray()
+
+        for index in indexes:
+            while True:
+                key = random.randrange(2**(4*8))
+
+                if key not in self.mime_map:
+                    logger.debug('create: {}'.format(key))
+                    self.mime_map[key] = index
+                    data.extend(key.to_bytes(4, 'big'))
+                    break
+
+        m = QtCore.QMimeData()
+        m.setData('mine', data)
+
+        return m
+
+    def dropMimeData(self, data, action, row, column, parent):
+        logger.debug('\nentering dropMimeData()')
+        logger.debug(data, action, row, column, parent)
+        new_parent = self.node_from_index(parent)
+        if row == -1 and column == -1:
+            if parent.isValid():
+                row = 0
+            else:
+                row = len(self.root.children)
+
+        decoded = self.decode_data(bytes(data.data('mine')))
+        node = decoded[0]
+        if action == QtCore.Qt.MoveAction:
+            logger.debug('node name: {}'.format(node.name))
+            logger.debug(data, action, row, column, parent)
+            logger.debug('dropped on: {}'.format(new_parent.name))
+
+            from_row = node.tree_parent.row_of_child(node)
+
+            success = self.beginMoveRows(
+                self.index_from_node(node.tree_parent),
+                from_row,
+                from_row,
+                self.index_from_node(new_parent),
+                row
+            )
+
+            if not success:
+                return False
+
+            node.tree_parent.remove_child(child=node)
+            new_parent.insert_child(row, node)
+
+            self.endMoveRows()
+
+            return True
+
+        return False
+
+    def canDropMimeData(self, mime, action, row, column, parent):
+        parent = self.node_from_index(parent)
+        logger.debug('canDropMimeData: {}: {}'.format(parent.name, row))
+        return parent.can_drop_on()
+
+    def decode_data(self, data):
+        keys = tuple(int.from_bytes(key, 'big') for key
+                     in epyqlib.utils.general.grouper(data, 4))
+
+        nodes = tuple(self.node_from_index(self.mime_map[key])
+                      for key in keys)
+
+        return nodes
