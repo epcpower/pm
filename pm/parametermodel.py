@@ -54,6 +54,18 @@ class Parameter(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
+    @classmethod
+    def from_json(cls, obj):
+        return cls(**obj)
+
+    def to_json(self):
+        return attr.asdict(
+            self,
+            recurse=False,
+            dict_factory=collections.OrderedDict,
+            filter=lambda a, _: a.metadata.get('to_file', True)
+        )
+
     def can_drop_on(self):
         return False
 
@@ -95,8 +107,29 @@ class Group(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
+    @classmethod
+    def from_json(cls, obj):
+        children = obj.pop('children')
+        node = cls(**obj)
+
+        for child in children:
+            node.append_child(child)
+
+        return node
+
+    def to_json(self):
+        return attr.asdict(
+            self,
+            recurse=False,
+            dict_factory=collections.OrderedDict,
+            filter=lambda a, _: a.metadata.get('to_file', True)
+        )
+
     def can_drop_on(self):
         return True
+
+
+types = (Parameter, EnumerationParameter, Group)
 
 
 class Decoder(json.JSONDecoder):
@@ -113,19 +146,10 @@ class Decoder(json.JSONDecoder):
         if isinstance(obj, list):
             return obj
 
-        elif obj_type == 'parameter':
-            obj.pop('_type')
-            return Parameter(**obj)
-
-        elif obj_type == 'group':
-            obj.pop('_type')
-            children = obj.pop('children')
-            node = Group(**obj)
-
-            for child in children:
-                node.append_child(child)
-
-            return node
+        for t in types:
+            if obj_type == t._type.default:
+                obj.pop('_type')
+                return t.from_json(obj)
 
         raise Exception('Unexpected object found: {}'.format(obj))
 
@@ -135,13 +159,10 @@ class Encoder(json.JSONEncoder):
         if isinstance(obj, list):
             return obj
 
-        elif isinstance(obj, (Parameter, Group)):
-            d = attr.asdict(obj,
-                            recurse=False,
-                            dict_factory=collections.OrderedDict,
-                            filter=lambda a, _: a.metadata.get('to_file', True))
+        elif isinstance(obj, types):
+            d = obj.to_json()
 
-            if isinstance(obj, Group):
+            if isinstance(obj, epyqlib.treenode.TreeNode):
                 if obj.tree_parent is None:
                     return [self.default(c) for c in d['children']]
 
@@ -163,13 +184,13 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
         super().__init__(root=root, attrs=True, parent=parent)
 
         self.headers = [a.name.replace('_', ' ').title()
-                        for a in Parameter.public_fields]
+                        for a in types[0].public_fields]
 
         self.mime_map = {}
 
     @classmethod
     def from_json_string(cls, s):
-        root = Group(name='root')
+        root = epyqlib.treenode.TreeNode()
 
         children = json.loads(s, cls=Decoder)
         for child in children:
