@@ -122,9 +122,6 @@ class Window:
         index = self.ui.tree_view.indexAt(position)
         index = self.ui.tree_view.model().mapToSource(index)
 
-        if not index.isValid():
-            return
-
         node = self.model.node_from_index(index)
 
         menu = QtWidgets.QMenu(parent=self.ui.tree_view)
