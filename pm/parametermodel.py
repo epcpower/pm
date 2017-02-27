@@ -136,7 +136,8 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
         super().__init__(root=root, attrs=True, parent=parent)
 
-        self.headers = [a.name.title() for a in Parameter('').public_fields]
+        self.headers = [a.name.replace('_', ' ').title()
+                        for a in Parameter('').public_fields]
 
         self.mime_map = {}
 
