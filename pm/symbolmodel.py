@@ -41,62 +41,33 @@ def ignored_attribute_filter(attribute):
 
 @epyqlib.utils.general.indexable_attrs(ignore=ignored_attribute_filter)
 @attr.s
-class Parameter(epyqlib.treenode.TreeNode):
-    _type = attr.ib(default='parameter', init=False, metadata={'ignore': True})
+class Message(epyqlib.treenode.TreeNode):
+    _type = attr.ib(default='message', init=False, metadata={'ignore': True})
     name = attr.ib()
-    default = attr.ib(default=None, convert=to_decimal_or_none)
-    minimum = attr.ib(default=None, convert=to_decimal_or_none)
-    maximum = attr.ib(default=None, convert=to_decimal_or_none)
-    nv = attr.ib(default=False, convert=two_state_checkbox)
-    read_only = attr.ib(default=False, convert=two_state_checkbox)
-    factory = attr.ib(default=False, convert=two_state_checkbox)
+    identifier = attr.ib()
+    extended = attr.ib(default=True, convert=two_state_checkbox)
+    cycle_time = attr.ib(default=None, convert=to_decimal_or_none)
 
     def __attrs_post_init__(self):
         super().__init__()
+
+    @classmethod
+    def from_json(cls, obj):
+        return cls(**obj)
+
+    def to_json(self):
+        return attr.asdict(
+            self,
+            recurse=False,
+            dict_factory=collections.OrderedDict,
+            filter=lambda a, _: a.metadata.get('to_file', True)
+        )
 
     def can_drop_on(self):
         return False
 
 
-@epyqlib.utils.general.indexable_attrs(ignore=ignored_attribute_filter)
-@attr.s
-class EnumerationParameter(epyqlib.treenode.TreeNode):
-    _type = attr.ib(
-        default='parameter.enumeration',
-        init=False,
-        metadata={'ignore': True}
-    )
-    name = attr.ib()
-    minimum = attr.ib(default=None, convert=to_decimal_or_none)
-    maximum = attr.ib(default=None, convert=to_decimal_or_none)
-    factory = attr.ib(default=False, convert=two_state_checkbox)
-
-    def __attrs_post_init__(self):
-        super().__init__()
-
-    def can_drop_on(self):
-        return False
-
-
-@epyqlib.utils.general.indexable_attrs(ignore=ignored_attribute_filter)
-@attr.s
-class Group(epyqlib.treenode.TreeNode):
-    _type = attr.ib(default='group', init=False, metadata={'ignore': True})
-    name = attr.ib()
-    fill0 = epyqlib.utils.general.filler_attribute()
-    fill1 = epyqlib.utils.general.filler_attribute()
-    fill2 = epyqlib.utils.general.filler_attribute()
-    fill3 = epyqlib.utils.general.filler_attribute()
-    fill4 = epyqlib.utils.general.filler_attribute()
-    fill5 = epyqlib.utils.general.filler_attribute()
-    children = attr.ib(default=attr.Factory(list), hash=False,
-                       metadata={'ignore': True})
-
-    def __attrs_post_init__(self):
-        super().__init__()
-
-    def can_drop_on(self):
-        return True
+types = (Message,)
 
 
 class Decoder(json.JSONDecoder):
@@ -113,19 +84,10 @@ class Decoder(json.JSONDecoder):
         if isinstance(obj, list):
             return obj
 
-        elif obj_type == 'parameter':
-            obj.pop('_type')
-            return Parameter(**obj)
-
-        elif obj_type == 'group':
-            obj.pop('_type')
-            children = obj.pop('children')
-            node = Group(**obj)
-
-            for child in children:
-                node.append_child(child)
-
-            return node
+        for t in types:
+            if obj_type == t._type.default:
+                obj.pop('_type')
+                return t.from_json(obj)
 
         raise Exception('Unexpected object found: {}'.format(obj))
 
@@ -135,13 +97,10 @@ class Encoder(json.JSONEncoder):
         if isinstance(obj, list):
             return obj
 
-        elif isinstance(obj, (Parameter, Group)):
-            d = attr.asdict(obj,
-                            recurse=False,
-                            dict_factory=collections.OrderedDict,
-                            filter=lambda a, _: a.metadata.get('to_file', True))
+        elif isinstance(obj, types):
+            d = obj.to_json()
 
-            if isinstance(obj, Group):
+            if isinstance(obj, epyqlib.treenode.TreeNode):
                 if obj.tree_parent is None:
                     return [self.default(c) for c in d['children']]
 
@@ -163,13 +122,13 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
         super().__init__(root=root, attrs=True, parent=parent)
 
         self.headers = [a.name.replace('_', ' ').title()
-                        for a in Parameter.public_fields]
+                        for a in types[0].public_fields]
 
         self.mime_map = {}
 
     @classmethod
     def from_json_string(cls, s):
-        root = Group(name='root')
+        root = epyqlib.treenode.TreeNode()
 
         children = json.loads(s, cls=Decoder)
         for child in children:
@@ -187,9 +146,8 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
         checkable = False
 
-        if isinstance(node, Parameter):
-            if node.public_fields[index.column()].convert is two_state_checkbox:
-                checkable = True
+        if node.public_fields[index.column()].convert is two_state_checkbox:
+            checkable = True
 
         if checkable:
             flags |= QtCore.Qt.ItemIsUserCheckable

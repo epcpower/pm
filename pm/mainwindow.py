@@ -1,17 +1,29 @@
 import io
+import json
 import logging
 import os
 
+import attr
 from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
 
 import epyqlib.utils.qt
 
 import pm.parametermodel
+import pm.symbolmodel
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
+
+
+@attr.s
+class ModelView:
+    model = attr.ib()
+    view = attr.ib()
+    filename = attr.ib()
+    proxy = attr.ib(default=None)
+    selection = attr.ib(default=None)
 
 
 class Window:
@@ -45,36 +57,34 @@ class Window:
             ('All Files', ['*'])
         ]
 
-        self.model = None
-        self.proxy = None
-        self.set_model(pm.parametermodel.Model())
+        self.view_models = {}
 
-        self.ui.tree_view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.ui.tree_view.customContextMenuRequested.connect(
-            self.context_menu
-        )
+        self.ui.parameter_view.setContextMenuPolicy(
+            QtCore.Qt.CustomContextMenu)
+        self.ui.parameter_view.customContextMenuRequested.connect(
+            self.context_menu)
 
-        self.ui.tree_view.setSelectionMode(
+        self.ui.parameter_view.setSelectionMode(
             QtWidgets.QAbstractItemView.ExtendedSelection)
-        self.ui.tree_view.setDropIndicatorShown(True)
-        self.ui.tree_view.setDragEnabled(True)
-        self.ui.tree_view.setAcceptDrops(True)
-        self.ui.tree_view.setDragDropMode(
+        self.ui.parameter_view.setDropIndicatorShown(True)
+        self.ui.parameter_view.setDragEnabled(True)
+        self.ui.parameter_view.setAcceptDrops(True)
+        self.ui.parameter_view.setDragDropMode(
             QtWidgets.QAbstractItemView.InternalMove)
-
-        self.selection_model = self.ui.tree_view.selectionModel()
-        self.selection_model.selectionChanged.connect(
-            self.selection_changed)
 
         self.filename = None
 
-    def set_model(self, model):
-        self.model = model
+    def set_model(self, name, view_model):
+        self.view_models[name] = view_model
 
-        self.proxy = QtCore.QSortFilterProxyModel()
-        self.proxy.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
-        self.proxy.setSourceModel(self.model)
-        self.ui.tree_view.setModel(self.proxy)
+        view_model.proxy = QtCore.QSortFilterProxyModel()
+        view_model.proxy.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        view_model.proxy.setSourceModel(view_model.model)
+        view_model.view.setModel(view_model.proxy)
+
+        view_model.selection = view_model.view.selectionModel()
+        view_model.selection.selectionChanged.connect(
+            self.selection_changed)
 
     def open(self, file=None):
         if file is None:
@@ -82,19 +92,33 @@ class Window:
 
             if filename is None:
                 return
-
-            with open(filename) as f:
-                s = f.read()
         else:
-            s = file.read()
+            file.close()
             filename = os.path.abspath(file.name)
 
-        model = pm.parametermodel.Model.from_json_string(s)
-        self.set_model(model)
-        self.ui.tree_view.expandAll()
-        for i, _ in enumerate(model.root):
-            self.ui.tree_view.resizeColumnToContents(i)
-        self.filename = filename
+        view_models = {
+            'parameters': ModelView(
+                model=pm.parametermodel.Model,
+                view=self.ui.parameter_view,
+                filename=filename
+            ),
+            'symbols': ModelView(
+                model=pm.symbolmodel.Model,
+                view=self.ui.symbol_view,
+                filename=filename.replace('parameters', 'symbols')
+            )
+        }
+
+        for name, view_model in view_models.items():
+            view = view_model.view
+            with open(view_model.filename) as f:
+                view_model.model = view_model.model.from_json_string(
+                    f.read())
+            self.set_model(name=name, view_model=view_model)
+            view.expandAll()
+            for i in range(view_model.model.columnCount(QtCore.QModelIndex())):
+                view.resizeColumnToContents(i)
+            self.filename = filename
 
         return
 
@@ -121,12 +145,12 @@ class Window:
             self.save(filename=filename)
 
     def context_menu(self, position):
-        index = self.ui.tree_view.indexAt(position)
-        index = self.ui.tree_view.model().mapToSource(index)
+        index = self.ui.parameter_view.indexAt(position)
+        index = self.ui.parameter_view.model().mapToSource(index)
 
         node = self.model.node_from_index(index)
 
-        menu = QtWidgets.QMenu(parent=self.ui.tree_view)
+        menu = QtWidgets.QMenu(parent=self.ui.parameter_view)
 
         add_group = menu.addAction('Add Group')
         add_parameter = menu.addAction('Add Parameter')
@@ -136,7 +160,9 @@ class Window:
             add_group.setEnabled(False)
             add_parameter.setEnabled(False)
 
-        action = menu.exec(self.ui.tree_view.viewport().mapToGlobal(position))
+        action = menu.exec(
+            self.ui.parameter_view.viewport().mapToGlobal(position)
+        )
 
         if action is None:
             pass
