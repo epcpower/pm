@@ -115,10 +115,7 @@ class Encoder(json.JSONEncoder):
 
 
 class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
-    def __init__(self, root=None, parent=None):
-        if root is None:
-            root = Group(name='root')
-
+    def __init__(self, root, parent=None):
         super().__init__(root=root, attrs=True, parent=parent)
 
         self.headers = [a.name.replace('_', ' ').title()
