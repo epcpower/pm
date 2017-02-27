@@ -2,6 +2,8 @@
     {
         "_type": "message",
         "name": "CommandVF",
-        "identifier": "0x0CFFAE41"
+        "identifier": "0x0CFFAE41",
+        "extended": true,
+        "cycle_time": null
     }
 ]

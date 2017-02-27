@@ -129,13 +129,14 @@ class Window:
         if filename is None:
             return
 
-        s = self.model.to_json_string()
+        for view_model in self.view_models.values():
+            s = view_model.model.to_json_string()
 
-        with open(filename, 'w') as f:
-            f.write(s)
+            with open(view_model.filename, 'w') as f:
+                f.write(s)
 
-            if not s.endswith('\n'):
-                f.write('\n')
+                if not s.endswith('\n'):
+                    f.write('\n')
 
     def save_as(self):
         filename = epyqlib.utils.qt.file_dialog(

@@ -159,12 +159,12 @@ class Encoder(json.JSONEncoder):
         if isinstance(obj, list):
             return obj
 
+        elif type(obj) == epyqlib.treenode.TreeNode:
+            if obj.tree_parent is None:
+                return [self.default(c) for c in obj.children]
+
         elif isinstance(obj, types):
             d = obj.to_json()
-
-            if isinstance(obj, epyqlib.treenode.TreeNode):
-                if obj.tree_parent is None:
-                    return [self.default(c) for c in d['children']]
 
         elif isinstance(obj, decimal.Decimal):
             i = int(obj)
