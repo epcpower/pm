@@ -10,22 +10,31 @@
                     {
                         "_type": "parameter",
                         "name": "paramAAa",
+                        "default": null,
                         "minimum": 3,
                         "maximum": null,
+                        "nv": false,
+                        "read_only": false,
                         "factory": true
                     },
                     {
                         "_type": "parameter",
                         "name": "paramAAb",
+                        "default": null,
                         "minimum": 5,
                         "maximum": 6.6,
+                        "nv": false,
+                        "read_only": false,
                         "factory": true
                     },
                     {
                         "_type": "parameter",
                         "name": "New Parameter",
+                        "default": null,
                         "minimum": null,
                         "maximum": null,
+                        "nv": false,
+                        "read_only": false,
                         "factory": false
                     }
                 ]
@@ -33,15 +42,21 @@
             {
                 "_type": "parameter",
                 "name": "paramAa",
+                "default": null,
                 "minimum": null,
                 "maximum": null,
+                "nv": false,
+                "read_only": false,
                 "factory": false
             },
             {
                 "_type": "parameter",
                 "name": "paramAb",
+                "default": null,
                 "minimum": null,
                 "maximum": null,
+                "nv": false,
+                "read_only": false,
                 "factory": false
             },
             {
@@ -51,15 +66,21 @@
                     {
                         "_type": "parameter",
                         "name": "New Parameter",
+                        "default": null,
                         "minimum": null,
                         "maximum": null,
+                        "nv": false,
+                        "read_only": false,
                         "factory": false
                     },
                     {
                         "_type": "parameter",
                         "name": "New Parameter",
+                        "default": null,
                         "minimum": null,
                         "maximum": null,
+                        "nv": false,
+                        "read_only": false,
                         "factory": false
                     }
                 ]
@@ -68,7 +89,7 @@
     },
     {
         "_type": "group",
-        "name": "GroupB",
+        "name": "Digital I/O",
         "children": [
             {
                 "_type": "group",
@@ -78,49 +99,183 @@
             {
                 "_type": "parameter",
                 "name": "paramBa",
+                "default": null,
                 "minimum": null,
                 "maximum": null,
+                "nv": false,
+                "read_only": false,
                 "factory": false
             },
             {
                 "_type": "parameter",
                 "name": "paramBb",
+                "default": null,
                 "minimum": null,
                 "maximum": null,
+                "nv": false,
+                "read_only": false,
                 "factory": false
             }
         ]
     },
     {
         "_type": "group",
-        "name": "New Group",
+        "name": "Commands",
         "children": [
             {
                 "_type": "parameter",
-                "name": "New Parameter",
-                "minimum": null,
-                "maximum": null,
+                "name": "Voltage",
+                "default": 208,
+                "minimum": 10,
+                "maximum": 800,
+                "nv": false,
+                "read_only": false,
                 "factory": false
             },
             {
                 "_type": "parameter",
-                "name": "New Parameter",
+                "name": "Frequency",
+                "default": null,
                 "minimum": null,
                 "maximum": null,
+                "nv": false,
+                "read_only": false,
                 "factory": false
             },
             {
-                "_type": "parameter",
-                "name": "New Parameter",
-                "minimum": null,
-                "maximum": null,
-                "factory": false
+                "_type": "group",
+                "name": "Current",
+                "children": [
+                    {
+                        "_type": "parameter",
+                        "name": "Real",
+                        "default": null,
+                        "minimum": null,
+                        "maximum": null,
+                        "nv": false,
+                        "read_only": false,
+                        "factory": false
+                    },
+                    {
+                        "_type": "parameter",
+                        "name": "Reactive",
+                        "default": null,
+                        "minimum": null,
+                        "maximum": null,
+                        "nv": false,
+                        "read_only": false,
+                        "factory": false
+                    }
+                ]
+            },
+            {
+                "_type": "group",
+                "name": "Power",
+                "children": [
+                    {
+                        "_type": "parameter",
+                        "name": "Real",
+                        "default": null,
+                        "minimum": null,
+                        "maximum": null,
+                        "nv": false,
+                        "read_only": false,
+                        "factory": false
+                    },
+                    {
+                        "_type": "parameter",
+                        "name": "Reactive",
+                        "default": null,
+                        "minimum": null,
+                        "maximum": null,
+                        "nv": false,
+                        "read_only": false,
+                        "factory": false
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "_type": "group",
+        "name": "LFM",
+        "children": [
+            {
+                "_type": "group",
+                "name": "Limits",
+                "children": [
+                    {
+                        "_type": "parameter",
+                        "name": "Frequency Very Low",
+                        "default": null,
+                        "minimum": null,
+                        "maximum": null,
+                        "nv": true,
+                        "read_only": false,
+                        "factory": false
+                    },
+                    {
+                        "_type": "parameter",
+                        "name": "Frequency Low",
+                        "default": null,
+                        "minimum": null,
+                        "maximum": null,
+                        "nv": true,
+                        "read_only": false,
+                        "factory": false
+                    },
+                    {
+                        "_type": "parameter",
+                        "name": "Frequency High",
+                        "default": null,
+                        "minimum": null,
+                        "maximum": null,
+                        "nv": true,
+                        "read_only": false,
+                        "factory": false
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "_type": "group",
+        "name": "Identification",
+        "children": [
+            {
+                "_type": "group",
+                "name": "Software",
+                "children": [
+                    {
+                        "_type": "parameter",
+                        "name": "Hash",
+                        "default": null,
+                        "minimum": null,
+                        "maximum": null,
+                        "nv": false,
+                        "read_only": true,
+                        "factory": false
+                    },
+                    {
+                        "_type": "parameter",
+                        "name": "Build Time",
+                        "default": null,
+                        "minimum": null,
+                        "maximum": null,
+                        "nv": false,
+                        "read_only": true,
+                        "factory": false
+                    }
+                ]
             },
             {
                 "_type": "parameter",
-                "name": "New Parameter",
+                "name": "Serial Number",
+                "default": null,
                 "minimum": null,
                 "maximum": null,
+                "nv": false,
+                "read_only": false,
                 "factory": false
             }
         ]

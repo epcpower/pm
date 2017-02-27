@@ -44,6 +44,29 @@ def ignored_attribute_filter(attribute):
 class Parameter(epyqlib.treenode.TreeNode):
     _type = attr.ib(default='parameter', init=False, metadata={'ignore': True})
     name = attr.ib()
+    default = attr.ib(default=None, convert=to_decimal_or_none)
+    minimum = attr.ib(default=None, convert=to_decimal_or_none)
+    maximum = attr.ib(default=None, convert=to_decimal_or_none)
+    nv = attr.ib(default=False, convert=two_state_checkbox)
+    read_only = attr.ib(default=False, convert=two_state_checkbox)
+    factory = attr.ib(default=False, convert=two_state_checkbox)
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    def can_drop_on(self):
+        return False
+
+
+@epyqlib.utils.general.indexable_attrs(ignore=ignored_attribute_filter)
+@attr.s
+class EnumerationParameter(epyqlib.treenode.TreeNode):
+    _type = attr.ib(
+        default='parameter.enumeration',
+        init=False,
+        metadata={'ignore': True}
+    )
+    name = attr.ib()
     minimum = attr.ib(default=None, convert=to_decimal_or_none)
     maximum = attr.ib(default=None, convert=to_decimal_or_none)
     factory = attr.ib(default=False, convert=two_state_checkbox)
@@ -63,6 +86,9 @@ class Group(epyqlib.treenode.TreeNode):
     fill0 = epyqlib.utils.general.filler_attribute()
     fill1 = epyqlib.utils.general.filler_attribute()
     fill2 = epyqlib.utils.general.filler_attribute()
+    fill3 = epyqlib.utils.general.filler_attribute()
+    fill4 = epyqlib.utils.general.filler_attribute()
+    fill5 = epyqlib.utils.general.filler_attribute()
     children = attr.ib(default=attr.Factory(list), hash=False,
                        metadata={'ignore': True})
 
@@ -273,7 +299,7 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
     def dropMimeData(self, data, action, row, column, parent):
         logger.debug('\nentering dropMimeData()')
-        logger.debug(data, action, row, column, parent)
+        logger.debug((data, action, row, column, parent))
         new_parent = self.node_from_index(parent)
         if row == -1 and column == -1:
             if parent.isValid():
