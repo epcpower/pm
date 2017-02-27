@@ -208,9 +208,8 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
         checkable = False
 
-        if isinstance(node, Parameter):
-            if node.public_fields[index.column()].convert is two_state_checkbox:
-                checkable = True
+        if node.public_fields[index.column()].convert is two_state_checkbox:
+            checkable = True
 
         if checkable:
             flags |= QtCore.Qt.ItemIsUserCheckable
