@@ -1,3 +1,4 @@
+import functools
 import io
 import logging
 import os
@@ -61,19 +62,6 @@ class Window:
 
         self.view_models = {}
 
-        self.ui.parameter_view.setContextMenuPolicy(
-            QtCore.Qt.CustomContextMenu)
-        self.ui.parameter_view.customContextMenuRequested.connect(
-            self.context_menu)
-
-        for view in (self.ui.parameter_view, self.ui.symbol_view):
-            view.setSelectionMode(
-                QtWidgets.QAbstractItemView.ExtendedSelection)
-            view.setDropIndicatorShown(True)
-            view.setDragEnabled(True)
-            view.setAcceptDrops(True)
-            view.setDragDropMode(
-                QtWidgets.QAbstractItemView.InternalMove)
 
         self.filename = None
 
@@ -116,6 +104,15 @@ class Window:
 
         for name, view_model in view_models.items():
             view = view_model.view
+
+            view.setSelectionMode(
+                QtWidgets.QAbstractItemView.ExtendedSelection)
+            view.setDropIndicatorShown(True)
+            view.setDragEnabled(True)
+            view.setAcceptDrops(True)
+            view.setDragDropMode(
+                QtWidgets.QAbstractItemView.InternalMove)
+
             with open(view_model.filename) as f:
                 view_model.model = pm.attrsmodel.Model.from_json_string(
                     f.read(),
@@ -127,6 +124,15 @@ class Window:
             for i in range(view_model.model.columnCount(QtCore.QModelIndex())):
                 view.resizeColumnToContents(i)
             self.filename = filename
+
+            view.setContextMenuPolicy(
+                QtCore.Qt.CustomContextMenu)
+            m = functools.partial(
+                self.context_menu,
+                view_model=view_model
+            )
+            view.customContextMenuRequested.connect(m)
+
 
         return
 
@@ -153,15 +159,14 @@ class Window:
         if filename is not None:
             self.save(filename=filename)
 
-    def context_menu(self, position):
-        view_model = self.view_models['parameters']
+    def context_menu(self, position, view_model):
         index = view_model.view.indexAt(position)
         index = view_model.view.model().mapToSource(index)
 
         model = view_model.model
         node = model.node_from_index(index)
 
-        menu = QtWidgets.QMenu(parent=self.ui.parameter_view)
+        menu = QtWidgets.QMenu(parent=view_model.view)
 
         delete = None
         actions = {}
@@ -175,7 +180,7 @@ class Window:
             delete = menu.addAction('Delete')
 
         action = menu.exec(
-            self.ui.parameter_view.viewport().mapToGlobal(position)
+            view_model.view.viewport().mapToGlobal(position)
         )
 
         if action is not None:
