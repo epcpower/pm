@@ -9,6 +9,14 @@
             "extended": true,
             "cycle_time": null,
             "uuid": "38127a59-0c93-4d7f-bc2b-d9d68bfa00c3"
+        },
+        {
+            "_type": "message",
+            "name": "New Message",
+            "identifier": "0x1fffffff",
+            "extended": true,
+            "cycle_time": null,
+            "uuid": "d4352853-eaa6-48a0-8fd5-e1ae50d46f27"
         }
     ],
     "uuid": "89dfcb54-0745-4b91-8a86-370be820a2a2"

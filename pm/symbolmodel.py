@@ -19,8 +19,8 @@ __license__ = 'GPLv2+'
 @attr.s
 class Message(epyqlib.treenode.TreeNode):
     _type = attr.ib(default='message', init=False, metadata={'ignore': True})
-    name = attr.ib()
-    identifier = attr.ib()
+    name = attr.ib(default='New Message')
+    identifier = attr.ib(default='0x1fffffff')
     extended = attr.ib(default=True,
                        convert=pm.attrsmodel.two_state_checkbox)
     cycle_time = attr.ib(default=None,
