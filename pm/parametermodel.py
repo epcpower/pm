@@ -19,7 +19,7 @@ __license__ = 'GPLv2+'
 @attr.s
 class Parameter(epyqlib.treenode.TreeNode):
     _type = attr.ib(default='parameter', init=False, metadata={'ignore': True})
-    name = attr.ib()
+    name = attr.ib(default='New Parameter')
     default = attr.ib(default=None, convert=pm.attrsmodel.to_decimal_or_none)
     minimum = attr.ib(default=None, convert=pm.attrsmodel.to_decimal_or_none)
     maximum = attr.ib(default=None, convert=pm.attrsmodel.to_decimal_or_none)
@@ -41,6 +41,10 @@ class Parameter(epyqlib.treenode.TreeNode):
             dict_factory=collections.OrderedDict,
             filter=lambda a, _: a.metadata.get('to_file', True)
         )
+
+    @classmethod
+    def addable_types(cls):
+        return {}
 
     def can_drop_on(self):
         return False
@@ -72,15 +76,21 @@ class EnumerationParameter(epyqlib.treenode.TreeNode):
 @attr.s
 class Group(epyqlib.treenode.TreeNode):
     _type = attr.ib(default='group', init=False, metadata={'ignore': True})
-    name = attr.ib()
+    name = attr.ib(default='New Group')
     fill0 = epyqlib.utils.general.filler_attribute()
     fill1 = epyqlib.utils.general.filler_attribute()
     fill2 = epyqlib.utils.general.filler_attribute()
     fill3 = epyqlib.utils.general.filler_attribute()
     fill4 = epyqlib.utils.general.filler_attribute()
     fill5 = epyqlib.utils.general.filler_attribute()
-    children = attr.ib(default=attr.Factory(list), hash=False,
-                       metadata={'ignore': True})
+    children = attr.ib(
+        default=attr.Factory(list),
+        hash=False,
+        metadata={
+            'ignore': True,
+            'valid_types': (Parameter, None)
+        }
+    )
 
     def __attrs_post_init__(self):
         super().__init__()
@@ -102,6 +112,23 @@ class Group(epyqlib.treenode.TreeNode):
             dict_factory=collections.OrderedDict,
             filter=lambda a, _: a.metadata.get('to_file', True)
         )
+
+    @classmethod
+    def addable_types(cls):
+        types = tuple(
+            __class__ if t is None else t
+            for t in attr.fields(cls).children.metadata['valid_types']
+        )
+
+        d = collections.OrderedDict()
+
+        for t in types:
+            type_attribute = attr.fields(t)._type
+            name = type_attribute.default.title()
+            name = type_attribute.metadata.get('human name', name)
+            d[name] = t
+
+        return d
 
     def can_drop_on(self):
         return True

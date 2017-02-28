@@ -153,33 +153,35 @@ class Window:
             self.save(filename=filename)
 
     def context_menu(self, position):
-        index = self.ui.parameter_view.indexAt(position)
-        index = self.ui.parameter_view.model().mapToSource(index)
+        view_model = self.view_models['parameters']
+        index = view_model.view.indexAt(position)
+        index = view_model.view.model().mapToSource(index)
 
-        node = self.model.node_from_index(index)
+        model = view_model.model
+        node = model.node_from_index(index)
 
         menu = QtWidgets.QMenu(parent=self.ui.parameter_view)
 
-        add_group = menu.addAction('Add Group')
-        add_parameter = menu.addAction('Add Parameter')
-        delete = menu.addAction('Delete')
+        delete = None
+        actions = {}
+        if node is not model.root:
+            addable_types = node.addable_types()
+            actions = {
+                menu.addAction('Add {}'.format(name)): t
+                for name, t in addable_types.items()
+            }
 
-        if isinstance(node, pm.parametermodel.Parameter):
-            add_group.setEnabled(False)
-            add_parameter.setEnabled(False)
+            delete = menu.addAction('Delete')
 
         action = menu.exec(
             self.ui.parameter_view.viewport().mapToGlobal(position)
         )
 
-        if action is None:
-            pass
-        elif action is add_group:
-            self.model.add_group(parent=node)
-        elif action is add_parameter:
-            self.model.add_parameter(parent=node)
-        elif action is delete:
-            self.model.delete(node=node)
+        if action is not None:
+            if action is delete:
+                model.delete(node=node)
+            else:
+                model.add_child(parent=node, child=actions[action]())
 
     def selection_changed(self, selected, deselected):
         pass

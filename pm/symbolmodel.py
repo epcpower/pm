@@ -41,6 +41,10 @@ class Message(epyqlib.treenode.TreeNode):
             filter=lambda a, _: a.metadata.get('to_file', True)
         )
 
+    @classmethod
+    def addable_types(cls):
+        return {}
+
     def can_drop_on(self):
         return False
 

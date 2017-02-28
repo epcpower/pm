@@ -181,18 +181,6 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
         return False
 
-    def add_group(self, parent, group=None):
-        if group is None:
-            group = Group(name='New Group')
-
-        self.add_child(parent=parent, child=group)
-
-    def add_parameter(self, parent, parameter=None):
-        if parameter is None:
-            parameter = Parameter(name='New Parameter')
-
-        self.add_child(parent=parent, child=parameter)
-
     def add_child(self, parent, child):
         row = len(parent.children)
         self.begin_insert_rows(parent, row, row)
