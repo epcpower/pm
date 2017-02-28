@@ -26,6 +26,7 @@ class Parameter(epyqlib.treenode.TreeNode):
     nv = attr.ib(default=False, convert=pm.attrsmodel.two_state_checkbox)
     read_only = attr.ib(default=False, convert=pm.attrsmodel.two_state_checkbox)
     factory = attr.ib(default=False, convert=pm.attrsmodel.two_state_checkbox)
+    uuid = pm.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
         super().__init__()
@@ -91,6 +92,7 @@ class Group(epyqlib.treenode.TreeNode):
             'valid_types': (Parameter, None)
         }
     )
+    uuid = pm.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
         super().__init__()

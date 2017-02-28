@@ -25,6 +25,7 @@ class Message(epyqlib.treenode.TreeNode):
                        convert=pm.attrsmodel.two_state_checkbox)
     cycle_time = attr.ib(default=None,
                          convert=pm.attrsmodel.to_decimal_or_none)
+    uuid = pm.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
         super().__init__()

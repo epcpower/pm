@@ -1,7 +1,9 @@
 import decimal
 import json
 import logging
+import uuid
 
+import attr
 from PyQt5 import QtCore
 
 import epyqlib.abstractcolumns
@@ -15,6 +17,14 @@ __license__ = 'GPLv2+'
 
 
 logger = logging.getLogger()
+
+
+def attr_uuid():
+    return attr.ib(
+        default=None,
+        convert=lambda x: x if x is None else uuid.UUID(x),
+        metadata={'ignore': True}
+    )
 
 
 def to_decimal_or_none(s):
@@ -76,10 +86,30 @@ class Encoder(json.JSONEncoder):
                 d = i
             else:
                 d = float(obj)
+        elif isinstance(obj, uuid.UUID):
+            d = str(obj)
         else:
             d = obj.to_json()
 
         return d
+
+
+def check_child_uuids(root):
+    def visit(node, uuids):
+        if node is root:
+            return
+
+        if node.uuid is None:
+            while node.uuid is None:
+                u = uuid.uuid4()
+                if u not in uuids:
+                    node.uuid = u
+        elif node.uuid in uuids:
+            raise Exception('Duplicate uuid found: {}'.format(node.uuid))
+
+        uuids.add(node.uuid)
+
+    root.traverse(call_this=visit, payload=set(), internal_nodes=True)
 
 
 class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
@@ -90,6 +120,8 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
                         for a in header_type.public_fields]
 
         self.mime_map = {}
+
+        check_child_uuids(self.root)
 
     @classmethod
     def from_json_string(cls, s, header_type, types, decoder=Decoder):

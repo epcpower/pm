@@ -4,6 +4,7 @@
         "name": "CommandVF",
         "identifier": "0x0CFFAE41",
         "extended": true,
-        "cycle_time": null
+        "cycle_time": null,
+        "uuid": "38127a59-0c93-4d7f-bc2b-d9d68bfa00c3"
     }
 ]

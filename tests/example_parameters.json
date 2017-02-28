@@ -15,7 +15,8 @@
                         "maximum": null,
                         "nv": false,
                         "read_only": false,
-                        "factory": true
+                        "factory": true,
+                        "uuid": "74d109c6-f96e-4736-8705-f9bdbdd9ef11"
                     },
                     {
                         "_type": "parameter",
@@ -25,7 +26,8 @@
                         "maximum": 6.6,
                         "nv": false,
                         "read_only": false,
-                        "factory": true
+                        "factory": true,
+                        "uuid": "6516a19e-ecb8-4cd9-acc1-3894193886f7"
                     },
                     {
                         "_type": "parameter",
@@ -35,9 +37,11 @@
                         "maximum": null,
                         "nv": false,
                         "read_only": false,
-                        "factory": false
+                        "factory": false,
+                        "uuid": "4f578d5a-7568-45e4-a252-54f3154156c6"
                     }
-                ]
+                ],
+                "uuid": "d8dee135-936d-46bc-ad55-5dde0c91827d"
             },
             {
                 "_type": "parameter",
@@ -47,7 +51,8 @@
                 "maximum": null,
                 "nv": false,
                 "read_only": false,
-                "factory": false
+                "factory": false,
+                "uuid": "3d22465b-d080-4a77-a9ef-ab624b77f3e2"
             },
             {
                 "_type": "parameter",
@@ -57,7 +62,8 @@
                 "maximum": null,
                 "nv": false,
                 "read_only": false,
-                "factory": false
+                "factory": false,
+                "uuid": "51faa87e-8e9c-489c-9ece-e5f57e402031"
             },
             {
                 "_type": "group",
@@ -71,7 +77,8 @@
                         "maximum": null,
                         "nv": false,
                         "read_only": false,
-                        "factory": false
+                        "factory": false,
+                        "uuid": "273ae233-aab3-4277-bc2b-33418bcba165"
                     },
                     {
                         "_type": "parameter",
@@ -81,11 +88,14 @@
                         "maximum": null,
                         "nv": false,
                         "read_only": false,
-                        "factory": false
+                        "factory": false,
+                        "uuid": "9b655a87-fe6a-47bf-85c1-7eff19957ffd"
                     }
-                ]
+                ],
+                "uuid": "17a278ed-5e8a-413e-ab0f-c54fc9759e57"
             }
-        ]
+        ],
+        "uuid": "1e43bf4d-8f73-42ce-9eae-f14efc45c16b"
     },
     {
         "_type": "group",
@@ -94,7 +104,8 @@
             {
                 "_type": "group",
                 "name": "GroupBA",
-                "children": []
+                "children": [],
+                "uuid": "2b00c3f8-9618-48e0-ac78-2aeed990190b"
             },
             {
                 "_type": "parameter",
@@ -104,7 +115,8 @@
                 "maximum": null,
                 "nv": false,
                 "read_only": false,
-                "factory": false
+                "factory": false,
+                "uuid": "a831ce88-d019-499d-b91e-9b9184bda7fa"
             },
             {
                 "_type": "parameter",
@@ -114,9 +126,11 @@
                 "maximum": null,
                 "nv": false,
                 "read_only": false,
-                "factory": false
+                "factory": false,
+                "uuid": "bcb40cd3-0005-4425-993c-71c6b6d15942"
             }
-        ]
+        ],
+        "uuid": "8098cdc1-16a7-4069-8945-7cbca6ca2d51"
     },
     {
         "_type": "group",
@@ -130,7 +144,8 @@
                 "maximum": 800,
                 "nv": false,
                 "read_only": false,
-                "factory": false
+                "factory": false,
+                "uuid": "c25cd4e2-b2a8-4106-8610-4e0db6033a17"
             },
             {
                 "_type": "parameter",
@@ -140,7 +155,8 @@
                 "maximum": null,
                 "nv": false,
                 "read_only": false,
-                "factory": false
+                "factory": false,
+                "uuid": "422638c9-87d1-4c86-aa8c-73bd8bfff99c"
             },
             {
                 "_type": "group",
@@ -154,7 +170,8 @@
                         "maximum": null,
                         "nv": false,
                         "read_only": false,
-                        "factory": false
+                        "factory": false,
+                        "uuid": "789fa76a-1756-474d-b35b-245f1d3bf62b"
                     },
                     {
                         "_type": "parameter",
@@ -164,9 +181,11 @@
                         "maximum": null,
                         "nv": false,
                         "read_only": false,
-                        "factory": false
+                        "factory": false,
+                        "uuid": "78391aec-bc7a-43c8-a8d1-cc2ce219aa02"
                     }
-                ]
+                ],
+                "uuid": "ada2fbd5-e434-4143-8245-cf88ec390264"
             },
             {
                 "_type": "group",
@@ -180,7 +199,8 @@
                         "maximum": null,
                         "nv": false,
                         "read_only": false,
-                        "factory": false
+                        "factory": false,
+                        "uuid": "0f7175cb-7dcb-47f8-9001-035ca898d7d4"
                     },
                     {
                         "_type": "parameter",
@@ -190,11 +210,14 @@
                         "maximum": null,
                         "nv": false,
                         "read_only": false,
-                        "factory": false
+                        "factory": false,
+                        "uuid": "bf4bbab0-4aed-4708-bd4c-9f0978b1c467"
                     }
-                ]
+                ],
+                "uuid": "f3d717c4-62de-4196-831a-141664297e2f"
             }
-        ]
+        ],
+        "uuid": "78f1ef7f-fe70-4850-aa03-d902a1b0ce82"
     },
     {
         "_type": "group",
@@ -212,7 +235,8 @@
                         "maximum": null,
                         "nv": true,
                         "read_only": false,
-                        "factory": false
+                        "factory": false,
+                        "uuid": "52b0ce3d-1aa6-48a1-b730-d4638a6813a9"
                     },
                     {
                         "_type": "parameter",
@@ -222,7 +246,8 @@
                         "maximum": null,
                         "nv": true,
                         "read_only": false,
-                        "factory": false
+                        "factory": false,
+                        "uuid": "28d5df3b-36cb-4707-83fd-13e562b07938"
                     },
                     {
                         "_type": "parameter",
@@ -232,11 +257,14 @@
                         "maximum": null,
                         "nv": true,
                         "read_only": false,
-                        "factory": false
+                        "factory": false,
+                        "uuid": "0a7bfb49-91cb-49d6-bdfb-9a2fcbc7dca7"
                     }
-                ]
+                ],
+                "uuid": "7e336a9c-d0bd-41fd-ad97-85867252b710"
             }
-        ]
+        ],
+        "uuid": "7bf83857-1edd-49c9-8670-2635805882a6"
     },
     {
         "_type": "group",
@@ -254,7 +282,8 @@
                         "maximum": null,
                         "nv": false,
                         "read_only": true,
-                        "factory": false
+                        "factory": false,
+                        "uuid": "4d554232-c9d9-4e3b-8a1e-bdb10932dd7c"
                     },
                     {
                         "_type": "parameter",
@@ -264,9 +293,11 @@
                         "maximum": null,
                         "nv": false,
                         "read_only": true,
-                        "factory": false
+                        "factory": false,
+                        "uuid": "614996aa-facf-444b-9d56-257a0df1e182"
                     }
-                ]
+                ],
+                "uuid": "4134ad9c-6111-4d63-b1a0-1162135d4bbd"
             },
             {
                 "_type": "parameter",
@@ -276,8 +307,10 @@
                 "maximum": null,
                 "nv": false,
                 "read_only": false,
-                "factory": false
+                "factory": false,
+                "uuid": "04593c06-b3a0-4213-8ce2-b7a52e32e98c"
             }
-        ]
+        ],
+        "uuid": "8cd087b3-e389-4394-aab2-7b1aa17e58b2"
     }
 ]
