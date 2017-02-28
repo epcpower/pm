@@ -180,8 +180,6 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
         self.headers = [a.name.replace('_', ' ').title()
                         for a in header_type.public_fields]
 
-        self.mime_map = {}
-
         check_uuids(self.root)
 
     @classmethod
@@ -286,27 +284,14 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
         return QtCore.Qt.MoveAction
 
     def mimeData(self, indexes):
-        import random
-
-        data = bytearray()
-
-        for index in indexes:
-            while True:
-                key = random.randrange(2**(4*8))
-
-                if key not in self.mime_map:
-                    logger.debug('create: {}'.format(key))
-                    self.mime_map[key] = index
-                    data.extend(key.to_bytes(4, 'big'))
-                    break
-
+        [node] = {self.node_from_index(i) for i in indexes}
         m = QtCore.QMimeData()
-        m.setData('mine', data)
+        m.setData('mine', node.uuid.bytes)
 
         return m
 
     def dropMimeData(self, data, action, row, column, parent):
-        logger.debug('\nentering dropMimeData()')
+        logger.debug('entering dropMimeData()')
         logger.debug((data, action, row, column, parent))
         new_parent = self.node_from_index(parent)
         if row == -1 and column == -1:
@@ -315,8 +300,22 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
             else:
                 row = len(self.root.children)
 
-        decoded = self.decode_data(bytes(data.data('mine')))
-        node = decoded[0]
+        u = uuid.UUID(bytes=bytes(data.data('mine')))
+
+        def uuid_matches(node, matches):
+            if node.uuid == u:
+                matches.add(node)
+
+        nodes = set()
+        logger.debug('searching for uuid: {}'.format(u))
+        self.root.traverse(
+            call_this=uuid_matches,
+            payload=nodes,
+            internal_nodes=True
+        )
+
+        [node] = nodes
+
         if action == QtCore.Qt.MoveAction:
             logger.debug('node name: {}'.format(node.name))
             logger.debug(data, action, row, column, parent)
