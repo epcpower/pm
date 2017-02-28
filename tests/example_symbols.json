@@ -8,6 +8,20 @@
             "identifier": "0x0CFFAE41",
             "extended": true,
             "cycle_time": null,
+            "children": [
+                {
+                    "_type": "signal",
+                    "name": "paramAAb",
+                    "parameter_uuid": "6516a19e-ecb8-4cd9-acc1-3894193886f7",
+                    "uuid": "f10114cc-a89f-462e-945c-1ef02aa12fae"
+                },
+                {
+                    "_type": "signal",
+                    "name": "paramAAb",
+                    "parameter_uuid": "6516a19e-ecb8-4cd9-acc1-3894193886f7",
+                    "uuid": "d79728b3-608d-482a-99fc-fe9c7025f3c5"
+                }
+            ],
             "uuid": "38127a59-0c93-4d7f-bc2b-d9d68bfa00c3"
         },
         {
@@ -16,6 +30,14 @@
             "identifier": "0x1fffffff",
             "extended": true,
             "cycle_time": null,
+            "children": [
+                {
+                    "_type": "signal",
+                    "name": "paramAAb",
+                    "parameter_uuid": "6516a19e-ecb8-4cd9-acc1-3894193886f7",
+                    "uuid": "2759cd9c-e53e-44f3-974e-2a7c343a2d0a"
+                }
+            ],
             "uuid": "d4352853-eaa6-48a0-8fd5-e1ae50d46f27"
         }
     ],

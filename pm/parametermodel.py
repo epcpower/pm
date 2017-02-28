@@ -47,8 +47,8 @@ class Parameter(epyqlib.treenode.TreeNode):
     def addable_types(cls):
         return {}
 
-    def can_drop_on(self):
-        return False
+    def can_drop_on(self, node):
+        return isinstance(node, tuple(self.addable_types().values()))
 
 
 @epyqlib.utils.general.indexable_attrs(
@@ -132,8 +132,8 @@ class Group(epyqlib.treenode.TreeNode):
 
         return d
 
-    def can_drop_on(self):
-        return True
+    def can_drop_on(self, node):
+        return isinstance(node, tuple(self.addable_types().values()))
 
 
 Root = pm.attrsmodel.Root(

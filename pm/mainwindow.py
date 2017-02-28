@@ -22,6 +22,7 @@ __license__ = 'GPLv2+'
 class ModelView:
     view = attr.ib()
     filename = attr.ib()
+    droppable_from = attr.ib()
     header_type = attr.ib()
     types = attr.ib()
     model = attr.ib(default=None)
@@ -91,12 +92,14 @@ class Window:
             'parameters': ModelView(
                 view=self.ui.parameter_view,
                 filename=filename,
+                droppable_from=('parameters',),
                 header_type=pm.parametermodel.Parameter,
                 types=pm.parametermodel.types
             ),
             'symbols': ModelView(
                 view=self.ui.symbol_view,
                 filename=filename.replace('parameters', 'symbols'),
+                droppable_from=('parameters', 'symbols'),
                 header_type=pm.symbolmodel.Message,
                 types=pm.symbolmodel.types
             )
@@ -111,7 +114,7 @@ class Window:
             view.setDragEnabled(True)
             view.setAcceptDrops(True)
             view.setDragDropMode(
-                QtWidgets.QAbstractItemView.InternalMove)
+                QtWidgets.QAbstractItemView.DragDrop)
 
             with open(view_model.filename) as f:
                 view_model.model = pm.attrsmodel.Model.from_json_string(
@@ -133,6 +136,10 @@ class Window:
             )
             view.customContextMenuRequested.connect(m)
 
+        for view_model in view_models.values():
+            view_model.model.add_drop_sources(*(
+                view_models[d].model.root for d in view_model.droppable_from
+            ))
 
         return
 
@@ -169,7 +176,6 @@ class Window:
         menu = QtWidgets.QMenu(parent=view_model.view)
 
         delete = None
-        actions = {}
         addable_types = node.addable_types()
         actions = {
             menu.addAction('Add {}'.format(name)): t

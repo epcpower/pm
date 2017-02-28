@@ -77,17 +77,17 @@ def Root(default_name, valid_types):
 
             return d
 
-        def can_drop_on(self):
-            return True
+        def can_drop_on(self, node):
+            return isinstance(node, tuple(self.addable_types().values()))
 
     return Root
 
 
-def attr_uuid():
+def attr_uuid(ignore=True):
     return attr.ib(
         default=None,
         convert=lambda x: x if x is None else uuid.UUID(x),
-        metadata={'ignore': True}
+        metadata={'ignore': ignore}
     )
 
 
@@ -158,19 +158,29 @@ class Encoder(json.JSONEncoder):
         return d
 
 
-def check_uuids(root):
-    def visit(node, uuids):
+def check_uuids(*roots):
+    def collect(node, uuids):
+        if node.uuid is not None:
+            if node.uuid in uuids:
+                raise Exception('Duplicate uuid found: {}'.format(node.uuid))
+
+            uuids.add(node.uuid)
+
+    def set_nones(node, uuids):
         if node.uuid is None:
             while node.uuid is None:
                 u = uuid.uuid4()
                 if u not in uuids:
                     node.uuid = u
-        elif node.uuid in uuids:
-            raise Exception('Duplicate uuid found: {}'.format(node.uuid))
+                    uuids.add(node.uuid)
 
-        uuids.add(node.uuid)
+    uuids = set()
 
-    root.traverse(call_this=visit, payload=set(), internal_nodes=True)
+    for root in set(roots):
+        root.traverse(call_this=collect, payload=uuids, internal_nodes=True)
+
+    for root in set(roots):
+        root.traverse(call_this=set_nones, payload=uuids, internal_nodes=True)
 
 
 class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
@@ -180,10 +190,13 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
         self.headers = [a.name.replace('_', ' ').title()
                         for a in header_type.public_fields]
 
+        self.droppable_from = set()
+
         check_uuids(self.root)
 
     @classmethod
-    def from_json_string(cls, s, header_type, types, decoder=Decoder):
+    def from_json_string(cls, s, header_type, types,
+                         decoder=Decoder):
         # Ugly but maintains the name 'types' both for the parameter
         # and in D.
         t = types
@@ -194,10 +207,17 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
         root = json.loads(s, cls=D)
 
-        return cls(root=root, header_type=header_type)
+        return cls(
+            root=root,
+            header_type=header_type
+        )
 
     def to_json_string(self):
         return json.dumps(self.root, cls=Encoder, indent=4)
+
+    def add_drop_sources(self, *sources):
+        self.droppable_from.update(sources)
+        check_uuids(self.root, *self.droppable_from)
 
     def flags(self, index):
         flags = super().flags(index)
@@ -272,6 +292,9 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
         row = len(parent.children)
         self.begin_insert_rows(parent, row, row)
         parent.append_child(child)
+        if child.uuid is None:
+            check_uuids(self.root)
+
         self.end_insert_rows()
 
     def delete(self, node):
@@ -293,66 +316,75 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
     def dropMimeData(self, data, action, row, column, parent):
         logger.debug('entering dropMimeData()')
         logger.debug((data, action, row, column, parent))
-        new_parent = self.node_from_index(parent)
-        if row == -1 and column == -1:
-            if parent.isValid():
-                row = 0
-            else:
-                row = len(self.root.children)
 
-        u = uuid.UUID(bytes=bytes(data.data('mine')))
-
-        def uuid_matches(node, matches):
-            if node.uuid == u:
-                matches.add(node)
-
-        nodes = set()
-        logger.debug('searching for uuid: {}'.format(u))
-        self.root.traverse(
-            call_this=uuid_matches,
-            payload=nodes,
-            internal_nodes=True
-        )
-
-        [node] = nodes
+        node, new_parent, row = self.source_target_for_drop(
+            column, data, parent, row)
 
         if action == QtCore.Qt.MoveAction:
             logger.debug('node name: {}'.format(node.name))
             logger.debug((data, action, row, column, parent))
             logger.debug('dropped on: {}'.format(new_parent.name))
 
-            from_row = node.tree_parent.row_of_child(node)
+            local = node.find_root() == self.root
 
-            success = self.beginMoveRows(
-                self.index_from_node(node.tree_parent),
-                from_row,
-                from_row,
-                self.index_from_node(new_parent),
-                row
-            )
+            if local:
+                from_row = node.tree_parent.row_of_child(node)
 
-            if not success:
-                return False
+                success = self.beginMoveRows(
+                    self.index_from_node(node.tree_parent),
+                    from_row,
+                    from_row,
+                    self.index_from_node(new_parent),
+                    row
+                )
 
-            node.tree_parent.remove_child(child=node)
-            new_parent.insert_child(row, node)
+                if not success:
+                    return False
 
-            self.endMoveRows()
+                node.tree_parent.remove_child(child=node)
+                new_parent.insert_child(row, node)
 
-            return True
+                self.endMoveRows()
+
+                return True
+            else:
+                new_child = new_parent.child_from(node)
+                self.add_child(new_parent, new_child)
 
         return False
 
+    def source_target_for_drop(self, column, data, parent, row):
+        new_parent = self.node_from_index(parent)
+        if row == -1 and column == -1:
+            if parent.isValid():
+                row = 0
+            else:
+                row = len(self.root.children)
+        u = uuid.UUID(bytes=bytes(data.data('mine')))
+        source = self.node_from_uuid(u)
+        return source, new_parent, row
+
+    def node_from_uuid(self, u):
+        def uuid_matches(node, matches):
+            if node.uuid == u:
+                matches.add(node)
+
+        nodes = set()
+        logger.debug('searching for uuid: {}'.format(u))
+        for root in self.droppable_from:
+            logger.debug('searching in {}'.format(root))
+            root.traverse(
+                call_this=uuid_matches,
+                payload=nodes,
+                internal_nodes=True
+            )
+
+        [node] = nodes
+
+        return node
+
     def canDropMimeData(self, mime, action, row, column, parent):
-        parent = self.node_from_index(parent)
-        logger.debug('canDropMimeData: {}: {}'.format(parent.name, row))
-        return parent.can_drop_on()
-
-    def decode_data(self, data):
-        keys = tuple(int.from_bytes(key, 'big') for key
-                     in epyqlib.utils.general.grouper(data, 4))
-
-        nodes = tuple(self.node_from_index(self.mime_map[key])
-                      for key in keys)
-
-        return nodes
+        node, new_parent, _ = self.source_target_for_drop(
+            column, mime, parent, row)
+        logger.debug('canDropMimeData: {}: {}'.format(new_parent.name, row))
+        return new_parent.can_drop_on(node=node)
