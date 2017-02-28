@@ -136,4 +136,9 @@ class Group(epyqlib.treenode.TreeNode):
         return True
 
 
-types = (Parameter, EnumerationParameter, Group)
+Root = pm.attrsmodel.Root(
+    default_name='Parameters',
+    valid_types=(None, Parameter, EnumerationParameter, Group)
+)
+
+types = (Root, Parameter, EnumerationParameter, Group)

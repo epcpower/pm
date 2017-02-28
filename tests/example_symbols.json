@@ -1,10 +1,14 @@
-[
-    {
-        "_type": "message",
-        "name": "CommandVF",
-        "identifier": "0x0CFFAE41",
-        "extended": true,
-        "cycle_time": null,
-        "uuid": "38127a59-0c93-4d7f-bc2b-d9d68bfa00c3"
-    }
-]
+{
+    "_type": "root",
+    "children": [
+        {
+            "_type": "message",
+            "name": "CommandVF",
+            "identifier": "0x0CFFAE41",
+            "extended": true,
+            "cycle_time": null,
+            "uuid": "38127a59-0c93-4d7f-bc2b-d9d68bfa00c3"
+        }
+    ],
+    "uuid": "89dfcb54-0745-4b91-8a86-370be820a2a2"
+}

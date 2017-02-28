@@ -1,3 +1,4 @@
+import collections
 import decimal
 import json
 import logging
@@ -17,6 +18,69 @@ __license__ = 'GPLv2+'
 
 
 logger = logging.getLogger()
+
+
+def Root(default_name, valid_types):
+    valid_types = tuple(valid_types)
+
+    @epyqlib.utils.general.indexable_attrs(
+        ignore=ignored_attribute_filter)
+    @attr.s
+    class Root(epyqlib.treenode.TreeNode):
+        _type = attr.ib(default='root', init=False, metadata={'ignore': True})
+        name = attr.ib(default=default_name)
+        children = attr.ib(
+            default=attr.Factory(list),
+            hash=False,
+            metadata={
+                'ignore': True,
+                'valid_types': valid_types
+            }
+        )
+        uuid = attr_uuid()
+
+        def __attrs_post_init__(self):
+            super().__init__()
+
+        @classmethod
+        def from_json(cls, obj):
+            children = obj.pop('children')
+            node = cls(**obj)
+
+            for child in children:
+                node.append_child(child)
+
+            return node
+
+        def to_json(self):
+            return attr.asdict(
+                self,
+                recurse=False,
+                dict_factory=collections.OrderedDict,
+                filter=lambda a, _: a.metadata.get('to_file', True)
+            )
+
+        @classmethod
+        def addable_types(cls):
+            types = tuple(
+                __class__ if t is None else t
+                for t in attr.fields(cls).children.metadata['valid_types']
+            )
+
+            d = collections.OrderedDict()
+
+            for t in types:
+                type_attribute = attr.fields(t)._type
+                name = type_attribute.default.title()
+                name = type_attribute.metadata.get('human name', name)
+                d[name] = t
+
+            return d
+
+        def can_drop_on(self):
+            return True
+
+    return Root
 
 
 def attr_uuid():
@@ -94,11 +158,8 @@ class Encoder(json.JSONEncoder):
         return d
 
 
-def check_child_uuids(root):
+def check_uuids(root):
     def visit(node, uuids):
-        if node is root:
-            return
-
         if node.uuid is None:
             while node.uuid is None:
                 u = uuid.uuid4()
@@ -121,12 +182,10 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
         self.mime_map = {}
 
-        check_child_uuids(self.root)
+        check_uuids(self.root)
 
     @classmethod
     def from_json_string(cls, s, header_type, types, decoder=Decoder):
-        root = epyqlib.treenode.TreeNode()
-
         # Ugly but maintains the name 'types' both for the parameter
         # and in D.
         t = types
@@ -135,9 +194,7 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
         class D(Decoder):
             types = t
 
-        children = json.loads(s, cls=D)
-        for child in children:
-            root.append_child(child)
+        root = json.loads(s, cls=D)
 
         return cls(root=root, header_type=header_type)
 
