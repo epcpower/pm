@@ -318,7 +318,7 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
         if action == QtCore.Qt.MoveAction:
             logger.debug('node name: {}'.format(node.name))
-            logger.debug(data, action, row, column, parent)
+            logger.debug((data, action, row, column, parent))
             logger.debug('dropped on: {}'.format(new_parent.name))
 
             from_row = node.tree_parent.row_of_child(node)
