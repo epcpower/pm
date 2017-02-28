@@ -66,13 +66,14 @@ class Window:
         self.ui.parameter_view.customContextMenuRequested.connect(
             self.context_menu)
 
-        self.ui.parameter_view.setSelectionMode(
-            QtWidgets.QAbstractItemView.ExtendedSelection)
-        self.ui.parameter_view.setDropIndicatorShown(True)
-        self.ui.parameter_view.setDragEnabled(True)
-        self.ui.parameter_view.setAcceptDrops(True)
-        self.ui.parameter_view.setDragDropMode(
-            QtWidgets.QAbstractItemView.InternalMove)
+        for view in (self.ui.parameter_view, self.ui.symbol_view):
+            view.setSelectionMode(
+                QtWidgets.QAbstractItemView.ExtendedSelection)
+            view.setDropIndicatorShown(True)
+            view.setDragEnabled(True)
+            view.setAcceptDrops(True)
+            view.setDragDropMode(
+                QtWidgets.QAbstractItemView.InternalMove)
 
         self.filename = None
 
