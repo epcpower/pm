@@ -1,5 +1,6 @@
 {
     "_type": "root",
+    "name": "Symbols",
     "children": [
         {
             "_type": "message",
