@@ -170,13 +170,13 @@ class Window:
 
         delete = None
         actions = {}
-        if node is not model.root:
-            addable_types = node.addable_types()
-            actions = {
-                menu.addAction('Add {}'.format(name)): t
-                for name, t in addable_types.items()
-            }
+        addable_types = node.addable_types()
+        actions = {
+            menu.addAction('Add {}'.format(name)): t
+            for name, t in addable_types.items()
+        }
 
+        if node is not model.root:
             delete = menu.addAction('Delete')
 
         action = menu.exec(

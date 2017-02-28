@@ -52,7 +52,7 @@ class Message(epyqlib.treenode.TreeNode):
 
 Root = pm.attrsmodel.Root(
     default_name='Symbols',
-    valid_types=(None, Message,)
+    valid_types=(Message,)
 )
 
 types = (Root, Message,)
