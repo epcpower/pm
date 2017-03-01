@@ -247,14 +247,11 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
         node = self.node_from_index(index)
 
-        checkable = False
+        field = node.public_fields[index.column()]
 
-        if node.public_fields[index.column()].convert is two_state_checkbox:
-            checkable = True
-
-        if checkable:
+        if field.convert is two_state_checkbox:
             flags |= QtCore.Qt.ItemIsUserCheckable
-        elif node.public_fields[index.column()].metadata.get('editable', True):
+        elif field.metadata.get('editable', True):
             flags |= QtCore.Qt.ItemIsEditable
 
         flags |= QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled
@@ -393,9 +390,7 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
                 matches.add(node)
 
         nodes = set()
-        logger.debug('searching for uuid: {}'.format(u))
         for root in self.droppable_from:
-            logger.debug('searching in {}'.format(root))
             root.traverse(
                 call_this=uuid_matches,
                 payload=nodes,

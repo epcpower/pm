@@ -1,5 +1,6 @@
 import collections
 import decimal
+import functools
 
 import attr
 from PyQt5 import QtCore
@@ -86,6 +87,7 @@ class Group(epyqlib.treenode.TreeNode):
     children = attr.ib(
         default=attr.Factory(list),
         hash=False,
+        cmp=False,
         metadata={
             'ignore': True,
             'valid_types': (Parameter, None)
