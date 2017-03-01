@@ -20,34 +20,41 @@ __license__ = 'GPLv2+'
 logger = logging.getLogger()
 
 
+@attr.s
 class add_addable_types:
-    def __init__(self, attribute='children'):
-        self.attribute_name = attribute
+    attribute_name = attr.ib(default='children')
 
     def __call__(self, class_to_decorate):
+        if hasattr(class_to_decorate, 'addable_types'):
+            raise Exception(
+                'Unable to add addable_types(), it is already defined')
+
         @classmethod
         def addable_types(cls):
-            if not hasattr(cls, self.attribute_name):
-                return {}
+            if cls.addable_types_cache is None:
+                if not hasattr(cls, self.attribute_name):
+                    return {}
 
-            print(cls)
-            types = tuple(
-                cls if t is None else t
-                for t in getattr(attr.fields(cls), self.attribute_name)
-                    .metadata['valid_types']
-            )
+                print(cls)
+                types = tuple(
+                    cls if t is None else t
+                    for t in getattr(attr.fields(cls), self.attribute_name)
+                        .metadata['valid_types']
+                )
 
-            d = collections.OrderedDict()
+                self.addable_types_cache = collections.OrderedDict()
 
-            for t in types:
-                type_attribute = attr.fields(t)._type
-                name = type_attribute.default.title()
-                name = type_attribute.metadata.get('human name', name)
-                d[name] = t
+                for t in types:
+                    type_attribute = attr.fields(t)._type
+                    name = type_attribute.default.title()
+                    name = type_attribute.metadata.get('human name', name)
+                    self.addable_types_cache[name] = t
 
-            return d
+            return self.addable_types_cache
 
         class_to_decorate.addable_types = addable_types
+        class_to_decorate.addable_types_cache = None
+        class_to_decorate.addable_types()
 
         return class_to_decorate
 
