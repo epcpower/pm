@@ -20,9 +20,42 @@ __license__ = 'GPLv2+'
 logger = logging.getLogger()
 
 
+class add_addable_types:
+    def __init__(self, attribute='children'):
+        self.attribute_name = attribute
+
+    def __call__(self, class_to_decorate):
+        @classmethod
+        def addable_types(cls):
+            if not hasattr(cls, self.attribute_name):
+                return {}
+
+            print(cls)
+            types = tuple(
+                cls if t is None else t
+                for t in getattr(attr.fields(cls), self.attribute_name)
+                    .metadata['valid_types']
+            )
+
+            d = collections.OrderedDict()
+
+            for t in types:
+                type_attribute = attr.fields(t)._type
+                name = type_attribute.default.title()
+                name = type_attribute.metadata.get('human name', name)
+                d[name] = t
+
+            return d
+
+        class_to_decorate.addable_types = addable_types
+
+        return class_to_decorate
+
+
 def Root(default_name, valid_types):
     valid_types = tuple(valid_types)
 
+    @add_addable_types()
     @epyqlib.utils.general.indexable_attrs(
         ignore=ignored_attribute_filter)
     @attr.s
@@ -59,23 +92,6 @@ def Root(default_name, valid_types):
                 dict_factory=collections.OrderedDict,
                 filter=lambda a, _: a.metadata.get('to_file', True)
             )
-
-        @classmethod
-        def addable_types(cls):
-            types = tuple(
-                __class__ if t is None else t
-                for t in attr.fields(cls).children.metadata['valid_types']
-            )
-
-            d = collections.OrderedDict()
-
-            for t in types:
-                type_attribute = attr.fields(t)._type
-                name = type_attribute.default.title()
-                name = type_attribute.metadata.get('human name', name)
-                d[name] = t
-
-            return d
 
         def can_drop_on(self, node):
             return isinstance(node, tuple(self.addable_types().values()))

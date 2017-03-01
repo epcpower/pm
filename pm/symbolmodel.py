@@ -15,6 +15,7 @@ __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
+@pm.attrsmodel.add_addable_types()
 @epyqlib.utils.general.indexable_attrs(
     ignore=pm.attrsmodel.ignored_attribute_filter)
 @attr.s
@@ -41,14 +42,11 @@ class Signal(epyqlib.treenode.TreeNode):
             filter=lambda a, _: a.metadata.get('to_file', True)
         )
 
-    @classmethod
-    def addable_types(cls):
-        return {}
-
     def can_drop_on(self, node):
         return False
 
 
+@pm.attrsmodel.add_addable_types()
 @epyqlib.utils.general.indexable_attrs(
     ignore=pm.attrsmodel.ignored_attribute_filter)
 @attr.s
@@ -85,23 +83,6 @@ class Message(epyqlib.treenode.TreeNode):
             filter=lambda a, _: a.metadata.get('to_file', True)
         )
 
-    @classmethod
-    def addable_types(cls):
-        types = tuple(
-            __class__ if t is None else t
-            for t in attr.fields(cls).children.metadata['valid_types']
-        )
-
-        d = collections.OrderedDict()
-
-        for t in types:
-            type_attribute = attr.fields(t)._type
-            name = type_attribute.default.title()
-            name = type_attribute.metadata.get('human name', name)
-            d[name] = t
-
-        return d
-
     def can_drop_on(self, node):
         print('blue')
         x = (*self.addable_types().values(), pm.parametermodel.Parameter)
@@ -110,7 +91,6 @@ class Message(epyqlib.treenode.TreeNode):
 
     def child_from(self, node):
         return Signal(name=node.name, parameter_uuid=str(node.uuid))
-
 
 
 Root = pm.attrsmodel.Root(
