@@ -430,5 +430,9 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
     def canDropMimeData(self, mime, action, row, column, parent):
         node, new_parent, _ = self.source_target_for_drop(
             column, mime, parent, row)
-        logger.debug('canDropMimeData: {}: {}'.format(new_parent.name, row))
-        return new_parent.can_drop_on(node=node)
+        can_drop = new_parent.can_drop_on(node=node)
+
+        logger.debug('canDropMimeData: {}: {}, {}'.format(
+            new_parent.name, row, can_drop))
+
+        return can_drop
