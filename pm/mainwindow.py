@@ -113,8 +113,6 @@ class Window:
             view.setDropIndicatorShown(True)
             view.setDragEnabled(True)
             view.setAcceptDrops(True)
-            view.setDragDropMode(
-                QtWidgets.QAbstractItemView.DragDrop)
 
             with open(view_model.filename) as f:
                 view_model.model = pm.attrsmodel.Model.from_json_string(

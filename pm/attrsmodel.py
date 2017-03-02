@@ -229,6 +229,8 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
     def __init__(self, root, columns, parent=None):
         super().__init__(root=root, parent=parent)
 
+        self.mime_type = 'application/com.epcpower.pm.attrsmodel'
+
         self.columns = columns
         self.headers = tuple(c.name for c in self.columns)
 
@@ -352,10 +354,13 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
     def supportedDropActions(self):
         return QtCore.Qt.MoveAction
 
+    def mimeTypes(self):
+        return (self.mime_type,)
+
     def mimeData(self, indexes):
         [node] = {self.node_from_index(i) for i in indexes}
         m = QtCore.QMimeData()
-        m.setData('mine', node.uuid.bytes)
+        m.setData(self.mime_type, node.uuid.bytes)
 
         return m
 
@@ -406,7 +411,7 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
                 row = 0
             else:
                 row = len(self.root.children)
-        u = uuid.UUID(bytes=bytes(data.data('mine')))
+        u = uuid.UUID(bytes=bytes(data.data(self.mime_type)))
         source = self.node_from_uuid(u)
         return source, new_parent, row
 
