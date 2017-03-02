@@ -18,7 +18,7 @@ __license__ = 'GPLv2+'
 @pm.attrsmodel.add_addable_types()
 @attr.s
 class Signal(epyqlib.treenode.TreeNode):
-    _type = attr.ib(default='signal', init=False)
+    type = attr.ib(default='signal', init=False)
     name = attr.ib(default='New Signal')
     parameter_uuid = pm.attrsmodel.attr_uuid(
         metadata={'human name': 'Parameter UUID'})
@@ -46,7 +46,7 @@ class Signal(epyqlib.treenode.TreeNode):
 @pm.attrsmodel.add_addable_types()
 @attr.s
 class Message(epyqlib.treenode.TreeNode):
-    _type = attr.ib(default='message', init=False, metadata={'ignore': True})
+    type = attr.ib(default='message', init=False, metadata={'ignore': True})
     name = attr.ib(default='New Message')
     identifier = attr.ib(default='0x1fffffff')
     extended = attr.ib(default=True,
@@ -100,35 +100,9 @@ types = (Root, Message, Signal)
 
 
 columns = pm.attrsmodel.columns(
-    (
-        Message,
-        {
-            Message: Message.name,
-            Signal: Signal.name
-        }
-    ),
-    (
-        Message,
-        {
-            Message: Message.identifier
-        }
-    ),
-    (
-        Message,
-        {
-            Message: Message.extended
-        }
-    ),
-    (
-        Message,
-        {
-            Message: Message.cycle_time
-        }
-    ),
-    (
-        Signal,
-        {
-            Signal: Signal.parameter_uuid
-        }
-    )
+    ((Message, Message.name), (Signal, Signal.name)),
+    ((Message, Message.identifier),),
+    ((Message, Message.extended),),
+    ((Message, Message.cycle_time),),
+    ((Signal, Signal.parameter_uuid),)
 )

@@ -18,7 +18,7 @@ __license__ = 'GPLv2+'
 @pm.attrsmodel.add_addable_types()
 @attr.s
 class Parameter(epyqlib.treenode.TreeNode):
-    _type = attr.ib(default='parameter', init=False)
+    type = attr.ib(default='parameter', init=False)
     name = attr.ib(default='New Parameter')
     default = attr.ib(default=None, convert=pm.attrsmodel.to_decimal_or_none)
     minimum = attr.ib(default=None, convert=pm.attrsmodel.to_decimal_or_none)
@@ -50,7 +50,7 @@ class Parameter(epyqlib.treenode.TreeNode):
 @pm.attrsmodel.add_addable_types()
 @attr.s
 class EnumerationParameter(epyqlib.treenode.TreeNode):
-    _type = attr.ib(
+    type = attr.ib(
         default='parameter.enumeration',
         init=False,
         metadata={'ignore': True}
@@ -70,7 +70,7 @@ class EnumerationParameter(epyqlib.treenode.TreeNode):
 @pm.attrsmodel.add_addable_types()
 @attr.s
 class Group(epyqlib.treenode.TreeNode):
-    _type = attr.ib(default='group', init=False)
+    type = attr.ib(default='group', init=False)
     name = attr.ib(default='New Group')
     children = attr.ib(
         default=attr.Factory(list),
@@ -112,49 +112,13 @@ Root = pm.attrsmodel.Root(
 
 types = (Root, Parameter, EnumerationParameter, Group)
 
-
 columns = pm.attrsmodel.columns(
-    (
-        Parameter,
-        {
-            Group: Group.name,
-            Parameter: Parameter.name
-        }
-    ),
-    (
-        Parameter,
-        {
-            Parameter: Parameter.default
-        }
-    ),
-    (
-        Parameter,
-        {
-            Parameter: Parameter.minimum
-        }
-    ),
-    (
-        Parameter,
-        {
-            Parameter: Parameter.maximum
-        }
-    ),
-    (
-        Parameter,
-        {
-            Parameter: Parameter.nv
-        }
-    ),
-    (
-        Parameter,
-        {
-            Parameter: Parameter.read_only
-        }
-    ),
-    (
-        Parameter,
-        {
-            Parameter: Parameter.factory
-        }
-    ),
+    ((Parameter, Parameter.name), (Group, Group.name)),
+    ((Parameter, Parameter.default),),
+    ((Parameter, Parameter.minimum),),
+    ((Parameter, Parameter.maximum),),
+    ((Parameter, Parameter.nv),),
+    ((Parameter, Parameter.read_only),),
+    ((Parameter, Parameter.factory),)
 )
+

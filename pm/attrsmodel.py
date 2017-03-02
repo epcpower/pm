@@ -28,20 +28,16 @@ class Column:
 
 def columns(*columns):
     def _name(column):
-        name = column[0]
-        if isinstance(name, str):
-            return name
+        field = column[1]
 
-        fields = column[1]
+        name = field.metadata.get('human name')
 
-        name_field = fields[name]
-        name = name_field.metadata.get('human name')
         if name is None:
-            name = name_field.name.replace('_', ' ').title()
+            name = field.name.replace('_', ' ').title()
 
         return name
 
-    return tuple(Column(name=_name(c), fields=c[1])
+    return tuple(Column(name=_name(c[0]), fields=dict(c))
                  for c in columns)
 
 
@@ -70,7 +66,7 @@ class add_addable_types:
                 self.addable_types_cache = collections.OrderedDict()
 
                 for t in types:
-                    type_attribute = attr.fields(t)._type
+                    type_attribute = attr.fields(t).type
                     name = type_attribute.default.title()
                     name = type_attribute.metadata.get('human name', name)
                     self.addable_types_cache[name] = t
@@ -90,7 +86,7 @@ def Root(default_name, valid_types):
     @add_addable_types()
     @attr.s
     class Root(epyqlib.treenode.TreeNode):
-        _type = attr.ib(default='root', init=False)
+        type = attr.ib(default='root', init=False)
         name = attr.ib(default=default_name)
         children = attr.ib(
             default=attr.Factory(list),
@@ -169,14 +165,14 @@ class Decoder(json.JSONDecoder):
                          **kwargs)
 
     def object_hook(self, obj):
-        obj_type = obj.get('_type', None)
+        obj_type = obj.get('type', None)
 
         if isinstance(obj, list):
             return obj
 
         for t in self.types:
-            if obj_type == t._type.default:
-                obj.pop('_type')
+            if obj_type == t.type.default:
+                obj.pop('type')
                 return t.from_json(obj)
 
         raise Exception('Unexpected object found: {}'.format(obj))
@@ -262,16 +258,6 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
     def to_json_string(self):
         return json.dumps(self.root, cls=Encoder, indent=4)
 
-    def data_display_get(self, node, column):
-        column = self.columns[column]
-        attribute = column.fields[type(node)]
-        value = epyqlib.utils.general.get_attribute(node, attribute)
-
-        return value
-
-    def data_edit_get(self, node, column):
-        return self.data_display_get(node, column)
-
     def add_drop_sources(self, *sources):
         self.droppable_from.update(sources)
         check_uuids(self.root, *self.droppable_from)
@@ -279,9 +265,7 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
     def flags(self, index):
         flags = super().flags(index)
 
-        node = self.node_from_index(index)
-
-        field = self.columns[index.column()].fields.get(type(node))
+        field = self.get_field(index)
 
         if field is not None:
             if field.convert is two_state_checkbox:
@@ -293,36 +277,42 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
         return flags
 
-    def data_display(self, index):
-        node = self.node_from_index(index)
+    def get_field(self, index):
+        c = index.column()
+        t = type(self.node_from_index(index))
+        return self.columns[c].fields.get(t)
 
-        if self.columns[index.column()].fields[type(node)].convert is two_state_checkbox:
+    def data_display(self, index):
+        field = self.get_field(index)
+
+        if field is None:
+            return None
+
+        if field.convert is two_state_checkbox:
             return ''
 
-        result = super().data_display(index)
-
-        return str(result)
+        node = self.node_from_index(index)
+        return str(getattr(node, field.name))
 
     def data_edit(self, index):
-        result = super().data_edit(index)
-
-        return str(result)
+        return self.data_display(index)
 
     def data_check_state(self, index):
         node = self.node_from_index(index)
 
-        attribute = self.columns[index.column()].fields[type(node)]
-        if attribute.convert is two_state_checkbox:
-            if epyqlib.utils.general.get_attribute(node, attribute):
-                return QtCore.Qt.Checked
-            else:
-                return QtCore.Qt.Unchecked
+        attribute = self.get_field(index)
+        if attribute is not None:
+            if attribute.convert is two_state_checkbox:
+                if getattr(node, attribute.name):
+                    return QtCore.Qt.Checked
+                else:
+                    return QtCore.Qt.Unchecked
 
         return None
 
     def setData(self, index, data, role=None):
         node = self.node_from_index(index)
-        attribute = self.columns[index.column()].fields[type(node)]
+        attribute = self.get_field(index)
 
         if role == QtCore.Qt.EditRole:
             convert = attribute.convert
@@ -334,12 +324,12 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
             else:
                 converted = data
 
-            epyqlib.utils.general.set_attribute(node, attribute, converted)
+            setattr(node, attribute.name, converted)
 
             self.dataChanged.emit(index, index)
             return True
         elif role == QtCore.Qt.CheckStateRole:
-            epyqlib.utils.general.set_attribute(node, attribute, self.columns[index.column()].fields[type(node)].convert(data))
+            setattr(node, attribute.name, attribute.convert(data))
 
             return True
 

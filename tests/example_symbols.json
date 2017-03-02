@@ -1,22 +1,22 @@
 {
-    "_type": "root",
+    "type": "root",
     "name": "Symbols",
     "children": [
         {
-            "_type": "message",
+            "type": "message",
             "name": "CommandVF",
             "identifier": "0x0CFFAE41",
             "extended": true,
             "cycle_time": null,
             "children": [
                 {
-                    "_type": "signal",
+                    "type": "signal",
                     "name": "Voltage",
                     "parameter_uuid": "c25cd4e2-b2a8-4106-8610-4e0db6033a17",
                     "uuid": "02b7c6f9-8447-4a84-b107-385749066bd3"
                 },
                 {
-                    "_type": "signal",
+                    "type": "signal",
                     "name": "Frequency",
                     "parameter_uuid": "422638c9-87d1-4c86-aa8c-73bd8bfff99c",
                     "uuid": "4cfe3c01-4543-456b-8396-2793faafec95"
@@ -25,14 +25,14 @@
             "uuid": "38127a59-0c93-4d7f-bc2b-d9d68bfa00c3"
         },
         {
-            "_type": "message",
+            "type": "message",
             "name": "New Message",
             "identifier": "0x1fffffff",
             "extended": true,
             "cycle_time": null,
             "children": [
                 {
-                    "_type": "signal",
+                    "type": "signal",
                     "name": "paramAAb",
                     "parameter_uuid": "6516a19e-ecb8-4cd9-acc1-3894193886f7",
                     "uuid": "2759cd9c-e53e-44f3-974e-2a7c343a2d0a"
