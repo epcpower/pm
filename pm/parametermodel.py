@@ -16,11 +16,9 @@ __license__ = 'GPLv2+'
 
 
 @pm.attrsmodel.add_addable_types()
-@epyqlib.utils.general.indexable_attrs(
-    ignore=pm.attrsmodel.ignored_attribute_filter)
 @attr.s
 class Parameter(epyqlib.treenode.TreeNode):
-    _type = attr.ib(default='parameter', init=False, metadata={'ignore': True})
+    _type = attr.ib(default='parameter', init=False)
     name = attr.ib(default='New Parameter')
     default = attr.ib(default=None, convert=pm.attrsmodel.to_decimal_or_none)
     minimum = attr.ib(default=None, convert=pm.attrsmodel.to_decimal_or_none)
@@ -50,8 +48,6 @@ class Parameter(epyqlib.treenode.TreeNode):
 
 
 @pm.attrsmodel.add_addable_types()
-@epyqlib.utils.general.indexable_attrs(
-    ignore=pm.attrsmodel.ignored_attribute_filter)
 @attr.s
 class EnumerationParameter(epyqlib.treenode.TreeNode):
     _type = attr.ib(
@@ -72,26 +68,15 @@ class EnumerationParameter(epyqlib.treenode.TreeNode):
 
 
 @pm.attrsmodel.add_addable_types()
-@epyqlib.utils.general.indexable_attrs(
-    ignore=pm.attrsmodel.ignored_attribute_filter)
 @attr.s
 class Group(epyqlib.treenode.TreeNode):
-    _type = attr.ib(default='group', init=False, metadata={'ignore': True})
+    _type = attr.ib(default='group', init=False)
     name = attr.ib(default='New Group')
-    fill0 = epyqlib.utils.general.filler_attribute()
-    fill1 = epyqlib.utils.general.filler_attribute()
-    fill2 = epyqlib.utils.general.filler_attribute()
-    fill3 = epyqlib.utils.general.filler_attribute()
-    fill4 = epyqlib.utils.general.filler_attribute()
-    fill5 = epyqlib.utils.general.filler_attribute()
     children = attr.ib(
         default=attr.Factory(list),
         hash=False,
         cmp=False,
-        metadata={
-            'ignore': True,
-            'valid_types': (Parameter, None)
-        }
+        metadata={'valid_types': (Parameter, None)}
     )
     uuid = pm.attrsmodel.attr_uuid()
 
@@ -126,3 +111,50 @@ Root = pm.attrsmodel.Root(
 )
 
 types = (Root, Parameter, EnumerationParameter, Group)
+
+
+columns = pm.attrsmodel.columns(
+    (
+        Parameter,
+        {
+            Group: Group.name,
+            Parameter: Parameter.name
+        }
+    ),
+    (
+        Parameter,
+        {
+            Parameter: Parameter.default
+        }
+    ),
+    (
+        Parameter,
+        {
+            Parameter: Parameter.minimum
+        }
+    ),
+    (
+        Parameter,
+        {
+            Parameter: Parameter.maximum
+        }
+    ),
+    (
+        Parameter,
+        {
+            Parameter: Parameter.nv
+        }
+    ),
+    (
+        Parameter,
+        {
+            Parameter: Parameter.read_only
+        }
+    ),
+    (
+        Parameter,
+        {
+            Parameter: Parameter.factory
+        }
+    ),
+)

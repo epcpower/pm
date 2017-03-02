@@ -23,7 +23,7 @@ class ModelView:
     view = attr.ib()
     filename = attr.ib()
     droppable_from = attr.ib()
-    header_type = attr.ib()
+    columns = attr.ib()
     types = attr.ib()
     model = attr.ib(default=None)
     proxy = attr.ib(default=None)
@@ -93,14 +93,14 @@ class Window:
                 view=self.ui.parameter_view,
                 filename=filename,
                 droppable_from=('parameters',),
-                header_type=pm.parametermodel.Parameter,
+                columns=pm.parametermodel.columns,
                 types=pm.parametermodel.types
             ),
             'symbols': ModelView(
                 view=self.ui.symbol_view,
                 filename=filename.replace('parameters', 'symbols'),
                 droppable_from=('parameters', 'symbols'),
-                header_type=pm.symbolmodel.Message,
+                columns=pm.symbolmodel.columns,
                 types=pm.symbolmodel.types
             )
         }
@@ -119,7 +119,7 @@ class Window:
             with open(view_model.filename) as f:
                 view_model.model = pm.attrsmodel.Model.from_json_string(
                     f.read(),
-                    header_type=view_model.header_type,
+                    columns=view_model.columns,
                     types=view_model.types
                 )
             self.set_model(name=name, view_model=view_model)

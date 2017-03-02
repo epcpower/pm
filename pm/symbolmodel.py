@@ -16,15 +16,12 @@ __license__ = 'GPLv2+'
 
 
 @pm.attrsmodel.add_addable_types()
-@epyqlib.utils.general.indexable_attrs(
-    ignore=pm.attrsmodel.ignored_attribute_filter)
 @attr.s
 class Signal(epyqlib.treenode.TreeNode):
-    _type = attr.ib(default='signal', init=False, metadata={'ignore': True})
+    _type = attr.ib(default='signal', init=False)
     name = attr.ib(default='New Signal')
-    fill0 = epyqlib.utils.general.filler_attribute()
-    fill1 = epyqlib.utils.general.filler_attribute()
-    parameter_uuid = pm.attrsmodel.attr_uuid(ignore=False)
+    parameter_uuid = pm.attrsmodel.attr_uuid(
+        metadata={'human name': 'Parameter UUID'})
     uuid = pm.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
@@ -47,8 +44,6 @@ class Signal(epyqlib.treenode.TreeNode):
 
 
 @pm.attrsmodel.add_addable_types()
-@epyqlib.utils.general.indexable_attrs(
-    ignore=pm.attrsmodel.ignored_attribute_filter)
 @attr.s
 class Message(epyqlib.treenode.TreeNode):
     _type = attr.ib(default='message', init=False, metadata={'ignore': True})
@@ -61,10 +56,7 @@ class Message(epyqlib.treenode.TreeNode):
     children = attr.ib(
         default=attr.Factory(list),
         hash=False,
-        metadata={
-            'ignore': True,
-            'valid_types': (Signal,)
-        }
+        metadata={'valid_types': (Signal,)}
     )
     uuid = pm.attrsmodel.attr_uuid()
 
@@ -73,7 +65,13 @@ class Message(epyqlib.treenode.TreeNode):
 
     @classmethod
     def from_json(cls, obj):
-        return cls(**obj)
+        children = obj.pop('children')
+        node = cls(**obj)
+
+        for child in children:
+            node.append_child(child)
+
+        return node
 
     def to_json(self):
         return attr.asdict(
@@ -99,3 +97,38 @@ Root = pm.attrsmodel.Root(
 )
 
 types = (Root, Message, Signal)
+
+
+columns = pm.attrsmodel.columns(
+    (
+        Message,
+        {
+            Message: Message.name,
+            Signal: Signal.name
+        }
+    ),
+    (
+        Message,
+        {
+            Message: Message.identifier
+        }
+    ),
+    (
+        Message,
+        {
+            Message: Message.extended
+        }
+    ),
+    (
+        Message,
+        {
+            Message: Message.cycle_time
+        }
+    ),
+    (
+        Signal,
+        {
+            Signal: Signal.parameter_uuid
+        }
+    )
+)

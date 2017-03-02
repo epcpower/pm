@@ -11,15 +11,15 @@
             "children": [
                 {
                     "_type": "signal",
-                    "name": "paramAAb",
-                    "parameter_uuid": "6516a19e-ecb8-4cd9-acc1-3894193886f7",
-                    "uuid": "f10114cc-a89f-462e-945c-1ef02aa12fae"
+                    "name": "Voltage",
+                    "parameter_uuid": "c25cd4e2-b2a8-4106-8610-4e0db6033a17",
+                    "uuid": "02b7c6f9-8447-4a84-b107-385749066bd3"
                 },
                 {
                     "_type": "signal",
-                    "name": "paramAAb",
-                    "parameter_uuid": "6516a19e-ecb8-4cd9-acc1-3894193886f7",
-                    "uuid": "d79728b3-608d-482a-99fc-fe9c7025f3c5"
+                    "name": "Frequency",
+                    "parameter_uuid": "422638c9-87d1-4c86-aa8c-73bd8bfff99c",
+                    "uuid": "4cfe3c01-4543-456b-8396-2793faafec95"
                 }
             ],
             "uuid": "38127a59-0c93-4d7f-bc2b-d9d68bfa00c3"

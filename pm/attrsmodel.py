@@ -21,6 +21,31 @@ logger = logging.getLogger()
 
 
 @attr.s
+class Column:
+    name = attr.ib()
+    fields = attr.ib()
+
+
+def columns(*columns):
+    def _name(column):
+        name = column[0]
+        if isinstance(name, str):
+            return name
+
+        fields = column[1]
+
+        name_field = fields[name]
+        name = name_field.metadata.get('human name')
+        if name is None:
+            name = name_field.name.replace('_', ' ').title()
+
+        return name
+
+    return tuple(Column(name=_name(c), fields=c[1])
+                 for c in columns)
+
+
+@attr.s
 class add_addable_types:
     attribute_name = attr.ib(default='children')
 
@@ -63,11 +88,9 @@ def Root(default_name, valid_types):
     valid_types = tuple(valid_types)
 
     @add_addable_types()
-    @epyqlib.utils.general.indexable_attrs(
-        ignore=ignored_attribute_filter)
     @attr.s
     class Root(epyqlib.treenode.TreeNode):
-        _type = attr.ib(default='root', init=False, metadata={'ignore': True})
+        _type = attr.ib(default='root', init=False)
         name = attr.ib(default=default_name)
         children = attr.ib(
             default=attr.Factory(list),
@@ -106,11 +129,12 @@ def Root(default_name, valid_types):
     return Root
 
 
-def attr_uuid(ignore=True):
+def attr_uuid(*args, **kwargs):
     return attr.ib(
         default=None,
         convert=lambda x: x if x is None else uuid.UUID(x),
-        metadata={'ignore': ignore}
+        *args,
+        **kwargs
     )
 
 
@@ -207,18 +231,18 @@ def check_uuids(*roots):
 
 
 class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
-    def __init__(self, root, header_type, parent=None):
-        super().__init__(root=root, attrs=True, parent=parent)
+    def __init__(self, root, columns, parent=None):
+        super().__init__(root=root, parent=parent)
 
-        self.headers = [a.name.replace('_', ' ').title()
-                        for a in header_type.public_fields]
+        self.columns = columns
+        self.headers = tuple(c.name for c in self.columns)
 
         self.droppable_from = set()
 
         check_uuids(self.root)
 
     @classmethod
-    def from_json_string(cls, s, header_type, types,
+    def from_json_string(cls, s, columns, types,
                          decoder=Decoder):
         # Ugly but maintains the name 'types' both for the parameter
         # and in D.
@@ -232,11 +256,21 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
         return cls(
             root=root,
-            header_type=header_type
+            columns=columns
         )
 
     def to_json_string(self):
         return json.dumps(self.root, cls=Encoder, indent=4)
+
+    def data_display_get(self, node, column):
+        column = self.columns[column]
+        attribute = column.fields[type(node)]
+        value = epyqlib.utils.general.get_attribute(node, attribute)
+
+        return value
+
+    def data_edit_get(self, node, column):
+        return self.data_display_get(node, column)
 
     def add_drop_sources(self, *sources):
         self.droppable_from.update(sources)
@@ -247,21 +281,22 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
         node = self.node_from_index(index)
 
-        field = node.public_fields[index.column()]
+        field = self.columns[index.column()].fields.get(type(node))
 
-        if field.convert is two_state_checkbox:
-            flags |= QtCore.Qt.ItemIsUserCheckable
-        elif field.metadata.get('editable', True):
-            flags |= QtCore.Qt.ItemIsEditable
+        if field is not None:
+            if field.convert is two_state_checkbox:
+                flags |= QtCore.Qt.ItemIsUserCheckable
+            elif field.metadata.get('editable', True):
+                flags |= QtCore.Qt.ItemIsEditable
 
-        flags |= QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled
+            flags |= QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled
 
         return flags
 
     def data_display(self, index):
         node = self.node_from_index(index)
 
-        if node.public_fields[index.column()].convert is two_state_checkbox:
+        if self.columns[index.column()].fields[type(node)].convert is two_state_checkbox:
             return ''
 
         result = super().data_display(index)
@@ -276,8 +311,9 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
     def data_check_state(self, index):
         node = self.node_from_index(index)
 
-        if node.public_fields[index.column()].convert is two_state_checkbox:
-            if node[index.column()]:
+        attribute = self.columns[index.column()].fields[type(node)]
+        if attribute.convert is two_state_checkbox:
+            if epyqlib.utils.general.get_attribute(node, attribute):
                 return QtCore.Qt.Checked
             else:
                 return QtCore.Qt.Unchecked
@@ -286,9 +322,10 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
 
     def setData(self, index, data, role=None):
         node = self.node_from_index(index)
+        attribute = self.columns[index.column()].fields[type(node)]
 
         if role == QtCore.Qt.EditRole:
-            convert = node.public_fields[index.column()].convert
+            convert = attribute.convert
             if convert is not None:
                 try:
                     converted = convert(data)
@@ -297,12 +334,12 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
             else:
                 converted = data
 
-            node[index.column()] = converted
+            epyqlib.utils.general.set_attribute(node, attribute, converted)
 
             self.dataChanged.emit(index, index)
             return True
         elif role == QtCore.Qt.CheckStateRole:
-            node[index.column()] = node.public_fields[index.column()].convert(data)
+            epyqlib.utils.general.set_attribute(node, attribute, self.columns[index.column()].fields[type(node)].convert(data))
 
             return True
 
