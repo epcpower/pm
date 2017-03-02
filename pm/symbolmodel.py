@@ -1,5 +1,4 @@
 import collections
-import decimal
 
 import attr
 from PyQt5 import QtCore

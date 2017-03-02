@@ -1,6 +1,4 @@
 import collections
-import decimal
-import functools
 
 import attr
 from PyQt5 import QtCore
