@@ -56,7 +56,6 @@ class add_addable_types:
                 if not hasattr(cls, self.attribute_name):
                     return {}
 
-                print(cls)
                 types = tuple(
                     cls if t is None else t
                     for t in getattr(attr.fields(cls), self.attribute_name)

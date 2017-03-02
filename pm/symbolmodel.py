@@ -82,7 +82,6 @@ class Message(epyqlib.treenode.TreeNode):
         )
 
     def can_drop_on(self, node):
-        print('blue')
         x = (*self.addable_types().values(), pm.parametermodel.Parameter)
 
         return isinstance(node, x)
