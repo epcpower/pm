@@ -6,25 +6,25 @@ from PyQt5 import QtCore
 import epyqlib.treenode
 import epyqlib.utils.general
 
-import pm.attrsmodel
+import epcpm.attrsmodel
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
-@pm.attrsmodel.add_addable_types()
+@epcpm.attrsmodel.add_addable_types()
 @attr.s
 class Parameter(epyqlib.treenode.TreeNode):
     type = attr.ib(default='parameter', init=False)
     name = attr.ib(default='New Parameter')
-    default = attr.ib(default=None, convert=pm.attrsmodel.to_decimal_or_none)
-    minimum = attr.ib(default=None, convert=pm.attrsmodel.to_decimal_or_none)
-    maximum = attr.ib(default=None, convert=pm.attrsmodel.to_decimal_or_none)
-    nv = attr.ib(default=False, convert=pm.attrsmodel.two_state_checkbox)
-    read_only = attr.ib(default=False, convert=pm.attrsmodel.two_state_checkbox)
-    factory = attr.ib(default=False, convert=pm.attrsmodel.two_state_checkbox)
-    uuid = pm.attrsmodel.attr_uuid()
+    default = attr.ib(default=None, convert=epcpm.attrsmodel.to_decimal_or_none)
+    minimum = attr.ib(default=None, convert=epcpm.attrsmodel.to_decimal_or_none)
+    maximum = attr.ib(default=None, convert=epcpm.attrsmodel.to_decimal_or_none)
+    nv = attr.ib(default=False, convert=epcpm.attrsmodel.two_state_checkbox)
+    read_only = attr.ib(default=False, convert=epcpm.attrsmodel.two_state_checkbox)
+    factory = attr.ib(default=False, convert=epcpm.attrsmodel.two_state_checkbox)
+    uuid = epcpm.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
         super().__init__()
@@ -45,7 +45,7 @@ class Parameter(epyqlib.treenode.TreeNode):
         return isinstance(node, tuple(self.addable_types().values()))
 
 
-@pm.attrsmodel.add_addable_types()
+@epcpm.attrsmodel.add_addable_types()
 @attr.s
 class EnumerationParameter(epyqlib.treenode.TreeNode):
     type = attr.ib(
@@ -54,9 +54,9 @@ class EnumerationParameter(epyqlib.treenode.TreeNode):
         metadata={'ignore': True}
     )
     name = attr.ib()
-    minimum = attr.ib(default=None, convert=pm.attrsmodel.to_decimal_or_none)
-    maximum = attr.ib(default=None, convert=pm.attrsmodel.to_decimal_or_none)
-    factory = attr.ib(default=False, convert=pm.attrsmodel.two_state_checkbox)
+    minimum = attr.ib(default=None, convert=epcpm.attrsmodel.to_decimal_or_none)
+    maximum = attr.ib(default=None, convert=epcpm.attrsmodel.to_decimal_or_none)
+    factory = attr.ib(default=False, convert=epcpm.attrsmodel.two_state_checkbox)
 
     def __attrs_post_init__(self):
         super().__init__()
@@ -65,7 +65,7 @@ class EnumerationParameter(epyqlib.treenode.TreeNode):
         return False
 
 
-@pm.attrsmodel.add_addable_types()
+@epcpm.attrsmodel.add_addable_types()
 @attr.s
 class Group(epyqlib.treenode.TreeNode):
     type = attr.ib(default='group', init=False)
@@ -76,7 +76,7 @@ class Group(epyqlib.treenode.TreeNode):
         cmp=False,
         metadata={'valid_types': (Parameter, None)}
     )
-    uuid = pm.attrsmodel.attr_uuid()
+    uuid = epcpm.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
         super().__init__()
@@ -103,14 +103,14 @@ class Group(epyqlib.treenode.TreeNode):
         return isinstance(node, tuple(self.addable_types().values()))
 
 
-Root = pm.attrsmodel.Root(
+Root = epcpm.attrsmodel.Root(
     default_name='Parameters',
     valid_types=(Parameter, Group)
 )
 
 types = (Root, Parameter, EnumerationParameter, Group)
 
-columns = pm.attrsmodel.columns(
+columns = epcpm.attrsmodel.columns(
     ((Parameter, Parameter.name), (Group, Group.name)),
     ((Parameter, Parameter.default),),
     ((Parameter, Parameter.minimum),),

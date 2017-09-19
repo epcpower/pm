@@ -6,7 +6,7 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import epyqlib.utils.qt
-import pm.mainwindow
+import epcpm.mainwindow
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
@@ -45,7 +45,7 @@ def main(*args, logger):
             if args.verbose >= 3:
                 logging.getLogger().setLevel(logging.DEBUG)
 
-    window = pm.mainwindow.Window(ui_file='__main__.ui')
+    window = epcpm.mainwindow.Window(ui_file='__main__.ui')
 
     sys.excepthook = functools.partial(
         epyqlib.utils.qt.exception_message_box,

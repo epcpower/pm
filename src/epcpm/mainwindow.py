@@ -9,9 +9,9 @@ import PyQt5.uic
 
 import epyqlib.utils.qt
 
-import pm.attrsmodel
-import pm.parametermodel
-import pm.symbolmodel
+import epcpm.attrsmodel
+import epcpm.parametermodel
+import epcpm.symbolmodel
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
@@ -93,15 +93,15 @@ class Window:
                 view=self.ui.parameter_view,
                 filename=filename,
                 droppable_from=('parameters',),
-                columns=pm.parametermodel.columns,
-                types=pm.parametermodel.types
+                columns=epcpm.parametermodel.columns,
+                types=epcpm.parametermodel.types
             ),
             'symbols': ModelView(
                 view=self.ui.symbol_view,
                 filename=filename.replace('parameters', 'symbols'),
                 droppable_from=('parameters', 'symbols'),
-                columns=pm.symbolmodel.columns,
-                types=pm.symbolmodel.types
+                columns=epcpm.symbolmodel.columns,
+                types=epcpm.symbolmodel.types
             )
         }
 
@@ -115,7 +115,7 @@ class Window:
             view.setAcceptDrops(True)
 
             with open(view_model.filename) as f:
-                view_model.model = pm.attrsmodel.Model.from_json_string(
+                view_model.model = epcpm.attrsmodel.Model.from_json_string(
                     f.read(),
                     columns=view_model.columns,
                     types=view_model.types

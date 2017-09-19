@@ -6,22 +6,22 @@ from PyQt5 import QtCore
 import epyqlib.treenode
 import epyqlib.utils.general
 
-import pm.attrsmodel
-import pm.parametermodel
+import epcpm.attrsmodel
+import epcpm.parametermodel
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
-@pm.attrsmodel.add_addable_types()
+@epcpm.attrsmodel.add_addable_types()
 @attr.s
 class Signal(epyqlib.treenode.TreeNode):
     type = attr.ib(default='signal', init=False)
     name = attr.ib(default='New Signal')
-    parameter_uuid = pm.attrsmodel.attr_uuid(
+    parameter_uuid = epcpm.attrsmodel.attr_uuid(
         metadata={'human name': 'Parameter UUID'})
-    uuid = pm.attrsmodel.attr_uuid()
+    uuid = epcpm.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
         super().__init__()
@@ -42,22 +42,22 @@ class Signal(epyqlib.treenode.TreeNode):
         return False
 
 
-@pm.attrsmodel.add_addable_types()
+@epcpm.attrsmodel.add_addable_types()
 @attr.s
 class Message(epyqlib.treenode.TreeNode):
     type = attr.ib(default='message', init=False, metadata={'ignore': True})
     name = attr.ib(default='New Message')
     identifier = attr.ib(default='0x1fffffff')
     extended = attr.ib(default=True,
-                       convert=pm.attrsmodel.two_state_checkbox)
+                       convert=epcpm.attrsmodel.two_state_checkbox)
     cycle_time = attr.ib(default=None,
-                         convert=pm.attrsmodel.to_decimal_or_none)
+                         convert=epcpm.attrsmodel.to_decimal_or_none)
     children = attr.ib(
         default=attr.Factory(list),
         hash=False,
         metadata={'valid_types': (Signal,)}
     )
-    uuid = pm.attrsmodel.attr_uuid()
+    uuid = epcpm.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
         super().__init__()
@@ -81,7 +81,7 @@ class Message(epyqlib.treenode.TreeNode):
         )
 
     def can_drop_on(self, node):
-        x = (*self.addable_types().values(), pm.parametermodel.Parameter)
+        x = (*self.addable_types().values(), epcpm.parametermodel.Parameter)
 
         return isinstance(node, x)
 
@@ -89,7 +89,7 @@ class Message(epyqlib.treenode.TreeNode):
         return Signal(name=node.name, parameter_uuid=str(node.uuid))
 
 
-Root = pm.attrsmodel.Root(
+Root = epcpm.attrsmodel.Root(
     default_name='Symbols',
     valid_types=(Message,)
 )
@@ -97,7 +97,7 @@ Root = pm.attrsmodel.Root(
 types = (Root, Message, Signal)
 
 
-columns = pm.attrsmodel.columns(
+columns = epcpm.attrsmodel.columns(
     ((Message, Message.name), (Signal, Signal.name)),
     ((Message, Message.identifier),),
     ((Message, Message.extended),),

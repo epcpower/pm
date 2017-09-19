@@ -6,4 +6,4 @@ try:
 except pkg_resources.DistributionNotFound:
     # TODO: probably a different exception when pyinstaller'ed
     import pm._version
-    __version__ = pm._version.__version__
+    __version__ = epcpm._version.__version__
