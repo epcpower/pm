@@ -13,7 +13,7 @@ setup(
     packages=find_packages(),
     entry_points={'gui_scripts': ['pm = pm.__main__:_entry_point']},
     install_requires=[
-        'PyQt5==5.8.0',
-        'SIP==4.19.1'
+        'PyQt5==5.9',
+        'SIP==4.19.3'
     ]
 )
