@@ -17,6 +17,15 @@ setuptools.setup(
         'PyQt5==5.9',
         'SIP==4.19.3'
     ],
+    extras_require={
+        'tests': [
+            'codecov',
+            'pytest',
+            'pytest-cov',
+            'pytest-qt',
+            'tox',
+        ],
+    },
     setup_requires=[
         'setuptools_scm',
     ],

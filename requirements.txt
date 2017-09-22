@@ -1,4 +1,4 @@
-tox==2.6.0
+tox==2.8.2
 -e sub/epyqlib
-attrs==16.3.0
-requests==2.13.0
+attrs==17.2.0
+requests==2.18.4

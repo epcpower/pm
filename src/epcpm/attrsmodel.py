@@ -83,6 +83,7 @@ def Root(default_name, valid_types):
     valid_types = tuple(valid_types)
 
     @add_addable_types()
+    # TODO: using object.__hash__ is a bit evil
     @attr.s(hash=False)
     class Root(epyqlib.treenode.TreeNode):
         type = attr.ib(default='root', init=False)

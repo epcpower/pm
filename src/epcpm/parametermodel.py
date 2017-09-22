@@ -14,7 +14,8 @@ __license__ = 'GPLv2+'
 
 
 @epcpm.attrsmodel.add_addable_types()
-@attr.s
+# TODO: using object.__hash__ is a bit evil
+@attr.s(hash=False)
 class Parameter(epyqlib.treenode.TreeNode):
     type = attr.ib(default='parameter', init=False)
     name = attr.ib(default='New Parameter')
@@ -46,7 +47,8 @@ class Parameter(epyqlib.treenode.TreeNode):
 
 
 @epcpm.attrsmodel.add_addable_types()
-@attr.s
+# TODO: using object.__hash__ is a bit evil
+@attr.s(hash=False)
 class EnumerationParameter(epyqlib.treenode.TreeNode):
     type = attr.ib(
         default='parameter.enumeration',
@@ -66,13 +68,13 @@ class EnumerationParameter(epyqlib.treenode.TreeNode):
 
 
 @epcpm.attrsmodel.add_addable_types()
-@attr.s
+# TODO: using object.__hash__ is a bit evil
+@attr.s(hash=False)
 class Group(epyqlib.treenode.TreeNode):
     type = attr.ib(default='group', init=False)
     name = attr.ib(default='New Group')
     children = attr.ib(
         default=attr.Factory(list),
-        hash=False,
         cmp=False,
         metadata={'valid_types': (Parameter, None)}
     )
