@@ -43,7 +43,6 @@ class Signal(epyqlib.treenode.TreeNode):
 
 
 @epcpm.attrsmodel.add_addable_types()
-# TODO: using object.__hash__ is a bit evil
 @attr.s(hash=False)
 class Message(epyqlib.treenode.TreeNode):
     type = attr.ib(default='message', init=False, metadata={'ignore': True})
