@@ -1,7 +1,6 @@
 import collections
 
 import attr
-from PyQt5 import QtCore
 
 import epyqlib.treenode
 import epyqlib.utils.general
