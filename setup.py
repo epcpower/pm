@@ -12,10 +12,18 @@ setuptools.setup(
     ],
     packages=setuptools.find_packages('src'),
     package_dir={'': 'src'},
-    entry_points={'gui_scripts': ['epcpm = epcpm.__main__:_entry_point']},
+    entry_points={
+        'gui_scripts': [
+            'epcpm = epcpm.__main__:_entry_point',
+        ],
+        'console_scripts': [
+            'epcparameterstoc = epcpm.parameterstoc:cli',
+        ],
+    },
     install_requires=[
         'pyqt5',
         'sip',
+        'click',
     ],
     extras_require={
         'tests': [
