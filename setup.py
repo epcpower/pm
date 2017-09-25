@@ -14,8 +14,8 @@ setuptools.setup(
     package_dir={'': 'src'},
     entry_points={'gui_scripts': ['epcpm = epcpm.__main__:_entry_point']},
     install_requires=[
-        'PyQt5==5.9',
-        'SIP==4.19.3'
+        'pyqt5',
+        'sip',
     ],
     extras_require={
         'tests': [
