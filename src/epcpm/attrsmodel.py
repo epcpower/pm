@@ -286,13 +286,18 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
         field = self.get_field(index)
 
         if field is None:
-            return None
+            return ''
 
         if field.convert is two_state_checkbox:
             return ''
 
         node = self.node_from_index(index)
-        return str(getattr(node, field.name))
+
+        data = getattr(node, field.name)
+        if data is None:
+            return '-'
+
+        return str(data)
 
     def data_edit(self, index):
         return self.data_display(index)
