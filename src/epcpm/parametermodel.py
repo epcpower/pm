@@ -46,6 +46,50 @@ class Parameter(epyqlib.treenode.TreeNode):
 
 @epcpm.attrsmodel.add_addable_types()
 @attr.s(hash=False)
+class ArrayGroup(epyqlib.treenode.TreeNode):
+    type = attr.ib(default='array_group', init=False)
+    name = attr.ib(default='New Array Group')
+    _length = attr.ib(
+        default=1,
+        convert=int,
+        # metadata={'property': 'length'},
+    )
+    children = attr.ib(
+        default=attr.Factory(list),
+        cmp=False,
+        init=False,
+        metadata={'valid_types': ()}
+    )
+    uuid = epcpm.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+        self.append_child(Parameter(name=''))
+
+    # @classmethod
+    # def from_json(cls, obj):
+    #     children = obj.pop('children')
+    #     node = cls(**obj)
+    #
+    #     for child in children:
+    #         node.append_child(child)
+    #
+    #     return node
+    #
+    # def to_json(self):
+    #     return attr.asdict(
+    #         self,
+    #         recurse=False,
+    #         dict_factory=collections.OrderedDict,
+    #         filter=lambda a, _: a.metadata.get('to_file', True)
+    #     )
+
+    def can_drop_on(self, node):
+        return isinstance(node, tuple(self.addable_types().values()))
+
+
+@epcpm.attrsmodel.add_addable_types()
+@attr.s(hash=False)
 class EnumerationParameter(epyqlib.treenode.TreeNode):
     type = attr.ib(
         default='parameter.enumeration',
@@ -73,7 +117,7 @@ class Group(epyqlib.treenode.TreeNode):
         default=attr.Factory(list),
         cmp=False,
         init=False,
-        metadata={'valid_types': (Parameter, None)}
+        metadata={'valid_types': (Parameter, ArrayGroup, None)}
     )
     uuid = epcpm.attrsmodel.attr_uuid()
 
@@ -107,10 +151,15 @@ Root = epcpm.attrsmodel.Root(
     valid_types=(Parameter, Group)
 )
 
-types = (Root, Parameter, EnumerationParameter, Group)
+types = (Root, Parameter, EnumerationParameter, Group, ArrayGroup)
 
 columns = epcpm.attrsmodel.columns(
-    ((Parameter, Parameter.name), (Group, Group.name)),
+    (
+        (Parameter, Parameter.name),
+        (Group, Group.name),
+        (ArrayGroup, ArrayGroup.name),
+    ),
+    ((ArrayGroup, ArrayGroup._length),),
     ((Parameter, Parameter.default),),
     ((Parameter, Parameter.minimum),),
     ((Parameter, Parameter.maximum),),

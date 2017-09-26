@@ -41,17 +41,47 @@ def build_ast(node):
 
         subgroup_type[child] = ast[-1].type.declname
 
-    ast.extend(struct(
-        name=spaced_to_upper_camel(node.name),
-        members=tuple(
-            (
-                subgroup_type.get(member, 'int16_t'),
-                spaced_to_lower_camel(member.name),
-                None,
+    if isinstance(node, epcpm.parametermodel.Group):
+        member_decls = []
+
+        for member in node.children:
+            if isinstance(member, epcpm.parametermodel.Group):
+                member_decls.append(Decl(
+                    type=Type(
+                        name=spaced_to_lower_camel(member.name),
+                        type=subgroup_type[member],
+                    )
+                ))
+            elif isinstance(member, epcpm.parametermodel.Parameter):
+                member_decls.append(Decl(
+                    type=Type(
+                        name=spaced_to_lower_camel(member.name),
+                        type='int16_t',
+                    )
+                ))
+            elif isinstance(member, epcpm.parametermodel.ArrayGroup):
+                member_decls.append(array(
+                    type='int16_t',
+                    name=spaced_to_lower_camel(member.name),
+                    length=member.length,
+                ))
+            else:
+                raise Exception('Unhandleable type: {}'.format(type(node)))
+
+        ast.extend(struct(
+            name=spaced_to_upper_camel(node.name),
+            member_decls=member_decls,
+        ))
+    elif isinstance(node, epcpm.parametermodel.ArrayGroup):
+        ast.append(
+            array(
+                type='int16_t',
+                name=spaced_to_lower_camel(node.name),
+                length=node.length,
             )
-            for member in node.children
-        ),
-    ))
+        )
+    else:
+        raise Exception('Unhandleable type: {}'.format(type(node)))
 
     return ast
 
@@ -83,6 +113,16 @@ def int_literal(value):
     return pycparser.c_ast.Constant(type='int', value=str(value))
 
 
+def Type(name, type):
+    return pycparser.c_ast.TypeDecl(
+        declname=name,
+        quals=[],
+        type=pycparser.c_ast.IdentifierType(
+            names=(type,),
+        ),
+    )
+
+
 Decl = functools.partial(
     pycparser.c_ast.Decl,
     name=None,
@@ -91,6 +131,12 @@ Decl = functools.partial(
     funcspec=[],
     init=None,
     bitsize=None,
+)
+
+
+ArrayDecl = functools.partial(
+    pycparser.c_ast.ArrayDecl,
+    dim_quals=[],
 )
 
 
@@ -134,30 +180,13 @@ def enum(name, enumerators=()):
     return declaration, typedef
 
 
-def struct(name, members=()):
+def struct(name, member_decls=()):
     struct_name = f'{name}_s'
     typedef_name = f'{name}_t'
 
     struct = pycparser.c_ast.Struct(
         name=struct_name,
-        decls=tuple(
-            pycparser.c_ast.Decl(
-                name=None,
-                quals=[],
-                storage=[],
-                funcspec=[],
-                type=pycparser.c_ast.TypeDecl(
-                    declname=name,
-                    quals=[],
-                    type=pycparser.c_ast.IdentifierType(
-                        names=(type,),
-                    ),
-                ),
-                init=None,
-                bitsize=bits,
-            )
-            for type, name, bits in members
-        ),
+        decls=member_decls,
     )
 
     decl = pycparser.c_ast.Decl(
@@ -179,3 +208,13 @@ def struct(name, members=()):
     )
 
     return decl, typedef
+
+
+def array(type, name, length):
+    return Decl(
+        name=name,
+        type=ArrayDecl(
+            type=Type(name, type),
+            dim=int_literal(length),
+        )
+    )
