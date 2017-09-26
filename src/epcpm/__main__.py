@@ -36,7 +36,7 @@ def main(*args, logger):
                       .format(QtCore.Qt.TextBrowserInteraction))
 
     app.setOrganizationName('EPC Power Corp.')
-    app.setApplicationName('EPyQ')
+    app.setApplicationName('EPC Parameter Management')
 
     args = parse_args(args=args)
 
