@@ -1,3 +1,4 @@
+import contextlib
 import functools
 import io
 import logging
@@ -75,6 +76,10 @@ class Window:
         view_model.view.setModel(view_model.proxy)
 
         view_model.selection = view_model.view.selectionModel()
+
+        with contextlib.suppress(TypeError):
+            view_model.selection.selectionChanged.disconnect()
+
         view_model.selection.selectionChanged.connect(
             self.selection_changed)
 
@@ -132,6 +137,10 @@ class Window:
                 self.context_menu,
                 view_model=view_model
             )
+
+            with contextlib.suppress(TypeError):
+                view.customContextMenuRequested.disconnect()
+
             view.customContextMenuRequested.connect(m)
 
         for view_model in view_models.values():
