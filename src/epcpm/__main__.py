@@ -24,6 +24,11 @@ def parse_args(args):
 def main(*args, logger):
     app = QtWidgets.QApplication(sys.argv)
 
+    epyqlib.utils.qt.exception_message_box_register_versions(
+        version_tag=epcpm.__version_tag__,
+        build_tag=epcpm.__build_tag__,
+    )
+
     sys.excepthook = epyqlib.utils.qt.exception_message_box
     QtCore.qInstallMessageHandler(epyqlib.utils.qt.message_handler)
 
@@ -46,11 +51,7 @@ def main(*args, logger):
                 logging.getLogger().setLevel(logging.DEBUG)
 
     window = epcpm.mainwindow.Window(ui_file='__main__.ui')
-
-    sys.excepthook = functools.partial(
-        epyqlib.utils.qt.exception_message_box,
-        parent=window.ui
-    )
+    epyqlib.utils.qt.exception_message_box_register_parent(parent=window)
 
     if args.file is not None:
         window.open(file=args.file)
