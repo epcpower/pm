@@ -34,7 +34,7 @@ def build_ast(node):
     ast = []
 
     ast.extend(struct(
-        name=spaced_to_lower_camel(node.name),
+        name=spaced_to_upper_camel(node.name),
         members=tuple(
             ('int16_t', spaced_to_lower_camel(member.name), None)
             for member in node.children

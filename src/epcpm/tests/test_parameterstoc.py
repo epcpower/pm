@@ -39,19 +39,19 @@ def test_pycparser_exploration_parse():
     typedef int int16_t;
     typedef int uint16_t;
 
-    enum enumName
+    enum EnumName
     {
         one=1,
         two=2
     };
-    typedef enum enumName enumTypedefName;
+    typedef enum EnumName EnumTypedefName;
 
-    struct structName
+    struct StructName
     {
         int16_t a;
         uint16_t b;
     };
-    typedef struct structName structTypedefName;
+    typedef struct StructName StructTypedefName;
     '''
 
     parser = pycparser.CParser()
@@ -66,7 +66,7 @@ def test_pycparser_exploration_wrapped():
     top_level = []
 
     top_level.extend(epcpm.parameterstoc.enum(
-        name='enumName',
+        name='EnumName',
         enumerators=(
             ('a', 1),
             ('b', 2),
@@ -74,7 +74,7 @@ def test_pycparser_exploration_wrapped():
     ))
 
     top_level.extend(epcpm.parameterstoc.struct(
-        name='structName',
+        name='StructName',
         members=(
             ('int16_t', 'a', None),
             ('uint16_t', 'b', None),
@@ -87,14 +87,14 @@ def test_pycparser_exploration_wrapped():
 
     s = generator.visit(ast)
     assert s == textwrap.dedent('''\
-    enum enumName_e {a = 1, b = 2};
-    typedef enum enumName_e enumName_t;
-    struct structName_s
+    enum EnumName_e {a = 1, b = 2};
+    typedef enum EnumName_e EnumName_t;
+    struct StructName_s
     {
       int16_t a;
       uint16_t b;
     };
-    typedef enum structName_s structName_t;
+    typedef enum StructName_s StructName_t;
     ''')
 
 
@@ -123,11 +123,11 @@ def test_single_layer_group_to_c():
     s = generator.visit(ast)
 
     assert s == textwrap.dedent('''\
-        struct groupName_s
+        struct GroupName_s
         {
           int16_t parameterA;
           int16_t parameterB;
           int16_t parameterC;
         };
-        typedef enum groupName_s groupName_t;
+        typedef enum GroupName_s GroupName_t;
         ''')
