@@ -72,6 +72,7 @@ class Group(epyqlib.treenode.TreeNode):
     children = attr.ib(
         default=attr.Factory(list),
         cmp=False,
+        init=False,
         metadata={'valid_types': (Parameter, None)}
     )
     uuid = epcpm.attrsmodel.attr_uuid()
