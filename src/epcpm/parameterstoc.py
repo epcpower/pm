@@ -1,3 +1,4 @@
+import itertools
 import functools
 
 import click
@@ -29,6 +30,41 @@ def build_ast(node):
         child_items = {}
         for child in node.children:
             child_items[child] = recurse(child, payload)
+
+    ast = []
+
+    ast.extend(struct(
+        name=spaced_to_lower_camel(node.name),
+        members=tuple(
+            ('int16_t', spaced_to_lower_camel(member.name), None)
+            for member in node.children
+        ),
+    ))
+
+    return ast
+
+
+# TODO: CAMPid 978597542154245264521645215421964521
+def spaced_to_lower_camel(name):
+    segments = name.split(' ')
+    segments = itertools.chain(
+        segments[0].lower(),
+        *(''.join(itertools.chain(
+            c[0].upper(), c[1:].lower(),
+        )) for c in segments[1:]),
+    )
+    return ''.join(segments)
+
+
+# TODO: CAMPid 978597542154245264521645215421964521
+def spaced_to_upper_camel(name):
+    segments = name.split(' ')
+    segments = itertools.chain(
+        *(''.join(itertools.chain(
+            c[0].upper(), c[1:].lower(),
+        )) for c in segments),
+    )
+    return ''.join(segments)
 
 
 def int_literal(value):

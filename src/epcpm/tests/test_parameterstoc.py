@@ -6,6 +6,7 @@ import click.testing
 import pycparser.c_ast
 import pycparser.c_generator
 
+import epcpm.parametermodel
 import epcpm.parameterstoc
 
 
@@ -95,3 +96,38 @@ def test_pycparser_exploration_wrapped():
     };
     typedef enum structName_s structName_t;
     ''')
+
+
+def test_single_layer_group_to_c():
+    group = epcpm.parametermodel.Group(
+        name='Group Name',
+    )
+
+    children = [
+        epcpm.parametermodel.Parameter(
+            name='Parameter A',
+        ),
+        epcpm.parametermodel.Parameter(
+            name='Parameter B',
+        ),
+        epcpm.parametermodel.Parameter(
+            name='Parameter C',
+        ),
+    ]
+
+    for child in children:
+        group.append_child(child)
+
+    ast = pycparser.c_ast.FileAST(epcpm.parameterstoc.build_ast(group))
+    generator = pycparser.c_generator.CGenerator()
+    s = generator.visit(ast)
+
+    assert s == textwrap.dedent('''\
+        struct groupName_s
+        {
+          int16_t parameterA;
+          int16_t parameterB;
+          int16_t parameterC;
+        };
+        typedef enum groupName_s groupName_t;
+        ''')
