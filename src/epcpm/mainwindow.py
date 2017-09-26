@@ -113,8 +113,8 @@ class Window:
         for name, view_model in view_models.items():
             view = view_model.view
 
-            view.setSelectionMode(
-                QtWidgets.QAbstractItemView.ExtendedSelection)
+            view.setSelectionBehavior(view.SelectRows)
+            view.setSelectionMode(view.SingleSelection)
             view.setDropIndicatorShown(True)
             view.setDragEnabled(True)
             view.setAcceptDrops(True)
