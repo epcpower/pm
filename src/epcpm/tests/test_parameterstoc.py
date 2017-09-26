@@ -135,6 +135,22 @@ def test_single_layer_group_to_c():
 
 
 def test_nested_group_to_c():
+    inner_inner_group = epcpm.parametermodel.Group(
+        name='Inner Inner Group Name',
+    )
+
+    children = [
+        epcpm.parametermodel.Parameter(
+            name='Parameter F',
+        ),
+        epcpm.parametermodel.Parameter(
+            name='Parameter G',
+        ),
+    ]
+
+    for child in children:
+        inner_inner_group.append_child(child)
+
     inner_group = epcpm.parametermodel.Group(
         name='Inner Group Name',
     )
@@ -143,6 +159,7 @@ def test_nested_group_to_c():
         epcpm.parametermodel.Parameter(
             name='Parameter D',
         ),
+        inner_inner_group,
         epcpm.parametermodel.Parameter(
             name='Parameter E',
         ),
@@ -176,9 +193,16 @@ def test_nested_group_to_c():
     s = generator.visit(ast)
 
     assert s == textwrap.dedent('''\
+        struct InnerInnerGroupName_s
+        {
+          int16_t parameterF;
+          int16_t parameterG;
+        };
+        typedef enum InnerInnerGroupName_s InnerInnerGroupName_t;
         struct InnerGroupName_s
         {
           int16_t parameterD;
+          InnerInnerGroupName_t innerInnerGroupName;
           int16_t parameterE;
         };
         typedef enum InnerGroupName_s InnerGroupName_t;
