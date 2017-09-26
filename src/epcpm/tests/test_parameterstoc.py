@@ -88,7 +88,7 @@ def test_pycparser_exploration_wrapped():
     assert s == textwrap.dedent('''\
     enum enumName_e {a = 1, b = 2};
     typedef enum enumName_e enumName_t;
-    struct structName
+    struct structName_s
     {
       int16_t a;
       uint16_t b;

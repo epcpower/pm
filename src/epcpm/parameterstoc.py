@@ -91,7 +91,7 @@ def struct(name, members=()):
     typedef_name = f'{name}_t'
 
     struct = pycparser.c_ast.Struct(
-        name=name,
+        name=struct_name,
         decls=tuple(
             pycparser.c_ast.Decl(
                 name=None,
