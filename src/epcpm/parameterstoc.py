@@ -26,17 +26,29 @@ def _cli(parameters):
 
 
 def build_ast(node):
-    def recurse(node, payload):
-        child_items = {}
-        for child in node.children:
-            child_items[child] = recurse(child, payload)
-
     ast = []
+
+    subgroups = tuple(
+        child for child in node.children
+        if isinstance(child, epcpm.parametermodel.Group)
+    )
+
+    subgroup_type = {}
+
+    for child in subgroups:
+        child_ast = build_ast(child)
+        ast.extend(child_ast)
+
+        subgroup_type[child] = ast[-1].type.declname
 
     ast.extend(struct(
         name=spaced_to_upper_camel(node.name),
         members=tuple(
-            ('int16_t', spaced_to_lower_camel(member.name), None)
+            (
+                subgroup_type.get(member, 'int16_t'),
+                spaced_to_lower_camel(member.name),
+                None,
+            )
             for member in node.children
         ),
     ))

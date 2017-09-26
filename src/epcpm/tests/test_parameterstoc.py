@@ -118,7 +118,8 @@ def test_single_layer_group_to_c():
     for child in children:
         group.append_child(child)
 
-    ast = pycparser.c_ast.FileAST(epcpm.parameterstoc.build_ast(group))
+    top_level = epcpm.parameterstoc.build_ast(group)
+    ast = pycparser.c_ast.FileAST(top_level)
     generator = pycparser.c_generator.CGenerator()
     s = generator.visit(ast)
 
@@ -130,4 +131,63 @@ def test_single_layer_group_to_c():
           int16_t parameterC;
         };
         typedef enum GroupName_s GroupName_t;
+        ''')
+
+
+def test_nested_group_to_c():
+    inner_group = epcpm.parametermodel.Group(
+        name='Inner Group Name',
+    )
+
+    children = [
+        epcpm.parametermodel.Parameter(
+            name='Parameter D',
+        ),
+        epcpm.parametermodel.Parameter(
+            name='Parameter E',
+        ),
+    ]
+
+    for child in children:
+        inner_group.append_child(child)
+
+    outer_group = epcpm.parametermodel.Group(
+        name='Outer Group Name',
+    )
+
+    children = [
+        epcpm.parametermodel.Parameter(
+            name='Parameter A',
+        ),
+        inner_group,
+        epcpm.parametermodel.Parameter(
+            name='Parameter B',
+        ),
+        epcpm.parametermodel.Parameter(
+            name='Parameter C',
+        ),
+    ]
+
+    for child in children:
+        outer_group.append_child(child)
+
+    ast = pycparser.c_ast.FileAST(epcpm.parameterstoc.build_ast(outer_group))
+    generator = pycparser.c_generator.CGenerator()
+    s = generator.visit(ast)
+
+    assert s == textwrap.dedent('''\
+        struct InnerGroupName_s
+        {
+          int16_t parameterD;
+          int16_t parameterE;
+        };
+        typedef enum InnerGroupName_s InnerGroupName_t;
+        struct OuterGroupName_s
+        {
+          int16_t parameterA;
+          InnerGroupName_t innerGroupName;
+          int16_t parameterB;
+          int16_t parameterC;
+        };
+        typedef enum OuterGroupName_s OuterGroupName_t;
         ''')
