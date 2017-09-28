@@ -51,7 +51,7 @@ def main(*args, logger):
                 logging.getLogger().setLevel(logging.DEBUG)
 
     window = epcpm.mainwindow.Window(ui_file='__main__.ui')
-    epyqlib.utils.qt.exception_message_box_register_parent(parent=window)
+    epyqlib.utils.qt.exception_message_box_register_parent(parent=window.ui)
 
     if args.file is not None:
         window.open(file=args.file)
