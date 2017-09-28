@@ -28,8 +28,9 @@ class Column:
 
 def columns(*columns):
     def _name(column):
-        field = column[1]
+        cls, field_name = column
 
+        field = getattr(attr.fields(cls), field_name)
         name = field.metadata.get('human name')
 
         if name is None:
@@ -83,6 +84,7 @@ def Root(default_name, valid_types):
     valid_types = tuple(valid_types)
 
     @add_addable_types()
+    @epyqlib.utils.qt.pyqtify()
     @attr.s(hash=False)
     class Root(epyqlib.treenode.TreeNode):
         type = attr.ib(default='root', init=False)
@@ -169,7 +171,7 @@ class Decoder(json.JSONDecoder):
             return obj
 
         for t in self.types:
-            if obj_type == t.type.default:
+            if obj_type == attr.fields(t).type.default:
                 obj.pop('type')
                 return t.from_json(obj)
 
@@ -280,7 +282,12 @@ class Model(epyqlib.pyqabstractitemmodel.PyQAbstractItemModel):
     def get_field(self, index):
         c = index.column()
         t = type(self.node_from_index(index))
-        return self.columns[c].fields.get(t)
+        name = self.columns[c].fields.get(t)
+
+        if name is None:
+            return None
+
+        return getattr(attr.fields(t), name)
 
     def data_display(self, index):
         field = self.get_field(index)

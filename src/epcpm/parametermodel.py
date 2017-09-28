@@ -4,6 +4,7 @@ import attr
 
 import epyqlib.treenode
 import epyqlib.utils.general
+import epyqlib.utils.qt
 
 import epcpm.attrsmodel
 
@@ -13,6 +14,7 @@ __license__ = 'GPLv2+'
 
 
 @epcpm.attrsmodel.add_addable_types()
+@epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Parameter(epyqlib.treenode.TreeNode):
     type = attr.ib(default='parameter', init=False)
@@ -45,6 +47,7 @@ class Parameter(epyqlib.treenode.TreeNode):
 
 
 @epcpm.attrsmodel.add_addable_types()
+@epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class ArrayGroup(epyqlib.treenode.TreeNode):
     type = attr.ib(default='array_group', init=False)
@@ -89,6 +92,7 @@ class ArrayGroup(epyqlib.treenode.TreeNode):
 
 
 @epcpm.attrsmodel.add_addable_types()
+@epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class EnumerationParameter(epyqlib.treenode.TreeNode):
     type = attr.ib(
@@ -109,6 +113,7 @@ class EnumerationParameter(epyqlib.treenode.TreeNode):
 
 
 @epcpm.attrsmodel.add_addable_types()
+@epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Group(epyqlib.treenode.TreeNode):
     type = attr.ib(default='group', init=False)
@@ -155,16 +160,16 @@ types = (Root, Parameter, EnumerationParameter, Group, ArrayGroup)
 
 columns = epcpm.attrsmodel.columns(
     (
-        (Parameter, Parameter.name),
-        (Group, Group.name),
-        (ArrayGroup, ArrayGroup.name),
+        (Parameter, 'name'),
+        (Group, 'name'),
+        (ArrayGroup, 'name'),
     ),
-    ((ArrayGroup, ArrayGroup._length),),
-    ((Parameter, Parameter.default),),
-    ((Parameter, Parameter.minimum),),
-    ((Parameter, Parameter.maximum),),
-    ((Parameter, Parameter.nv),),
-    ((Parameter, Parameter.read_only),),
-    ((Parameter, Parameter.factory),)
+    ((ArrayGroup, '_length'),),
+    ((Parameter, 'default'),),
+    ((Parameter, 'minimum'),),
+    ((Parameter, 'maximum'),),
+    ((Parameter, 'nv'),),
+    ((Parameter, 'read_only'),),
+    ((Parameter, 'factory'),)
 )
 

@@ -15,6 +15,7 @@ __license__ = 'GPLv2+'
 
 
 @epcpm.attrsmodel.add_addable_types()
+@epyqlib.utils.qt.pyqtify()
 @attr.s
 class Signal(epyqlib.treenode.TreeNode):
     type = attr.ib(default='signal', init=False)
@@ -43,6 +44,7 @@ class Signal(epyqlib.treenode.TreeNode):
 
 
 @epcpm.attrsmodel.add_addable_types()
+@epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Message(epyqlib.treenode.TreeNode):
     type = attr.ib(default='message', init=False, metadata={'ignore': True})
@@ -97,9 +99,9 @@ types = (Root, Message, Signal)
 
 
 columns = epcpm.attrsmodel.columns(
-    ((Message, Message.name), (Signal, Signal.name)),
-    ((Message, Message.identifier),),
-    ((Message, Message.extended),),
-    ((Message, Message.cycle_time),),
-    ((Signal, Signal.parameter_uuid),)
+    ((Message, 'name'), (Signal, 'name')),
+    ((Message, 'identifier'),),
+    ((Message, 'extended'),),
+    ((Message, 'cycle_time'),),
+    ((Signal, 'parameter_uuid'),)
 )
