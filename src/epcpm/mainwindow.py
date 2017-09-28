@@ -8,9 +8,9 @@ import attr
 from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
 
+import epyqlib.attrsmodel
 import epyqlib.utils.qt
 
-import epcpm.attrsmodel
 import epcpm.parametermodel
 import epcpm.symbolmodel
 
@@ -120,7 +120,7 @@ class Window:
             view.setAcceptDrops(True)
 
             with open(view_model.filename) as f:
-                view_model.model = epcpm.attrsmodel.Model.from_json_string(
+                view_model.model = epyqlib.attrsmodel.Model.from_json_string(
                     f.read(),
                     columns=view_model.columns,
                     types=view_model.types

@@ -3,10 +3,10 @@ import collections
 import attr
 from PyQt5 import QtCore
 
+import epyqlib.attrsmodel
 import epyqlib.treenode
 import epyqlib.utils.general
 
-import epcpm.attrsmodel
 import epcpm.parametermodel
 
 # See file COPYING in this source tree
@@ -14,15 +14,15 @@ __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
-@epcpm.attrsmodel.add_addable_types()
+@epyqlib.attrsmodel.add_addable_types()
 @epyqlib.utils.qt.pyqtify()
 @attr.s
 class Signal(epyqlib.treenode.TreeNode):
     type = attr.ib(default='signal', init=False)
     name = attr.ib(default='New Signal')
-    parameter_uuid = epcpm.attrsmodel.attr_uuid(
+    parameter_uuid = epyqlib.attrsmodel.attr_uuid(
         metadata={'human name': 'Parameter UUID'})
-    uuid = epcpm.attrsmodel.attr_uuid()
+    uuid = epyqlib.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
         super().__init__()
@@ -43,7 +43,7 @@ class Signal(epyqlib.treenode.TreeNode):
         return False
 
 
-@epcpm.attrsmodel.add_addable_types()
+@epyqlib.attrsmodel.add_addable_types()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Message(epyqlib.treenode.TreeNode):
@@ -51,14 +51,14 @@ class Message(epyqlib.treenode.TreeNode):
     name = attr.ib(default='New Message')
     identifier = attr.ib(default='0x1fffffff')
     extended = attr.ib(default=True,
-                       convert=epcpm.attrsmodel.two_state_checkbox)
+                       convert=epyqlib.attrsmodel.two_state_checkbox)
     cycle_time = attr.ib(default=None,
-                         convert=epcpm.attrsmodel.to_decimal_or_none)
+                         convert=epyqlib.attrsmodel.to_decimal_or_none)
     children = attr.ib(
         default=attr.Factory(list),
         metadata={'valid_types': (Signal,)}
     )
-    uuid = epcpm.attrsmodel.attr_uuid()
+    uuid = epyqlib.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
         super().__init__()
@@ -90,7 +90,7 @@ class Message(epyqlib.treenode.TreeNode):
         return Signal(name=node.name, parameter_uuid=str(node.uuid))
 
 
-Root = epcpm.attrsmodel.Root(
+Root = epyqlib.attrsmodel.Root(
     default_name='Symbols',
     valid_types=(Message,)
 )
@@ -98,7 +98,7 @@ Root = epcpm.attrsmodel.Root(
 types = (Root, Message, Signal)
 
 
-columns = epcpm.attrsmodel.columns(
+columns = epyqlib.attrsmodel.columns(
     ((Message, 'name'), (Signal, 'name')),
     ((Message, 'identifier'),),
     ((Message, 'extended'),),
