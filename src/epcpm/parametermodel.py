@@ -47,22 +47,22 @@ class Parameter(epyqlib.treenode.TreeNode):
 
     @PyQt5.QtCore.pyqtProperty('PyQt_PyObject')
     def pyqtify_minimum(self):
-        return self._pyqtify_get('minimum')
+        return epyqlib.utils.qt.pyqtify_get(self, 'minimum')
 
     @pyqtify_minimum.setter
     def pyqtify_minimum(self, value):
-        self._pyqtify_set('minimum', value)
+        epyqlib.utils.qt.pyqtify_set(self, 'minimum', value)
         if None not in (value, self.maximum):
             if value > self.maximum:
                 self.maximum = value
 
     @PyQt5.QtCore.pyqtProperty('PyQt_PyObject')
     def pyqtify_maximum(self):
-        return self._pyqtify_get('maximum')
+        return epyqlib.utils.qt.pyqtify_get(self, 'maximum')
 
     @pyqtify_maximum.setter
     def pyqtify_maximum(self, value):
-        self._pyqtify_set('maximum', value)
+        epyqlib.utils.qt.pyqtify_set(self, 'maximum', value)
         if None not in (value, self.minimum):
             if value < self.minimum:
                 self.minimum = value
