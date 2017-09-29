@@ -16,7 +16,7 @@ __license__ = 'GPLv2+'
 
 @epyqlib.attrsmodel.add_addable_types()
 @epyqlib.utils.qt.pyqtify()
-@attr.s
+@attr.s(hash=False)
 class Signal(epyqlib.treenode.TreeNode):
     type = attr.ib(default='signal', init=False)
     name = attr.ib(default='New Signal')
