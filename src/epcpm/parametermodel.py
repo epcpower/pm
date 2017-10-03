@@ -72,7 +72,7 @@ class Parameter(epyqlib.treenode.TreeNode):
 class ArrayGroup(epyqlib.treenode.TreeNode):
     type = attr.ib(default='array_group', init=False)
     name = attr.ib(default='New Array Group')
-    _length = attr.ib(
+    length = attr.ib(
         default=1,
         convert=int,
         # metadata={'property': 'length'},
@@ -184,7 +184,7 @@ columns = epyqlib.attrsmodel.columns(
         (Group, 'name'),
         (ArrayGroup, 'name'),
     ),
-    ((ArrayGroup, '_length'),),
+    ((ArrayGroup, 'length'),),
     ((Parameter, 'default'),),
     ((Parameter, 'minimum'),),
     ((Parameter, 'maximum'),),
