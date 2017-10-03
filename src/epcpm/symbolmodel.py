@@ -15,7 +15,6 @@ __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
-@epyqlib.attrsmodel.add_addable_types()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Signal(epyqlib.treenode.TreeNode):
@@ -44,7 +43,6 @@ class Signal(epyqlib.treenode.TreeNode):
         return False
 
 
-@epyqlib.attrsmodel.add_addable_types()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Message(epyqlib.treenode.TreeNode):
@@ -96,8 +94,9 @@ Root = epyqlib.attrsmodel.Root(
     valid_types=(Message,)
 )
 
-types = (Root, Message, Signal)
-
+types = epyqlib.attrsmodel.Types(
+    types=(Root, Message, Signal),
+)
 
 columns = epyqlib.attrsmodel.columns(
     ((Message, 'name'), (Signal, 'name')),

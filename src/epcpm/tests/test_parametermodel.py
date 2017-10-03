@@ -12,7 +12,6 @@ __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
-@epyqlib.attrsmodel.add_addable_types()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Parameter(epyqlib.treenode.TreeNode):
@@ -25,7 +24,6 @@ class Parameter(epyqlib.treenode.TreeNode):
         super().__init__()
 
 
-@epyqlib.attrsmodel.add_addable_types()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Group(epyqlib.treenode.TreeNode):
@@ -51,7 +49,9 @@ Root = epyqlib.attrsmodel.Root(
     valid_types=(Parameter, Group)
 )
 
-types = (Root, Parameter, Group)
+types = epyqlib.attrsmodel.Types(
+    types=(Root, Parameter, Group),
+)
 
 columns = epyqlib.attrsmodel.columns(
     (

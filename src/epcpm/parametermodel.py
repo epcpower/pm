@@ -13,7 +13,6 @@ __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
-@epyqlib.attrsmodel.add_addable_types()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Parameter(epyqlib.treenode.TreeNode):
@@ -68,7 +67,6 @@ class Parameter(epyqlib.treenode.TreeNode):
                 self.minimum = value
 
 
-@epyqlib.attrsmodel.add_addable_types()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class ArrayGroup(epyqlib.treenode.TreeNode):
@@ -83,7 +81,7 @@ class ArrayGroup(epyqlib.treenode.TreeNode):
         default=attr.Factory(list),
         cmp=False,
         init=False,
-        metadata={'valid_types': ()}
+        metadata={'valid_types': (Parameter, 'Group', None)}
     )
     uuid = epyqlib.attrsmodel.attr_uuid()
 
@@ -113,7 +111,6 @@ class ArrayGroup(epyqlib.treenode.TreeNode):
         return isinstance(node, tuple(self.addable_types().values()))
 
 
-@epyqlib.attrsmodel.add_addable_types()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class EnumerationParameter(epyqlib.treenode.TreeNode):
@@ -134,7 +131,6 @@ class EnumerationParameter(epyqlib.treenode.TreeNode):
         return False
 
 
-@epyqlib.attrsmodel.add_addable_types()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Group(epyqlib.treenode.TreeNode):
@@ -178,7 +174,9 @@ Root = epyqlib.attrsmodel.Root(
     valid_types=(Parameter, Group)
 )
 
-types = (Root, Parameter, EnumerationParameter, Group, ArrayGroup)
+types = epyqlib.attrsmodel.Types(
+    types=(Root, Parameter, EnumerationParameter, Group, ArrayGroup),
+)
 
 columns = epyqlib.attrsmodel.columns(
     (
