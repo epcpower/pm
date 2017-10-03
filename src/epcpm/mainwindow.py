@@ -5,6 +5,7 @@ import logging
 import os
 
 import attr
+import PyQt5.QtCore
 from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
 
@@ -64,6 +65,8 @@ class Window:
 
         self.view_models = {}
 
+        self.uuid_notifier = epcpm.symbolmodel.ReferencedUuidNotifier()
+        self.uuid_notifier.changed.connect(self.symbol_uuid_changed)
 
         self.filename = None
 
@@ -110,6 +113,8 @@ class Window:
             )
         }
 
+        self.uuid_notifier.disconnect_view()
+
         for name, view_model in view_models.items():
             view = view_model.view
 
@@ -142,6 +147,8 @@ class Window:
                 view.customContextMenuRequested.disconnect()
 
             view.customContextMenuRequested.connect(m)
+
+        self.uuid_notifier.set_view(self.ui.symbol_view)
 
         for view_model in view_models.values():
             view_model.model.add_drop_sources(*(
@@ -204,3 +211,22 @@ class Window:
 
     def selection_changed(self, selected, deselected):
         pass
+
+    def symbol_uuid_changed(self, uuid):
+        view_model = self.view_models['parameters']
+        model = view_model.model
+        view = view_model.view
+
+        node = model.node_from_uuid(uuid)
+        index = model.index_from_node(node)
+        index = epyqlib.utils.qt.resolve_index_from_model(
+            model=model,
+            view=view,
+            index=index,
+        )
+
+        view.setCurrentIndex(index)
+        view.selectionModel().select(
+            index,
+            QtCore.QItemSelectionModel.ClearAndSelect,
+        )
