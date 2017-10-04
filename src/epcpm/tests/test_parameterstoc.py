@@ -299,7 +299,7 @@ def test_array_group_to_c():
         ''')
 
 
-def test_explore():
+def test_datalogger_a():
     root = epcpm.parametermodel.Root()
 
     model = epyqlib.attrsmodel.Model(
