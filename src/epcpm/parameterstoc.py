@@ -28,9 +28,14 @@ def _cli(parameters):
 def build_ast(node):
     ast = []
 
+    group_types = (
+        epcpm.parametermodel.Group,
+        epcpm.parametermodel.ArrayGroup,
+    )
+
     subgroups = tuple(
         child for child in node.children
-        if isinstance(child, epcpm.parametermodel.Group)
+        if isinstance(child, group_types)
     )
 
     subgroup_type = {}
@@ -39,13 +44,19 @@ def build_ast(node):
         child_ast = build_ast(child)
         ast.extend(child_ast)
 
+        if isinstance(child, epcpm.parametermodel.ArrayGroup):
+            ast.append(Typedef(
+                target=array(ast[-1].type.declname, 'array_name', child.length),
+                name=ast[-1].type.declname[:-1] + 'at',
+            ))
+
         subgroup_type[child] = ast[-1].type.declname
 
-    if isinstance(node, epcpm.parametermodel.Group):
+    if isinstance(node, group_types):
         member_decls = []
 
         for member in node.children:
-            if isinstance(member, epcpm.parametermodel.Group):
+            if isinstance(member, group_types):
                 member_decls.append(Decl(
                     type=Type(
                         name=spaced_to_lower_camel(member.name),
@@ -59,12 +70,6 @@ def build_ast(node):
                         type='int16_t',
                     )
                 ))
-            elif isinstance(member, epcpm.parametermodel.ArrayGroup):
-                member_decls.append(array(
-                    type='int16_t',
-                    name=spaced_to_lower_camel(member.name),
-                    length=member.length,
-                ))
             else:
                 raise Exception('Unhandleable type: {}'.format(type(node)))
 
@@ -72,14 +77,6 @@ def build_ast(node):
             name=spaced_to_upper_camel(node.name),
             member_decls=member_decls,
         ))
-    elif isinstance(node, epcpm.parametermodel.ArrayGroup):
-        ast.append(
-            array(
-                type='int16_t',
-                name=spaced_to_lower_camel(node.name),
-                length=node.length,
-            )
-        )
     else:
         raise Exception('Unhandleable type: {}'.format(type(node)))
 

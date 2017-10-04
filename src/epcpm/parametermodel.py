@@ -87,7 +87,6 @@ class ArrayGroup(epyqlib.treenode.TreeNode):
 
     def __attrs_post_init__(self):
         super().__init__()
-        self.append_child(Parameter(name=''))
 
     # @classmethod
     # def from_json(cls, obj):
