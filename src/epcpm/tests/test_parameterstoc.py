@@ -108,7 +108,7 @@ def test_pycparser_exploration_wrapped():
       int16_t a;
       uint16_t b;
     };
-    typedef enum StructName_s StructName_t;
+    typedef struct StructName_s StructName_t;
     ''')
 
 
@@ -144,7 +144,7 @@ def test_single_layer_group_to_c():
           int16_t parameterB;
           int16_t parameterC;
         };
-        typedef enum GroupName_s GroupName_t;
+        typedef struct GroupName_s GroupName_t;
         ''')
 
 
@@ -212,14 +212,14 @@ def test_nested_group_to_c():
           int16_t parameterF;
           int16_t parameterG;
         };
-        typedef enum InnerInnerGroupName_s InnerInnerGroupName_t;
+        typedef struct InnerInnerGroupName_s InnerInnerGroupName_t;
         struct InnerGroupName_s
         {
           int16_t parameterD;
           InnerInnerGroupName_t innerInnerGroupName;
           int16_t parameterE;
         };
-        typedef enum InnerGroupName_s InnerGroupName_t;
+        typedef struct InnerGroupName_s InnerGroupName_t;
         struct OuterGroupName_s
         {
           int16_t parameterA;
@@ -227,7 +227,7 @@ def test_nested_group_to_c():
           int16_t parameterB;
           int16_t parameterC;
         };
-        typedef enum OuterGroupName_s OuterGroupName_t;
+        typedef struct OuterGroupName_s OuterGroupName_t;
         ''')
 
 
@@ -280,5 +280,5 @@ def test_array_group_to_c():
           int16_t parameterB;
           int16_t parameterC;
         };
-        typedef enum GroupName_s GroupName_t;
+        typedef struct GroupName_s GroupName_t;
         ''')

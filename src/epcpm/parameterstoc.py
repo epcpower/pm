@@ -200,9 +200,9 @@ def struct(name, member_decls=()):
     )
 
     typedef = Typedef(
-        target=pycparser.c_ast.Enum(
+        target=pycparser.c_ast.Struct(
             name=struct_name,
-            values=[],
+            decls=[],
         ),
         name=typedef_name,
     )
