@@ -71,7 +71,7 @@ def build_ast(node):
                     )
                 ))
             else:
-                raise Exception('Unhandleable type: {}'.format(type(node)))
+                raise Exception('Unhandleable type: {}'.format(type(member)))
 
         ast.extend(struct(
             name=spaced_to_upper_camel(node.name),
