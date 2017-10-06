@@ -5,6 +5,8 @@ import logging
 import os
 
 import attr
+import pycparser.c_ast
+import pycparser.c_generator
 import PyQt5.QtCore
 from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
@@ -13,6 +15,7 @@ import epyqlib.attrsmodel
 import epyqlib.utils.qt
 
 import epcpm.parametermodel
+import epcpm.parameterstoc
 import epcpm.symbolmodel
 
 # See file COPYING in this source tree
@@ -199,6 +202,9 @@ class Window:
         if node is not model.root:
             delete = menu.addAction('Delete')
 
+        menu.addSeparator()
+        generate_code = menu.addAction('Generate code...')
+
         action = menu.exec(
             view_model.view.viewport().mapToGlobal(position)
         )
@@ -206,6 +212,16 @@ class Window:
         if action is not None:
             if action is delete:
                 node.tree_parent.remove_child(child=node)
+            elif action is generate_code:
+                builder = epcpm.parameterstoc.builders.wrap(node)
+
+                ast = pycparser.c_ast.FileAST(builder.definition())
+                generator = pycparser.c_generator.CGenerator()
+                s = generator.visit(ast)
+                epyqlib.utils.qt.dialog(
+                    parent=self.ui,
+                    message=s,
+                )
             else:
                 node.append_child(actions[action]())
 
