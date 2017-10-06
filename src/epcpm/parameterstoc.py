@@ -126,7 +126,7 @@ class Array:
         return [
             *definitions,
             *enum_definitions,
-            ArrayTypedef(
+            array_typedef(
                 target=builder.type_name(),
                 name=self.type_name(),
                 length=self.wrapped.length,
@@ -179,12 +179,10 @@ Decl = functools.partial(
     bitsize=None,
 )
 
-
 ArrayDecl = functools.partial(
     pycparser.c_ast.ArrayDecl,
     dim_quals=[],
 )
-
 
 TypeDecl = functools.partial(
     pycparser.c_ast.TypeDecl,
@@ -192,7 +190,8 @@ TypeDecl = functools.partial(
     quals=[],
 )
 
-def Typedef(target, name):
+
+def typedef(target, name):
     return pycparser.c_ast.Typedef(
         name='',
         quals=[],
@@ -205,7 +204,7 @@ def Typedef(target, name):
     )
 
 
-def ArrayTypedef(target, name, length):
+def array_typedef(target, name, length):
     return pycparser.c_ast.Typedef(
         name=name,
         quals=[],
@@ -238,7 +237,7 @@ def enum(name, enumerators=()):
 
     declaration = Decl(type=enumeration)
 
-    typedef = Typedef(
+    typedef_ = typedef(
         target=pycparser.c_ast.Enum(
             name=enum_name,
             values=[],
@@ -246,7 +245,7 @@ def enum(name, enumerators=()):
         name=typedef_name,
     )
 
-    return declaration, typedef
+    return declaration, typedef_
 
 
 def struct(name, member_decls=()):
@@ -268,7 +267,7 @@ def struct(name, member_decls=()):
         bitsize=None,
     )
 
-    typedef = Typedef(
+    typedef_ = typedef(
         target=pycparser.c_ast.Struct(
             name=struct_name,
             decls=[],
@@ -276,7 +275,7 @@ def struct(name, member_decls=()):
         name=typedef_name,
     )
 
-    return decl, typedef
+    return decl, typedef_
 
 
 def array(type, name, length):
