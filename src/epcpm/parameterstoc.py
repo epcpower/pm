@@ -1,6 +1,7 @@
 import itertools
 import functools
 
+import attr
 import click
 import pycparser
 
@@ -23,6 +24,120 @@ def _cli(parameters):
     ast = build_ast(model.root)
 
     print()
+
+
+@attr.s
+class TypeMap:
+    types = attr.ib(default=attr.Factory(dict), init=False)
+
+    def __call__(self, wrapped):
+        def inner(cls):
+            self.types[wrapped] = cls
+
+        return inner
+
+    def __getitem__(self, item):
+        return self.types[item]
+
+    def wrap(self, wrapped):
+        return self.types[type(wrapped)](wrapped=wrapped)
+
+
+builders = TypeMap()
+
+
+@builders(epcpm.parametermodel.Parameter)
+@attr.s
+class Parameter:
+    wrapped = attr.ib()
+
+    def definition(self):
+        return []
+
+    def type_name(self):
+        return 'int16_t'
+
+
+@builders(epcpm.parametermodel.Group)
+@attr.s
+class Group:
+    wrapped = attr.ib()
+
+    def definition(self):
+        definitions = []
+        member_decls = []
+
+        for member in self.wrapped.children:
+            builder = builders.wrap(member)
+
+            member_decls.append(Decl(
+                type=Type(
+                    name=spaced_to_lower_camel(member.name),
+                    type=builder.type_name(),
+                )
+            ))
+
+            definitions.extend(builder.definition())
+
+        return [
+            *definitions,
+            *struct(
+                name=self.type_name()[:-2],
+                member_decls=member_decls,
+            ),
+        ]
+
+    def type_name(self):
+        name = self.wrapped.type_name
+        if name is None:
+            name = self.wrapped.name
+        return spaced_to_upper_camel(name) + '_t'
+
+
+@builders(epcpm.parametermodel.Array)
+@attr.s
+class Array:
+    wrapped = attr.ib()
+
+    def definition(self):
+        builder = builders.wrap(self.wrapped.children[0])
+        definitions = builder.definition()
+
+        enum_definitions = enum(
+            name=self.base_type_name(),
+            enumerators=[
+                (
+                    '{base}_{name}'.format(
+                        base=self.base_type_name(),
+                        name=name,
+                    ),
+                    value,
+                )
+                for value, name in enumerate(
+                    [
+                        spaced_to_upper_camel(child.name)
+                        for child in self.wrapped.children
+                    ]
+                    + ['Count']
+                )
+            ],
+        )
+
+        return [
+            *definitions,
+            *enum_definitions,
+            ArrayTypedef(
+                target=builder.type_name(),
+                name=self.type_name(),
+                length=self.wrapped.length,
+            ),
+        ]
+
+    def base_type_name(self):
+        return spaced_to_upper_camel(self.wrapped.name)
+
+    def type_name(self):
+        return self.base_type_name() + '_t'
 
 
 def build_ast(node):
@@ -137,6 +252,12 @@ ArrayDecl = functools.partial(
 )
 
 
+TypeDecl = functools.partial(
+    pycparser.c_ast.TypeDecl,
+    declname='',
+    quals=[],
+)
+
 def Typedef(target, name):
     return pycparser.c_ast.Typedef(
         name='',
@@ -150,9 +271,26 @@ def Typedef(target, name):
     )
 
 
+def ArrayTypedef(target, name, length):
+    return pycparser.c_ast.Typedef(
+        name=name,
+        quals=[],
+        storage=['typedef'],
+        type=ArrayDecl(
+            dim=int_literal(length),
+            type=TypeDecl(
+                declname=name,
+                type=pycparser.c_ast.IdentifierType(
+                    names=[target],
+                ),
+            ),
+        ),
+    )
+
+
 def enum(name, enumerators=()):
     enum_name = '{name}_e'.format(name=name)
-    typedef_name = '{name}_t'.format(name=name)
+    typedef_name = '{name}_et'.format(name=name)
 
     enumerators = pycparser.c_ast.EnumeratorList(enumerators=tuple(
         pycparser.c_ast.Enumerator(name=name, value=int_literal(value))

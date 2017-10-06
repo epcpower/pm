@@ -1,11 +1,15 @@
 import PyQt5.QtCore
 import PyQt5.QtWidgets
 import attr
+import pytest
+
 import epyqlib.attrsmodel
 import epyqlib.searchbox
 import epyqlib.treenode
 import epyqlib.utils.general
 import epyqlib.utils.qt
+
+import epcpm.parametermodel
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
@@ -77,13 +81,13 @@ def make_a_model():
     parameter_b = Parameter(name='Parameter B', default=42)
     group_c = Group(name='Group C')
 
-    model.add_child(parent=root, child=group_a)
-    model.add_child(parent=group_a, child=parameter_a_a)
-    model.add_child(parent=group_a, child=group_a_b)
+    root.append_child(group_a)
+    group_a.append_child(parameter_a_a)
+    group_a.append_child(group_a_b)
 
-    model.add_child(parent=root, child=parameter_b)
+    root.append_child(parameter_b)
 
-    model.add_child(parent=root, child=group_c)
+    root.append_child(group_c)
 
     return model
 
@@ -152,3 +156,64 @@ def proxy_search_in_column(column, target):
     search_node = model.node_from_index(proxy.mapToSource(index))
 
     assert match_node is search_node
+
+
+def test_array_addable_types():
+    array = epcpm.parametermodel.Array()
+
+    value_types = (
+        epcpm.parametermodel.Parameter,
+        epcpm.parametermodel.Group,
+        # epcpm.parametermodel.Array,
+    )
+
+    assert array.addable_types() == epyqlib.attrsmodel.create_addable_types(
+        value_types,
+    )
+
+    for value_type in value_types:
+        child = value_type()
+        array.append_child(child)
+
+        assert array.addable_types() == epyqlib.attrsmodel.create_addable_types(
+            (),
+        )
+
+        array.remove_child(child=child)
+
+        assert array.addable_types() == epyqlib.attrsmodel.create_addable_types(
+            value_types,
+        )
+
+
+def test_array_update_children_length():
+    array = epcpm.parametermodel.Array()
+    parameter = epcpm.parametermodel.Parameter()
+
+    assert len(array.children) == 0
+
+    array.append_child(parameter)
+
+    assert len(array.children) == 1
+
+    for n in (3, 7, 4, 1, 5):
+        array.length = n
+        assert len(array.children) == n
+
+
+def test_array_passthrough_nv():
+    array = epcpm.parametermodel.Array()
+    parameter = epcpm.parametermodel.Parameter()
+    array.append_child(parameter)
+
+    array.length = 5
+
+    assignments = (
+        (3, True),
+        (1, False),
+        (0, True),
+    )
+
+    for index, value in assignments:
+        array.children[index].nv = value
+        assert all(child.nv == value for child in array.children)

@@ -104,7 +104,7 @@ def test_pycparser_exploration_wrapped():
     s = generator.visit(ast)
     assert s == textwrap.dedent('''\
     enum EnumName_e {a = 1, b = 2};
-    typedef enum EnumName_e EnumName_t;
+    typedef enum EnumName_e EnumName_et;
     struct StructName_s
     {
       int16_t a;
@@ -308,33 +308,33 @@ def test_datalogger_a():
     )
 
     data_logger = epcpm.parametermodel.Group(name='Data Logger')
-    model.add_child(parent=root, child=data_logger)
+    root.append_child(data_logger)
 
     chunks = epcpm.parametermodel.ArrayGroup(name='Chunks', length=16)
-    model.add_child(parent=data_logger, child=chunks)
+    data_logger.append_child(chunks)
 
     address = epcpm.parametermodel.Parameter(
         name='Address',
         default=0,
     )
-    model.add_child(parent=chunks, child=address)
+    chunks.append_child(address)
     bytes_ = epcpm.parametermodel.Parameter(
         name='Bytes',
         default=0,
     )
-    model.add_child(parent=chunks, child=bytes_)
+    chunks.append_child(bytes_)
 
     post_trigger_duration = epcpm.parametermodel.Parameter(
         name='Post Trigger Duration',
         default=500,
     )
-    model.add_child(parent=data_logger, child=post_trigger_duration)
+    data_logger.append_child(post_trigger_duration)
 
     group = epcpm.parametermodel.Group(name='Group')
-    model.add_child(parent=data_logger, child=group)
+    data_logger.append_child(group)
 
     param = epcpm.parametermodel.Parameter(name='Param')
-    model.add_child(parent=group, child=param)
+    group.append_child(param)
 
     ast = pycparser.c_ast.FileAST(epcpm.parameterstoc.build_ast(data_logger))
     generator = pycparser.c_generator.CGenerator()
@@ -391,3 +391,112 @@ typedef struct
     __VA_ARGS__ \
 }
 '''
+
+
+def test_basic_parameter_array():
+    array = epcpm.parametermodel.Array(name='Array Name')
+    parameter = epcpm.parametermodel.Parameter(name='Parameter Name')
+
+    array.append_child(parameter)
+
+    n = 5
+
+    array.length = n
+
+    builder = epcpm.parameterstoc.builders.wrap(array)
+
+    ast = pycparser.c_ast.FileAST(builder.definition())
+    generator = pycparser.c_generator.CGenerator()
+    s = generator.visit(ast)
+
+    assert s == textwrap.dedent('''\
+    enum ArrayName_e {ArrayName_ParameterName = 0, ArrayName_NewArrayParameterElement = 1, ArrayName_NewArrayParameterElement = 2, ArrayName_NewArrayParameterElement = 3, ArrayName_NewArrayParameterElement = 4, ArrayName_Count = 5};
+    typedef enum ArrayName_e ArrayName_et;
+    typedef int16_t ArrayName_t[5];
+    ''')
+
+
+def test_grouped_parameter_array():
+    group = epcpm.parametermodel.Group(name='Group Name')
+    array = epcpm.parametermodel.Array(name='Array Name')
+    parameter = epcpm.parametermodel.Parameter(name='Parameter Name')
+
+    group.append_child(array)
+    array.append_child(parameter)
+
+    n = 5
+
+    array.length = n
+
+    builder = epcpm.parameterstoc.builders.wrap(group)
+
+    ast = pycparser.c_ast.FileAST(builder.definition())
+    generator = pycparser.c_generator.CGenerator()
+    s = generator.visit(ast)
+
+    assert s == textwrap.dedent('''\
+    enum ArrayName_e {ArrayName_ParameterName = 0, ArrayName_NewArrayParameterElement = 1, ArrayName_NewArrayParameterElement = 2, ArrayName_NewArrayParameterElement = 3, ArrayName_NewArrayParameterElement = 4, ArrayName_Count = 5};
+    typedef enum ArrayName_e ArrayName_et;
+    typedef int16_t ArrayName_t[5];
+    struct GroupName_s
+    {
+      ArrayName_t arrayName;
+    };
+    typedef struct GroupName_s GroupName_t;
+    ''')
+
+
+def test_line_monitor_params():
+    line_monitoring = epcpm.parametermodel.Group(
+        name='Line Monitoring',
+    )
+
+    frequency_limits = epcpm.parametermodel.Array(
+        name='Frequency Limits',
+    )
+    line_monitoring.append_child(frequency_limits)
+
+    frequency_limit = epcpm.parametermodel.Group(
+        name='First',
+        type_name='Frequency Limit',
+    )
+    frequency_limits.append_child(frequency_limit)
+
+    frequency = epcpm.parametermodel.Parameter(
+        name='Frequency',
+    )
+    frequency_limit.append_child(frequency)
+
+    clearing_time = epcpm.parametermodel.Parameter(
+        name='Clearing Time',
+    )
+    frequency_limit.append_child(clearing_time)
+
+    frequency_limits.length = 4
+    frequency_limits.children[1].name = 'Second'
+    frequency_limits.children[2].name = 'Third'
+    frequency_limits.children[3].name = 'Fourth'
+
+    builder = epcpm.parameterstoc.builders.wrap(line_monitoring)
+
+    ast = pycparser.c_ast.FileAST(builder.definition())
+    generator = pycparser.c_generator.CGenerator()
+    s = generator.visit(ast)
+    print(f' - - -\n{s}\n - - -')
+
+    assert s == textwrap.dedent('''\
+    struct FrequencyLimit_s
+    {
+      int16_t frequency;
+      int16_t clearingTime;
+    };
+    typedef struct FrequencyLimit_s FrequencyLimit_t;
+    enum FrequencyLimits_e {FrequencyLimits_First = 0, FrequencyLimits_Second = 1, FrequencyLimits_Third = 2, FrequencyLimits_Fourth = 3, FrequencyLimits_Count = 4};
+    typedef enum FrequencyLimits_e FrequencyLimits_et;
+    typedef FrequencyLimit_t FrequencyLimits_t[4];
+    struct LineMonitoring_s
+    {
+      FrequencyLimits_t frequencyLimits;
+    };
+    typedef struct LineMonitoring_s LineMonitoring_t;
+    ''')

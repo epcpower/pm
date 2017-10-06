@@ -315,6 +315,24 @@
                 }
             ],
             "uuid": "8cd087b3-e389-4394-aab2-7b1aa17e58b2"
+        },
+        {
+            "type": "group",
+            "name": "Data Logger",
+            "children": [
+                {
+                    "type": "parameter",
+                    "name": "Post trigger duration",
+                    "default": null,
+                    "minimum": null,
+                    "maximum": null,
+                    "nv": false,
+                    "read_only": false,
+                    "factory": false,
+                    "uuid": "aa7d28a0-3af3-47c8-bdf5-2cffcbcd6b67"
+                }
+            ],
+            "uuid": "8c370273-b4fe-4c3d-ba22-ac3a954e7cf0"
         }
     ],
     "uuid": "60e31160-177e-4574-8277-38175fcf5e9f"

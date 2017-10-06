@@ -205,9 +205,9 @@ class Window:
 
         if action is not None:
             if action is delete:
-                model.delete(node=node)
+                node.tree_parent.remove_child(child=node)
             else:
-                model.add_child(parent=node, child=actions[action]())
+                node.append_child(actions[action]())
 
     def selection_changed(self, selected, deselected):
         pass
