@@ -140,64 +140,6 @@ class Array:
         return self.base_type_name() + '_t'
 
 
-def build_ast(node):
-    ast = []
-
-    group_types = (
-        epcpm.parametermodel.Group,
-        epcpm.parametermodel.ArrayGroup,
-    )
-
-    subgroups = tuple(
-        child for child in node.children
-        if isinstance(child, group_types)
-    )
-
-    subgroup_type = {}
-
-    for child in subgroups:
-        child_ast = build_ast(child)
-        ast.extend(child_ast)
-
-        if isinstance(child, epcpm.parametermodel.ArrayGroup):
-            ast.append(Typedef(
-                target=array(ast[-1].type.declname, 'array_name', child.length),
-                name=ast[-1].type.declname[:-1] + 'at',
-            ))
-
-        subgroup_type[child] = ast[-1].type.declname
-
-    if isinstance(node, group_types):
-        member_decls = []
-
-        for member in node.children:
-            if isinstance(member, group_types):
-                member_decls.append(Decl(
-                    type=Type(
-                        name=spaced_to_lower_camel(member.name),
-                        type=subgroup_type[member],
-                    )
-                ))
-            elif isinstance(member, epcpm.parametermodel.Parameter):
-                member_decls.append(Decl(
-                    type=Type(
-                        name=spaced_to_lower_camel(member.name),
-                        type='int16_t',
-                    )
-                ))
-            else:
-                raise Exception('Unhandleable type: {}'.format(type(member)))
-
-        ast.extend(struct(
-            name=spaced_to_upper_camel(node.name),
-            member_decls=member_decls,
-        ))
-    else:
-        raise Exception('Unhandleable type: {}'.format(type(node)))
-
-    return ast
-
-
 # TODO: CAMPid 978597542154245264521645215421964521
 def spaced_to_lower_camel(name):
     segments = name.split(' ')

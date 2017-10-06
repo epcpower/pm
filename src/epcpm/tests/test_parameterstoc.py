@@ -134,8 +134,9 @@ def test_single_layer_group_to_c():
     for child in children:
         group.append_child(child)
 
-    top_level = epcpm.parameterstoc.build_ast(group)
-    ast = pycparser.c_ast.FileAST(top_level)
+    builder = epcpm.parameterstoc.builders.wrap(group)
+
+    ast = pycparser.c_ast.FileAST(builder.definition())
     generator = pycparser.c_generator.CGenerator()
     s = generator.visit(ast)
 
@@ -204,7 +205,9 @@ def test_nested_group_to_c():
     for child in children:
         outer_group.append_child(child)
 
-    ast = pycparser.c_ast.FileAST(epcpm.parameterstoc.build_ast(outer_group))
+    builder = epcpm.parameterstoc.builders.wrap(outer_group)
+
+    ast = pycparser.c_ast.FileAST(builder.definition())
     generator = pycparser.c_generator.CGenerator()
     s = generator.visit(ast)
 
@@ -233,96 +236,30 @@ def test_nested_group_to_c():
         ''')
 
 
-def test_array_group_to_c():
-    array = epcpm.parametermodel.ArrayGroup(
-        name='Array Group Name',
-    )
-
-    array.length = 5
-
-    parameter = epcpm.parametermodel.Parameter(name='Array Parameter')
-    array.append_child(parameter)
-
-    top_level = epcpm.parameterstoc.build_ast(array)
-    ast = pycparser.c_ast.FileAST(top_level)
-    generator = pycparser.c_generator.CGenerator()
-    s = generator.visit(ast)
-
-    assert s == textwrap.dedent('''\
-        struct ArrayGroupName_s
-        {
-          int16_t arrayParameter;
-        };
-        typedef struct ArrayGroupName_s ArrayGroupName_t;
-        ''')
-
-    group = epcpm.parametermodel.Group(
-        name='Group Name',
-    )
-
-    children = [
-        epcpm.parametermodel.Parameter(
-            name='Parameter A',
-        ),
-        array,
-        epcpm.parametermodel.Parameter(
-            name='Parameter B',
-        ),
-        epcpm.parametermodel.Parameter(
-            name='Parameter C',
-        ),
-    ]
-
-    for child in children:
-        group.append_child(child)
-
-    top_level = epcpm.parameterstoc.build_ast(group)
-    ast = pycparser.c_ast.FileAST(top_level)
-    generator = pycparser.c_generator.CGenerator()
-    s = generator.visit(ast)
-
-    assert s == textwrap.dedent('''\
-        struct ArrayGroupName_s
-        {
-          int16_t arrayParameter;
-        };
-        typedef struct ArrayGroupName_s ArrayGroupName_t;
-        typedef ArrayGroupName_t array_name[5] ArrayGroupName_at;
-        struct GroupName_s
-        {
-          int16_t parameterA;
-          ArrayGroupName_at arrayGroupName;
-          int16_t parameterB;
-          int16_t parameterC;
-        };
-        typedef struct GroupName_s GroupName_t;
-        ''')
-
-
 def test_datalogger_a():
-    root = epcpm.parametermodel.Root()
-
-    model = epyqlib.attrsmodel.Model(
-        root=root,
-        columns=epcpm.parametermodel.columns,
-    )
-
     data_logger = epcpm.parametermodel.Group(name='Data Logger')
-    root.append_child(data_logger)
 
-    chunks = epcpm.parametermodel.ArrayGroup(name='Chunks', length=16)
-    data_logger.append_child(chunks)
+    chunks_array = epcpm.parametermodel.Array(name='Chunks')
+    data_logger.append_child(chunks_array)
+
+    chunk = epcpm.parametermodel.Group(type_name='Chunk')
+    chunks_array.append_child(chunk)
+    chunks_array.length = 4
+    chunks_array.children[0].name = 'First'
+    chunks_array.children[1].name = 'Second'
+    chunks_array.children[2].name = 'Third'
+    chunks_array.children[3].name = 'Fourth'
 
     address = epcpm.parametermodel.Parameter(
         name='Address',
         default=0,
     )
-    chunks.append_child(address)
+    chunk.append_child(address)
     bytes_ = epcpm.parametermodel.Parameter(
         name='Bytes',
         default=0,
     )
-    chunks.append_child(bytes_)
+    chunk.append_child(bytes_)
 
     post_trigger_duration = epcpm.parametermodel.Parameter(
         name='Post Trigger Duration',
@@ -336,18 +273,22 @@ def test_datalogger_a():
     param = epcpm.parametermodel.Parameter(name='Param')
     group.append_child(param)
 
-    ast = pycparser.c_ast.FileAST(epcpm.parameterstoc.build_ast(data_logger))
+    builder = epcpm.parameterstoc.builders.wrap(data_logger)
+
+    ast = pycparser.c_ast.FileAST(builder.definition())
     generator = pycparser.c_generator.CGenerator()
     s = generator.visit(ast)
 
     assert s == textwrap.dedent('''\
-    struct Chunks_s
+    struct Chunk_s
     {
       int16_t address;
       int16_t bytes;
     };
-    typedef struct Chunks_s Chunks_t;
-    typedef Chunks_t array_name[16] Chunks_at;
+    typedef struct Chunk_s Chunk_t;
+    enum Chunks_e {Chunks_First = 0, Chunks_Second = 1, Chunks_Third = 2, Chunks_Fourth = 3, Chunks_Count = 4};
+    typedef enum Chunks_e Chunks_et;
+    typedef Chunk_t Chunks_t[4];
     struct Group_s
     {
       int16_t param;
@@ -355,7 +296,7 @@ def test_datalogger_a():
     typedef struct Group_s Group_t;
     struct DataLogger_s
     {
-      Chunks_at chunks;
+      Chunks_t chunks;
       int16_t postTriggerDuration;
       Group_t group;
     };

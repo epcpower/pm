@@ -69,49 +69,6 @@ class Parameter(epyqlib.treenode.TreeNode):
 
 
 @epyqlib.utils.qt.pyqtify()
-@attr.s(hash=False)
-class ArrayGroup(epyqlib.treenode.TreeNode):
-    type = attr.ib(default='array_group', init=False)
-    name = attr.ib(default='New Array Group')
-    length = attr.ib(
-        default=1,
-        convert=int,
-        # metadata={'property': 'length'},
-    )
-    children = attr.ib(
-        default=attr.Factory(list),
-        cmp=False,
-        init=False,
-        metadata={'valid_types': (Parameter, 'Group', None)}
-    )
-    uuid = epyqlib.attrsmodel.attr_uuid()
-
-    def __attrs_post_init__(self):
-        super().__init__()
-
-    # @classmethod
-    # def from_json(cls, obj):
-    #     children = obj.pop('children')
-    #     node = cls(**obj)
-    #
-    #     for child in children:
-    #         node.append_child(child)
-    #
-    #     return node
-    #
-    # def to_json(self):
-    #     return attr.asdict(
-    #         self,
-    #         recurse=False,
-    #         dict_factory=collections.OrderedDict,
-    #         filter=lambda a, _: a.metadata.get('to_file', True)
-    #     )
-
-    def can_drop_on(self, node):
-        return isinstance(node, tuple(self.addable_types().values()))
-
-
-@epyqlib.utils.qt.pyqtify()
 @epyqlib.utils.qt.pyqtify_passthrough_properties(
     original='original',
     field_names=('nv',),
@@ -242,7 +199,7 @@ class Group(epyqlib.treenode.TreeNode):
         default=attr.Factory(list),
         cmp=False,
         init=False,
-        metadata={'valid_types': (Parameter, ArrayGroup, Array, None)}
+        metadata={'valid_types': (Parameter, Array, None)}
     )
     uuid = epyqlib.attrsmodel.attr_uuid()
 
@@ -277,21 +234,20 @@ Root = epyqlib.attrsmodel.Root(
 )
 
 types = epyqlib.attrsmodel.Types(
-    types=(Root, Parameter, EnumerationParameter, Group, ArrayGroup, Array),
+    types=(Root, Parameter, EnumerationParameter, Group, Array),
 )
 
 columns = epyqlib.attrsmodel.columns(
     (
         (Parameter, 'name'),
         (Group, 'name'),
-        (ArrayGroup, 'name'),
         (Array, 'name'),
         (ArrayParameterElement, 'name'),
         (ArrayGroupElement, 'name'),
         (EnumerationParameter, 'name'),
     ),
     ((Group, 'type_name'),),
-    ((ArrayGroup, 'length'), (Array, 'length'),),
+    ((Array, 'length'),),
     ((Parameter, 'default'), (ArrayParameterElement, 'default')),
     ((Parameter, 'minimum'), (ArrayParameterElement, 'minimum')),
     ((Parameter, 'maximum'), (ArrayParameterElement, 'maximum')),
