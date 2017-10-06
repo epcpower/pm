@@ -122,12 +122,15 @@ def test_single_layer_group_to_c():
     children = [
         epcpm.parametermodel.Parameter(
             name='Parameter A',
+            type_name='int16_t',
         ),
         epcpm.parametermodel.Parameter(
             name='Parameter B',
+            type_name='int16_t',
         ),
         epcpm.parametermodel.Parameter(
             name='Parameter C',
+            type_name='int16_t',
         ),
     ]
 
@@ -159,9 +162,11 @@ def test_nested_group_to_c():
     children = [
         epcpm.parametermodel.Parameter(
             name='Parameter F',
+            type_name='int16_t',
         ),
         epcpm.parametermodel.Parameter(
             name='Parameter G',
+            type_name='int16_t',
         ),
     ]
 
@@ -175,10 +180,12 @@ def test_nested_group_to_c():
     children = [
         epcpm.parametermodel.Parameter(
             name='Parameter D',
+            type_name='int16_t',
         ),
         inner_inner_group,
         epcpm.parametermodel.Parameter(
             name='Parameter E',
+            type_name='int16_t',
         ),
     ]
 
@@ -192,13 +199,16 @@ def test_nested_group_to_c():
     children = [
         epcpm.parametermodel.Parameter(
             name='Parameter A',
+            type_name='int16_t',
         ),
         inner_group,
         epcpm.parametermodel.Parameter(
             name='Parameter B',
+            type_name='int16_t',
         ),
         epcpm.parametermodel.Parameter(
             name='Parameter C',
+            type_name='int16_t',
         ),
     ]
 
@@ -253,24 +263,30 @@ def test_datalogger_a():
     address = epcpm.parametermodel.Parameter(
         name='Address',
         default=0,
+        type_name='int16_t',
     )
     chunk.append_child(address)
     bytes_ = epcpm.parametermodel.Parameter(
         name='Bytes',
         default=0,
+        type_name='int16_t',
     )
     chunk.append_child(bytes_)
 
     post_trigger_duration = epcpm.parametermodel.Parameter(
         name='Post Trigger Duration',
         default=500,
+        type_name='int16_t',
     )
     data_logger.append_child(post_trigger_duration)
 
     group = epcpm.parametermodel.Group(name='Group')
     data_logger.append_child(group)
 
-    param = epcpm.parametermodel.Parameter(name='Param')
+    param = epcpm.parametermodel.Parameter(
+        name='Param',
+        type_name='int16_t',
+    )
     group.append_child(param)
 
     builder = epcpm.parameterstoc.builders.wrap(data_logger)
@@ -336,7 +352,10 @@ typedef struct
 
 def test_basic_parameter_array():
     array = epcpm.parametermodel.Array(name='Array Name')
-    parameter = epcpm.parametermodel.Parameter(name='Parameter Name')
+    parameter = epcpm.parametermodel.Parameter(
+        name='Parameter Name',
+        type_name='int16_t',
+    )
 
     array.append_child(parameter)
 
@@ -360,7 +379,10 @@ def test_basic_parameter_array():
 def test_grouped_parameter_array():
     group = epcpm.parametermodel.Group(name='Group Name')
     array = epcpm.parametermodel.Array(name='Array Name')
-    parameter = epcpm.parametermodel.Parameter(name='Parameter Name')
+    parameter = epcpm.parametermodel.Parameter(
+        name='Parameter Name',
+        type_name='int16_t',
+    )
 
     group.append_child(array)
     array.append_child(parameter)
@@ -405,11 +427,13 @@ def test_line_monitor_params():
 
     frequency = epcpm.parametermodel.Parameter(
         name='Frequency',
+        type_name='_iq',
     )
     frequency_limit.append_child(frequency)
 
     clearing_time = epcpm.parametermodel.Parameter(
         name='Clearing Time',
+        type_name='_iq',
     )
     frequency_limit.append_child(clearing_time)
 
@@ -428,8 +452,8 @@ def test_line_monitor_params():
     assert s == textwrap.dedent('''\
     struct FrequencyLimit_s
     {
-      int16_t frequency;
-      int16_t clearingTime;
+      _iq frequency;
+      _iq clearingTime;
     };
     typedef struct FrequencyLimit_s FrequencyLimit_t;
     enum FrequencyLimits_e {FrequencyLimits_First = 0, FrequencyLimits_Second = 1, FrequencyLimits_Third = 2, FrequencyLimits_Fourth = 3, FrequencyLimits_Count = 4};

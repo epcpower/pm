@@ -55,7 +55,12 @@ class Parameter:
         return []
 
     def type_name(self):
-        return 'int16_t'
+        type_name = self.wrapped.type_name
+
+        if type_name is None:
+            return 'void'
+
+        return type_name
 
 
 @builders(epcpm.parametermodel.Group)

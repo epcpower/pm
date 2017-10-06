@@ -18,6 +18,7 @@ __license__ = 'GPLv2+'
 class Parameter(epyqlib.treenode.TreeNode):
     type = attr.ib(default='parameter', init=False)
     name = attr.ib(default='New Parameter')
+    type_name = attr.ib(default=None)
     # TODO: CAMPid 1342975467516679768543165421
     default = attr.ib(default=None, convert=epyqlib.attrsmodel.to_decimal_or_none)
     minimum = attr.ib(default=None, convert=epyqlib.attrsmodel.to_decimal_or_none)
@@ -246,7 +247,7 @@ columns = epyqlib.attrsmodel.columns(
         (ArrayGroupElement, 'name'),
         (EnumerationParameter, 'name'),
     ),
-    ((Group, 'type_name'),),
+    ((Group, 'type_name'), (Parameter, 'type_name')),
     ((Array, 'length'),),
     ((Parameter, 'default'), (ArrayParameterElement, 'default')),
     ((Parameter, 'minimum'), (ArrayParameterElement, 'minimum')),
