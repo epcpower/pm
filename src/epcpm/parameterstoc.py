@@ -140,7 +140,6 @@ class Array:
         return self.base_type_name() + '_t'
 
 
-# TODO: CAMPid 978597542154245264521645215421964521
 def spaced_to_lower_camel(name):
     segments = name.split(' ')
     segments = itertools.chain(
@@ -152,15 +151,8 @@ def spaced_to_lower_camel(name):
     return ''.join(segments)
 
 
-# TODO: CAMPid 978597542154245264521645215421964521
 def spaced_to_upper_camel(name):
-    segments = name.split(' ')
-    segments = itertools.chain(
-        *(''.join(itertools.chain(
-            c[0].upper(), c[1:].lower(),
-        )) for c in segments),
-    )
-    return ''.join(segments)
+    return name[0].upper() + spaced_to_lower_camel(name[1:])
 
 
 def int_literal(value):
