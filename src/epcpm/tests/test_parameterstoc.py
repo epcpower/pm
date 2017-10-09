@@ -447,7 +447,6 @@ def test_line_monitor_params():
     ast = pycparser.c_ast.FileAST(builder.definition())
     generator = pycparser.c_generator.CGenerator()
     s = generator.visit(ast)
-    print(f' - - -\n{s}\n - - -')
 
     assert s == textwrap.dedent('''\
     struct FrequencyLimit_s
