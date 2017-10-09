@@ -21,9 +21,9 @@ setuptools.setup(
         ],
     },
     install_requires=[
+        'click',
         'pyqt5',
         'sip',
-        'click',
     ],
     extras_require={
         'tests': [
