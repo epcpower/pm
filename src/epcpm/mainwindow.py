@@ -30,6 +30,7 @@ class ModelView:
     droppable_from = attr.ib()
     columns = attr.ib()
     types = attr.ib()
+    root_factory = attr.ib()
     model = attr.ib(default=None)
     proxy = attr.ib(default=None)
     selection = attr.ib(default=None)
@@ -57,7 +58,8 @@ class Window:
         sio = io.StringIO(ts.readAll())
         self.ui = PyQt5.uic.loadUi(sio)
 
-        self.ui.action_open.triggered.connect(lambda _: self.open())
+        self.ui.action_new.triggered.connect(lambda _: self.open())
+        self.ui.action_open.triggered.connect(lambda _: self.open_from_dialog())
         self.ui.action_save.triggered.connect(lambda _: self.save())
         self.ui.action_save_as.triggered.connect(self.save_as)
 
@@ -89,31 +91,36 @@ class Window:
         view_model.selection.selectionChanged.connect(
             self.selection_changed)
 
-    def open(self, file=None):
-        if file is None:
-            filename = epyqlib.utils.qt.file_dialog(self.filters, parent=self.ui)
+    def open_from_dialog(self):
+        filename = epyqlib.utils.qt.file_dialog(self.filters, parent=self.ui)
 
-            if filename is None:
-                return
-        else:
-            file.close()
-            filename = os.path.abspath(file.name)
+        if filename is None:
+            return
 
+        self.open(filename=filename)
+
+    def open(self, filename=None):
         view_models = {
             'parameters': ModelView(
                 view=self.ui.parameter_view,
                 filename=filename,
                 droppable_from=('parameters',),
                 columns=epcpm.parametermodel.columns,
-                types=epcpm.parametermodel.types
+                types=epcpm.parametermodel.types,
+                root_factory=epcpm.parametermodel.Root,
             ),
             'symbols': ModelView(
                 view=self.ui.symbol_view,
-                filename=filename.replace('parameters', 'symbols'),
+                filename=(
+                    filename.replace('parameters', 'symbols')
+                    if filename is not None
+                    else None
+                ),
                 droppable_from=('parameters', 'symbols'),
                 columns=epcpm.symbolmodel.columns,
-                types=epcpm.symbolmodel.types
-            )
+                types=epcpm.symbolmodel.types,
+                root_factory=epcpm.symbolmodel.Root,
+            ),
         }
 
         self.uuid_notifier.disconnect_view()
@@ -127,12 +134,19 @@ class Window:
             view.setDragEnabled(True)
             view.setAcceptDrops(True)
 
-            with open(view_model.filename) as f:
-                view_model.model = epyqlib.attrsmodel.Model.from_json_string(
-                    f.read(),
+            if view_model.filename is None:
+                view_model.model = epyqlib.attrsmodel.Model(
+                    root=view_model.root_factory(),
                     columns=view_model.columns,
-                    types=view_model.types
                 )
+            else:
+                with open(view_model.filename) as f:
+                    view_model.model = epyqlib.attrsmodel.Model.from_json_string(
+                        s=f.read(),
+                        columns=view_model.columns,
+                        types=view_model.types
+                    )
+
             self.set_model(name=name, view_model=view_model)
             view.expandAll()
             for i in range(view_model.model.columnCount(QtCore.QModelIndex())):
@@ -160,13 +174,7 @@ class Window:
 
         return
 
-    def save(self, filename=None):
-        if filename is None:
-            filename = self.filename
-
-        if filename is None:
-            return
-
+    def save(self):
         for view_model in self.view_models.values():
             s = view_model.model.to_json_string()
 
@@ -177,11 +185,26 @@ class Window:
                     f.write('\n')
 
     def save_as(self):
-        filename = epyqlib.utils.qt.file_dialog(
-            self.filters, parent=self.ui, save=True)
+        filenames = {}
+
+        for name, view_model in self.view_models.items():
+            filename = epyqlib.utils.qt.file_dialog(
+                filters=self.filters,
+                parent=self.ui,
+                save=True,
+                caption='Save {} As'.format(name.title()),
+            )
+
+            if filename is None:
+                return
+
+            filenames[name] = filename
+
+        for name, view_model in self.view_models.items():
+            view_model.filename = filenames[name]
 
         if filename is not None:
-            self.save(filename=filename)
+            self.save()
 
     def context_menu(self, position, view_model):
         index = view_model.view.indexAt(position)

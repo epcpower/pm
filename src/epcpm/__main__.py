@@ -1,6 +1,7 @@
 import argparse
 import functools
 import logging
+import os.path
 import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -54,7 +55,9 @@ def main(*args, logger):
     epyqlib.utils.qt.exception_message_box_register_parent(parent=window.ui)
 
     if args.file is not None:
-        window.open(file=args.file)
+        args.file.close()
+        filename = os.path.abspath(args.file.name)
+        window.open(filename=filename)
         args.file.close()
 
     window.ui.show()

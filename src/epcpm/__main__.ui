@@ -40,6 +40,7 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <addaction name="action_new"/>
     <addaction name="action_open"/>
     <addaction name="action_save"/>
     <addaction name="action_save_as"/>
@@ -63,6 +64,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="action_new">
+   <property name="text">
+    <string>New</string>
    </property>
   </action>
  </widget>
