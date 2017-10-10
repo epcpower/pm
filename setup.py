@@ -22,6 +22,7 @@ setuptools.setup(
     },
     install_requires=[
         'click',
+        'graham',
         'pyqt5',
         'sip',
     ],

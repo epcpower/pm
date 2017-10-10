@@ -3,8 +3,10 @@ import functools
 import io
 import logging
 import os
+import pathlib
 
 import attr
+import graham
 import pycparser.c_ast
 import pycparser.c_generator
 import PyQt5.QtCore
@@ -16,6 +18,7 @@ import epyqlib.utils.qt
 
 import epcpm.parametermodel
 import epcpm.parameterstoc
+import epcpm.project
 import epcpm.symbolmodel
 
 # See file COPYING in this source tree
@@ -26,7 +29,7 @@ __license__ = 'GPLv2+'
 @attr.s
 class ModelView:
     view = attr.ib()
-    filename = attr.ib()
+    # filename = attr.ib()
     droppable_from = attr.ib()
     columns = attr.ib()
     types = attr.ib()
@@ -63,7 +66,12 @@ class Window:
         self.ui.action_save.triggered.connect(lambda _: self.save())
         self.ui.action_save_as.triggered.connect(self.save_as)
 
-        self.filters = [
+        self.project_filters = [
+            ('Parameter Project', ['pmp']),
+            ('All Files', ['*'])
+        ]
+
+        self.data_filters = [
             ('JSON', ['json']),
             ('All Files', ['*'])
         ]
@@ -73,7 +81,7 @@ class Window:
         self.uuid_notifier = epcpm.symbolmodel.ReferencedUuidNotifier()
         self.uuid_notifier.changed.connect(self.symbol_uuid_changed)
 
-        self.filename = None
+        self.project = None
 
     def set_model(self, name, view_model):
         self.view_models[name] = view_model
@@ -92,7 +100,7 @@ class Window:
             self.selection_changed)
 
     def open_from_dialog(self):
-        filename = epyqlib.utils.qt.file_dialog(self.filters, parent=self.ui)
+        filename = epyqlib.utils.qt.file_dialog(self.project_filters, parent=self.ui)
 
         if filename is None:
             return
@@ -100,33 +108,37 @@ class Window:
         self.open(filename=filename)
 
     def open(self, filename=None):
-        view_models = {
-            'parameters': ModelView(
-                view=self.ui.parameter_view,
-                filename=filename,
-                droppable_from=('parameters',),
-                columns=epcpm.parametermodel.columns,
-                types=epcpm.parametermodel.types,
-                root_factory=epcpm.parametermodel.Root,
-            ),
-            'symbols': ModelView(
-                view=self.ui.symbol_view,
-                filename=(
-                    filename.replace('parameters', 'symbols')
-                    if filename is not None
-                    else None
-                ),
-                droppable_from=('parameters', 'symbols'),
-                columns=epcpm.symbolmodel.columns,
-                types=epcpm.symbolmodel.types,
-                root_factory=epcpm.symbolmodel.Root,
-            ),
-        }
+        if filename is None:
+            self.project = epcpm.project.Project()
+        else:
+            with open(filename) as f:
+                self.project = graham.schema(epcpm.project.Project).loads(
+                    f.read(),
+                ).data
+
+            self.project.filename = pathlib.Path(filename).resolve()
+
+        self.project.models.parameters = ModelView(
+            view=self.ui.parameter_view,
+            droppable_from=('parameters',),
+            columns=epcpm.parametermodel.columns,
+            types=epcpm.parametermodel.types,
+            root_factory=epcpm.parametermodel.Root,
+        )
+
+        self.project.models.symbols = ModelView(
+            view=self.ui.symbol_view,
+            droppable_from=('parameters', 'symbols'),
+            columns=epcpm.symbolmodel.columns,
+            types=epcpm.symbolmodel.types,
+            root_factory=epcpm.symbolmodel.Root,
+        )
 
         self.uuid_notifier.disconnect_view()
 
-        for name, view_model in view_models.items():
-            view = view_model.view
+        i = zip(self.project.models.items(), self.project.paths.values())
+        for (name, model), path in i:
+            view = model.view
 
             view.setSelectionBehavior(view.SelectRows)
             view.setSelectionMode(view.SingleSelection)
@@ -134,30 +146,29 @@ class Window:
             view.setDragEnabled(True)
             view.setAcceptDrops(True)
 
-            if view_model.filename is None:
-                view_model.model = epyqlib.attrsmodel.Model(
-                    root=view_model.root_factory(),
-                    columns=view_model.columns,
+            if path is None:
+                model.model = epyqlib.attrsmodel.Model(
+                    root=model.root_factory(),
+                    columns=model.columns,
                 )
             else:
-                with open(view_model.filename) as f:
-                    view_model.model = epyqlib.attrsmodel.Model.from_json_string(
+                with open(self.project.filename.parents[0] / path) as f:
+                    model.model = epyqlib.attrsmodel.Model.from_json_string(
                         s=f.read(),
-                        columns=view_model.columns,
-                        types=view_model.types
+                        columns=model.columns,
+                        types=model.types
                     )
 
-            self.set_model(name=name, view_model=view_model)
+            self.set_model(name=name, view_model=model)
             view.expandAll()
-            for i in range(view_model.model.columnCount(QtCore.QModelIndex())):
+            for i in range(model.model.columnCount(QtCore.QModelIndex())):
                 view.resizeColumnToContents(i)
-            self.filename = filename
 
             view.setContextMenuPolicy(
                 QtCore.Qt.CustomContextMenu)
             m = functools.partial(
                 self.context_menu,
-                view_model=view_model
+                view_model=model
             )
 
             with contextlib.suppress(TypeError):
@@ -167,44 +178,26 @@ class Window:
 
         self.uuid_notifier.set_view(self.ui.symbol_view)
 
-        for view_model in view_models.values():
+        for view_model in self.project.models.values():
             view_model.model.add_drop_sources(*(
-                view_models[d].model.root for d in view_model.droppable_from
+                self.project.models[d].model.root
+                for d in view_model.droppable_from
             ))
 
         return
 
     def save(self):
-        for view_model in self.view_models.values():
-            s = view_model.model.to_json_string()
-
-            with open(view_model.filename, 'w') as f:
-                f.write(s)
-
-                if not s.endswith('\n'):
-                    f.write('\n')
+        self.project.save(parent=self.ui)
 
     def save_as(self):
-        filenames = {}
+        project = attr.evolve(self.project)
+        project.filename = None
+        # TODO: this is still going to mutate the same object as the
+        #       original project is referencing
+        project.paths.set_all(None)
 
-        for name, view_model in self.view_models.items():
-            filename = epyqlib.utils.qt.file_dialog(
-                filters=self.filters,
-                parent=self.ui,
-                save=True,
-                caption='Save {} As'.format(name.title()),
-            )
-
-            if filename is None:
-                return
-
-            filenames[name] = filename
-
-        for name, view_model in self.view_models.items():
-            view_model.filename = filenames[name]
-
-        if filename is not None:
-            self.save()
+        project.save(parent=self.ui)
+        self.project = project
 
     def context_menu(self, position, view_model):
         index = view_model.view.indexAt(position)

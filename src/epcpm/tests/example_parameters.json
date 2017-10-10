@@ -5,14 +5,17 @@
         {
             "type": "group",
             "name": "GroupA",
+            "type_name": null,
             "children": [
                 {
                     "type": "group",
                     "name": "GroupAA",
+                    "type_name": null,
                     "children": [
                         {
                             "type": "parameter",
                             "name": "paramAAa",
+                            "type_name": null,
                             "default": null,
                             "minimum": 3,
                             "maximum": null,
@@ -24,6 +27,7 @@
                         {
                             "type": "parameter",
                             "name": "paramAAb",
+                            "type_name": null,
                             "default": null,
                             "minimum": 5,
                             "maximum": 6.6,
@@ -35,6 +39,7 @@
                         {
                             "type": "parameter",
                             "name": "New Parameter",
+                            "type_name": null,
                             "default": null,
                             "minimum": null,
                             "maximum": null,
@@ -49,6 +54,7 @@
                 {
                     "type": "parameter",
                     "name": "paramAa",
+                    "type_name": null,
                     "default": null,
                     "minimum": null,
                     "maximum": null,
@@ -60,6 +66,7 @@
                 {
                     "type": "parameter",
                     "name": "paramAb",
+                    "type_name": null,
                     "default": null,
                     "minimum": null,
                     "maximum": null,
@@ -71,10 +78,12 @@
                 {
                     "type": "group",
                     "name": "New Group",
+                    "type_name": null,
                     "children": [
                         {
                             "type": "parameter",
                             "name": "New Parameter",
+                            "type_name": null,
                             "default": null,
                             "minimum": null,
                             "maximum": null,
@@ -86,6 +95,7 @@
                         {
                             "type": "parameter",
                             "name": "New Parameter",
+                            "type_name": null,
                             "default": null,
                             "minimum": null,
                             "maximum": null,
@@ -103,16 +113,19 @@
         {
             "type": "group",
             "name": "Digital I/O",
+            "type_name": null,
             "children": [
                 {
                     "type": "group",
                     "name": "GroupBA",
+                    "type_name": null,
                     "children": [],
                     "uuid": "2b00c3f8-9618-48e0-ac78-2aeed990190b"
                 },
                 {
                     "type": "parameter",
                     "name": "paramBa",
+                    "type_name": null,
                     "default": null,
                     "minimum": null,
                     "maximum": null,
@@ -124,6 +137,7 @@
                 {
                     "type": "parameter",
                     "name": "paramBb",
+                    "type_name": null,
                     "default": null,
                     "minimum": null,
                     "maximum": null,
@@ -138,10 +152,12 @@
         {
             "type": "group",
             "name": "Commands",
+            "type_name": null,
             "children": [
                 {
                     "type": "parameter",
                     "name": "Voltage",
+                    "type_name": null,
                     "default": 208,
                     "minimum": 10,
                     "maximum": 800,
@@ -153,6 +169,7 @@
                 {
                     "type": "parameter",
                     "name": "Frequency",
+                    "type_name": null,
                     "default": null,
                     "minimum": null,
                     "maximum": null,
@@ -164,10 +181,12 @@
                 {
                     "type": "group",
                     "name": "Current",
+                    "type_name": null,
                     "children": [
                         {
                             "type": "parameter",
                             "name": "Real",
+                            "type_name": null,
                             "default": null,
                             "minimum": null,
                             "maximum": null,
@@ -179,6 +198,7 @@
                         {
                             "type": "parameter",
                             "name": "Reactive",
+                            "type_name": null,
                             "default": null,
                             "minimum": null,
                             "maximum": null,
@@ -193,10 +213,12 @@
                 {
                     "type": "group",
                     "name": "Power",
+                    "type_name": null,
                     "children": [
                         {
                             "type": "parameter",
                             "name": "Real",
+                            "type_name": null,
                             "default": null,
                             "minimum": null,
                             "maximum": null,
@@ -208,6 +230,7 @@
                         {
                             "type": "parameter",
                             "name": "Reactive",
+                            "type_name": null,
                             "default": null,
                             "minimum": null,
                             "maximum": null,
@@ -225,14 +248,17 @@
         {
             "type": "group",
             "name": "LFM",
+            "type_name": null,
             "children": [
                 {
                     "type": "group",
                     "name": "Limits",
+                    "type_name": null,
                     "children": [
                         {
                             "type": "parameter",
                             "name": "Frequency Very Low",
+                            "type_name": null,
                             "default": null,
                             "minimum": null,
                             "maximum": null,
@@ -244,6 +270,7 @@
                         {
                             "type": "parameter",
                             "name": "Frequency Low",
+                            "type_name": null,
                             "default": null,
                             "minimum": null,
                             "maximum": null,
@@ -255,6 +282,7 @@
                         {
                             "type": "parameter",
                             "name": "Frequency High",
+                            "type_name": null,
                             "default": null,
                             "minimum": null,
                             "maximum": null,
@@ -272,14 +300,17 @@
         {
             "type": "group",
             "name": "Identification",
+            "type_name": null,
             "children": [
                 {
                     "type": "group",
                     "name": "Software",
+                    "type_name": null,
                     "children": [
                         {
                             "type": "parameter",
                             "name": "Hash",
+                            "type_name": null,
                             "default": null,
                             "minimum": null,
                             "maximum": null,
@@ -291,6 +322,7 @@
                         {
                             "type": "parameter",
                             "name": "Build Time",
+                            "type_name": null,
                             "default": null,
                             "minimum": null,
                             "maximum": null,
@@ -305,6 +337,7 @@
                 {
                     "type": "parameter",
                     "name": "Serial Number",
+                    "type_name": null,
                     "default": null,
                     "minimum": null,
                     "maximum": null,
@@ -319,10 +352,12 @@
         {
             "type": "group",
             "name": "Data Logger",
+            "type_name": null,
             "children": [
                 {
                     "type": "parameter",
                     "name": "Post trigger duration",
+                    "type_name": null,
                     "default": null,
                     "minimum": null,
                     "maximum": null,
