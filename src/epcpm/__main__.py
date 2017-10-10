@@ -31,6 +31,9 @@ def main(*args, logger):
     )
 
     sys.excepthook = epyqlib.utils.qt.exception_message_box
+
+    os_signal_timer = epyqlib.utils.qt.setup_sigint()
+
     QtCore.qInstallMessageHandler(epyqlib.utils.qt.message_handler)
 
     app.setStyleSheet('QMessageBox {{ messagebox-text-interaction-flags: {}; }}'
