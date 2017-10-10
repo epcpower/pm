@@ -19,8 +19,8 @@ build_script:
   - venv\\Scripts\\pip install -r requirements.txt
   - venv\\Scripts\\pip install -r requirements.build
   - venv\\Scripts\\pip install -r requirements.test
-  - venv\\Scripts\\genbuildinfo "epyq\\_build.py"
-  - ps: Update-AppveyorBuild -Version "v$(venv\\Scripts\\python -c 'import epyq; print(epyq.__version__, end=\"\")') b$Env:APPVEYOR_BUILD_NUMBER"
+  - venv\\Scripts\\genbuildinfo "src\\epcpm\\_build.py"
+  - ps: Update-AppveyorBuild -Version "v$(venv\\Scripts\\python -c 'import epcpm; print(epcpm.__version__, end=\"\")') b$Env:APPVEYOR_BUILD_NUMBER"
   - ps: if (Get-ChildItem Env:PHRASE -ErrorAction SilentlyContinue) {$Env:PHRASE | Out-File sub/epyqlib/epyqlib/resources/code -Encoding ascii -NoNewline}
   - venv\\Scripts\\pyinstaller pyinstaller.spec
 #  - venv\\Scripts\\python sub\\epyqlib\\deploy_win.py --name epcpm
