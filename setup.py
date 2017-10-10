@@ -27,13 +27,16 @@ setuptools.setup(
         'sip',
     ],
     extras_require={
-        'tests': [
+        'test': [
             'codecov',
             'pytest',
             'pytest-cov',
             'pytest-qt',
             'tox',
         ],
+        'build': [
+            'pyinstaller',
+        ]
     },
     setup_requires=[
         'setuptools_scm',
