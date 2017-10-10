@@ -11,7 +11,6 @@ def collect(prefix, search_in, *extensions):
             yield (filename, dir_name.relative_to(prefix))
 
 
-hidden_imports = set()
 data_files = []
 
 name = 'epcpm'
@@ -22,11 +21,10 @@ data_files.extend(collect(prefix, search_in, '.ui', '.ico', '.png'))
 
 
 a = Analysis(
-    [pathlib.Path('src', name, '__main__.py')],
+    [str(pathlib.Path('src', name, '__main__.py'))],
     pathex=['..'],
     binaries=[],
-    datas=[(pathlib.Path(p).resolve(), pp) for p, pp in data_files],
-    hiddenimports=list(hidden_imports),
+    datas=[(str(pathlib.Path(p).resolve()), pp) for p, pp in data_files],
     hookspath=[],
     runtime_hooks=[],
     excludes=[],
@@ -50,7 +48,7 @@ exe = EXE(
     strip=False,
     upx=True,
     console=False,
-    icon=pathlib.Path('src', name, 'icon.ico'),
+    icon=str(pathlib.Path('src', name, 'icon.ico')),
 )
 
 coll = COLLECT(
