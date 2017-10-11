@@ -48,7 +48,7 @@ exe = EXE(
     debug=False,
     strip=False,
     upx=True,
-    console=True,
+    console=False,
     icon=str(pathlib.Path('src', name, 'icon.ico')),
 )
 
