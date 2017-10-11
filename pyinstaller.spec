@@ -8,7 +8,7 @@ def collect(prefix, search_in, *extensions):
     for dir_name, subdirs, files in os.walk(search_in):
         for filename in (f for f in files if f.endswith(extensions)):
             filename = pathlib.Path(dir_name, filename)
-            yield (filename, dir_name.relative_to(prefix))
+            yield (filename, pathlib.Path(dir_name).relative_to(prefix))
 
 
 data_files = []
