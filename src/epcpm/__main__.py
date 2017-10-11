@@ -83,3 +83,8 @@ def _entry_point():
     sys.excepthook = epyqlib.utils.general.exception_logger
 
     return main(*sys.argv[1:], logger=logger)
+
+
+# for PyInstaller
+if __name__ == '__main__':
+    sys.exit(_entry_point())
