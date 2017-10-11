@@ -48,18 +48,10 @@ class Window:
 
         logging.debug('Loading UI from: {}'.format(ui_file))
 
-        ui = ui_file
-        # TODO: CAMPid 9549757292917394095482739548437597676742
-        if not QtCore.QFileInfo(ui).isAbsolute():
-            ui_file = os.path.join(
-                QtCore.QFileInfo.absolutePath(QtCore.QFileInfo(__file__)), ui)
-        else:
-            ui_file = ui
-        ui_file = QtCore.QFile(ui_file)
-        ui_file.open(QtCore.QFile.ReadOnly | QtCore.QFile.Text)
-        ts = QtCore.QTextStream(ui_file)
-        sio = io.StringIO(ts.readAll())
-        self.ui = PyQt5.uic.loadUi(sio)
+        self.ui = PyQt5.uic.loadUi(pathlib.Path(
+            pathlib.Path(__file__).parents[0],
+            ui_file,
+        ))
 
         self.ui.action_new.triggered.connect(lambda _: self.open())
         self.ui.action_open.triggered.connect(lambda _: self.open_from_dialog())
