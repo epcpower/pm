@@ -23,8 +23,8 @@ build_script:
   - ps: Update-AppveyorBuild -Version "v$(venv\\Scripts\\python -c 'import epcpm; print(epcpm.__version__, end=\"\")') b$Env:APPVEYOR_BUILD_NUMBER"
   - ps: if (Get-ChildItem Env:PHRASE -ErrorAction SilentlyContinue) {$Env:PHRASE | Out-File sub/epyqlib/epyqlib/resources/code -Encoding ascii -NoNewline}
   - venv\\Scripts\\pyinstaller pyinstaller.spec
-  - mkdir "EPCPM $APPVEYOR_BUILD_VERSION"
-  - move dist\\epcpm "EPCPM $APPVEYOR_BUILD_VERSION\\EPCPM $APPVEYOR_BUILD_VERSION"
+  - mkdir "EPCPM %APPVEYOR_BUILD_VERSION%"
+  - move dist\\epcpm "EPCPM %APPVEYOR_BUILD_VERSION%\\EPCPM %APPVEYOR_BUILD_VERSION%"
 #  - venv\\Scripts\\python sub\\epyqlib\\deploy_win.py --name epcpm
 #  - move ..\\*.exe .
   - venv\\Scripts\\pytest epcpm.tests --pyargs
