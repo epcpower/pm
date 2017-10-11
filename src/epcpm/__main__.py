@@ -69,8 +69,6 @@ def main(*args, logger):
 
 
 def _entry_point():
-    import traceback
-
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -83,10 +81,6 @@ def _entry_point():
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
 
-    def excepthook(excType, excValue, tracebackobj):
-        logger.error('Uncaught exception hooked:\n' +
-            traceback.format_exception(excType, excValue, tracebackobj))
-
-    sys.excepthook = excepthook
+    sys.excepthook = epyqlib.utils.general.exception_logger
 
     return main(*sys.argv[1:], logger=logger)
