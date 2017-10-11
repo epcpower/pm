@@ -15,7 +15,7 @@ data_files = []
 
 name = 'epcpm'
 
-prefix = pathlib.Path(name)
+prefix = pathlib.Path('src', name)
 search_in = prefix
 data_files.extend(collect(prefix, search_in, '.ui', '.ico', '.png'))
 
