@@ -17,7 +17,8 @@ name = 'epcpm'
 
 prefix = pathlib.Path('src')
 search_in = prefix
-data_files.extend(collect(prefix, search_in, '.ui', '.ico', '.png'))
+extensions = ['.ui', '.ico', '.png', '.svg', '.pmp', '.json']
+data_files.extend(collect(prefix, search_in, *extensions))
 
 
 a = Analysis(
