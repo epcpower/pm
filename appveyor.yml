@@ -30,7 +30,7 @@ build_script:
   - venv\\Scripts\\pytest epcpm.tests --pyargs
 
 artifacts:
-  - path: "EPCPM $APPVEYOR_BUILD_VERSION"
+  - path: "EPCPM %APPVEYOR_BUILD_VERSION%"
 
 # https://www.appveyor.com/docs/how-to/rdp-to-build-worker/
 on_finish:
