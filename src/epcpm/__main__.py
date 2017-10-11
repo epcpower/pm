@@ -73,7 +73,7 @@ def _entry_point():
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     stream_handler = logging.StreamHandler()
-    file_handler = logging.FileHandler('pm.log')
+    file_handler = logging.FileHandler('epcpm.log')
 
     for handler in (stream_handler, file_handler):
         handler.setFormatter(formatter)
