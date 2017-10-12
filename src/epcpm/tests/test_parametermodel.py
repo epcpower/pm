@@ -217,3 +217,16 @@ def test_array_passthrough_nv():
     for index, value in assignments:
         array.children[index].nv = value
         assert all(child.nv == value for child in array.children)
+
+
+def test_all_addable_also_in_types():
+    # Since addable types is dynamic and could be anything... this
+    # admittedly only checks the addable types on default instances.
+    for cls in epcpm.parametermodel.types.types.values():
+        addable_types = cls.all_addable_types().values()
+        assert set(addable_types) - set(epcpm.parametermodel.types) == set()
+
+
+def test_all_have_can_drop_on():
+    for cls in epcpm.parametermodel.types.types.values():
+        assert hasattr(cls, 'can_drop_on')
