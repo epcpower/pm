@@ -245,7 +245,7 @@ def enum(name, enumerators=()):
     typedef_ = typedef(
         target=pycparser.c_ast.Enum(
             name=enum_name,
-            values=[],
+            values=None
         ),
         name=typedef_name,
     )
