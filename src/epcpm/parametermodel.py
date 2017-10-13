@@ -133,6 +133,18 @@ class ArrayParameterElement(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
+    @classmethod
+    def from_json(cls, obj):
+        return cls(**obj)
+
+    def to_json(self):
+        return attr.asdict(
+            self,
+            recurse=False,
+            dict_factory=collections.OrderedDict,
+            filter=lambda a, _: a.metadata.get('to_file', True)
+        )
+
     def can_drop_on(self, node):
         return False
 
@@ -148,6 +160,18 @@ class ArrayGroupElement(epyqlib.treenode.TreeNode):
 
     def __attrs_post_init__(self):
         super().__init__()
+
+    @classmethod
+    def from_json(cls, obj):
+        return cls(**obj)
+
+    def to_json(self):
+        return attr.asdict(
+            self,
+            recurse=False,
+            dict_factory=collections.OrderedDict,
+            filter=lambda a, _: a.metadata.get('to_file', True)
+        )
 
     def can_drop_on(self, node):
         return False
@@ -221,6 +245,24 @@ class Array(epyqlib.treenode.TreeNode):
 
         return epyqlib.attrsmodel.create_addable_types(types)
 
+    @classmethod
+    def from_json(cls, obj):
+        children = obj.pop('children')
+        node = cls(**obj)
+
+        for child in children:
+            node.append_child(child)
+
+        return node
+
+    def to_json(self):
+        return attr.asdict(
+            self,
+            recurse=False,
+            dict_factory=collections.OrderedDict,
+            filter=lambda a, _: a.metadata.get('to_file', True)
+        )
+
     def can_drop_on(self, node):
         return isinstance(node, tuple(self.addable_types().values()))
 
@@ -238,6 +280,18 @@ class EnumerationParameter(epyqlib.treenode.TreeNode):
 
     def __attrs_post_init__(self):
         super().__init__()
+
+    @classmethod
+    def from_json(cls, obj):
+        return cls(**obj)
+
+    def to_json(self):
+        return attr.asdict(
+            self,
+            recurse=False,
+            dict_factory=collections.OrderedDict,
+            filter=lambda a, _: a.metadata.get('to_file', True)
+        )
 
     def can_drop_on(self):
         return False
