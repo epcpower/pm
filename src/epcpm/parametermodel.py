@@ -69,6 +69,8 @@ class Parameter(epyqlib.treenode.TreeNode):
             if value < self.minimum:
                 self.minimum = value
 
+    can_delete = epyqlib.attrsmodel.childless_can_delete
+
 
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
@@ -107,6 +109,12 @@ class Group(epyqlib.treenode.TreeNode):
 
     def can_drop_on(self, node):
         return isinstance(node, tuple(self.addable_types().values()))
+
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+        return True
 
 
 @epyqlib.utils.qt.pyqtify()
@@ -159,6 +167,8 @@ class ArrayParameterElement(epyqlib.treenode.TreeNode):
     def can_drop_on(self, node):
         return False
 
+    can_delete = epyqlib.attrsmodel.childless_can_delete
+
 
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
@@ -195,6 +205,8 @@ class ArrayGroupElement(epyqlib.treenode.TreeNode):
 
     def can_drop_on(self, node):
         return False
+
+    can_delete = epyqlib.attrsmodel.childless_can_delete
 
 
 class InvalidArrayLength(Exception):
@@ -297,6 +309,20 @@ class Array(epyqlib.treenode.TreeNode):
     def can_drop_on(self, node):
         return isinstance(node, tuple(self.addable_types().values()))
 
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+        if node not in self.children:
+            raise epyqlib.attrsmodel.ConsistencyError(
+                'Specified node not found in children'
+            )
+
+        if len(self.children) > 1:
+            return False
+
+        return True
+
 
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
@@ -326,6 +352,8 @@ class EnumerationParameter(epyqlib.treenode.TreeNode):
 
     def can_drop_on(self):
         return False
+
+    can_delete = epyqlib.attrsmodel.childless_can_delete
 
 
 Root = epyqlib.attrsmodel.Root(

@@ -242,3 +242,7 @@ def test_all_have_can_drop_on():
 def test_all_have_to_from_json():
     assert_incomplete_types('from_json')
     assert_incomplete_types('to_json')
+
+
+def test_all_have_can_delete():
+    assert_incomplete_types('can_delete')

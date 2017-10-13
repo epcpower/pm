@@ -207,7 +207,7 @@ class Window:
             for name, t in addable_types.items()
         }
 
-        if node is not model.root:
+        if node.can_delete():
             delete = menu.addAction('Delete')
 
         menu.addSeparator()
