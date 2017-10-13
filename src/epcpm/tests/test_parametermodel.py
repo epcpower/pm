@@ -227,12 +227,18 @@ def test_all_addable_also_in_types():
         assert set(addable_types) - set(epcpm.parametermodel.types) == set()
 
 
+def assert_incomplete_types(name):
+    assert [] == [
+        cls
+        for cls in epcpm.parametermodel.types.types.values()
+        if not hasattr(cls, name)
+    ]
+
+
 def test_all_have_can_drop_on():
-    for cls in epcpm.parametermodel.types.types.values():
-        assert hasattr(cls, 'can_drop_on')
+    assert_incomplete_types('can_drop_on')
 
 
 def test_all_have_to_from_json():
-    for cls in epcpm.parametermodel.types.types.values():
-        assert hasattr(cls, 'from_json')
-        assert hasattr(cls, 'to_json')
+    assert_incomplete_types('from_json')
+    assert_incomplete_types('to_json')
