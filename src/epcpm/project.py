@@ -103,7 +103,7 @@ class Project:
 
         for name, path in self.paths.items():
             if path is not None:
-                paths[name] = None
+                paths[name] = path
             else:
                 new_path = epyqlib.utils.qt.file_dialog(
                     filters=self.data_filters,
@@ -128,7 +128,7 @@ class Project:
             if not s.endswith('\n'):
                 f.write('\n')
 
-        for path, model in zip(self.paths.values(), self.models.values()):
+        for path, model in zip(paths.values(), self.models.values()):
             s = model.model.to_json_string()
 
             with open(project_directory / path, 'w') as f:
