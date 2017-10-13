@@ -47,6 +47,56 @@
                             "read_only": false,
                             "factory": false,
                             "uuid": "4f578d5a-7568-45e4-a252-54f3154156c6"
+                        },
+                        {
+                            "type": "array",
+                            "name": "New Array",
+                            "length": 2,
+                            "children": [
+                                {
+                                    "type": "parameter",
+                                    "name": "New Parameter",
+                                    "type_name": null,
+                                    "default": null,
+                                    "minimum": null,
+                                    "maximum": null,
+                                    "nv": false,
+                                    "read_only": false,
+                                    "factory": false,
+                                    "uuid": "3a3aa6ca-7f04-40a2-a0ae-b5db7804f189"
+                                },
+                                {
+                                    "type": "array_parameter_element",
+                                    "name": "New Array Parameter Element",
+                                    "default": null,
+                                    "minimum": null,
+                                    "maximum": null,
+                                    "uuid": "f2731600-4ada-4c24-ba3b-6b7093d5dbd5",
+                                    "original": "3a3aa6ca-7f04-40a2-a0ae-b5db7804f189"
+                                }
+                            ],
+                            "uuid": "cc05708c-bc1c-404f-9073-558ab346230a"
+                        },
+                        {
+                            "type": "array",
+                            "name": "New Array",
+                            "length": 2,
+                            "children": [
+                                {
+                                    "type": "group",
+                                    "name": "New Group",
+                                    "type_name": null,
+                                    "children": [],
+                                    "uuid": "2bd2d5c7-5ece-442e-98b3-666317058111"
+                                },
+                                {
+                                    "type": "array_group_element",
+                                    "name": "New Array Group Element",
+                                    "uuid": "98de6a15-9af1-45e9-9069-f0e9670424f6",
+                                    "original": "2bd2d5c7-5ece-442e-98b3-666317058111"
+                                }
+                            ],
+                            "uuid": "4a66ed83-9df9-4450-81da-5bc453ae1f7b"
                         }
                     ],
                     "uuid": "d8dee135-936d-46bc-ad55-5dde0c91827d"

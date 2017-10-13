@@ -1,4 +1,5 @@
 import collections
+import uuid
 
 import PyQt5.QtCore
 import attr
@@ -125,25 +126,35 @@ class ArrayParameterElement(epyqlib.treenode.TreeNode):
         default=False,
         init=False,
         convert=epyqlib.attrsmodel.two_state_checkbox,
+        metadata={'to_file': False},
     )
     metadata = {'valid_types': ()}
     uuid = epyqlib.attrsmodel.attr_uuid()
-    original = attr.ib(default=None)
+    original = attr.ib(default=None, metadata={'to_file': False})
 
     def __attrs_post_init__(self):
         super().__init__()
 
     @classmethod
     def from_json(cls, obj):
-        return cls(**obj)
+        instance = cls(**obj)
+        # TODO: seems like at least the uuid.UUID stuff should be inside
+        #       the model to makes sure the right uuid type etc are used.
+        instance.original = uuid.UUID(instance.original)
+
+        return instance
 
     def to_json(self):
-        return attr.asdict(
+        d = attr.asdict(
             self,
             recurse=False,
             dict_factory=collections.OrderedDict,
             filter=lambda a, _: a.metadata.get('to_file', True)
         )
+
+        d['original'] = self.original.uuid
+
+        return d
 
     def can_drop_on(self, node):
         return False
@@ -163,15 +174,24 @@ class ArrayGroupElement(epyqlib.treenode.TreeNode):
 
     @classmethod
     def from_json(cls, obj):
-        return cls(**obj)
+        instance = cls(**obj)
+        # TODO: seems like at least the uuid.UUID stuff should be inside
+        #       the model to makes sure the right uuid type etc are used.
+        instance.original = uuid.UUID(instance.original)
+
+        return instance
 
     def to_json(self):
-        return attr.asdict(
+        d = attr.asdict(
             self,
             recurse=False,
             dict_factory=collections.OrderedDict,
             filter=lambda a, _: a.metadata.get('to_file', True)
         )
+
+        d['original'] = self.original.uuid
+
+        return d
 
     def can_drop_on(self, node):
         return False
@@ -250,7 +270,18 @@ class Array(epyqlib.treenode.TreeNode):
         children = obj.pop('children')
         node = cls(**obj)
 
-        for child in children:
+        node.append_child(children[0])
+
+        for child in children[1:]:
+            if children[0].uuid != child.original:
+                raise epyqlib.attrsmodel.ConsistencyError(
+                    'UUID mismatch: {} != {}'.format(
+                        children[0].uuid,
+                        child.original,
+                    )
+                )
+
+            child.original = children[0]
             node.append_child(child)
 
         return node
