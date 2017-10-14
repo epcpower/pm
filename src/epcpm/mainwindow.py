@@ -40,7 +40,7 @@ class ModelView:
 
 
 class Window:
-    def __init__(self, title, ui_file):
+    def __init__(self, title, ui_file, icon_path):
         # # TODO: CAMPid 980567566238416124867857834291346779
         # ico_file = os.path.join(QtCore.QFileInfo.absolutePath(QtCore.QFileInfo(__file__)), 'icon.ico')
         # ico = QtGui.QIcon(ico_file)
@@ -59,6 +59,8 @@ class Window:
         self.ui.action_save_as.triggered.connect(self.save_as)
 
         self.ui.setWindowTitle(title)
+
+        self.ui.setWindowIcon(QtGui.QIcon(str(icon_path)))
 
         self.project_filters = [
             ('Parameter Project', ['pmp']),

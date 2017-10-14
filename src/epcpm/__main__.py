@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os.path
+import pathlib
 import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -56,6 +57,7 @@ def main(*args, logger):
     window = epcpm.mainwindow.Window(
         title='EPC Parameter Manager',
         ui_file='__main__.ui',
+        icon_path=pathlib.Path(__file__).parents[0] / 'icon.ico',
     )
 
     epyqlib.utils.qt.exception_message_box_register_parent(parent=window.ui)
