@@ -53,7 +53,11 @@ def main(*args, logger):
             if args.verbose >= 3:
                 logging.getLogger().setLevel(logging.DEBUG)
 
-    window = epcpm.mainwindow.Window(ui_file='__main__.ui')
+    window = epcpm.mainwindow.Window(
+        title='EPC Parameter Manager',
+        ui_file='__main__.ui',
+    )
+
     epyqlib.utils.qt.exception_message_box_register_parent(parent=window.ui)
 
     if args.file is not None:
