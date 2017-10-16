@@ -103,7 +103,11 @@ def test_pycparser_exploration_wrapped():
 
     s = generator.visit(ast)
     assert s == textwrap.dedent('''\
-    enum EnumName_e {a = 1, b = 2};
+    enum EnumName_e
+    {
+      a = 1,
+      b = 2
+    };
     typedef enum EnumName_e EnumName_et;
     struct StructName_s
     {
@@ -302,7 +306,14 @@ def test_datalogger_a():
       int16_t bytes;
     };
     typedef struct Chunk_s Chunk_t;
-    enum Chunks_e {Chunks_First = 0, Chunks_Second = 1, Chunks_Third = 2, Chunks_Fourth = 3, Chunks_Count = 4};
+    enum Chunks_e
+    {
+      Chunks_First = 0,
+      Chunks_Second = 1,
+      Chunks_Third = 2,
+      Chunks_Fourth = 3,
+      Chunks_Count = 4
+    };
     typedef enum Chunks_e Chunks_et;
     typedef Chunk_t Chunks_t[4];
     struct Group_s
@@ -370,7 +381,15 @@ def test_basic_parameter_array():
     s = generator.visit(ast)
 
     assert s == textwrap.dedent('''\
-    enum ArrayName_e {ArrayName_ParameterName = 0, ArrayName_NewArrayParameterElement = 1, ArrayName_NewArrayParameterElement = 2, ArrayName_NewArrayParameterElement = 3, ArrayName_NewArrayParameterElement = 4, ArrayName_Count = 5};
+    enum ArrayName_e
+    {
+      ArrayName_ParameterName = 0,
+      ArrayName_NewArrayParameterElement = 1,
+      ArrayName_NewArrayParameterElement = 2,
+      ArrayName_NewArrayParameterElement = 3,
+      ArrayName_NewArrayParameterElement = 4,
+      ArrayName_Count = 5
+    };
     typedef enum ArrayName_e ArrayName_et;
     typedef int16_t ArrayName_t[5];
     ''')
@@ -398,7 +417,15 @@ def test_grouped_parameter_array():
     s = generator.visit(ast)
 
     assert s == textwrap.dedent('''\
-    enum ArrayName_e {ArrayName_ParameterName = 0, ArrayName_NewArrayParameterElement = 1, ArrayName_NewArrayParameterElement = 2, ArrayName_NewArrayParameterElement = 3, ArrayName_NewArrayParameterElement = 4, ArrayName_Count = 5};
+    enum ArrayName_e
+    {
+      ArrayName_ParameterName = 0,
+      ArrayName_NewArrayParameterElement = 1,
+      ArrayName_NewArrayParameterElement = 2,
+      ArrayName_NewArrayParameterElement = 3,
+      ArrayName_NewArrayParameterElement = 4,
+      ArrayName_Count = 5
+    };
     typedef enum ArrayName_e ArrayName_et;
     typedef int16_t ArrayName_t[5];
     struct GroupName_s
@@ -430,7 +457,10 @@ def test_grouped_parameter_array_no_enum():
     s = generator.visit(ast)
 
     assert s == textwrap.dedent('''\
-    enum ArrayName_e {ArrayName_Count = 5};
+    enum ArrayName_e
+    {
+      ArrayName_Count = 5
+    };
     typedef enum ArrayName_e ArrayName_et;
     typedef int16_t ArrayName_t[5];
     ''')
@@ -482,7 +512,14 @@ def test_line_monitor_params():
       _iq clearingTime;
     };
     typedef struct FrequencyLimit_s FrequencyLimit_t;
-    enum FrequencyLimits_e {FrequencyLimits_First = 0, FrequencyLimits_Second = 1, FrequencyLimits_Third = 2, FrequencyLimits_Fourth = 3, FrequencyLimits_Count = 4};
+    enum FrequencyLimits_e
+    {
+      FrequencyLimits_First = 0,
+      FrequencyLimits_Second = 1,
+      FrequencyLimits_Third = 2,
+      FrequencyLimits_Fourth = 3,
+      FrequencyLimits_Count = 4
+    };
     typedef enum FrequencyLimits_e FrequencyLimits_et;
     typedef FrequencyLimit_t FrequencyLimits_t[4];
     struct LineMonitoring_s
