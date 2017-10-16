@@ -55,24 +55,27 @@ class Root:
 
     def definition(self):
         definitions = []
-        member_decls = []
+
+        for member in self.wrapped.children:
+            builder = builders.wrap(member)
+            definitions.extend(builder.definition())
+
+        return definitions
+
+    def instantiation(self):
+        decls = []
 
         for member in self.wrapped.children:
             builder = builders.wrap(member)
 
-            member_decls.append(Decl(
+            decls.append(Decl(
                 type=Type(
                     name=spaced_to_lower_camel(member.name),
                     type=builder.type_name(),
                 )
             ))
 
-            definitions.extend(builder.definition())
-
-        return [
-            *definitions,
-            *member_decls,
-        ]
+        return decls
 
 
 @builders(epcpm.parametermodel.Parameter)

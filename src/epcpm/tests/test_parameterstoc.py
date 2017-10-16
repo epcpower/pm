@@ -544,6 +544,12 @@ def test_root():
       RedType red;
     };
     typedef struct Group_s Group_t;
+    ''')
+
+    ast = pycparser.c_ast.FileAST(builder.instantiation())
+    s = generator.visit(ast)
+
+    assert s == textwrap.dedent('''\
     Group_t group;
     BlueType blue;
     ''')
