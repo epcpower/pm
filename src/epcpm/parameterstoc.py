@@ -137,7 +137,9 @@ class Array:
             array_typedef(
                 target=builder.type_name(),
                 name=self.type_name(),
-                length=self.wrapped.length,
+                length=pycparser.c_ast.ID(
+                    enum_definitions[0].type.values.enumerators[-1].name
+                ),
             ),
         ]
 
@@ -218,7 +220,7 @@ def array_typedef(target, name, length):
         quals=[],
         storage=['typedef'],
         type=ArrayDecl(
-            dim=int_literal(length),
+            dim=length,
             type=TypeDecl(
                 declname=name,
                 type=pycparser.c_ast.IdentifierType(

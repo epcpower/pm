@@ -315,7 +315,7 @@ def test_datalogger_a():
       Chunks_Count = 4
     };
     typedef enum Chunks_e Chunks_et;
-    typedef Chunk_t Chunks_t[4];
+    typedef Chunk_t Chunks_t[Chunks_Count];
     struct Group_s
     {
       int16_t param;
@@ -391,7 +391,7 @@ def test_basic_parameter_array():
       ArrayName_Count = 5
     };
     typedef enum ArrayName_e ArrayName_et;
-    typedef int16_t ArrayName_t[5];
+    typedef int16_t ArrayName_t[ArrayName_Count];
     ''')
 
 
@@ -427,7 +427,7 @@ def test_grouped_parameter_array():
       ArrayName_Count = 5
     };
     typedef enum ArrayName_e ArrayName_et;
-    typedef int16_t ArrayName_t[5];
+    typedef int16_t ArrayName_t[ArrayName_Count];
     struct GroupName_s
     {
       ArrayName_t arrayName;
@@ -462,7 +462,7 @@ def test_grouped_parameter_array_no_enum():
       ArrayName_Count = 5
     };
     typedef enum ArrayName_e ArrayName_et;
-    typedef int16_t ArrayName_t[5];
+    typedef int16_t ArrayName_t[ArrayName_Count];
     ''')
 
 
@@ -521,7 +521,7 @@ def test_line_monitor_params():
       FrequencyLimits_Count = 4
     };
     typedef enum FrequencyLimits_e FrequencyLimits_et;
-    typedef FrequencyLimit_t FrequencyLimits_t[4];
+    typedef FrequencyLimit_t FrequencyLimits_t[FrequencyLimits_Count];
     struct LineMonitoring_s
     {
       FrequencyLimits_t frequencyLimits;
