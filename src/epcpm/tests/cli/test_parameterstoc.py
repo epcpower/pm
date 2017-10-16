@@ -12,7 +12,7 @@ parameters_path = (
 )
 
 
-def test_():
+def test_declaration():
     runner = click.testing.CliRunner()
     result = runner.invoke(
         epcpm.cli.parameterstoc.cli,
@@ -27,4 +27,20 @@ def test_():
       RedType red;
     };
     typedef struct GreenType_s GreenType_t;
+    ''')
+
+
+def test_instantiation():
+    runner = click.testing.CliRunner()
+    result = runner.invoke(
+        epcpm.cli.parameterstoc.cli,
+        [
+            '--parameters', parameters_path,
+            '--instantiation',
+        ],
+    )
+    assert result.exit_code == 0
+    assert result.output == textwrap.dedent('''\
+    GreenType_t green;
+    BlueType blue;
     ''')
