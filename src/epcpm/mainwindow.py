@@ -233,6 +233,7 @@ class Window:
                 epyqlib.utils.qt.dialog(
                     parent=self.ui,
                     message=s,
+                    modal=False,
                 )
             else:
                 node.append_child(actions[action]())
