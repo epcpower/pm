@@ -2,28 +2,9 @@ import itertools
 import functools
 
 import attr
-import click
 import pycparser
 
 import epcpm.parametermodel
-
-
-@click.command()
-@click.option('--parameters', type=click.File())
-def cli(*args, **kwargs):
-    _cli(*args, **kwargs)
-
-
-def _cli(parameters):
-    model = epcpm.attrsmodel.Model.from_json_string(
-        parameters.read(),
-        columns=epcpm.parametermodel.columns,
-        types=epcpm.parametermodel.types,
-    )
-
-    ast = build_ast(model.root)
-
-    print()
 
 
 @attr.s
