@@ -30,14 +30,6 @@ def disabled_test_exploration():
     assert result.exit_code == 0
 
 
-@pytest.mark.skip
-def test_exploration():
-    path = os.path.join(os.path.dirname(__file__), 'example_parameters.json')
-
-    with open(path) as f:
-        epcpm.parameterstoc._cli(parameters=f)
-
-
 def test_pycparser_exploration_parse():
     sample = '''
     typedef int int16_t;
