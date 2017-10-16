@@ -34,6 +34,8 @@ class TypeMap:
         def inner(cls):
             self.types[wrapped] = cls
 
+            return cls
+
         return inner
 
     def __getitem__(self, item):
