@@ -520,3 +520,30 @@ def test_line_monitor_params():
     };
     typedef struct LineMonitoring_s LineMonitoring_t;
     ''')
+
+
+def test_root():
+    root = epcpm.parametermodel.Root()
+    group = epcpm.parametermodel.Group(name='Group')
+    p1 = epcpm.parametermodel.Parameter(name='red', type_name='RedType')
+    p2 = epcpm.parametermodel.Parameter(name='blue', type_name='BlueType')
+
+    root.append_child(group)
+    group.append_child(p1)
+    root.append_child(p2)
+
+    builder = epcpm.parameterstoc.builders.wrap(root)
+
+    ast = pycparser.c_ast.FileAST(builder.definition())
+    generator = pycparser.c_generator.CGenerator()
+    s = generator.visit(ast)
+
+    assert s == textwrap.dedent('''\
+    struct Group_s
+    {
+      RedType red;
+    };
+    typedef struct Group_s Group_t;
+    Group_t group;
+    BlueType blue;
+    ''')
