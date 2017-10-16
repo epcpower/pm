@@ -17,7 +17,7 @@ setuptools.setup(
             'epcpm = epcpm.__main__:_entry_point',
         ],
         'console_scripts': [
-            'epcparameterstoc = epcpm.parameterstoc:cli',
+            'epcparameterstoc = epcpm.cli.parameterstoc:cli',
         ],
     },
     install_requires=[
