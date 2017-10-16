@@ -52,6 +52,7 @@
                             "type": "array",
                             "name": "New Array",
                             "length": 2,
+                            "named_enumerators": true,
                             "children": [
                                 {
                                     "type": "parameter",
@@ -79,8 +80,9 @@
                         },
                         {
                             "type": "array",
-                            "name": "New Array",
+                            "name": "Other Array",
                             "length": 2,
+                            "named_enumerators": false,
                             "children": [
                                 {
                                     "type": "group",

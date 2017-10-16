@@ -222,6 +222,10 @@ class Array(epyqlib.treenode.TreeNode):
         default=1,
         convert=int,
     )
+    named_enumerators = attr.ib(
+        default=True,
+        convert=epyqlib.attrsmodel.two_state_checkbox,
+    )
     children = attr.ib(
         default=attr.Factory(list),
         cmp=False,
@@ -384,6 +388,7 @@ columns = epyqlib.attrsmodel.columns(
     ),
     ((Group, 'type_name'), (Parameter, 'type_name')),
     ((Array, 'length'),),
+    ((Array, 'named_enumerators'),),
     ((Parameter, 'default'), (ArrayParameterElement, 'default')),
     ((Parameter, 'minimum'), (ArrayParameterElement, 'minimum')),
     ((Parameter, 'maximum'), (ArrayParameterElement, 'maximum')),

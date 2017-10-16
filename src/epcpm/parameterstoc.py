@@ -108,6 +108,15 @@ class Array:
         builder = builders.wrap(self.wrapped.children[0])
         definitions = builder.definition()
 
+        values = []
+        if self.wrapped.named_enumerators:
+            values.extend(enumerate(
+                spaced_to_upper_camel(child.name)
+                for child in self.wrapped.children
+            ))
+
+        values.append((len(self.wrapped.children), 'Count'))
+
         enum_definitions = enum(
             name=self.base_type_name(),
             enumerators=[
@@ -118,13 +127,7 @@ class Array:
                     ),
                     value,
                 )
-                for value, name in enumerate(
-                    [
-                        spaced_to_upper_camel(child.name)
-                        for child in self.wrapped.children
-                    ]
-                    + ['Count']
-                )
+                for value, name in values
             ],
         )
 

@@ -409,6 +409,33 @@ def test_grouped_parameter_array():
     ''')
 
 
+def test_grouped_parameter_array_no_enum():
+    array = epcpm.parametermodel.Array(name='Array Name')
+    array.named_enumerators = False
+    parameter = epcpm.parametermodel.Parameter(
+        name='Parameter Name',
+        type_name='int16_t',
+    )
+
+    array.append_child(parameter)
+
+    n = 5
+
+    array.length = n
+
+    builder = epcpm.parameterstoc.builders.wrap(array)
+
+    ast = pycparser.c_ast.FileAST(builder.definition())
+    generator = pycparser.c_generator.CGenerator()
+    s = generator.visit(ast)
+
+    assert s == textwrap.dedent('''\
+    enum ArrayName_e {ArrayName_Count = 5};
+    typedef enum ArrayName_e ArrayName_et;
+    typedef int16_t ArrayName_t[5];
+    ''')
+
+
 def test_line_monitor_params():
     line_monitoring = epcpm.parametermodel.Group(
         name='Line Monitoring',
