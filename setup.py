@@ -23,6 +23,7 @@ setuptools.setup(
     install_requires=[
         'click',
         'graham',
+        'pycparser',
         'pyqt5',
         'sip',
     ],
