@@ -5,28 +5,10 @@ import attr
 import pycparser
 
 import epcpm.parametermodel
+import epyqlib.utils.general
 
 
-@attr.s
-class TypeMap:
-    types = attr.ib(default=attr.Factory(dict), init=False)
-
-    def __call__(self, wrapped):
-        def inner(cls):
-            self.types[wrapped] = cls
-
-            return cls
-
-        return inner
-
-    def __getitem__(self, item):
-        return self.types[item]
-
-    def wrap(self, wrapped):
-        return self.types[type(wrapped)](wrapped=wrapped)
-
-
-builders = TypeMap()
+builders = epyqlib.utils.general.TypeMap()
 
 
 @builders(epcpm.parametermodel.Root)
