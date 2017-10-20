@@ -21,6 +21,7 @@ setuptools.setup(
         ],
     },
     install_requires=[
+        'canmatrix',
         'click',
         'graham',
         'pycparser',
