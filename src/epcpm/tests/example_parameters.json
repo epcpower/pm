@@ -1,23 +1,23 @@
 {
-    "type": "root",
+    "_type": "root",
     "name": "Parameters",
     "children": [
         {
-            "type": "group",
+            "_type": "group",
             "name": "GroupA",
             "type_name": null,
             "children": [
                 {
-                    "type": "group",
+                    "_type": "group",
                     "name": "GroupAA",
                     "type_name": null,
                     "children": [
                         {
-                            "type": "parameter",
+                            "_type": "parameter",
                             "name": "paramAAa",
                             "type_name": null,
                             "default": null,
-                            "minimum": 3,
+                            "minimum": "3",
                             "maximum": null,
                             "nv": false,
                             "read_only": false,
@@ -25,19 +25,19 @@
                             "uuid": "74d109c6-f96e-4736-8705-f9bdbdd9ef11"
                         },
                         {
-                            "type": "parameter",
+                            "_type": "parameter",
                             "name": "paramAAb",
                             "type_name": null,
                             "default": null,
-                            "minimum": 5,
-                            "maximum": 6.6,
+                            "minimum": "5",
+                            "maximum": "6.6",
                             "nv": false,
                             "read_only": false,
                             "factory": true,
                             "uuid": "6516a19e-ecb8-4cd9-acc1-3894193886f7"
                         },
                         {
-                            "type": "parameter",
+                            "_type": "parameter",
                             "name": "New Parameter",
                             "type_name": null,
                             "default": null,
@@ -49,13 +49,12 @@
                             "uuid": "4f578d5a-7568-45e4-a252-54f3154156c6"
                         },
                         {
-                            "type": "array",
+                            "_type": "array",
                             "name": "New Array",
-                            "length": 2,
                             "named_enumerators": true,
                             "children": [
                                 {
-                                    "type": "parameter",
+                                    "_type": "parameter",
                                     "name": "New Parameter",
                                     "type_name": null,
                                     "default": null,
@@ -67,7 +66,7 @@
                                     "uuid": "3a3aa6ca-7f04-40a2-a0ae-b5db7804f189"
                                 },
                                 {
-                                    "type": "array_parameter_element",
+                                    "_type": "array_parameter_element",
                                     "name": "New Array Parameter Element",
                                     "default": null,
                                     "minimum": null,
@@ -79,20 +78,19 @@
                             "uuid": "cc05708c-bc1c-404f-9073-558ab346230a"
                         },
                         {
-                            "type": "array",
+                            "_type": "array",
                             "name": "Other Array",
-                            "length": 2,
                             "named_enumerators": false,
                             "children": [
                                 {
-                                    "type": "group",
+                                    "_type": "group",
                                     "name": "New Group",
                                     "type_name": null,
                                     "children": [],
                                     "uuid": "2bd2d5c7-5ece-442e-98b3-666317058111"
                                 },
                                 {
-                                    "type": "array_group_element",
+                                    "_type": "array_group_element",
                                     "name": "New Array Group Element",
                                     "uuid": "98de6a15-9af1-45e9-9069-f0e9670424f6",
                                     "original": "2bd2d5c7-5ece-442e-98b3-666317058111"
@@ -104,7 +102,7 @@
                     "uuid": "d8dee135-936d-46bc-ad55-5dde0c91827d"
                 },
                 {
-                    "type": "parameter",
+                    "_type": "parameter",
                     "name": "paramAa",
                     "type_name": null,
                     "default": null,
@@ -116,7 +114,7 @@
                     "uuid": "3d22465b-d080-4a77-a9ef-ab624b77f3e2"
                 },
                 {
-                    "type": "parameter",
+                    "_type": "parameter",
                     "name": "paramAb",
                     "type_name": null,
                     "default": null,
@@ -128,12 +126,12 @@
                     "uuid": "51faa87e-8e9c-489c-9ece-e5f57e402031"
                 },
                 {
-                    "type": "group",
+                    "_type": "group",
                     "name": "New Group",
                     "type_name": null,
                     "children": [
                         {
-                            "type": "parameter",
+                            "_type": "parameter",
                             "name": "New Parameter",
                             "type_name": null,
                             "default": null,
@@ -145,7 +143,7 @@
                             "uuid": "273ae233-aab3-4277-bc2b-33418bcba165"
                         },
                         {
-                            "type": "parameter",
+                            "_type": "parameter",
                             "name": "New Parameter",
                             "type_name": null,
                             "default": null,
@@ -163,19 +161,19 @@
             "uuid": "1e43bf4d-8f73-42ce-9eae-f14efc45c16b"
         },
         {
-            "type": "group",
+            "_type": "group",
             "name": "Digital I/O",
             "type_name": null,
             "children": [
                 {
-                    "type": "group",
+                    "_type": "group",
                     "name": "GroupBA",
                     "type_name": null,
                     "children": [],
                     "uuid": "2b00c3f8-9618-48e0-ac78-2aeed990190b"
                 },
                 {
-                    "type": "parameter",
+                    "_type": "parameter",
                     "name": "paramBa",
                     "type_name": null,
                     "default": null,
@@ -187,7 +185,7 @@
                     "uuid": "a831ce88-d019-499d-b91e-9b9184bda7fa"
                 },
                 {
-                    "type": "parameter",
+                    "_type": "parameter",
                     "name": "paramBb",
                     "type_name": null,
                     "default": null,
@@ -202,24 +200,24 @@
             "uuid": "8098cdc1-16a7-4069-8945-7cbca6ca2d51"
         },
         {
-            "type": "group",
+            "_type": "group",
             "name": "Commands",
             "type_name": null,
             "children": [
                 {
-                    "type": "parameter",
+                    "_type": "parameter",
                     "name": "Voltage",
                     "type_name": null,
-                    "default": 208,
-                    "minimum": 10,
-                    "maximum": 800,
+                    "default": "208",
+                    "minimum": "10",
+                    "maximum": "800",
                     "nv": false,
                     "read_only": false,
                     "factory": false,
                     "uuid": "c25cd4e2-b2a8-4106-8610-4e0db6033a17"
                 },
                 {
-                    "type": "parameter",
+                    "_type": "parameter",
                     "name": "Frequency",
                     "type_name": null,
                     "default": null,
@@ -231,12 +229,12 @@
                     "uuid": "422638c9-87d1-4c86-aa8c-73bd8bfff99c"
                 },
                 {
-                    "type": "group",
+                    "_type": "group",
                     "name": "Current",
                     "type_name": null,
                     "children": [
                         {
-                            "type": "parameter",
+                            "_type": "parameter",
                             "name": "Real",
                             "type_name": null,
                             "default": null,
@@ -248,7 +246,7 @@
                             "uuid": "789fa76a-1756-474d-b35b-245f1d3bf62b"
                         },
                         {
-                            "type": "parameter",
+                            "_type": "parameter",
                             "name": "Reactive",
                             "type_name": null,
                             "default": null,
@@ -263,12 +261,12 @@
                     "uuid": "ada2fbd5-e434-4143-8245-cf88ec390264"
                 },
                 {
-                    "type": "group",
+                    "_type": "group",
                     "name": "Power",
                     "type_name": null,
                     "children": [
                         {
-                            "type": "parameter",
+                            "_type": "parameter",
                             "name": "Real",
                             "type_name": null,
                             "default": null,
@@ -280,7 +278,7 @@
                             "uuid": "0f7175cb-7dcb-47f8-9001-035ca898d7d4"
                         },
                         {
-                            "type": "parameter",
+                            "_type": "parameter",
                             "name": "Reactive",
                             "type_name": null,
                             "default": null,
@@ -298,17 +296,17 @@
             "uuid": "78f1ef7f-fe70-4850-aa03-d902a1b0ce82"
         },
         {
-            "type": "group",
+            "_type": "group",
             "name": "LFM",
             "type_name": null,
             "children": [
                 {
-                    "type": "group",
+                    "_type": "group",
                     "name": "Limits",
                     "type_name": null,
                     "children": [
                         {
-                            "type": "parameter",
+                            "_type": "parameter",
                             "name": "Frequency Very Low",
                             "type_name": null,
                             "default": null,
@@ -320,7 +318,7 @@
                             "uuid": "52b0ce3d-1aa6-48a1-b730-d4638a6813a9"
                         },
                         {
-                            "type": "parameter",
+                            "_type": "parameter",
                             "name": "Frequency Low",
                             "type_name": null,
                             "default": null,
@@ -332,7 +330,7 @@
                             "uuid": "28d5df3b-36cb-4707-83fd-13e562b07938"
                         },
                         {
-                            "type": "parameter",
+                            "_type": "parameter",
                             "name": "Frequency High",
                             "type_name": null,
                             "default": null,
@@ -350,17 +348,17 @@
             "uuid": "7bf83857-1edd-49c9-8670-2635805882a6"
         },
         {
-            "type": "group",
+            "_type": "group",
             "name": "Identification",
             "type_name": null,
             "children": [
                 {
-                    "type": "group",
+                    "_type": "group",
                     "name": "Software",
                     "type_name": null,
                     "children": [
                         {
-                            "type": "parameter",
+                            "_type": "parameter",
                             "name": "Hash",
                             "type_name": null,
                             "default": null,
@@ -372,7 +370,7 @@
                             "uuid": "4d554232-c9d9-4e3b-8a1e-bdb10932dd7c"
                         },
                         {
-                            "type": "parameter",
+                            "_type": "parameter",
                             "name": "Build Time",
                             "type_name": null,
                             "default": null,
@@ -387,7 +385,7 @@
                     "uuid": "4134ad9c-6111-4d63-b1a0-1162135d4bbd"
                 },
                 {
-                    "type": "parameter",
+                    "_type": "parameter",
                     "name": "Serial Number",
                     "type_name": null,
                     "default": null,
@@ -402,12 +400,12 @@
             "uuid": "8cd087b3-e389-4394-aab2-7b1aa17e58b2"
         },
         {
-            "type": "group",
+            "_type": "group",
             "name": "Data Logger",
             "type_name": null,
             "children": [
                 {
-                    "type": "parameter",
+                    "_type": "parameter",
                     "name": "Post trigger duration",
                     "type_name": null,
                     "default": null,

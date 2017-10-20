@@ -1,6 +1,8 @@
 import collections
 
 import attr
+import graham
+import marshmallow
 import PyQt5.QtCore
 
 import epyqlib.attrsmodel
@@ -15,11 +17,16 @@ __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
+@graham.schemify(tag='signal')
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Signal(epyqlib.treenode.TreeNode):
-    type = attr.ib(default='signal', init=False)
-    name = attr.ib(default='New Signal')
+    name = attr.ib(
+        default='New Signal',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
     parameter_uuid = epyqlib.attrsmodel.attr_uuid(
         metadata={'human name': 'Parameter UUID'})
     uuid = epyqlib.attrsmodel.attr_uuid()
@@ -27,58 +34,52 @@ class Signal(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
-    @classmethod
-    def from_json(cls, obj):
-        return cls(**obj)
-
-    def to_json(self):
-        return attr.asdict(
-            self,
-            recurse=False,
-            dict_factory=collections.OrderedDict,
-            filter=lambda a, _: a.metadata.get('to_file', True)
-        )
-
     def can_drop_on(self, node):
         return False
 
 
+@graham.schemify(tag='message')
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Message(epyqlib.treenode.TreeNode):
-    type = attr.ib(default='message', init=False, metadata={'ignore': True})
-    name = attr.ib(default='New Message')
-    identifier = attr.ib(default='0x1fffffff')
-    extended = attr.ib(default=True,
-                       convert=epyqlib.attrsmodel.two_state_checkbox)
-    cycle_time = attr.ib(default=None,
-                         convert=epyqlib.attrsmodel.to_decimal_or_none)
+    name = attr.ib(
+        default='New Message',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    identifier = attr.ib(
+        default='0x1fffffff',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    extended = attr.ib(
+        default=True,
+        convert=epyqlib.attrsmodel.two_state_checkbox,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Boolean(),
+        ),
+    )
+    cycle_time = attr.ib(
+        default=None,
+        convert=epyqlib.attrsmodel.to_decimal_or_none,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Decimal(allow_none=True),
+        ),
+    )
     children = attr.ib(
         default=attr.Factory(list),
-        metadata={'valid_types': (Signal,)}
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(fields=(
+                marshmallow.fields.Nested(graham.schema(Signal)),
+            )),
+        ),
     )
     uuid = epyqlib.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
         super().__init__()
-
-    @classmethod
-    def from_json(cls, obj):
-        children = obj.pop('children')
-        node = cls(**obj)
-
-        for child in children:
-            node.append_child(child)
-
-        return node
-
-    def to_json(self):
-        return attr.asdict(
-            self,
-            recurse=False,
-            dict_factory=collections.OrderedDict,
-            filter=lambda a, _: a.metadata.get('to_file', True)
-        )
 
     def can_drop_on(self, node):
         x = (*self.addable_types().values(), epcpm.parametermodel.Parameter)

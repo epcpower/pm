@@ -1,14 +1,14 @@
 {
-    "type": "root",
+    "_type": "root",
     "name": "Parameters",
     "children": [
         {
-            "type": "group",
+            "_type": "group",
             "name": "Green",
             "type_name": "Green Type",
             "children": [
                 {
-                    "type": "parameter",
+                    "_type": "parameter",
                     "name": "Red",
                     "type_name": "RedType",
                     "default": null,
@@ -23,7 +23,7 @@
             "uuid": "b97f42c6-bbd8-43ac-92d2-0e414ae1a419"
         },
         {
-            "type": "parameter",
+            "_type": "parameter",
             "name": "Blue",
             "type_name": "BlueType",
             "default": null,

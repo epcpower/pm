@@ -1,6 +1,7 @@
 import PyQt5.QtCore
 import PyQt5.QtWidgets
 import attr
+import graham
 import pytest
 
 import epyqlib.attrsmodel
@@ -16,6 +17,7 @@ __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
+@graham.schemify('parameter')
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Parameter(epyqlib.treenode.TreeNode):
@@ -28,6 +30,7 @@ class Parameter(epyqlib.treenode.TreeNode):
         super().__init__()
 
 
+@graham.schemify('Group')
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Group(epyqlib.treenode.TreeNode):
@@ -237,11 +240,6 @@ def assert_incomplete_types(name):
 
 def test_all_have_can_drop_on():
     assert_incomplete_types('can_drop_on')
-
-
-def test_all_have_to_from_json():
-    assert_incomplete_types('from_json')
-    assert_incomplete_types('to_json')
 
 
 def test_all_have_can_delete():

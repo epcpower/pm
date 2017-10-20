@@ -7,12 +7,12 @@ import epcpm.project
 
 reference_string = textwrap.dedent('''\
 {
+    "_type": "project",
     "paths": {
+        "_type": "models",
         "parameters": "parameters.json",
-        "symbols": "symbols.json",
-        "_type": "models"
-    },
-    "_type": "project"
+        "symbols": "symbols.json"
+    }
 }''')
 
 reference_project = epcpm.project.Project()

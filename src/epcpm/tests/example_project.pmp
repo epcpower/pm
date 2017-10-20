@@ -1,8 +1,8 @@
 {
+    "_type": "project",
     "paths": {
+        "_type": "models",
         "parameters": "example_parameters.json",
-        "symbols": "example_symbols.json",
-        "_type": "models"
-    },
-    "_type": "project"
+        "symbols": "example_symbols.json"
+    }
 }

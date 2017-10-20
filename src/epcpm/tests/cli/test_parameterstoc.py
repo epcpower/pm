@@ -19,6 +19,7 @@ def test_declaration():
         [
             '--parameters', parameters_path,
         ],
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
     assert result.output == textwrap.dedent('''\
@@ -38,6 +39,7 @@ def test_instantiation():
             '--parameters', parameters_path,
             '--instantiation',
         ],
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
     assert result.output == textwrap.dedent('''\

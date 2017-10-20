@@ -1,6 +1,6 @@
 -e sub/epyqlib
 
--e git+https://github.com/altendky/graham@66e30b45df6f473fb7c34679b0b7de88962b0c83#egg=graham
+-e git+https://github.com/altendky/graham@3c66af305a82d88c70cceefe3b7cc2aea3b672ca#egg=graham
 -e git+https://github.com/altendky/pycparser@b19d2b7cb78bccc89ef187c1c4eb5db0fdd3bbf9#egg=pycparser
 
 attrs==17.2.0

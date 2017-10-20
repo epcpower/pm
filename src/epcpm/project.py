@@ -129,13 +129,10 @@ class Project:
                 f.write('\n')
 
         for path, model in zip(paths.values(), self.models.values()):
-            s = model.model.to_json_string()
+            s = graham.dumps(model.model.root, indent=4).data
 
             with open(project_directory / path, 'w') as f:
                 f.write(s)
 
                 if not s.endswith('\n'):
                     f.write('\n')
-
-
-graham.register(Project)

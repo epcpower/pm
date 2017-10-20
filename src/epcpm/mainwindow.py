@@ -149,10 +149,14 @@ class Window:
                 )
             else:
                 with open(self.project.filename.parents[0] / path) as f:
-                    model.model = epyqlib.attrsmodel.Model.from_json_string(
-                        s=f.read(),
+                    raw = f.read()
+                    # TODO: should be a root_type if we are doing this
+                    root_schema = graham.schema(model.root_factory)
+                    root = root_schema.loads(raw).data
+
+                    model.model = epyqlib.attrsmodel.Model(
+                        root=root,
                         columns=model.columns,
-                        types=model.types
                     )
 
             self.set_model(name=name, view_model=model)
