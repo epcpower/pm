@@ -33,7 +33,9 @@ class Root:
 
             decls.append(Decl(
                 type=Type(
-                    name=spaced_to_lower_camel(member.name),
+                    name=epyqlib.utils.general.spaced_to_lower_camel(
+                        member.name,
+                    ),
                     type=builder.type_name(),
                 )
             ))
@@ -72,7 +74,9 @@ class Group:
 
             member_decls.append(Decl(
                 type=Type(
-                    name=spaced_to_lower_camel(member.name),
+                    name=epyqlib.utils.general.spaced_to_lower_camel(
+                        member.name,
+                    ),
                     type=builder.type_name(),
                 )
             ))
@@ -91,7 +95,7 @@ class Group:
         name = self.wrapped.type_name
         if name is None:
             name = self.wrapped.name
-        return spaced_to_upper_camel(name) + '_t'
+        return epyqlib.utils.general.spaced_to_upper_camel(name) + '_t'
 
 
 @builders(epcpm.parametermodel.Array)
@@ -106,7 +110,7 @@ class Array:
         values = []
         if self.wrapped.named_enumerators:
             values.extend(enumerate(
-                spaced_to_upper_camel(child.name)
+                epyqlib.utils.general.spaced_to_upper_camel(child.name)
                 for child in self.wrapped.children
             ))
 
@@ -139,25 +143,10 @@ class Array:
         ]
 
     def base_type_name(self):
-        return spaced_to_upper_camel(self.wrapped.name)
+        return epyqlib.utils.general.spaced_to_upper_camel(self.wrapped.name)
 
     def type_name(self):
         return self.base_type_name() + '_t'
-
-
-def spaced_to_lower_camel(name):
-    segments = name.split(' ')
-    segments = itertools.chain(
-        segments[0].lower(),
-        *(''.join(itertools.chain(
-            c[0].upper(), c[1:].lower(),
-        )) for c in segments[1:]),
-    )
-    return ''.join(segments)
-
-
-def spaced_to_upper_camel(name):
-    return name[0].upper() + spaced_to_lower_camel(name[1:])
 
 
 def int_literal(value):
