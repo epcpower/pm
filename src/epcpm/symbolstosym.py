@@ -53,9 +53,43 @@ class Message:
 class Signal:
     wrapped = attr.ib()
 
-    def gen(self):
+    def gen(self, multiplex_id=None):
         signal = canmatrix.canmatrix.Signal(
             name=epyqlib.utils.general.spaced_to_upper_camel(self.wrapped.name),
+            multiplex=multiplex_id,
+            signalSize=self.wrapped.bits,
         )
 
         return signal
+
+
+@builders(epcpm.symbolmodel.MultiplexedMessage)
+@attr.s
+class MultiplexedMessage:
+    wrapped = attr.ib()
+
+    def gen(self):
+        frame = canmatrix.canmatrix.Frame(
+            name=epyqlib.utils.general.spaced_to_upper_camel(self.wrapped.name),
+            Id=int(self.wrapped.identifier[2:], 16),
+            extended=self.wrapped.extended,
+        )
+
+        signal = builders.wrap(self.wrapped.children[0]).gen(
+            multiplex_id='Multiplexor',
+        )
+        frame.signals.append(signal)
+
+        for multiplexer in self.wrapped.children[1:]:
+            frame.mux_names[multiplexer.id] = (
+                epyqlib.utils.general.spaced_to_upper_camel(multiplexer.name)
+            )
+
+            for signal in multiplexer.children:
+                signal = builders.wrap(signal).gen(
+                    multiplex_id=multiplexer.id,
+                )
+
+                frame.signals.append(signal)
+
+        return frame

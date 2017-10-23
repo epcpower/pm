@@ -27,6 +27,12 @@ class Signal(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.String(),
         ),
     )
+    bits = attr.ib(
+        default=0,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(),
+        ),
+    )
     parameter_uuid = epyqlib.attrsmodel.attr_uuid(
         metadata={'human name': 'Parameter UUID'})
     uuid = epyqlib.attrsmodel.attr_uuid()
@@ -88,6 +94,88 @@ class Message(epyqlib.treenode.TreeNode):
 
     def child_from(self, node):
         return Signal(name=node.name, parameter_uuid=str(node.uuid))
+
+
+@graham.schemify(tag='multiplexer')
+@epyqlib.utils.qt.pyqtify()
+@attr.s(hash=False)
+class Multiplexer(epyqlib.treenode.TreeNode):
+    name = attr.ib(
+        default='New Message',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    id = attr.ib(
+        default=None,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(allow_none=True),
+        )
+    )
+    cycle_time = attr.ib(
+        default=None,
+        convert=epyqlib.attrsmodel.to_decimal_or_none,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Decimal(allow_none=True),
+        ),
+    )
+    children = attr.ib(
+        default=attr.Factory(list),
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(fields=(
+                marshmallow.fields.Nested(graham.schema(Signal)),
+            )),
+        ),
+    )
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    def can_drop_on(self, node):
+        return False
+
+
+@graham.schemify(tag='multiplexed_message')
+@epyqlib.utils.qt.pyqtify()
+@attr.s(hash=False)
+class MultiplexedMessage(epyqlib.treenode.TreeNode):
+    name = attr.ib(
+        default='New Message',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    identifier = attr.ib(
+        default='0x1fffffff',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    extended = attr.ib(
+        default=True,
+        convert=epyqlib.attrsmodel.two_state_checkbox,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Boolean(),
+        ),
+    )
+    children = attr.ib(
+        default=attr.Factory(list),
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(fields=(
+                marshmallow.fields.Nested(graham.schema(Multiplexer)),
+            )),
+        ),
+    )
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    def can_drop_on(self, node):
+        x = (*self.addable_types().values(), epcpm.parametermodel.Parameter)
+
+        return isinstance(node, x)
 
 
 Root = epyqlib.attrsmodel.Root(
