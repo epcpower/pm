@@ -1,3 +1,4 @@
+import collections
 import contextlib
 import functools
 import io
@@ -34,6 +35,7 @@ class ModelView:
     columns = attr.ib()
     types = attr.ib()
     root_factory = attr.ib()
+    extras = attr.ib(default=attr.Factory(collections.OrderedDict))
     model = attr.ib(default=None)
     proxy = attr.ib(default=None)
     selection = attr.ib(default=None)
@@ -120,6 +122,9 @@ class Window:
             columns=epcpm.parametermodel.columns,
             types=epcpm.parametermodel.types,
             root_factory=epcpm.parametermodel.Root,
+            extras=collections.OrderedDict((
+                ('Generate code...', self.generate_code),
+            )),
         )
 
         self.project.models.symbols = ModelView(
@@ -219,28 +224,35 @@ class Window:
             delete = menu.addAction('Delete')
 
         menu.addSeparator()
-        generate_code = menu.addAction('Generate code...')
+
+        extra_actions = {
+            menu.addAction(name): function
+            for name, function in view_model.extras.items()
+        }
 
         action = menu.exec(
             view_model.view.viewport().mapToGlobal(position)
         )
 
         if action is not None:
-            if action is delete:
+            extra = extra_actions.get(action)
+            if extra is not None:
+                extra(node)
+            elif action is delete:
                 node.tree_parent.remove_child(child=node)
-            elif action is generate_code:
-                builder = epcpm.parameterstoc.builders.wrap(node)
-
-                ast = pycparser.c_ast.FileAST(builder.definition())
-                generator = pycparser.c_generator.CGenerator()
-                s = generator.visit(ast)
-                epyqlib.utils.qt.dialog(
-                    parent=self.ui,
-                    message=s,
-                    modal=False,
-                )
             else:
                 node.append_child(actions[action]())
+
+    def generate_code(self, node):
+        builder = epcpm.parameterstoc.builders.wrap(node)
+        ast = pycparser.c_ast.FileAST(builder.definition())
+        generator = pycparser.c_generator.CGenerator()
+        s = generator.visit(ast)
+        epyqlib.utils.qt.dialog(
+            parent=self.ui,
+            message=s,
+            modal=False,
+        )
 
     def selection_changed(self, selected, deselected):
         pass
