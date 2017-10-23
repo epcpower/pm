@@ -43,6 +43,8 @@ class Signal(epyqlib.treenode.TreeNode):
     def can_drop_on(self, node):
         return False
 
+    can_delete = epyqlib.attrsmodel.childless_can_delete
+
 
 @graham.schemify(tag='message')
 @epyqlib.utils.qt.pyqtify()
@@ -95,6 +97,12 @@ class Message(epyqlib.treenode.TreeNode):
     def child_from(self, node):
         return Signal(name=node.name, parameter_uuid=str(node.uuid))
 
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+        return True
+
 
 @graham.schemify(tag='multiplexer')
 @epyqlib.utils.qt.pyqtify()
@@ -134,6 +142,12 @@ class Multiplexer(epyqlib.treenode.TreeNode):
 
     def can_drop_on(self, node):
         return False
+
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+        return True
 
 
 @graham.schemify(tag='multiplexed_message')
@@ -177,14 +191,20 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
 
         return isinstance(node, x)
 
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+        return True
+
 
 Root = epyqlib.attrsmodel.Root(
     default_name='Symbols',
-    valid_types=(Message,)
+    valid_types=(Message, MultiplexedMessage)
 )
 
 types = epyqlib.attrsmodel.Types(
-    types=(Root, Message, Signal),
+    types=(Root, Message, Signal, MultiplexedMessage, Multiplexer),
 )
 
 columns = epyqlib.attrsmodel.columns(
