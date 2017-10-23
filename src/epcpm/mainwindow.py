@@ -21,6 +21,7 @@ import epcpm.parametermodel
 import epcpm.parameterstoc
 import epcpm.project
 import epcpm.symbolmodel
+import epcpm.symbolstosym
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
@@ -133,6 +134,9 @@ class Window:
             columns=epcpm.symbolmodel.columns,
             types=epcpm.symbolmodel.types,
             root_factory=epcpm.symbolmodel.Root,
+            extras=collections.OrderedDict((
+                ('Generate .sym...', self.generate_symbol_file),
+            )),
         )
 
         self.uuid_notifier.disconnect_view()
@@ -251,6 +255,15 @@ class Window:
         epyqlib.utils.qt.dialog(
             parent=self.ui,
             message=s,
+            modal=False,
+        )
+
+    def generate_symbol_file(self, node):
+        builder = epcpm.symbolstosym.builders.wrap(node)
+
+        epyqlib.utils.qt.dialog(
+            parent=self.ui,
+            message=builder.gen(),
             modal=False,
         )
 
