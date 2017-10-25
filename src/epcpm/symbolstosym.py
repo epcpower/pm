@@ -71,7 +71,7 @@ class MultiplexedMessage:
     def gen(self):
         frame = canmatrix.canmatrix.Frame(
             name=epyqlib.utils.general.spaced_to_upper_camel(self.wrapped.name),
-            Id=int(self.wrapped.identifier[2:], 16),
+            Id=int(self.wrapped.identifier, 0),
             extended=self.wrapped.extended,
         )
 
