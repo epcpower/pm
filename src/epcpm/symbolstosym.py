@@ -22,11 +22,13 @@ class Root:
             frame = builders.wrap(child).gen()
             matrix.frames.addFrame(frame)
 
+        codec = 'utf-8'
+
         f = io.BytesIO()
-        canmatrix.formats.dump(matrix, f, 'sym')
+        canmatrix.formats.dump(matrix, f, 'sym', symExportEncoding=codec)
         f.seek(0)
 
-        return f.read().decode('utf-8')
+        return f.read().decode(codec)
 
 
 @builders(epcpm.symbolmodel.Message)
@@ -74,6 +76,9 @@ class MultiplexedMessage:
             Id=int(self.wrapped.identifier, 0),
             extended=self.wrapped.extended,
         )
+
+        if len(self.wrapped.children) == 0:
+            return frame
 
         signal = builders.wrap(self.wrapped.children[0]).gen(
             multiplex_id='Multiplexor',

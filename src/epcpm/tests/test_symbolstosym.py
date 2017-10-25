@@ -63,44 +63,21 @@ def try_loading_multiplex():
     print()
 
 
+def tidy_sym(s):
+    return '\n'.join(s.strip() for s in s.splitlines()).strip()
+
+
 def test_multiplexed():
     root = epcpm.symbolmodel.Root()
+    builder = epcpm.symbolstosym.builders.wrap(root)
 
     multiplexed_message = epcpm.symbolmodel.MultiplexedMessage(
         name='Test Multiplexed Message',
         identifier='0xbabeface',
     )
     root.append_child(multiplexed_message)
-    multiplex_signal = epcpm.symbolmodel.Signal(
-        name='Multiplexer Signal',
-        bits=8,
-    )
-    multiplexed_message.append_child(multiplex_signal)
 
-    multiplexer_a = epcpm.symbolmodel.Multiplexer(
-        name='Test Multiplexer A',
-        id=0,
-    )
-    multiplexed_message.append_child(multiplexer_a)
-    signal_a = epcpm.symbolmodel.Signal(
-        name='Signal A',
-    )
-    multiplexer_a.append_child(signal_a)
-
-    multiplexer_b = epcpm.symbolmodel.Multiplexer(
-        name='Test Multiplexer B',
-        id=1,
-    )
-    multiplexed_message.append_child(multiplexer_b)
-    signal_b = epcpm.symbolmodel.Signal(
-        name='Signal B',
-    )
-    multiplexer_b.append_child(signal_b)
-
-    builder = epcpm.symbolstosym.builders.wrap(root)
-    s = builder.gen()
-
-    assert s == textwrap.dedent('''\
+    expected = textwrap.dedent('''\
     FormatVersion=5.0 // Do not edit this line!
     Title="canmatrix-Export"
     {ENUMS}
@@ -112,12 +89,52 @@ def test_multiplexed():
     ID=BABEFACEh
     Type=Extended
     DLC=0
-    Mux=TestMultiplexerA 0,8 0 
+    ''')
+
+    assert tidy_sym(builder.gen()) == tidy_sym(expected)
+
+    multiplex_signal = epcpm.symbolmodel.Signal(
+        name='Multiplexer Signal',
+        bits=8,
+    )
+    multiplexed_message.append_child(multiplex_signal)
+
+    # seems like at this point it should do the same thing, or perhaps
+    # add a line for the multiplexer signal.  instead it wipes the message
+    # out entirely.
+    # assert tidy_sym(builder.gen()) == tidy_sym(expected)
+
+    multiplexer_a = epcpm.symbolmodel.Multiplexer(
+        name='Test Multiplexer A',
+        id=0,
+    )
+    multiplexed_message.append_child(multiplexer_a)
+    signal_a = epcpm.symbolmodel.Signal(
+        name='Signal A',
+    )
+    multiplexer_a.append_child(signal_a)
+
+    expected += textwrap.dedent('''\
+    Mux=TestMultiplexerA 0,8 0
     Var=SignalA signed 0,0
+    ''')
+
+    assert tidy_sym(builder.gen()) == tidy_sym(expected)
+
+    multiplexer_b = epcpm.symbolmodel.Multiplexer(
+        name='Test Multiplexer B',
+        id=1,
+    )
+    multiplexed_message.append_child(multiplexer_b)
+    signal_b = epcpm.symbolmodel.Signal(
+        name='Signal B',
+    )
+    multiplexer_b.append_child(signal_b)
+
+    expected += textwrap.dedent('''\
 
     [TestMultiplexedMessage]
     DLC=0
     Mux=TestMultiplexerB 0,8 1 
     Var=SignalB signed 0,0
-
     ''')
