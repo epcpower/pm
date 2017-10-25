@@ -275,7 +275,11 @@ class Window:
         model = view_model.model
         view = view_model.view
 
-        node = model.node_from_uuid(uuid)
+        try:
+            node = model.node_from_uuid(uuid)
+        except epyqlib.attrsmodel.NotFoundError:
+            return
+
         index = model.index_from_node(node)
         index = epyqlib.utils.qt.resolve_index_from_model(
             model=model,
