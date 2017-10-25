@@ -18,6 +18,7 @@ setuptools.setup(
         ],
         'console_scripts': [
             'epcparameterstoc = epcpm.cli.parameterstoc:cli',
+            'epcimportsym = epcpm.cli.importsym:cli',
         ],
     },
     install_requires=[
