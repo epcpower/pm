@@ -39,7 +39,9 @@ class Signal(epyqlib.treenode.TreeNode):
         ),
     )
     parameter_uuid = epyqlib.attrsmodel.attr_uuid(
-        metadata={'human name': 'Parameter UUID'})
+        metadata={'human name': 'Parameter UUID'},
+        allow_none=True,
+    )
     uuid = epyqlib.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
