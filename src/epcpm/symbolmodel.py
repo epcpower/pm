@@ -17,6 +17,11 @@ __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
+@staticmethod
+def child_from(node):
+    return Signal(name=node.name, parameter_uuid=str(node.uuid))
+
+
 @graham.schemify(tag='signal')
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
@@ -89,13 +94,17 @@ class Message(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
+    child_from = child_from
+
+    @classmethod
+    def all_addable_types(cls):
+        return epyqlib.attrsmodel.create_addable_types((Signal,))
+
+    def addable_types(self):
+        return {}
+
     def can_drop_on(self, node):
-        x = (*self.addable_types().values(), epcpm.parametermodel.Parameter)
-
-        return isinstance(node, x)
-
-    def child_from(self, node):
-        return Signal(name=node.name, parameter_uuid=str(node.uuid))
+        return isinstance(node, epcpm.parametermodel.Parameter)
 
     def can_delete(self, node=None):
         if node is None:
@@ -109,7 +118,7 @@ class Message(epyqlib.treenode.TreeNode):
 @attr.s(hash=False)
 class Multiplexer(epyqlib.treenode.TreeNode):
     name = attr.ib(
-        default='New Message',
+        default='New Multiplexer',
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(),
         ),
@@ -140,8 +149,17 @@ class Multiplexer(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
+    child_from = child_from
+
+    @classmethod
+    def all_addable_types(cls):
+        return epyqlib.attrsmodel.create_addable_types((Signal,))
+
+    def addable_types(self):
+        return {}
+
     def can_drop_on(self, node):
-        return False
+        return isinstance(node, (epcpm.parametermodel.Parameter, Signal))
 
     def can_delete(self, node=None):
         if node is None:
@@ -155,7 +173,7 @@ class Multiplexer(epyqlib.treenode.TreeNode):
 @attr.s(hash=False)
 class MultiplexedMessage(epyqlib.treenode.TreeNode):
     name = attr.ib(
-        default='New Message',
+        default='New Multiplexed Message',
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(),
         ),
@@ -177,6 +195,7 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
         default=attr.Factory(list),
         metadata=graham.create_metadata(
             field=graham.fields.MixedList(fields=(
+                marshmallow.fields.Nested(graham.schema(Signal)),
                 marshmallow.fields.Nested(graham.schema(Multiplexer)),
             )),
         ),
@@ -187,15 +206,25 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
         super().__init__()
 
     def can_drop_on(self, node):
-        x = (*self.addable_types().values(), epcpm.parametermodel.Parameter)
-
-        return isinstance(node, x)
+        return isinstance(node, tuple(self.addable_types().values()))
 
     def can_delete(self, node=None):
         if node is None:
             return self.tree_parent.can_delete(node=self)
 
         return True
+
+    @classmethod
+    def all_addable_types(cls):
+        return epyqlib.attrsmodel.create_addable_types((Signal, Multiplexer))
+
+    def addable_types(self):
+        types = (Signal,)
+
+        if len(self.children) > 0:
+            types += (Multiplexer,)
+
+        return epyqlib.attrsmodel.create_addable_types(types)
 
 
 Root = epyqlib.attrsmodel.Root(
@@ -208,7 +237,7 @@ types = epyqlib.attrsmodel.Types(
 )
 
 columns = epyqlib.attrsmodel.columns(
-    ((Message, 'name'), (Signal, 'name')),
+    tuple((x, 'name') for x in types.types.values()),
     ((Message, 'identifier'),),
     ((Message, 'extended'),),
     ((Message, 'cycle_time'),),
