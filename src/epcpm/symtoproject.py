@@ -79,6 +79,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                 multiplexer = epcpm.symbolmodel.Multiplexer(
                     name=name,
                     identifier=value,
+                    length=frame.size,
                 )
                 message.append_child(multiplexer)
 

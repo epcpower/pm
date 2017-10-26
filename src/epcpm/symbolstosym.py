@@ -41,6 +41,7 @@ class Message:
             name=epyqlib.utils.general.spaced_to_upper_camel(self.wrapped.name),
             Id=int(self.wrapped.identifier[2:], 16),
             extended=self.wrapped.extended,
+            dlc=self.wrapped.length,
         )
 
         for child in self.wrapped.children:
@@ -71,10 +72,19 @@ class MultiplexedMessage:
     wrapped = attr.ib()
 
     def gen(self):
+        common_signals = []
+        not_signals = []
+        for child in self.wrapped.children[1:]:
+            if isinstance(child, epcpm.symbolmodel.Signal):
+                common_signals.append(child)
+            else:
+                not_signals.append(child)
+
         frame = canmatrix.canmatrix.Frame(
             name=epyqlib.utils.general.spaced_to_upper_camel(self.wrapped.name),
             Id=int(self.wrapped.identifier, 0),
             extended=self.wrapped.extended,
+            dlc=not_signals[0].length,
         )
 
         if len(self.wrapped.children) == 0:
@@ -84,14 +94,6 @@ class MultiplexedMessage:
             multiplex_id='Multiplexor',
         )
         frame.signals.append(signal)
-
-        common_signals = []
-        not_signals = []
-        for child in self.wrapped.children[1:]:
-            if isinstance(child, epcpm.symbolmodel.Signal):
-                common_signals.append(child)
-            else:
-                not_signals.append(child)
 
         for multiplexer in not_signals:
             for signal in common_signals:

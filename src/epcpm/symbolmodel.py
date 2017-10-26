@@ -77,6 +77,12 @@ class Message(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.Boolean(),
         ),
     )
+    length = attr.ib(
+        default=0,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Int(),
+        ),
+    )
     cycle_time = attr.ib(
         default=None,
         convert=epyqlib.attrsmodel.to_decimal_or_none,
@@ -131,6 +137,12 @@ class Multiplexer(epyqlib.treenode.TreeNode):
         metadata=graham.create_metadata(
             field=marshmallow.fields.Integer(allow_none=True),
         )
+    )
+    length = attr.ib(
+        default=0,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Int(),
+        ),
     )
     cycle_time = attr.ib(
         default=None,
@@ -247,6 +259,7 @@ columns = epyqlib.attrsmodel.columns(
         Multiplexer,
     )),
     ((Signal, 'bits'),),
+    tuple((x, 'length') for x in (Message, Multiplexer)),
     ((Message, 'extended'),),
     ((Message, 'cycle_time'),),
     ((Signal, 'parameter_uuid'),)
