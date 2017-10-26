@@ -106,6 +106,11 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                         if matrix_signal.calcMax() != matrix_signal.max:
                             extras['maximum'] = matrix_signal.max
 
+                        attributes = matrix_signal.attributes
+                        default = attributes.get('GenSigStartValue')
+                        if default is not None:
+                            extras['default'] = default
+
                         parameter = epcpm.parametermodel.Parameter(
                             name=f'{name}:{matrix_signal.name}',
                             **extras,

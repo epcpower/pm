@@ -71,6 +71,7 @@ class Signal:
             self.wrapped.parameter_uuid is not None
             and self.parameter_uuid_finder is not None
         )
+        parameter = None
         if can_find_parameter:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
@@ -87,6 +88,10 @@ class Signal:
             is_signed=self.wrapped.signed,
             **extras,
         )
+
+        if parameter is not None:
+            if parameter.default is not None:
+                signal.attributes['GenSigStartValue'] = parameter.default
 
         return signal
 
