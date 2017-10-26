@@ -118,6 +118,10 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                             if len(comment) > 0:
                                 extras['comment'] = comment
 
+                        if matrix_signal.unit is not None:
+                            if len(matrix_signal.unit) > 0:
+                                extras['units'] = matrix_signal.unit
+
                         attributes = matrix_signal.attributes
                         default = attributes.get('GenSigStartValue')
                         if default is not None:
