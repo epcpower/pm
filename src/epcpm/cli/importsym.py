@@ -33,7 +33,7 @@ def cli(sym, hierarchy, project, parameters, symbols):
 
     project_root = epcpm.project.Project()
     project_root.paths.parameters = relative_path(parameters.name, project_path)
-    project_root.paths.symbols= relative_path(symbols.name, project_path)
+    project_root.paths.symbols = relative_path(symbols.name, project_path)
 
     project.write(graham.dumps(project_root, indent=4).data)
     parameters.write(graham.dumps(parameters_root, indent=4).data)
