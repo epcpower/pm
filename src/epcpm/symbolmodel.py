@@ -126,7 +126,7 @@ class Multiplexer(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.String(),
         ),
     )
-    id = attr.ib(
+    identifier = attr.ib(
         default=None,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Integer(allow_none=True),
@@ -241,7 +241,12 @@ types = epyqlib.attrsmodel.Types(
 
 columns = epyqlib.attrsmodel.columns(
     tuple((x, 'name') for x in types.types.values()),
-    ((Message, 'identifier'),),
+    tuple((x, 'identifier') for x in (
+        Message,
+        MultiplexedMessage,
+        Multiplexer,
+    )),
+    ((Signal, 'bits'),),
     ((Message, 'extended'),),
     ((Message, 'cycle_time'),),
     ((Signal, 'parameter_uuid'),)

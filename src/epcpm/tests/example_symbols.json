@@ -51,25 +51,33 @@
             "children": [
                 {
                     "_type": "signal",
-                    "name": "New Signal",
-                    "bits": 0,
+                    "name": "Mux Signal",
+                    "bits": 2,
                     "parameter_uuid": null,
                     "uuid": "c03fda26-bdbb-4dc7-8a2b-f0da0d32b48a"
                 },
                 {
                     "_type": "signal",
-                    "name": "New Signal",
+                    "name": "Common Signal",
                     "bits": 0,
                     "parameter_uuid": null,
                     "uuid": "bed79739-bedd-429d-bd96-63bf8213252a"
                 },
                 {
                     "_type": "multiplexer",
-                    "name": "New Multiplexer",
-                    "id": null,
+                    "name": "Multiplexer A",
+                    "identifier": 1,
                     "cycle_time": null,
                     "children": [],
                     "uuid": "1491d55a-ef3d-4079-9443-3a0790b033b9"
+                },
+                {
+                    "_type": "multiplexer",
+                    "name": "Multiplexer B",
+                    "identifier": 2,
+                    "cycle_time": null,
+                    "children": [],
+                    "uuid": "4e06142b-b91c-4916-985f-509336ed3b1d"
                 }
             ],
             "uuid": "dc33ff0f-43c9-4f96-a19c-6d41a263ebd7"

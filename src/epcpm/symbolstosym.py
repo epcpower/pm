@@ -96,17 +96,17 @@ class MultiplexedMessage:
         for multiplexer in not_signals:
             for signal in common_signals:
                 matrix_signal = builders.wrap(signal).gen(
-                    multiplex_id=multiplexer.id,
+                    multiplex_id=multiplexer.identifier,
                 )
                 frame.signals.append(matrix_signal)
 
-            frame.mux_names[multiplexer.id] = (
+            frame.mux_names[multiplexer.identifier] = (
                 epyqlib.utils.general.spaced_to_upper_camel(multiplexer.name)
             )
 
             for signal in multiplexer.children:
                 signal = builders.wrap(signal).gen(
-                    multiplex_id=multiplexer.id,
+                    multiplex_id=multiplexer.identifier,
                 )
 
                 frame.signals.append(signal)

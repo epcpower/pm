@@ -114,7 +114,7 @@ def test_multiplexed():
 
     multiplexer_a = epcpm.symbolmodel.Multiplexer(
         name='Test Multiplexer A',
-        id=1,
+        identifier=1,
     )
     multiplexed_message.append_child(multiplexer_a)
     signal_a = epcpm.symbolmodel.Signal(
@@ -132,7 +132,7 @@ def test_multiplexed():
 
     multiplexer_b = epcpm.symbolmodel.Multiplexer(
         name='Test Multiplexer B',
-        id=2,
+        identifier=2,
     )
     multiplexed_message.append_child(multiplexer_b)
     signal_b = epcpm.symbolmodel.Signal(
