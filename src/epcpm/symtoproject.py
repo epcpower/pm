@@ -3,8 +3,13 @@ import pathlib
 
 import canmatrix.formats
 
+import epyqlib.utils.general
+
 import epcpm.parametermodel
 import epcpm.symbolmodel
+
+
+humanize_name = epyqlib.utils.general.underscored_camel_to_title_spaced
 
 
 def load_can_path(can_path, hierarchy_path):
@@ -57,7 +62,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
     for frame in matrix.frames:
         if len(frame.mux_names) > 0:
             message = epcpm.symbolmodel.MultiplexedMessage(
-                name=frame.name,
+                name=humanize_name(frame.name),
                 identifier=frame.id,
                 extended=frame.extended,
             )
@@ -70,14 +75,14 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
             )
 
             mux_signal = epcpm.symbolmodel.Signal(
-                name=matrix_mux_signal.name,
+                name=humanize_name(matrix_mux_signal.name),
                 bits=matrix_mux_signal.signalsize,
             )
             message.append_child(mux_signal)
 
             for value, name in sorted(frame.mux_names.items()):
                 multiplexer = epcpm.symbolmodel.Multiplexer(
-                    name=name,
+                    name=humanize_name(name),
                     identifier=value,
                     length=frame.size,
                 )
@@ -99,7 +104,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                         parameter_uuid = parameter.uuid
 
                     signal = epcpm.symbolmodel.Signal(
-                        name=matrix_signal.name,
+                        name=humanize_name(matrix_signal.name),
                         parameter_uuid=parameter_uuid,
                         bits=matrix_signal.signalsize,
                     )
