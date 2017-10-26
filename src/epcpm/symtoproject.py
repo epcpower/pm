@@ -82,10 +82,17 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
             message.append_child(mux_signal)
 
             for value, name in sorted(frame.mux_names.items()):
+                extras = {}
+
+                mux_comment = matrix_mux_signal.comments.get(value)
+                if mux_comment is not None:
+                    extras['comment'] = mux_comment
+
                 multiplexer = epcpm.symbolmodel.Multiplexer(
                     name=humanize_name(name),
                     identifier=value,
                     length=frame.size,
+                    **extras,
                 )
                 message.append_child(multiplexer)
 

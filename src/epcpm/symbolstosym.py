@@ -124,15 +124,20 @@ class MultiplexedMessage:
         if len(self.wrapped.children) == 0:
             return frame
 
-        signal = builders.wrap(
+        mux_signal = builders.wrap(
             wrapped=self.wrapped.children[0],
             parameter_uuid_finder=self.parameter_uuid_finder,
         ).gen(
             multiplex_id='Multiplexor',
         )
-        frame.signals.append(signal)
+        frame.signals.append(mux_signal)
 
         for multiplexer in not_signals:
+            if multiplexer.comment is not None:
+                mux_signal.comments[multiplexer.identifier] = (
+                    multiplexer.comment
+                )
+
             for signal in common_signals:
                 matrix_signal = builders.wrap(
                     wrapped=signal,
