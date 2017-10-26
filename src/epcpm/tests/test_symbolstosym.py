@@ -98,15 +98,23 @@ def test_multiplexed():
         bits=8,
     )
     multiplexed_message.append_child(multiplex_signal)
+    common_signal = epcpm.symbolmodel.Signal(
+        name='Common Signal',
+    )
+    multiplexed_message.append_child(common_signal)
 
     # seems like at this point it should do the same thing, or perhaps
     # add a line for the multiplexer signal.  instead it wipes the message
     # out entirely.
+    # expected += textwrap.dedent('''\
+    # Mux=MultiplexerSignal0 0,8 0
+    # Var=CommonSignal signed 0,0
+    # ''')
     # assert tidy_sym(builder.gen()) == tidy_sym(expected)
 
     multiplexer_a = epcpm.symbolmodel.Multiplexer(
         name='Test Multiplexer A',
-        id=0,
+        id=1,
     )
     multiplexed_message.append_child(multiplexer_a)
     signal_a = epcpm.symbolmodel.Signal(
@@ -115,7 +123,8 @@ def test_multiplexed():
     multiplexer_a.append_child(signal_a)
 
     expected += textwrap.dedent('''\
-    Mux=TestMultiplexerA 0,8 0
+    Mux=TestMultiplexerA 0,8 1
+    Var=CommonSignal signed 0,0
     Var=SignalA signed 0,0
     ''')
 
@@ -123,7 +132,7 @@ def test_multiplexed():
 
     multiplexer_b = epcpm.symbolmodel.Multiplexer(
         name='Test Multiplexer B',
-        id=1,
+        id=2,
     )
     multiplexed_message.append_child(multiplexer_b)
     signal_b = epcpm.symbolmodel.Signal(
@@ -135,6 +144,9 @@ def test_multiplexed():
 
     [TestMultiplexedMessage]
     DLC=0
-    Mux=TestMultiplexerB 0,8 1 
+    Mux=TestMultiplexerB 0,8 2
+    Var=CommonSignal signed 0,0
     Var=SignalB signed 0,0
     ''')
+
+    assert tidy_sym(builder.gen()) == tidy_sym(expected)

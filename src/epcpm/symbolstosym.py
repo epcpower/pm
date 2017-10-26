@@ -85,7 +85,21 @@ class MultiplexedMessage:
         )
         frame.signals.append(signal)
 
-        for multiplexer in self.wrapped.children[1:]:
+        common_signals = []
+        not_signals = []
+        for child in self.wrapped.children[1:]:
+            if isinstance(child, epcpm.symbolmodel.Signal):
+                common_signals.append(child)
+            else:
+                not_signals.append(child)
+
+        for multiplexer in not_signals:
+            for signal in common_signals:
+                matrix_signal = builders.wrap(signal).gen(
+                    multiplex_id=multiplexer.id,
+                )
+                frame.signals.append(matrix_signal)
+
             frame.mux_names[multiplexer.id] = (
                 epyqlib.utils.general.spaced_to_upper_camel(multiplexer.name)
             )
