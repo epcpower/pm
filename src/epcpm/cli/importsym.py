@@ -17,13 +17,15 @@ def relative_path(target, reference):
 
 @click.command()
 @click.option('--sym', type=click.File('rb'), required=True)
+@click.option('--hierarchy', type=click.File(), required=True)
 @click.option('--project', type=click.File('w'), required=True)
 @click.option('--parameters', type=click.File('w'), required=True)
 @click.option('--symbols', type=click.File('w'), required=True)
-def cli(sym, project, parameters, symbols):
+def cli(sym, hierarchy, project, parameters, symbols):
     parameters_root, symbols_root = epcpm.symtoproject.load_can_file(
-        f=sym,
+        can_file=sym,
         file_type=str(pathlib.Path(sym.name).suffix[1:]),
+        parameter_hierarchy_file=hierarchy,
     )
 
     project_path = pathlib.Path(project.name).parents[0]
