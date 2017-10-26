@@ -97,8 +97,13 @@ class Signal:
         )
 
         if parameter is not None:
+            attributes = signal.attributes
+
             if parameter.default is not None:
-                signal.attributes['GenSigStartValue'] = parameter.default
+                attributes['GenSigStartValue'] = parameter.default
+
+            if parameter.decimal_places is not None:
+                attributes['DisplayDecimalPlaces'] = parameter.decimal_places
 
         return signal
 

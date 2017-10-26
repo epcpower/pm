@@ -127,6 +127,10 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                         if default is not None:
                             extras['default'] = default
 
+                        decimal_places = attributes.get('DisplayDecimalPlaces')
+                        if decimal_places is not None:
+                            extras['decimal_places'] = decimal_places
+
                         parameter = epcpm.parametermodel.Parameter(
                             name=f'{name}:{matrix_signal.name}',
                             **extras,

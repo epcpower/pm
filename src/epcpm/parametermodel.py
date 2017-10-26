@@ -58,6 +58,13 @@ class Parameter(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.String(allow_none=True),
         ),
     )
+    decimal_places = attr.ib(
+        default=None,
+        convert=epyqlib.attrsmodel.to_int_or_none,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(allow_none=True),
+        ),
+    )
     nv = attr.ib(
         default=False,
         convert=epyqlib.attrsmodel.two_state_checkbox,
