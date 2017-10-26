@@ -99,7 +99,7 @@ class Message(epyqlib.treenode.TreeNode):
         default=None,
         convert=epyqlib.attrsmodel.to_decimal_or_none,
         metadata=graham.create_metadata(
-            field=marshmallow.fields.Decimal(allow_none=True),
+            field=marshmallow.fields.Decimal(allow_none=True, as_string=True),
         ),
     )
     children = attr.ib(
@@ -160,7 +160,7 @@ class Multiplexer(epyqlib.treenode.TreeNode):
         default=None,
         convert=epyqlib.attrsmodel.to_decimal_or_none,
         metadata=graham.create_metadata(
-            field=marshmallow.fields.Decimal(allow_none=True),
+            field=marshmallow.fields.Decimal(allow_none=True, as_string=True),
         ),
     )
     comment = attr.ib(

@@ -132,6 +132,10 @@ class MultiplexedMessage:
             dlc=not_signals[0].length,
         )
 
+        cycle_time = not_signals[0].cycle_time
+        if cycle_time is not None:
+            frame.attributes['GenMsgCycleTime'] = str(cycle_time)
+
         if len(self.wrapped.children) == 0:
             return frame
 

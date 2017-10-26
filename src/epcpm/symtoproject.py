@@ -88,6 +88,10 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                 if mux_comment is not None:
                     extras['comment'] = mux_comment
 
+                cycle_time = frame.attributes.get('GenMsgCycleTime')
+                if cycle_time is not None:
+                    extras['cycle_time'] = cycle_time
+
                 multiplexer = epcpm.symbolmodel.Multiplexer(
                     name=humanize_name(mux_name),
                     identifier=value,
@@ -137,6 +141,10 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                                 humanize_name(mux_name),
                                 humanize_name(matrix_signal.name),
                             )
+
+                        cycle_time = frame.attributes.get('GenMsgCycleTime')
+                        if cycle_time is not None:
+                            extras['cycle_time'] = cycle_time
 
                         parameter = epcpm.parametermodel.Parameter(
                             name=signal_name,
