@@ -81,6 +81,9 @@ class Signal:
             if parameter.maximum is not None:
                 extras['max'] = parameter.maximum
 
+            if parameter.comment is not None:
+                extras['comment'] = parameter.comment
+
         signal = canmatrix.canmatrix.Signal(
             name=epyqlib.utils.general.spaced_to_upper_camel(self.wrapped.name),
             multiplex=multiplex_id,

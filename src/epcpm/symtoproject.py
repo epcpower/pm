@@ -106,6 +106,11 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                         if matrix_signal.calcMax() != matrix_signal.max:
                             extras['maximum'] = matrix_signal.max
 
+                        if matrix_signal.comment is not None:
+                            comment = matrix_signal.comment.strip()
+                            if len(comment) > 0:
+                                extras['comment'] = comment
+
                         attributes = matrix_signal.attributes
                         default = attributes.get('GenSigStartValue')
                         if default is not None:

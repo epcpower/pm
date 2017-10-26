@@ -72,6 +72,13 @@ class Parameter(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.Boolean(),
         ),
     )
+    comment = attr.ib(
+        default=None,
+        convert=epyqlib.attrsmodel.to_str_or_none,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(allow_none=True),
+        ),
+    )
     uuid = epyqlib.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
