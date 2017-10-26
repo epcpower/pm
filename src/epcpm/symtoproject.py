@@ -81,7 +81,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
             )
             message.append_child(mux_signal)
 
-            for value, name in sorted(frame.mux_names.items()):
+            for value, mux_name in sorted(frame.mux_names.items()):
                 extras = {}
 
                 mux_comment = matrix_mux_signal.comments.get(value)
@@ -89,7 +89,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                     extras['comment'] = mux_comment
 
                 multiplexer = epcpm.symbolmodel.Multiplexer(
-                    name=humanize_name(name),
+                    name=humanize_name(mux_name),
                     identifier=value,
                     length=frame.size,
                     **extras,
@@ -102,7 +102,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
 
                     parameter_uuid = None
                     group = group_from_path.get(
-                        (frame.name, name, matrix_signal.name),
+                        (frame.name, mux_name, matrix_signal.name),
                     )
                     if group is not None:
                         extras = {}
@@ -131,8 +131,15 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                         if decimal_places is not None:
                             extras['decimal_places'] = decimal_places
 
+                        signal_name = attributes.get('LongName')
+                        if signal_name is None:
+                            signal_name = '{} : {}'.format(
+                                humanize_name(mux_name),
+                                humanize_name(matrix_signal.name),
+                            )
+
                         parameter = epcpm.parametermodel.Parameter(
-                            name=f'{name}:{matrix_signal.name}',
+                            name=signal_name,
                             **extras,
                         )
                         group.append_child(parameter)

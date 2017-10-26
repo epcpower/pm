@@ -99,6 +99,8 @@ class Signal:
         if parameter is not None:
             attributes = signal.attributes
 
+            attributes['LongName'] = parameter.name
+
             if parameter.default is not None:
                 attributes['GenSigStartValue'] = parameter.default
 
