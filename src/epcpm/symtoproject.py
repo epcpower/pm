@@ -101,6 +101,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                     signal = epcpm.symbolmodel.Signal(
                         name=matrix_signal.name,
                         parameter_uuid=parameter_uuid,
+                        bits=matrix_signal.signalsize,
                     )
 
                     multiplexer.append_child(signal)
