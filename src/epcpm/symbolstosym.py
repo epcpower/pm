@@ -14,12 +14,16 @@ builders = epyqlib.utils.general.TypeMap()
 @attr.s
 class Root:
     wrapped = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
         matrix = canmatrix.canmatrix.CanMatrix()
 
         for child in self.wrapped.children:
-            frame = builders.wrap(child).gen()
+            frame = builders.wrap(
+                wrapped=child,
+                parameter_uuid_finder=self.parameter_uuid_finder,
+            ).gen()
             matrix.frames.addFrame(frame)
 
         codec = 'utf-8'
@@ -35,6 +39,7 @@ class Root:
 @attr.s
 class Message:
     wrapped = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
         frame = canmatrix.canmatrix.Frame(
@@ -45,7 +50,10 @@ class Message:
         )
 
         for child in self.wrapped.children:
-            signal = builders.wrap(child).gen()
+            signal = builders.wrap(
+                wrapped=child,
+                parameter_uuid_finder=self.parameter_uuid_finder,
+            ).gen()
             frame.signals.append(signal)
 
         return frame
@@ -55,13 +63,29 @@ class Message:
 @attr.s
 class Signal:
     wrapped = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self, multiplex_id=None):
+        extras = {}
+        can_find_parameter = (
+            self.wrapped.parameter_uuid is not None
+            and self.parameter_uuid_finder is not None
+        )
+        if can_find_parameter:
+            parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+
+            if parameter.minimum is not None:
+                extras['min'] = parameter.minimum
+
+            if parameter.maximum is not None:
+                extras['max'] = parameter.maximum
+
         signal = canmatrix.canmatrix.Signal(
             name=epyqlib.utils.general.spaced_to_upper_camel(self.wrapped.name),
             multiplex=multiplex_id,
             signalSize=self.wrapped.bits,
             is_signed=self.wrapped.signed,
+            **extras,
         )
 
         return signal
@@ -71,6 +95,7 @@ class Signal:
 @attr.s
 class MultiplexedMessage:
     wrapped = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
         common_signals = []
@@ -91,14 +116,20 @@ class MultiplexedMessage:
         if len(self.wrapped.children) == 0:
             return frame
 
-        signal = builders.wrap(self.wrapped.children[0]).gen(
+        signal = builders.wrap(
+            wrapped=self.wrapped.children[0],
+            parameter_uuid_finder=self.parameter_uuid_finder,
+        ).gen(
             multiplex_id='Multiplexor',
         )
         frame.signals.append(signal)
 
         for multiplexer in not_signals:
             for signal in common_signals:
-                matrix_signal = builders.wrap(signal).gen(
+                matrix_signal = builders.wrap(
+                    wrapped=signal,
+                    parameter_uuid_finder=self.parameter_uuid_finder,
+                ).gen(
                     multiplex_id=multiplexer.identifier,
                 )
                 frame.signals.append(matrix_signal)
@@ -108,7 +139,10 @@ class MultiplexedMessage:
             )
 
             for signal in multiplexer.children:
-                signal = builders.wrap(signal).gen(
+                signal = builders.wrap(
+                    wrapped=signal,
+                    parameter_uuid_finder=self.parameter_uuid_finder,
+                ).gen(
                     multiplex_id=multiplexer.identifier,
                 )
 

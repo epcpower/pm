@@ -98,8 +98,17 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                         (frame.name, name, matrix_signal.name),
                     )
                     if group is not None:
+                        extras = {}
+
+                        if matrix_signal.calcMin() != matrix_signal.min:
+                            extras['minimum'] = matrix_signal.min
+
+                        if matrix_signal.calcMax() != matrix_signal.max:
+                            extras['maximum'] = matrix_signal.max
+
                         parameter = epcpm.parametermodel.Parameter(
                             name=f'{name}:{matrix_signal.name}',
+                            **extras,
                         )
                         group.append_child(parameter)
                         parameter_uuid = parameter.uuid
