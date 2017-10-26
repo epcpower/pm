@@ -71,12 +71,14 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
 
             mux_signal = epcpm.symbolmodel.Signal(
                 name=matrix_mux_signal.name,
+                bits=matrix_mux_signal.signalsize,
             )
             message.append_child(mux_signal)
 
             for value, name in sorted(frame.mux_names.items()):
                 multiplexer = epcpm.symbolmodel.Multiplexer(
                     name=name,
+                    identifier=value,
                 )
                 message.append_child(multiplexer)
 
