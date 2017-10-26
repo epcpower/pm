@@ -77,6 +77,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
             mux_signal = epcpm.symbolmodel.Signal(
                 name=humanize_name(matrix_mux_signal.name),
                 bits=matrix_mux_signal.signalsize,
+                signed=False,
             )
             message.append_child(mux_signal)
 
@@ -107,6 +108,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                         name=humanize_name(matrix_signal.name),
                         parameter_uuid=parameter_uuid,
                         bits=matrix_signal.signalsize,
+                        signed=matrix_signal.is_signed,
                     )
 
                     multiplexer.append_child(signal)

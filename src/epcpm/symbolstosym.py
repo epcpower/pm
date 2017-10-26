@@ -61,6 +61,7 @@ class Signal:
             name=epyqlib.utils.general.spaced_to_upper_camel(self.wrapped.name),
             multiplex=multiplex_id,
             signalSize=self.wrapped.bits,
+            is_signed=self.wrapped.signed,
         )
 
         return signal

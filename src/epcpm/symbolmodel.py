@@ -38,6 +38,12 @@ class Signal(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.Integer(),
         ),
     )
+    signed = attr.ib(
+        default=False,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Boolean(),
+        ),
+    )
     parameter_uuid = epyqlib.attrsmodel.attr_uuid(
         metadata={'human name': 'Parameter UUID'},
         default=None,

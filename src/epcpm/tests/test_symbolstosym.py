@@ -14,6 +14,7 @@ def test_explore():
 
     signal = epcpm.symbolmodel.Signal(
         name='Test Signal',
+        signed=True,
     )
     message.append_child(signal)
 
@@ -100,6 +101,7 @@ def test_multiplexed():
     multiplexed_message.append_child(multiplex_signal)
     common_signal = epcpm.symbolmodel.Signal(
         name='Common Signal',
+        signed=True,
     )
     multiplexed_message.append_child(common_signal)
 
@@ -119,6 +121,7 @@ def test_multiplexed():
     multiplexed_message.append_child(multiplexer_a)
     signal_a = epcpm.symbolmodel.Signal(
         name='Signal A',
+        signed=True,
     )
     multiplexer_a.append_child(signal_a)
 
@@ -137,6 +140,7 @@ def test_multiplexed():
     multiplexed_message.append_child(multiplexer_b)
     signal_b = epcpm.symbolmodel.Signal(
         name='Signal B',
+        signed=True,
     )
     multiplexer_b.append_child(signal_b)
 
