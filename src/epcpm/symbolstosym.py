@@ -92,6 +92,7 @@ class Signal:
             multiplex=multiplex_id,
             signalSize=self.wrapped.bits,
             is_signed=self.wrapped.signed,
+            factor=self.wrapped.factor,
             **extras,
         )
 

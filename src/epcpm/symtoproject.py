@@ -139,6 +139,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                         parameter_uuid=parameter_uuid,
                         bits=matrix_signal.signalsize,
                         signed=matrix_signal.is_signed,
+                        factor=matrix_signal.factor,
                     )
 
                     multiplexer.append_child(signal)
