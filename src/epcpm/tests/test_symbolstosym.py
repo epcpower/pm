@@ -74,7 +74,7 @@ def test_multiplexed():
 
     multiplexed_message = epcpm.symbolmodel.MultiplexedMessage(
         name='Test Multiplexed Message',
-        identifier='0xbabeface',
+        identifier=0xbabeface,
     )
     root.append_child(multiplexed_message)
 

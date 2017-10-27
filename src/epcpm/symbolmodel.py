@@ -77,9 +77,9 @@ class Message(epyqlib.treenode.TreeNode):
         ),
     )
     identifier = attr.ib(
-        default='0x1fffffff',
+        default=0x1fffffff,
         metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
+            field=marshmallow.fields.Integer(),
         ),
     )
     extended = attr.ib(
@@ -213,9 +213,9 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
         ),
     )
     identifier = attr.ib(
-        default='0x1fffffff',
+        default=0x1fffffff,
         metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
+            field=marshmallow.fields.Integer(),
         ),
     )
     extended = attr.ib(

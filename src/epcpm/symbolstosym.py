@@ -82,7 +82,7 @@ class Message:
     def gen(self):
         frame = canmatrix.canmatrix.Frame(
             name=dehumanize_name(self.wrapped.name),
-            Id=int(self.wrapped.identifier[2:], 16),
+            Id=self.wrapped.identifier,
             extended=self.wrapped.extended,
             dlc=self.wrapped.length,
         )
@@ -173,7 +173,7 @@ class MultiplexedMessage:
 
         frame = canmatrix.canmatrix.Frame(
             name=dehumanize_name(self.wrapped.name),
-            Id=int(self.wrapped.identifier, 0),
+            Id=self.wrapped.identifier,
             extended=self.wrapped.extended,
             dlc=not_signals[0].length,
         )
