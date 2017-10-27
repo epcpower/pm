@@ -29,6 +29,9 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
     parameters_root = epcpm.parametermodel.Root()
     symbols_root = epcpm.symbolmodel.Root()
 
+    enumerations = epcpm.parametermodel.Enumerations(name='Enumerations')
+    parameters_root.append_child(enumerations)
+
     parameters = epcpm.parametermodel.Group(name='Parameters')
     parameters_root.append_child(parameters)
 
@@ -66,7 +69,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
         enumeration = epcpm.parametermodel.Enumeration(
             name=name,
         )
-        parameters_root.append_child(enumeration)
+        enumerations.append_child(enumeration)
         enumeration_name_to_uuid[name] = enumeration.uuid
 
         for value, name in values.items():

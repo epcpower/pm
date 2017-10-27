@@ -157,6 +157,40 @@ class Group(epyqlib.treenode.TreeNode):
                 marshmallow.fields.Nested('Group'),
                 marshmallow.fields.Nested('Array'),
                 marshmallow.fields.Nested(graham.schema(Parameter)),
+            )),
+        ),
+    )
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    def can_drop_on(self, node):
+        return isinstance(node, tuple(self.addable_types().values()))
+
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+        return True
+
+
+@graham.schemify(tag='enumerations')
+@epyqlib.utils.qt.pyqtify()
+@attr.s(hash=False)
+class Enumerations(epyqlib.treenode.TreeNode):
+    name = attr.ib(
+        default='New Enumerations Group',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    children = attr.ib(
+        default=attr.Factory(list),
+        cmp=False,
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(fields=(
+                # TODO: would be nice to self reference without a name
                 marshmallow.fields.Nested('Enumeration'),
             )),
         ),
@@ -459,7 +493,7 @@ class Enumeration(epyqlib.treenode.TreeNode):
 
 Root = epyqlib.attrsmodel.Root(
     default_name='Parameters',
-    valid_types=(Parameter, Group, Enumeration)
+    valid_types=(Parameter, Group, Enumerations)
 )
 
 types = epyqlib.attrsmodel.Types(
@@ -472,12 +506,14 @@ types = epyqlib.attrsmodel.Types(
         ArrayParameterElement,
         Enumeration,
         Enumerator,
+Enumerations,
     ),
 )
 
 columns = epyqlib.attrsmodel.columns(
     (
         (Parameter, 'name'),
+        (Enumerations, 'name'),
         (Group, 'name'),
         (Array, 'name'),
         (ArrayParameterElement, 'name'),
