@@ -6,6 +6,9 @@ import marshmallow
 
 import epyqlib.utils.qt
 
+import epcpm.parametermodel
+import epcpm.symbolmodel
+
 
 class ProjectSaveCanceled(Exception):
     pass
@@ -13,6 +16,70 @@ class ProjectSaveCanceled(Exception):
 
 # class ProjectLoadCanceled(Exception):
 #     pass
+
+
+def create_blank():
+    project = Project()
+    _post_load(project)
+
+    return project
+
+
+def loads(s, project_path=None):
+    project = graham.schema(Project).loads(s).data
+
+    if project_path is not None:
+        project.filename = pathlib.Path(project_path).absolute()
+
+    _post_load(project)
+
+    return project
+
+
+def load(f):
+    project = loads(f.read(), project_path=f.name)
+
+    return project
+
+
+def loadp(path):
+    with open(path) as f:
+        return load(f)
+
+
+def _post_load(project):
+    models = project.models
+
+    if project.paths.parameters is None:
+        models.parameters = epyqlib.attrsmodel.Model(
+            root=epcpm.parametermodel.Root(),
+            columns=epcpm.parametermodel.columns,
+        )
+    else:
+        models.parameters = load_model(
+            project=project,
+            path=project.paths.parameters,
+            root_type=epcpm.parametermodel.Root,
+            columns=epcpm.parametermodel.columns,
+        )
+
+    if project.paths.symbols is None:
+        models.symbols = epyqlib.attrsmodel.Model(
+            root=epcpm.symbolmodel.Root(),
+            columns=epcpm.symbolmodel.columns,
+        )
+    else:
+        models.symbols = load_model(
+            project=project,
+            path=project.paths.symbols,
+            root_type=epcpm.symbolmodel.Root,
+            columns=epcpm.symbolmodel.columns,
+        )
+
+    models.parameters.droppable_from.add(models.parameters.root)
+
+    models.symbols.droppable_from.add(models.parameters.root)
+    models.symbols.droppable_from.add(models.symbols.root)
 
 
 @graham.schemify(tag='models')
@@ -129,10 +196,24 @@ class Project:
                 f.write('\n')
 
         for path, model in zip(paths.values(), self.models.values()):
-            s = graham.dumps(model.model.root, indent=4).data
+            s = graham.dumps(model.root, indent=4).data
 
             with open(project_directory / path, 'w') as f:
                 f.write(s)
 
                 if not s.endswith('\n'):
                     f.write('\n')
+
+
+def load_model(project, path, root_type, columns):
+    resolved_path = path
+    if project.filename is not None:
+        resolved_path = project.filename.parents[0] / resolved_path
+
+    with open(resolved_path) as f:
+        raw = f.read()
+
+    root_schema = graham.schema(root_type)
+    root = root_schema.loads(raw).data
+
+    return epyqlib.attrsmodel.Model(root=root, columns=columns)
