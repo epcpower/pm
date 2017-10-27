@@ -10,6 +10,11 @@ import epyqlib.utils.general
 builders = epyqlib.utils.general.TypeMap()
 
 
+def dehumanize_name(name):
+    name = name.replace('-', '_')
+    return epyqlib.utils.general.spaced_to_upper_camel(name)
+
+
 @builders(epcpm.symbolmodel.Root)
 @attr.s
 class Root:
@@ -43,7 +48,7 @@ class Message:
 
     def gen(self):
         frame = canmatrix.canmatrix.Frame(
-            name=epyqlib.utils.general.spaced_to_upper_camel(self.wrapped.name),
+            name=dehumanize_name(self.wrapped.name),
             Id=int(self.wrapped.identifier[2:], 16),
             extended=self.wrapped.extended,
             dlc=self.wrapped.length,
@@ -88,7 +93,7 @@ class Signal:
                 extras['unit'] = parameter.units
 
         signal = canmatrix.canmatrix.Signal(
-            name=epyqlib.utils.general.spaced_to_upper_camel(self.wrapped.name),
+            name=dehumanize_name(self.wrapped.name),
             multiplex=multiplex_id,
             signalSize=self.wrapped.bits,
             is_signed=self.wrapped.signed,
@@ -126,7 +131,7 @@ class MultiplexedMessage:
                 not_signals.append(child)
 
         frame = canmatrix.canmatrix.Frame(
-            name=epyqlib.utils.general.spaced_to_upper_camel(self.wrapped.name),
+            name=dehumanize_name(self.wrapped.name),
             Id=int(self.wrapped.identifier, 0),
             extended=self.wrapped.extended,
             dlc=not_signals[0].length,
@@ -163,7 +168,7 @@ class MultiplexedMessage:
                 frame.signals.append(matrix_signal)
 
             frame.mux_names[multiplexer.identifier] = (
-                epyqlib.utils.general.spaced_to_upper_camel(multiplexer.name)
+                dehumanize_name(multiplexer.name)
             )
 
             for signal in multiplexer.children:

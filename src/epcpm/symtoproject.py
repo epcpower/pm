@@ -9,7 +9,9 @@ import epcpm.parametermodel
 import epcpm.symbolmodel
 
 
-humanize_name = epyqlib.utils.general.underscored_camel_to_title_spaced
+def humanize_name(name):
+    name = name.replace('_', ' - ')
+    return epyqlib.utils.general.underscored_camel_to_title_spaced(name)
 
 
 def load_can_path(can_path, hierarchy_path):
