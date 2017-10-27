@@ -152,6 +152,8 @@ class Group(epyqlib.treenode.TreeNode):
                 marshmallow.fields.Nested('Group'),
                 marshmallow.fields.Nested('Array'),
                 marshmallow.fields.Nested(graham.schema(Parameter)),
+                marshmallow.fields.Nested('EnumeratedParameter'),
+                marshmallow.fields.Nested('Enumeration'),
             )),
         ),
     )
@@ -373,15 +375,20 @@ class Array(epyqlib.treenode.TreeNode):
         return True
 
 
-@graham.schemify(tag='parameter.enumeration')
+@graham.schemify(tag='enumeratedparameter')
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
-class EnumerationParameter(epyqlib.treenode.TreeNode):
+class EnumeratedParameter(epyqlib.treenode.TreeNode):
     name = attr.ib(
-        default='New Enumeration',
+        default='New Enumerated Parameter',
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(),
         )
+    )
+    enumeration_uuid = epyqlib.attrsmodel.attr_uuid(
+        metadata={'human name': 'Enumeration UUID'},
+        default=None,
+        allow_none=True,
     )
     uuid = epyqlib.attrsmodel.attr_uuid()
 
@@ -394,20 +401,100 @@ class EnumerationParameter(epyqlib.treenode.TreeNode):
     can_delete = epyqlib.attrsmodel.childless_can_delete
 
 
+@graham.schemify(tag='enumerator')
+@epyqlib.utils.qt.pyqtify()
+@attr.s(hash=False)
+class Enumerator(epyqlib.treenode.TreeNode):
+    name = attr.ib(
+        default='New Enumerator',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    value = attr.ib(
+        default=None,
+        convert=epyqlib.attrsmodel.to_decimal_or_none,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(allow_none=True),
+        ),
+    )
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    def can_drop_on(self):
+        return False
+
+    can_delete = epyqlib.attrsmodel.childless_can_delete
+
+
+@graham.schemify(tag='enumeration')
+@epyqlib.utils.qt.pyqtify()
+@attr.s(hash=False)
+class Enumeration(epyqlib.treenode.TreeNode):
+    name = attr.ib(
+        default='New Enumeration',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    children = attr.ib(
+        default=attr.Factory(list),
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(fields=(
+                marshmallow.fields.Nested(graham.schema(Enumerator)),
+            )),
+        ),
+    )
+    # children = attr.ib(
+    #     default=attr.Factory(list),
+    #     metadata=graham.create_metadata(
+    #         field=marshmallow.fields.List(
+    #             marshmallow.fields.Nested(graham.schema(Enumerator)),
+    #         ),
+    #     ),
+    # )
+
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    def items(self):
+        for child in self.children:
+            yield (child.name, child.value)
+
+    def values(self):
+        for child in self.children:
+            yield child.value
+
+    def can_drop_on(self):
+        return False
+
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+        return True
+
+
 Root = epyqlib.attrsmodel.Root(
     default_name='Parameters',
-    valid_types=(Parameter, Group)
+    valid_types=(Parameter, Group, EnumeratedParameter, Enumeration)
 )
 
 types = epyqlib.attrsmodel.Types(
     types=(
         Root,
         Parameter,
-        EnumerationParameter,
+        EnumeratedParameter,
         Group,
         Array,
         ArrayGroupElement,
         ArrayParameterElement,
+        Enumeration,
+        Enumerator,
     ),
 )
 
@@ -418,7 +505,9 @@ columns = epyqlib.attrsmodel.columns(
         (Array, 'name'),
         (ArrayParameterElement, 'name'),
         (ArrayGroupElement, 'name'),
-        (EnumerationParameter, 'name'),
+        (EnumeratedParameter, 'name'),
+        (Enumeration, 'name'),
+        (Enumerator, 'name'),
     ),
     ((Group, 'type_name'), (Parameter, 'type_name')),
     ((Array, 'length'),),

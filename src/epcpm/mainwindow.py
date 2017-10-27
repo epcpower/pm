@@ -236,6 +236,7 @@ class Window:
         builder = epcpm.symbolstosym.builders.wrap(
             wrapped=node,
             parameter_uuid_finder=finder,
+            parameter_model=self.view_models['parameters'].model,
         )
 
         epyqlib.utils.qt.dialog(

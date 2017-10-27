@@ -1,3 +1,4 @@
+import collections
 import io
 import textwrap
 
@@ -20,9 +21,23 @@ def dehumanize_name(name):
 class Root:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
+    parameter_model = attr.ib(default=None)
 
     def gen(self):
         matrix = canmatrix.canmatrix.CanMatrix()
+
+        enumerations = self.collect_enumerations()
+
+        for enumeration in enumerations:
+            enumerators = collections.OrderedDict(
+                (e.value, dehumanize_name(e.name))
+                for e in enumeration.children
+            )
+
+            matrix.addValueTable(
+                name=dehumanize_name(enumeration.name),
+                valueTable=enumerators,
+            )
 
         for child in self.wrapped.children:
             frame = builders.wrap(
@@ -38,6 +53,24 @@ class Root:
         f.seek(0)
 
         return f.read().decode(codec)
+
+    def collect_enumerations(self):
+        collected = []
+
+        if self.parameter_model is None:
+            return collected
+
+        def collect(node, collected):
+            if isinstance(node, epcpm.parametermodel.Enumeration):
+                collected.append(node)
+
+        self.parameter_model.root.traverse(
+            call_this=collect,
+            payload=collected,
+            internal_nodes=True,
+        )
+
+        return collected
 
 
 @builders(epcpm.symbolmodel.Message)
@@ -79,18 +112,31 @@ class Signal:
         parameter = None
         if can_find_parameter:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+            is_enumerated = isinstance(
+                parameter,
+                epcpm.parametermodel.EnumeratedParameter,
+            )
 
-            if parameter.minimum is not None:
-                extras['min'] = parameter.minimum
+            if not is_enumerated:
+                if parameter.minimum is not None:
+                    extras['min'] = parameter.minimum
 
-            if parameter.maximum is not None:
-                extras['max'] = parameter.maximum
+                if parameter.maximum is not None:
+                    extras['max'] = parameter.maximum
 
-            if parameter.comment is not None:
-                extras['comment'] = parameter.comment
+                if parameter.comment is not None:
+                    extras['comment'] = parameter.comment
 
-            if parameter.units is not None:
-                extras['unit'] = parameter.units
+                if parameter.units is not None:
+                    extras['unit'] = parameter.units
+            else:
+                if parameter.enumeration_uuid is not None:
+                    enumeration = self.parameter_uuid_finder(
+                        parameter.enumeration_uuid,
+                    )
+
+                    extras['enumeration'] = dehumanize_name(enumeration.name)
+                    extras['values'] = {v: k for k, v in enumeration.items()}
 
         signal = canmatrix.canmatrix.Signal(
             name=dehumanize_name(self.wrapped.name),
@@ -101,7 +147,7 @@ class Signal:
             **extras,
         )
 
-        if parameter is not None:
+        if parameter is not None and not is_enumerated:
             attributes = signal.attributes
 
             attributes['LongName'] = parameter.name

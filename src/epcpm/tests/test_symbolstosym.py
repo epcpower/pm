@@ -154,3 +154,52 @@ def test_multiplexed():
     ''')
 
     assert tidy_sym(builder.gen()) == tidy_sym(expected)
+
+
+def test_enumerations():
+    project = epcpm.project.create_blank()
+    parameter_root = project.models.parameters.root
+    symbol_root = project.models.symbols.root
+
+    builder = epcpm.symbolstosym.builders.wrap(
+        symbol_root,
+        parameter_uuid_finder=project.models.symbols.node_from_uuid,
+        parameter_model=project.models.parameters,
+    )
+
+    on_off = epcpm.parametermodel.Enumeration(name='On Off')
+    parameter_root.append_child(on_off)
+    off = epcpm.parametermodel.Enumerator(name='off', value=0)
+    on = epcpm.parametermodel.Enumerator(name='on', value=1)
+
+    on_off.append_child(off)
+    on_off.append_child(on)
+
+    parameter = epcpm.parametermodel.EnumeratedParameter(
+        enumeration_uuid=on_off.uuid,
+    )
+    parameter_root.append_child(parameter)
+
+    message = epcpm.symbolmodel.Message()
+    symbol_root.append_child(message)
+    signal = epcpm.symbolmodel.Signal(
+        parameter_uuid=parameter.uuid,
+    )
+    message.append_child(signal)
+
+    expected = textwrap.dedent('''\
+    FormatVersion=5.0 // Do not edit this line!
+    Title="canmatrix-Export"
+    {ENUMS}
+    enum OnOff(0="off", 1="on")
+    
+    {SENDRECEIVE}
+    
+    [NewMessage]
+    ID=1FFFFFFFh
+    Type=Extended
+    DLC=0
+    Var=NewSignal unsigned 0,0 /e:OnOff
+    ''')
+
+    assert tidy_sym(builder.gen()) == tidy_sym(expected)
