@@ -19,9 +19,12 @@
                             "default": null,
                             "minimum": "3",
                             "maximum": null,
+                            "units": null,
+                            "decimal_places": null,
                             "nv": false,
                             "read_only": false,
                             "factory": true,
+                            "comment": null,
                             "uuid": "74d109c6-f96e-4736-8705-f9bdbdd9ef11"
                         },
                         {
@@ -31,9 +34,12 @@
                             "default": null,
                             "minimum": "5",
                             "maximum": "6.6",
+                            "units": null,
+                            "decimal_places": null,
                             "nv": false,
                             "read_only": false,
                             "factory": true,
+                            "comment": null,
                             "uuid": "6516a19e-ecb8-4cd9-acc1-3894193886f7"
                         },
                         {
@@ -43,9 +49,12 @@
                             "default": null,
                             "minimum": null,
                             "maximum": null,
+                            "units": null,
+                            "decimal_places": null,
                             "nv": false,
                             "read_only": false,
                             "factory": false,
+                            "comment": null,
                             "uuid": "4f578d5a-7568-45e4-a252-54f3154156c6"
                         },
                         {
@@ -60,9 +69,12 @@
                                     "default": null,
                                     "minimum": null,
                                     "maximum": null,
+                                    "units": null,
+                                    "decimal_places": null,
                                     "nv": false,
                                     "read_only": false,
                                     "factory": false,
+                                    "comment": null,
                                     "uuid": "3a3aa6ca-7f04-40a2-a0ae-b5db7804f189"
                                 },
                                 {
@@ -108,9 +120,12 @@
                     "default": null,
                     "minimum": null,
                     "maximum": null,
+                    "units": null,
+                    "decimal_places": null,
                     "nv": false,
                     "read_only": false,
                     "factory": false,
+                    "comment": null,
                     "uuid": "3d22465b-d080-4a77-a9ef-ab624b77f3e2"
                 },
                 {
@@ -120,9 +135,12 @@
                     "default": null,
                     "minimum": null,
                     "maximum": null,
+                    "units": null,
+                    "decimal_places": null,
                     "nv": false,
                     "read_only": false,
                     "factory": false,
+                    "comment": null,
                     "uuid": "51faa87e-8e9c-489c-9ece-e5f57e402031"
                 },
                 {
@@ -137,9 +155,12 @@
                             "default": null,
                             "minimum": null,
                             "maximum": null,
+                            "units": null,
+                            "decimal_places": null,
                             "nv": false,
                             "read_only": false,
                             "factory": false,
+                            "comment": null,
                             "uuid": "273ae233-aab3-4277-bc2b-33418bcba165"
                         },
                         {
@@ -149,9 +170,12 @@
                             "default": null,
                             "minimum": null,
                             "maximum": null,
+                            "units": null,
+                            "decimal_places": null,
                             "nv": false,
                             "read_only": false,
                             "factory": false,
+                            "comment": null,
                             "uuid": "9b655a87-fe6a-47bf-85c1-7eff19957ffd"
                         }
                     ],
@@ -179,9 +203,12 @@
                     "default": null,
                     "minimum": null,
                     "maximum": null,
+                    "units": null,
+                    "decimal_places": null,
                     "nv": false,
                     "read_only": false,
                     "factory": false,
+                    "comment": null,
                     "uuid": "a831ce88-d019-499d-b91e-9b9184bda7fa"
                 },
                 {
@@ -191,9 +218,12 @@
                     "default": null,
                     "minimum": null,
                     "maximum": null,
+                    "units": null,
+                    "decimal_places": null,
                     "nv": false,
                     "read_only": false,
                     "factory": false,
+                    "comment": null,
                     "uuid": "bcb40cd3-0005-4425-993c-71c6b6d15942"
                 }
             ],
@@ -211,9 +241,12 @@
                     "default": "208",
                     "minimum": "10",
                     "maximum": "800",
+                    "units": null,
+                    "decimal_places": null,
                     "nv": false,
                     "read_only": false,
                     "factory": false,
+                    "comment": null,
                     "uuid": "c25cd4e2-b2a8-4106-8610-4e0db6033a17"
                 },
                 {
@@ -223,9 +256,12 @@
                     "default": null,
                     "minimum": null,
                     "maximum": null,
+                    "units": null,
+                    "decimal_places": null,
                     "nv": false,
                     "read_only": false,
                     "factory": false,
+                    "comment": null,
                     "uuid": "422638c9-87d1-4c86-aa8c-73bd8bfff99c"
                 },
                 {
@@ -240,9 +276,12 @@
                             "default": null,
                             "minimum": null,
                             "maximum": null,
+                            "units": null,
+                            "decimal_places": null,
                             "nv": false,
                             "read_only": false,
                             "factory": false,
+                            "comment": null,
                             "uuid": "789fa76a-1756-474d-b35b-245f1d3bf62b"
                         },
                         {
@@ -252,9 +291,12 @@
                             "default": null,
                             "minimum": null,
                             "maximum": null,
+                            "units": null,
+                            "decimal_places": null,
                             "nv": false,
                             "read_only": false,
                             "factory": false,
+                            "comment": null,
                             "uuid": "78391aec-bc7a-43c8-a8d1-cc2ce219aa02"
                         }
                     ],
@@ -272,9 +314,12 @@
                             "default": null,
                             "minimum": null,
                             "maximum": null,
+                            "units": null,
+                            "decimal_places": null,
                             "nv": false,
                             "read_only": false,
                             "factory": false,
+                            "comment": null,
                             "uuid": "0f7175cb-7dcb-47f8-9001-035ca898d7d4"
                         },
                         {
@@ -284,9 +329,12 @@
                             "default": null,
                             "minimum": null,
                             "maximum": null,
+                            "units": null,
+                            "decimal_places": null,
                             "nv": false,
                             "read_only": false,
                             "factory": false,
+                            "comment": null,
                             "uuid": "bf4bbab0-4aed-4708-bd4c-9f0978b1c467"
                         }
                     ],
@@ -312,9 +360,12 @@
                             "default": null,
                             "minimum": null,
                             "maximum": null,
+                            "units": null,
+                            "decimal_places": null,
                             "nv": true,
                             "read_only": false,
                             "factory": false,
+                            "comment": null,
                             "uuid": "52b0ce3d-1aa6-48a1-b730-d4638a6813a9"
                         },
                         {
@@ -324,9 +375,12 @@
                             "default": null,
                             "minimum": null,
                             "maximum": null,
+                            "units": null,
+                            "decimal_places": null,
                             "nv": true,
                             "read_only": false,
                             "factory": false,
+                            "comment": null,
                             "uuid": "28d5df3b-36cb-4707-83fd-13e562b07938"
                         },
                         {
@@ -336,9 +390,12 @@
                             "default": null,
                             "minimum": null,
                             "maximum": null,
+                            "units": null,
+                            "decimal_places": null,
                             "nv": true,
                             "read_only": false,
                             "factory": false,
+                            "comment": null,
                             "uuid": "0a7bfb49-91cb-49d6-bdfb-9a2fcbc7dca7"
                         }
                     ],
@@ -364,9 +421,12 @@
                             "default": null,
                             "minimum": null,
                             "maximum": null,
+                            "units": null,
+                            "decimal_places": null,
                             "nv": false,
                             "read_only": true,
                             "factory": false,
+                            "comment": null,
                             "uuid": "4d554232-c9d9-4e3b-8a1e-bdb10932dd7c"
                         },
                         {
@@ -376,9 +436,12 @@
                             "default": null,
                             "minimum": null,
                             "maximum": null,
+                            "units": null,
+                            "decimal_places": null,
                             "nv": false,
                             "read_only": true,
                             "factory": false,
+                            "comment": null,
                             "uuid": "614996aa-facf-444b-9d56-257a0df1e182"
                         }
                     ],
@@ -391,9 +454,12 @@
                     "default": null,
                     "minimum": null,
                     "maximum": null,
+                    "units": null,
+                    "decimal_places": null,
                     "nv": false,
                     "read_only": false,
                     "factory": false,
+                    "comment": null,
                     "uuid": "04593c06-b3a0-4213-8ce2-b7a52e32e98c"
                 }
             ],
@@ -411,9 +477,12 @@
                     "default": null,
                     "minimum": null,
                     "maximum": null,
+                    "units": null,
+                    "decimal_places": null,
                     "nv": false,
                     "read_only": false,
                     "factory": false,
+                    "comment": null,
                     "uuid": "aa7d28a0-3af3-47c8-bdf5-2cffcbcd6b67"
                 }
             ],
