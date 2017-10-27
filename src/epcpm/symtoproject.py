@@ -77,89 +77,152 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
             enumeration.append_child(enumerator)
 
     for frame in matrix.frames:
-        if len(frame.mux_names) > 0:
-            message = epcpm.symbolmodel.MultiplexedMessage(
-                name=humanize_name(frame.name),
-                identifier=frame.id,
-                extended=frame.extended,
+        if len(frame.mux_names) == 0:
+            message = build_message(
+                frame=frame,
+                parameter_group=parameters_root,
+                enumeration_name_to_uuid=enumeration_name_to_uuid,
             )
-            symbols_root.append_child(message)
-
-            matrix_mux_signal, = (
-                s
-                for s in frame.signals
-                if s.multiplex == 'Multiplexor'
+        else:
+            message = build_multiplexed_message(
+                enumeration_name_to_uuid=enumeration_name_to_uuid,
+                frame=frame,
+                group_from_path=group_from_path,
             )
 
-            mux_signal = epcpm.symbolmodel.Signal(
-                name=humanize_name(matrix_mux_signal.name),
-                bits=matrix_mux_signal.signalsize,
-                signed=False,
-            )
-            message.append_child(mux_signal)
-
-            for value, mux_name in sorted(frame.mux_names.items()):
-                extras = {}
-
-                mux_comment = matrix_mux_signal.comments.get(value)
-                if mux_comment is not None:
-                    extras['comment'] = mux_comment
-
-                cycle_time = frame.attributes.get('GenMsgCycleTime')
-                if cycle_time is not None:
-                    extras['cycle_time'] = cycle_time
-
-                multiplexer = epcpm.symbolmodel.Multiplexer(
-                    name=humanize_name(mux_name),
-                    identifier=value,
-                    length=frame.size,
-                    **extras,
-                )
-                message.append_child(multiplexer)
-
-                for matrix_signal in frame.signals:
-                    if matrix_signal.multiplex != value:
-                        continue
-
-                    parameter_uuid = None
-                    group = group_from_path.get(
-                        (frame.name, mux_name, matrix_signal.name),
-                    )
-                    if group is not None:
-                        parameter = parameter_from_signal(
-                            frame=frame,
-                            matrix_signal=matrix_signal,
-                            mux_name=mux_name,
-                            enumeration_name_to_uuid=enumeration_name_to_uuid,
-                        )
-                        group.append_child(parameter)
-                        parameter_uuid = parameter.uuid
-
-                    signal = epcpm.symbolmodel.Signal(
-                        name=humanize_name(matrix_signal.name),
-                        parameter_uuid=parameter_uuid,
-                        bits=matrix_signal.signalsize,
-                        signed=matrix_signal.is_signed,
-                        factor=matrix_signal.factor,
-                    )
-
-                    multiplexer.append_child(signal)
+        symbols_root.append_child(message)
 
     return parameters_root, symbols_root
 
 
-def parameter_from_signal(frame, matrix_signal, mux_name,
-                          enumeration_name_to_uuid):
+def build_message(frame, parameter_group, enumeration_name_to_uuid):
+    message = message_from_matrix(
+        frame=frame,
+        factory=epcpm.symbolmodel.Message,
+    )
+    group = epcpm.parametermodel.Group(
+        name=humanize_name(frame.name),
+    )
+    parameter_group.append_child(group)
+
+    for matrix_signal in frame.signals:
+        parameter = parameter_from_signal(
+            frame=frame,
+            matrix_signal=matrix_signal,
+            enumeration_name_to_uuid=enumeration_name_to_uuid,
+        )
+        group.append_child(parameter)
+
+        signal = signal_from_matrix(
+            matrix_signal=matrix_signal,
+            factory=epcpm.symbolmodel.Signal,
+            parameter_uuid=parameter.uuid,
+        )
+        message.append_child(signal)
+
+    return message
+
+
+def message_from_matrix(frame, factory, **extras):
+    extras.setdefault('name', humanize_name(frame.name))
+    extras.setdefault('identifier', frame.id)
+    extras.setdefault('extended', frame.extended)
+
+    return factory(
+        **extras
+    )
+
+
+def signal_from_matrix(matrix_signal, factory, **extras):
+    extras.setdefault('name', humanize_name(matrix_signal.name))
+    extras.setdefault('bits', matrix_signal.signalsize)
+    extras.setdefault('factor', matrix_signal.factor)
+    extras.setdefault('signed', matrix_signal.is_signed)
+
+    return factory(
+        **extras
+    )
+
+
+def build_multiplexed_message(enumeration_name_to_uuid, frame, group_from_path):
+    message = message_from_matrix(
+        frame=frame,
+        factory=epcpm.symbolmodel.MultiplexedMessage,
+    )
+    matrix_mux_signal, = (
+        s
+        for s in frame.signals
+        if s.multiplex == 'Multiplexor'
+    )
+    mux_signal = signal_from_matrix(
+        factory=epcpm.symbolmodel.Signal,
+        matrix_signal=matrix_mux_signal,
+        signed=False,
+    )
+    message.append_child(mux_signal)
+    for value, mux_name in sorted(frame.mux_names.items()):
+        extras = {}
+
+        mux_comment = matrix_mux_signal.comments.get(value)
+        if mux_comment is not None:
+            extras['comment'] = mux_comment
+
+        cycle_time = frame.attributes.get('GenMsgCycleTime')
+        if cycle_time is not None:
+            extras['cycle_time'] = cycle_time
+
+        multiplexer = epcpm.symbolmodel.Multiplexer(
+            name=humanize_name(mux_name),
+            identifier=value,
+            length=frame.size,
+            **extras,
+        )
+        message.append_child(multiplexer)
+
+        for matrix_signal in frame.signals:
+            if matrix_signal.multiplex != value:
+                continue
+
+            parameter_uuid = None
+            group = group_from_path.get(
+                (frame.name, mux_name, matrix_signal.name),
+            )
+            if group is not None:
+                parameter = parameter_from_signal(
+                    frame=frame,
+                    matrix_signal=matrix_signal,
+                    mux_name=mux_name,
+                    enumeration_name_to_uuid=enumeration_name_to_uuid,
+                )
+                group.append_child(parameter)
+                parameter_uuid = parameter.uuid
+
+            signal = signal_from_matrix(
+                matrix_signal=matrix_signal,
+                factory=epcpm.symbolmodel.Signal,
+                parameter_uuid=parameter_uuid,
+            )
+
+            multiplexer.append_child(signal)
+
+    return message
+
+
+def parameter_from_signal(frame, matrix_signal, enumeration_name_to_uuid,
+                          mux_name=None):
     extras = {}
 
     attributes = matrix_signal.attributes
 
     signal_name = attributes.get('LongName')
     if signal_name is None:
-        signal_name = '{} : {}'.format(
-            humanize_name(mux_name),
-            humanize_name(matrix_signal.name),
-        )
+        if mux_name is not None:
+            signal_name = '{} : {}'.format(
+                humanize_name(mux_name),
+                humanize_name(matrix_signal.name),
+            )
+        else:
+            signal_name = humanize_name(matrix_signal.name)
 
     if matrix_signal.calcMin() != matrix_signal.min:
         extras['minimum'] = matrix_signal.min
@@ -183,10 +246,6 @@ def parameter_from_signal(frame, matrix_signal, mux_name,
     decimal_places = attributes.get('DisplayDecimalPlaces')
     if decimal_places is not None:
         extras['decimal_places'] = decimal_places
-
-    cycle_time = frame.attributes.get('GenMsgCycleTime')
-    if cycle_time is not None:
-        extras['cycle_time'] = cycle_time
 
     if matrix_signal.enumeration is not None:
         extras['enumeration_uuid'] = enumeration_name_to_uuid[
