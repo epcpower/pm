@@ -232,7 +232,7 @@ class Window:
         )
 
     def generate_symbol_file(self, node):
-        finder = self.view_models['parameters'].model.node_from_uuid
+        finder = self.view_models['symbols'].model.node_from_uuid
         builder = epcpm.symbolstosym.builders.wrap(
             wrapped=node,
             parameter_uuid_finder=finder,
