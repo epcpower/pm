@@ -207,6 +207,12 @@ class Window:
             for name, function in view_model.extras.items()
         }
 
+        if len(extra_actions) > 0:
+            menu.addSeparator()
+
+        expand_all = menu.addAction('Expand All')
+        collapse_all = menu.addAction('Collapse All')
+
         action = menu.exec(
             view_model.view.viewport().mapToGlobal(position)
         )
@@ -217,6 +223,10 @@ class Window:
                 extra(node)
             elif action is delete:
                 node.tree_parent.remove_child(child=node)
+            elif action is expand_all:
+                view_model.view.expandAll()
+            elif action is collapse_all:
+                view_model.view.collapseAll()
             else:
                 node.append_child(actions[action]())
 
