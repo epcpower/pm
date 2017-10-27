@@ -85,6 +85,7 @@ class Message:
             Id=self.wrapped.identifier,
             extended=self.wrapped.extended,
             dlc=self.wrapped.length,
+            comment=self.wrapped.comment,
         )
 
         for child in self.wrapped.children:
@@ -176,6 +177,7 @@ class MultiplexedMessage:
             Id=self.wrapped.identifier,
             extended=self.wrapped.extended,
             dlc=not_signals[0].length,
+            comment=self.wrapped.comment,
         )
 
         cycle_time = not_signals[0].cycle_time

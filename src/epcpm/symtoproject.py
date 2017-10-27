@@ -130,6 +130,7 @@ def message_from_matrix(frame, factory, **extras):
     extras.setdefault('name', humanize_name(frame.name))
     extras.setdefault('identifier', frame.id)
     extras.setdefault('extended', frame.extended)
+    extras.setdefault('comment', frame.comment)
 
     return factory(
         **extras
