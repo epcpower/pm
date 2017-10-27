@@ -152,15 +152,6 @@ def parameter_from_signal(frame, matrix_signal, mux_name,
                           enumeration_name_to_uuid):
     extras = {}
 
-    is_enumeration = matrix_signal.enumeration is not None
-
-    if not is_enumeration:
-        parameter_type = epcpm.parametermodel.Parameter
-    else:
-        parameter_type = (
-            epcpm.parametermodel.EnumeratedParameter
-        )
-
     attributes = matrix_signal.attributes
 
     signal_name = attributes.get('LongName')
@@ -170,40 +161,39 @@ def parameter_from_signal(frame, matrix_signal, mux_name,
             humanize_name(matrix_signal.name),
         )
 
-    if is_enumeration:
-        if matrix_signal.enumeration is not None:
-            extras['enumeration_uuid'] = enumeration_name_to_uuid[
-                matrix_signal.enumeration
-            ]
-    else:
-        if matrix_signal.calcMin() != matrix_signal.min:
-            extras['minimum'] = matrix_signal.min
+    if matrix_signal.calcMin() != matrix_signal.min:
+        extras['minimum'] = matrix_signal.min
 
-        if matrix_signal.calcMax() != matrix_signal.max:
-            extras['maximum'] = matrix_signal.max
+    if matrix_signal.calcMax() != matrix_signal.max:
+        extras['maximum'] = matrix_signal.max
 
-        if matrix_signal.comment is not None:
-            comment = matrix_signal.comment.strip()
-            if len(comment) > 0:
-                extras['comment'] = comment
+    if matrix_signal.comment is not None:
+        comment = matrix_signal.comment.strip()
+        if len(comment) > 0:
+            extras['comment'] = comment
 
-        if matrix_signal.unit is not None:
-            if len(matrix_signal.unit) > 0:
-                extras['units'] = matrix_signal.unit
+    if matrix_signal.unit is not None:
+        if len(matrix_signal.unit) > 0:
+            extras['units'] = matrix_signal.unit
 
-        default = attributes.get('GenSigStartValue')
-        if default is not None:
-            extras['default'] = default
+    default = attributes.get('GenSigStartValue')
+    if default is not None:
+        extras['default'] = default
 
-        decimal_places = attributes.get('DisplayDecimalPlaces')
-        if decimal_places is not None:
-            extras['decimal_places'] = decimal_places
+    decimal_places = attributes.get('DisplayDecimalPlaces')
+    if decimal_places is not None:
+        extras['decimal_places'] = decimal_places
 
-        cycle_time = frame.attributes.get('GenMsgCycleTime')
-        if cycle_time is not None:
-            extras['cycle_time'] = cycle_time
+    cycle_time = frame.attributes.get('GenMsgCycleTime')
+    if cycle_time is not None:
+        extras['cycle_time'] = cycle_time
 
-    return parameter_type(
+    if matrix_signal.enumeration is not None:
+        extras['enumeration_uuid'] = enumeration_name_to_uuid[
+            matrix_signal.enumeration
+        ]
+
+    return epcpm.parametermodel.Parameter(
         name=signal_name,
         **extras,
     )

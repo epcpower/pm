@@ -58,6 +58,11 @@ class Parameter(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.String(allow_none=True),
         ),
     )
+    enumeration_uuid = epyqlib.attrsmodel.attr_uuid(
+        metadata={'human name': 'Enumeration UUID'},
+        default=None,
+        allow_none=True,
+    )
     decimal_places = attr.ib(
         default=None,
         convert=epyqlib.attrsmodel.to_int_or_none,
@@ -152,7 +157,6 @@ class Group(epyqlib.treenode.TreeNode):
                 marshmallow.fields.Nested('Group'),
                 marshmallow.fields.Nested('Array'),
                 marshmallow.fields.Nested(graham.schema(Parameter)),
-                marshmallow.fields.Nested('EnumeratedParameter'),
                 marshmallow.fields.Nested('Enumeration'),
             )),
         ),
@@ -375,32 +379,6 @@ class Array(epyqlib.treenode.TreeNode):
         return True
 
 
-@graham.schemify(tag='enumeratedparameter')
-@epyqlib.utils.qt.pyqtify()
-@attr.s(hash=False)
-class EnumeratedParameter(epyqlib.treenode.TreeNode):
-    name = attr.ib(
-        default='New Enumerated Parameter',
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
-        )
-    )
-    enumeration_uuid = epyqlib.attrsmodel.attr_uuid(
-        metadata={'human name': 'Enumeration UUID'},
-        default=None,
-        allow_none=True,
-    )
-    uuid = epyqlib.attrsmodel.attr_uuid()
-
-    def __attrs_post_init__(self):
-        super().__init__()
-
-    def can_drop_on(self):
-        return False
-
-    can_delete = epyqlib.attrsmodel.childless_can_delete
-
-
 @graham.schemify(tag='enumerator')
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
@@ -481,14 +459,13 @@ class Enumeration(epyqlib.treenode.TreeNode):
 
 Root = epyqlib.attrsmodel.Root(
     default_name='Parameters',
-    valid_types=(Parameter, Group, EnumeratedParameter, Enumeration)
+    valid_types=(Parameter, Group, Enumeration)
 )
 
 types = epyqlib.attrsmodel.Types(
     types=(
         Root,
         Parameter,
-        EnumeratedParameter,
         Group,
         Array,
         ArrayGroupElement,
@@ -505,7 +482,6 @@ columns = epyqlib.attrsmodel.columns(
         (Array, 'name'),
         (ArrayParameterElement, 'name'),
         (ArrayGroupElement, 'name'),
-        (EnumeratedParameter, 'name'),
         (Enumeration, 'name'),
         (Enumerator, 'name'),
     ),

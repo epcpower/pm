@@ -112,31 +112,26 @@ class Signal:
         parameter = None
         if can_find_parameter:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
-            is_enumerated = isinstance(
-                parameter,
-                epcpm.parametermodel.EnumeratedParameter,
-            )
 
-            if not is_enumerated:
-                if parameter.minimum is not None:
-                    extras['min'] = parameter.minimum
+            if parameter.minimum is not None:
+                extras['min'] = parameter.minimum
 
-                if parameter.maximum is not None:
-                    extras['max'] = parameter.maximum
+            if parameter.maximum is not None:
+                extras['max'] = parameter.maximum
 
-                if parameter.comment is not None:
-                    extras['comment'] = parameter.comment
+            if parameter.comment is not None:
+                extras['comment'] = parameter.comment
 
-                if parameter.units is not None:
-                    extras['unit'] = parameter.units
-            else:
-                if parameter.enumeration_uuid is not None:
-                    enumeration = self.parameter_uuid_finder(
-                        parameter.enumeration_uuid,
-                    )
+            if parameter.units is not None:
+                extras['unit'] = parameter.units
 
-                    extras['enumeration'] = dehumanize_name(enumeration.name)
-                    extras['values'] = {v: k for k, v in enumeration.items()}
+            if parameter.enumeration_uuid is not None:
+                enumeration = self.parameter_uuid_finder(
+                    parameter.enumeration_uuid,
+                )
+
+                extras['enumeration'] = dehumanize_name(enumeration.name)
+                extras['values'] = {v: k for k, v in enumeration.items()}
 
         signal = canmatrix.canmatrix.Signal(
             name=dehumanize_name(self.wrapped.name),
@@ -147,7 +142,7 @@ class Signal:
             **extras,
         )
 
-        if parameter is not None and not is_enumerated:
+        if parameter is not None:
             attributes = signal.attributes
 
             attributes['LongName'] = parameter.name

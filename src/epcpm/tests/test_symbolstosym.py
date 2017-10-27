@@ -175,7 +175,7 @@ def test_enumerations():
     on_off.append_child(off)
     on_off.append_child(on)
 
-    parameter = epcpm.parametermodel.EnumeratedParameter(
+    parameter = epcpm.parametermodel.Parameter(
         enumeration_uuid=on_off.uuid,
     )
     parameter_root.append_child(parameter)
@@ -199,7 +199,7 @@ def test_enumerations():
     ID=1FFFFFFFh
     Type=Extended
     DLC=0
-    Var=NewSignal unsigned 0,0 /e:OnOff
+    Var=NewSignal unsigned 0,0 /e:OnOff /ln:"New Parameter"
     ''')
 
     assert tidy_sym(builder.gen()) == tidy_sym(expected)
