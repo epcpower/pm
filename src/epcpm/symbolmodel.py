@@ -17,6 +17,20 @@ __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
+class HexadecimalIntegerField(marshmallow.fields.Field):
+    def _serialize(self, value, attr, obj):
+        if self.allow_none and value is None:
+            return None
+
+        return hex(value)
+
+    def _deserialize(self, value, attr, data):
+        if self.allow_none and value is None:
+            return None
+
+        return int(value, 0)
+
+
 @staticmethod
 def child_from(node):
     return Signal(name=node.name, parameter_uuid=str(node.uuid))
@@ -79,7 +93,7 @@ class Message(epyqlib.treenode.TreeNode):
     identifier = attr.ib(
         default=0x1fffffff,
         metadata=graham.create_metadata(
-            field=marshmallow.fields.Integer(),
+            field=HexadecimalIntegerField(),
         ),
     )
     extended = attr.ib(
@@ -222,7 +236,7 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
     identifier = attr.ib(
         default=0x1fffffff,
         metadata=graham.create_metadata(
-            field=marshmallow.fields.Integer(),
+            field=HexadecimalIntegerField(),
         ),
     )
     extended = attr.ib(

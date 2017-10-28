@@ -1,8 +1,37 @@
+import attr
+import graham
+
 import epcpm.symbolmodel
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
+
+
+def test_hex_field():
+    @graham.schemify(tag='test')
+    @attr.s(hash=False)
+    class Test:
+        field = attr.ib(
+            metadata=graham.create_metadata(
+                field=epcpm.symbolmodel.HexadecimalIntegerField(),
+            ),
+        )
+        none = attr.ib(
+            default=None,
+            metadata=graham.create_metadata(
+                field=epcpm.symbolmodel.HexadecimalIntegerField(
+                    allow_none=True,
+                ),
+            ),
+        )
+
+    t = Test(field=0x123)
+
+    serialized = '{"_type": "test", "field": "0x123", "none": null}'
+
+    assert graham.dumps(t).data == serialized
+    assert graham.schema(Test).loads(serialized).data == t
 
 
 def test_all_addable_also_in_types():
