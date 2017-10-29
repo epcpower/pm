@@ -5,10 +5,11 @@
         {
             "_type": "message",
             "name": "CommandVF",
-            "identifier": "0x0CFFAE41",
+            "identifier": "0xcffae41",
             "extended": true,
             "length": 0,
             "cycle_time": null,
+            "comment": null,
             "children": [
                 {
                     "_type": "signal",
@@ -38,6 +39,7 @@
             "extended": true,
             "length": 0,
             "cycle_time": null,
+            "comment": null,
             "children": [
                 {
                     "_type": "signal",
@@ -56,6 +58,7 @@
             "name": "New Multiplexed Message",
             "identifier": "0x1fffffff",
             "extended": true,
+            "comment": null,
             "children": [
                 {
                     "_type": "signal",
