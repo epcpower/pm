@@ -35,6 +35,24 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
     parameters = epcpm.parametermodel.Group(name='Parameters')
     parameters_root.append_child(parameters)
 
+    other_parameters = epcpm.parametermodel.Group(name='Other')
+    parameters.append_child(other_parameters)
+
+    ccp = epcpm.parametermodel.Group(name='CCP')
+    parameters_root.append_child(ccp)
+
+    process_to_inverter = epcpm.parametermodel.Group(name='Process To Inverter')
+    parameters_root.append_child(process_to_inverter)
+
+    other = epcpm.parametermodel.Group(name='Other')
+    parameters_root.append_child(other)
+
+    read_nvs = epcpm.parametermodel.Group(name='ReadNV')
+    other.append_child(read_nvs)
+
+    ccp_counters = epcpm.parametermodel.Group(name='CCP Counters')
+    other.append_child(ccp_counters)
+
     def traverse_hierarchy(children, parent, group_from_path):
         for child in children:
             if isinstance(child, dict):
@@ -56,7 +74,14 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                 group_from_path[('ParameterQuery',) + tuple(child)] = parent
                 group_from_path[('ParameterResponse',) + tuple(child)] = parent
 
-    group_from_path = {}
+    group_from_path = {
+        'other_parameters': other_parameters,
+        'read_nvs': read_nvs,
+        'ccp': ccp,
+        'ccp_counters': ccp_counters,
+        'process_to_inverter': process_to_inverter,
+        'other': other,
+    }
     parameter_hierarchy = json.load(parameter_hierarchy_file)
     traverse_hierarchy(
         children=parameter_hierarchy['children'],
@@ -187,24 +212,41 @@ def build_multiplexed_message(enumeration_name_to_uuid, frame, group_from_path):
             if matrix_signal.multiplex != value:
                 continue
 
-            parameter_uuid = None
+            parameter = parameter_from_signal(
+                frame=frame,
+                matrix_signal=matrix_signal,
+                mux_name=mux_name,
+                enumeration_name_to_uuid=enumeration_name_to_uuid,
+            )
+
             group = group_from_path.get(
                 (frame.name, mux_name, matrix_signal.name),
             )
-            if group is not None:
-                parameter = parameter_from_signal(
-                    frame=frame,
-                    matrix_signal=matrix_signal,
-                    mux_name=mux_name,
-                    enumeration_name_to_uuid=enumeration_name_to_uuid,
-                )
-                group.append_child(parameter)
-                parameter_uuid = parameter.uuid
+
+            if group is None:
+                if frame.name.startswith('Parameter'):
+                    if matrix_signal.enumeration == 'ReadNV':
+                        group = 'read_nvs'
+                    else:
+                        group = 'other_parameters'
+                elif frame.name.startswith('CCP'):
+                    if matrix_signal.name == 'CommandCounter':
+                        group = 'ccp_counters'
+                    else:
+                        group = 'ccp'
+                elif frame.name.startswith('Process'):
+                    group = 'process_to_inverter'
+                else:
+                    group = 'other'
+
+                group = group_from_path[group]
+
+            group.append_child(parameter)
 
             signal = signal_from_matrix(
                 matrix_signal=matrix_signal,
                 factory=epcpm.symbolmodel.Signal,
-                parameter_uuid=parameter_uuid,
+                parameter_uuid=parameter.uuid,
             )
 
             multiplexer.append_child(signal)
