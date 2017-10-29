@@ -24,6 +24,10 @@ def based_int(v):
     return int(v)
 
 
+def hex_upper(v, width=8, prefix='0x'):
+    return f'{prefix}{v:0{width}X}'
+
+
 class HexadecimalIntegerField(marshmallow.fields.Field):
     def _serialize(self, value, attr, obj):
         if self.allow_none and value is None:
@@ -97,6 +101,7 @@ class Message(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.String(),
         ),
     )
+
     identifier = attr.ib(
         default=0x1fffffff,
         convert=based_int,
@@ -104,6 +109,11 @@ class Message(epyqlib.treenode.TreeNode):
             field=HexadecimalIntegerField(),
         ),
     )
+    identifier = epyqlib.attrsmodel.attribute(
+        data_display=hex_upper,
+        attribute=identifier,
+    )
+
     extended = attr.ib(
         default=True,
         convert=epyqlib.attrsmodel.two_state_checkbox,
@@ -241,6 +251,7 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.String(),
         ),
     )
+
     identifier = attr.ib(
         default=0x1fffffff,
         convert=based_int,
@@ -248,6 +259,11 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
             field=HexadecimalIntegerField(),
         ),
     )
+    identifier = epyqlib.attrsmodel.attribute(
+        data_display=hex_upper,
+        attribute=identifier,
+    )
+
     extended = attr.ib(
         default=True,
         convert=epyqlib.attrsmodel.two_state_checkbox,
