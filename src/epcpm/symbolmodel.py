@@ -17,6 +17,13 @@ __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
+def based_int(v):
+    if isinstance(v, str):
+        return int(v, 0)
+
+    return int(v)
+
+
 class HexadecimalIntegerField(marshmallow.fields.Field):
     def _serialize(self, value, attr, obj):
         if self.allow_none and value is None:
@@ -92,6 +99,7 @@ class Message(epyqlib.treenode.TreeNode):
     )
     identifier = attr.ib(
         default=0x1fffffff,
+        convert=based_int,
         metadata=graham.create_metadata(
             field=HexadecimalIntegerField(),
         ),
@@ -235,6 +243,7 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
     )
     identifier = attr.ib(
         default=0x1fffffff,
+        convert=based_int,
         metadata=graham.create_metadata(
             field=HexadecimalIntegerField(),
         ),
