@@ -109,7 +109,7 @@ class Message(epyqlib.treenode.TreeNode):
             field=HexadecimalIntegerField(),
         ),
     )
-    epyqlib.attrsmodel.attribute(
+    epyqlib.attrsmodel.attrib(
         data_display=hex_upper,
         attribute=identifier,
     )
@@ -259,7 +259,7 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
             field=HexadecimalIntegerField(),
         ),
     )
-    epyqlib.attrsmodel.attribute(
+    epyqlib.attrsmodel.attrib(
         data_display=hex_upper,
         attribute=identifier,
     )
