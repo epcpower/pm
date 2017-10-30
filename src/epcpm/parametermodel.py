@@ -13,6 +13,7 @@ __license__ = 'GPLv2+'
 
 
 @graham.schemify(tag='parameter')
+@epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Parameter(epyqlib.treenode.TreeNode):
@@ -132,6 +133,7 @@ class Parameter(epyqlib.treenode.TreeNode):
 
 
 @graham.schemify(tag='group')
+@epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Group(epyqlib.treenode.TreeNode):
@@ -176,6 +178,7 @@ class Group(epyqlib.treenode.TreeNode):
 
 
 @graham.schemify(tag='enumerations')
+@epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Enumerations(epyqlib.treenode.TreeNode):
@@ -211,6 +214,7 @@ class Enumerations(epyqlib.treenode.TreeNode):
 
 
 @graham.schemify(tag='array_parameter_element')
+@epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @epyqlib.utils.qt.pyqtify_passthrough_properties(
     original='original',
@@ -269,6 +273,7 @@ class ArrayParameterElement(epyqlib.treenode.TreeNode):
 
 
 @graham.schemify(tag='array_group_element')
+@epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class ArrayGroupElement(epyqlib.treenode.TreeNode):
@@ -300,6 +305,7 @@ class InvalidArrayLength(Exception):
 
 
 @graham.schemify(tag='array')
+@epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Array(epyqlib.treenode.TreeNode):
@@ -414,6 +420,7 @@ class Array(epyqlib.treenode.TreeNode):
 
 
 @graham.schemify(tag='enumerator')
+@epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Enumerator(epyqlib.treenode.TreeNode):
@@ -442,6 +449,7 @@ class Enumerator(epyqlib.treenode.TreeNode):
 
 
 @graham.schemify(tag='enumeration')
+@epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Enumeration(epyqlib.treenode.TreeNode):

@@ -48,6 +48,7 @@ def child_from(node):
 
 
 @graham.schemify(tag='signal')
+@epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Signal(epyqlib.treenode.TreeNode):
@@ -92,6 +93,7 @@ class Signal(epyqlib.treenode.TreeNode):
 
 
 @graham.schemify(tag='message')
+@epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Message(epyqlib.treenode.TreeNode):
@@ -174,6 +176,7 @@ class Message(epyqlib.treenode.TreeNode):
 
 
 @graham.schemify(tag='multiplexer')
+@epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Multiplexer(epyqlib.treenode.TreeNode):
@@ -242,6 +245,7 @@ class Multiplexer(epyqlib.treenode.TreeNode):
 
 
 @graham.schemify(tag='multiplexed_message')
+@epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class MultiplexedMessage(epyqlib.treenode.TreeNode):

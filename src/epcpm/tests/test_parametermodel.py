@@ -18,6 +18,7 @@ __license__ = 'GPLv2+'
 
 
 @graham.schemify('parameter')
+@epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Parameter(epyqlib.treenode.TreeNode):
@@ -31,6 +32,7 @@ class Parameter(epyqlib.treenode.TreeNode):
 
 
 @graham.schemify('Group')
+@epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Group(epyqlib.treenode.TreeNode):
