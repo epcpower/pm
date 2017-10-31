@@ -147,6 +147,8 @@ class Signal:
             is_signed=self.wrapped.signed,
             factor=self.wrapped.factor,
             startBit=self.wrapped.start_bit,
+            calc_min_for_none=False,
+            calc_max_for_none=False,
             **extras,
         )
 

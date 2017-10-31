@@ -24,7 +24,12 @@ def load_can_path(can_path, hierarchy_path):
 
 
 def load_can_file(can_file, file_type, parameter_hierarchy_file):
-    matrix, = canmatrix.formats.load(can_file, file_type).values()
+    matrix, = canmatrix.formats.load(
+        can_file,
+        file_type,
+        calc_min_for_none=False,
+        calc_max_for_none=False,
+    ).values()
 
     parameters_root = epcpm.parametermodel.Root()
     symbols_root = epcpm.symbolmodel.Root()
@@ -284,10 +289,10 @@ def parameter_from_signal(frame, matrix_signal, enumeration_name_to_uuid,
     if hexadecimal is not None:
         extras['display_hexadecimal'] = hexadecimal == 'True'
 
-    if matrix_signal.calcMin() != matrix_signal.min:
+    if matrix_signal.min is not None:
         extras['minimum'] = matrix_signal.min
 
-    if matrix_signal.calcMax() != matrix_signal.max:
+    if matrix_signal.max is not None:
         extras['maximum'] = matrix_signal.max
 
     if matrix_signal.comment is not None:
