@@ -143,6 +143,7 @@ class Signal:
             signalSize=self.wrapped.bits,
             is_signed=self.wrapped.signed,
             factor=self.wrapped.factor,
+            startBit=self.wrapped.start_bit,
             **extras,
         )
 

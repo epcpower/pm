@@ -76,6 +76,12 @@ class Signal(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.Decimal(as_string=True),
         ),
     )
+    start_bit = attr.ib(
+        default=0,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(),
+        ),
+    )
 
     parameter_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,

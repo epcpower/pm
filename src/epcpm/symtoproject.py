@@ -169,6 +169,7 @@ def signal_from_matrix(matrix_signal, factory, **extras):
     extras.setdefault('bits', matrix_signal.signalsize)
     extras.setdefault('factor', matrix_signal.factor)
     extras.setdefault('signed', matrix_signal.is_signed)
+    extras.setdefault('start_bit', matrix_signal.getStartbit())
 
     return factory(
         **extras
