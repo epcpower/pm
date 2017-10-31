@@ -156,6 +156,8 @@ def message_from_matrix(frame, factory, **extras):
     extras.setdefault('identifier', frame.id)
     extras.setdefault('extended', frame.extended)
     extras.setdefault('comment', frame.comment)
+    extras.setdefault('sendable', frame.attributes['Sendable'] == 'True')
+    extras.setdefault('receivable', frame.attributes['Receivable'] == 'True')
 
     return factory(
         **extras

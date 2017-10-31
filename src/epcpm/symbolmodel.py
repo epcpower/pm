@@ -141,6 +141,20 @@ class Message(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.Decimal(allow_none=True, as_string=True),
         ),
     )
+    sendable = attr.ib(
+        default=True,
+        convert=epyqlib.attrsmodel.two_state_checkbox,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Boolean(),
+        ),
+    )
+    receivable = attr.ib(
+        default=True,
+        convert=epyqlib.attrsmodel.two_state_checkbox,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Boolean(),
+        ),
+    )
     comment = attr.ib(
         default=None,
         convert=epyqlib.attrsmodel.to_str_or_none,
@@ -274,6 +288,20 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
     )
 
     extended = attr.ib(
+        default=True,
+        convert=epyqlib.attrsmodel.two_state_checkbox,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Boolean(),
+        ),
+    )
+    sendable = attr.ib(
+        default=True,
+        convert=epyqlib.attrsmodel.two_state_checkbox,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Boolean(),
+        ),
+    )
+    receivable = attr.ib(
         default=True,
         convert=epyqlib.attrsmodel.two_state_checkbox,
         metadata=graham.create_metadata(

@@ -88,6 +88,9 @@ class Message:
             comment=self.wrapped.comment,
         )
 
+        frame.attributes['Receivable'] = str(self.wrapped.receivable)
+        frame.attributes['Sendable'] = str(self.wrapped.sendable)
+
         for child in self.wrapped.children:
             signal = builders.wrap(
                 wrapped=child,
@@ -178,6 +181,10 @@ class MultiplexedMessage:
             extended=self.wrapped.extended,
             dlc=not_signals[0].length,
             comment=self.wrapped.comment,
+            attributes={
+                'Receivable': str(self.wrapped.receivable),
+                'Sendable': str(self.wrapped.sendable),
+            }
         )
 
         cycle_time = not_signals[0].cycle_time
