@@ -272,6 +272,10 @@ def parameter_from_signal(frame, matrix_signal, enumeration_name_to_uuid,
         else:
             signal_name = humanize_name(matrix_signal.name)
 
+    hexadecimal = matrix_signal.attributes.get('HexadecimalOutput')
+    if hexadecimal is not None:
+        extras['display_hexadecimal'] = hexadecimal == 'True'
+
     if matrix_signal.calcMin() != matrix_signal.min:
         extras['minimum'] = matrix_signal.min
 

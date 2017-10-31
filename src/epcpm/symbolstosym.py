@@ -150,6 +150,7 @@ class Signal:
             attributes = signal.attributes
 
             attributes['LongName'] = parameter.name
+            attributes['HexadecimalOutput'] = parameter.display_hexadecimal
 
             if parameter.default is not None:
                 attributes['GenSigStartValue'] = parameter.default
