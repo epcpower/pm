@@ -124,9 +124,16 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
 
 
 def build_message(frame, parameter_group, enumeration_name_to_uuid):
+    extras = {}
+
+    cycle_time = frame.attributes.get('GenMsgCycleTime')
+    if cycle_time is not None:
+        extras['cycle_time'] = cycle_time
+
     message = message_from_matrix(
         frame=frame,
         factory=epcpm.symbolmodel.Message,
+        **extras,
     )
     group = epcpm.parametermodel.Group(
         name=humanize_name(frame.name),

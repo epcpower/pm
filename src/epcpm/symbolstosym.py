@@ -88,6 +88,9 @@ class Message:
             comment=self.wrapped.comment,
         )
 
+        if self.wrapped.cycle_time is not None:
+            frame.attributes['GenMsgCycleTime'] = str(self.wrapped.cycle_time)
+
         frame.attributes['Receivable'] = str(self.wrapped.receivable)
         frame.attributes['Sendable'] = str(self.wrapped.sendable)
 
