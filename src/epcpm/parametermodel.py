@@ -59,11 +59,16 @@ class Parameter(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.String(allow_none=True),
         ),
     )
+
     enumeration_uuid = epyqlib.attrsmodel.attr_uuid(
-        metadata={'human name': 'Enumeration UUID'},
         default=None,
         allow_none=True,
     )
+    epyqlib.attrsmodel.attrib(
+        attribute=enumeration_uuid,
+        human_name='Enumeration UUID',
+    )
+
     decimal_places = attr.ib(
         default=None,
         convert=epyqlib.attrsmodel.to_int_or_none,

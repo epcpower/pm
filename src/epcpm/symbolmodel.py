@@ -76,11 +76,16 @@ class Signal(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.Decimal(as_string=True),
         ),
     )
+
     parameter_uuid = epyqlib.attrsmodel.attr_uuid(
-        metadata={'human name': 'Parameter UUID'},
         default=None,
         allow_none=True,
     )
+    epyqlib.attrsmodel.attrib(
+        attribute=parameter_uuid,
+        human_name='Parameter UUID',
+    )
+
     uuid = epyqlib.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
