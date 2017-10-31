@@ -138,6 +138,7 @@ def build_message(frame, parameter_group, enumeration_name_to_uuid):
     message = message_from_matrix(
         frame=frame,
         factory=epcpm.symbolmodel.Message,
+        length=frame.size,
         **extras,
     )
     group = epcpm.parametermodel.Group(
