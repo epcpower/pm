@@ -79,6 +79,16 @@ class Window:
 
         self.project = None
 
+        self.set_title()
+
+    def set_title(self, detail=None):
+        title = 'Parameter Manager v{}'.format(epcpm.__version__)
+
+        if detail is not None:
+            title = ' - '.join((title, detail))
+
+        self.ui.setWindowTitle(title)
+
     def set_model(self, name, view_model):
         self.view_models[name] = view_model
 
