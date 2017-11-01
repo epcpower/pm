@@ -298,6 +298,7 @@ class Window:
             __copyright__,
             __license__,
             f'Version Tag: {epcpm.__version_tag__}',
+            f'Commit SHA: {epcpm.__sha__}',
             f'Build Tag: {epcpm.__build_tag__}',
         ]
 
