@@ -1,5 +1,5 @@
 try:
-    import epcpm.__version
+    from epcpm.__version import __version__, __sha__, __revision__
 except ImportError:
     __version__ = None
     __sha__ = None
