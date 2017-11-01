@@ -18,10 +18,18 @@
     <item row="0" column="0">
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="QTreeView" name="parameter_view"/>
+       <widget class="QTreeView" name="parameter_view">
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QTreeView" name="symbol_view"/>
+       <widget class="QTreeView" name="symbol_view">
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
