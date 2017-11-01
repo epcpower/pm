@@ -58,6 +58,8 @@ class Window:
         self.ui.action_save.triggered.connect(lambda _: self.save())
         self.ui.action_save_as.triggered.connect(self.save_as)
 
+        self.ui.action_about.triggered.connect(self.about_dialog)
+
         self.ui.setWindowTitle(title)
 
         self.ui.setWindowIcon(QtGui.QIcon(str(icon_path)))
@@ -289,4 +291,20 @@ class Window:
         view.selectionModel().select(
             index,
             QtCore.QItemSelectionModel.ClearAndSelect,
+        )
+
+    def about_dialog(self):
+        message = [
+            __copyright__,
+            __license__,
+            f'Version Tag: {epcpm.__version_tag__}',
+            f'Build Tag: {epcpm.__build_tag__}',
+        ]
+
+        message = '\n'.join(message)
+
+        epyqlib.utils.qt.dialog(
+            parent=self.ui,
+            title='About Parameter Manager',
+            message=message,
         )
