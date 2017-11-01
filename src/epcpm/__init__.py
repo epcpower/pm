@@ -4,6 +4,7 @@ import epcpm._build
 
 try:
     __version__ = pkg_resources.get_distribution(__name__).version
+    __sha__ = None
 except pkg_resources.DistributionNotFound:
     # TODO: probably a different exception when pyinstaller'ed
     from epcpm._version import __version__, __sha__

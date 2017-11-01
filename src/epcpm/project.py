@@ -50,31 +50,33 @@ def loadp(path):
 def _post_load(project):
     models = project.models
 
-    if project.paths.parameters is None:
-        models.parameters = epyqlib.attrsmodel.Model(
-            root=epcpm.parametermodel.Root(),
-            columns=epcpm.parametermodel.columns,
-        )
-    else:
-        models.parameters = load_model(
-            project=project,
-            path=project.paths.parameters,
-            root_type=epcpm.parametermodel.Root,
-            columns=epcpm.parametermodel.columns,
-        )
+    if models.parameters is None:
+        if project.paths.parameters is None:
+            models.parameters = epyqlib.attrsmodel.Model(
+                root=epcpm.parametermodel.Root(),
+                columns=epcpm.parametermodel.columns,
+            )
+        else:
+            models.parameters = load_model(
+                project=project,
+                path=project.paths.parameters,
+                root_type=epcpm.parametermodel.Root,
+                columns=epcpm.parametermodel.columns,
+            )
 
-    if project.paths.symbols is None:
-        models.symbols = epyqlib.attrsmodel.Model(
-            root=epcpm.symbolmodel.Root(),
-            columns=epcpm.symbolmodel.columns,
-        )
-    else:
-        models.symbols = load_model(
-            project=project,
-            path=project.paths.symbols,
-            root_type=epcpm.symbolmodel.Root,
-            columns=epcpm.symbolmodel.columns,
-        )
+    if models.symbols is None:
+        if project.paths.symbols is None:
+            models.symbols = epyqlib.attrsmodel.Model(
+                root=epcpm.symbolmodel.Root(),
+                columns=epcpm.symbolmodel.columns,
+            )
+        else:
+            models.symbols = load_model(
+                project=project,
+                path=project.paths.symbols,
+                root_type=epcpm.symbolmodel.Root,
+                columns=epcpm.symbolmodel.columns,
+            )
 
     models.parameters.droppable_from.add(models.parameters.root)
 

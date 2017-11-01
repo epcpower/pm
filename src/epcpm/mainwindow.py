@@ -22,6 +22,7 @@ import epcpm.parameterstoc
 import epcpm.project
 import epcpm.symbolmodel
 import epcpm.symbolstosym
+import epcpm.symtoproject
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
@@ -57,6 +58,7 @@ class Window:
         self.ui.action_open.triggered.connect(lambda _: self.open_from_dialog())
         self.ui.action_save.triggered.connect(lambda _: self.save())
         self.ui.action_save_as.triggered.connect(self.save_as)
+        self.ui.action_import_sym.triggered.connect(self.import_sym)
 
         self.ui.action_about.triggered.connect(self.about_dialog)
 
@@ -71,6 +73,12 @@ class Window:
 
         self.data_filters = [
             ('JSON', ['json']),
+            ('All Files', ['*'])
+        ]
+        self.hierarchy_filters = self.data_filters
+
+        self.can_filters = [
+            ('CAN Symbols', ['sym']),
             ('All Files', ['*'])
         ]
 
@@ -115,11 +123,54 @@ class Window:
 
         self.open(filename=filename)
 
-    def open(self, filename=None):
-        if filename is None:
-            self.project = epcpm.project.create_blank()
+    def import_sym(self):
+        sym_path = epyqlib.utils.qt.file_dialog(
+            filters=self.can_filters,
+            parent=self.ui,
+        )
+
+        if sym_path is None:
+            return
+
+        hierarchy_path = epyqlib.utils.qt.file_dialog(
+            filters=self.hierarchy_filters,
+            parent=self.ui,
+            caption='Open Parameter Hierarchy',
+        )
+
+        if hierarchy_path is None:
+            return
+
+        with open(sym_path, 'rb') as sym, open(hierarchy_path) as hierarchy:
+            parameters_root, symbols_root = epcpm.symtoproject.load_can_file(
+                can_file=sym,
+                file_type=str(pathlib.Path(sym.name).suffix[1:]),
+                parameter_hierarchy_file=hierarchy,
+            )
+
+        project = epcpm.project.Project()
+
+        project.models.parameters = epyqlib.attrsmodel.Model(
+            root=parameters_root,
+            columns=epcpm.parametermodel.columns,
+        )
+        project.models.symbols = epyqlib.attrsmodel.Model(
+            root=symbols_root,
+            columns=epcpm.symbolmodel.columns,
+        )
+
+        epcpm.project._post_load(project)
+
+        self.open(project=project)
+
+    def open(self, filename=None, project=None):
+        if project is not None:
+            self.project = project
         else:
-            self.project = epcpm.project.loadp(filename)
+            if filename is None:
+                self.project = epcpm.project.create_blank()
+            else:
+                self.project = epcpm.project.loadp(filename)
 
         model_views = epcpm.project.Models()
 
