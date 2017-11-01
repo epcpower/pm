@@ -46,6 +46,7 @@
     <addaction name="action_save_as"/>
     <addaction name="separator"/>
     <addaction name="action_import_sym"/>
+    <addaction name="action_export_sym"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -88,6 +89,11 @@
   <action name="action_import_sym">
    <property name="text">
     <string>&amp;Import .sym...</string>
+   </property>
+  </action>
+  <action name="action_export_sym">
+   <property name="text">
+    <string>&amp;Export .sym...</string>
    </property>
   </action>
  </widget>

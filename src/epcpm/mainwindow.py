@@ -59,6 +59,7 @@ class Window:
         self.ui.action_save.triggered.connect(lambda _: self.save())
         self.ui.action_save_as.triggered.connect(self.save_as)
         self.ui.action_import_sym.triggered.connect(self.import_sym)
+        self.ui.action_export_sym.triggered.connect(self.generate_symbol_file)
 
         self.ui.action_about.triggered.connect(self.about_dialog)
 
@@ -185,9 +186,6 @@ class Window:
         model_views.symbols = ModelView(
             view=self.ui.symbol_view,
             types=epcpm.symbolmodel.types,
-            extras=collections.OrderedDict((
-                ('Generate .sym...', self.generate_symbol_file),
-            )),
         )
 
         self.uuid_notifier.disconnect_view()
@@ -304,10 +302,10 @@ class Window:
             modal=False,
         )
 
-    def generate_symbol_file(self, node):
+    def generate_symbol_file(self):
         finder = self.view_models['symbols'].model.node_from_uuid
         builder = epcpm.symbolstosym.builders.wrap(
-            wrapped=node,
+            wrapped=self.view_models['symbols'].model.root,
             parameter_uuid_finder=finder,
             parameter_model=self.view_models['parameters'].model,
         )
@@ -316,6 +314,11 @@ class Window:
             parent=self.ui,
             message=builder.gen(),
             modal=False,
+            save_filters=(
+                ('CAN Symbols', ['sym']),
+                ('All Files', ['*'])
+            ),
+            save_caption='Save CAN Symbols',
         )
 
     def selection_changed(self, selected, deselected):
