@@ -2,6 +2,7 @@ import attr
 import graham
 
 import epyqlib.attrsmodel
+import epyqlib.tests.test_attrsmodel
 
 import epcpm.symbolmodel
 

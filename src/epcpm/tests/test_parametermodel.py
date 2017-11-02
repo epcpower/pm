@@ -6,6 +6,7 @@ import pytest
 
 import epyqlib.attrsmodel
 import epyqlib.searchbox
+import epyqlib.tests.test_attrsmodel
 import epyqlib.treenode
 import epyqlib.utils.general
 import epyqlib.utils.qt
