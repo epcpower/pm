@@ -49,8 +49,6 @@ class Window:
             ui_file,
         ))
 
-        self.ui.setWindowIcon(QtGui.QIcon(str(icon_path)))
-
         self.ui.action_new.triggered.connect(lambda _: self.open())
         self.ui.action_open.triggered.connect(lambda _: self.open_from_dialog())
         self.ui.action_save.triggered.connect(lambda _: self.save())
