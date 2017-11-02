@@ -360,6 +360,6 @@ class Window:
 
         epyqlib.utils.qt.dialog(
             parent=self.ui,
-            title='About Parameter Manager',
+            title='About',
             message=message,
         )
