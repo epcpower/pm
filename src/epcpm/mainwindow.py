@@ -62,7 +62,10 @@ class Window:
         self.ui.setWindowTitle(title)
 
         logging.debug('Loading icon from: {}'.format(icon_path))
-        self.ui.setWindowIcon(QtGui.QIcon(str(icon_path)))
+        self.ui.setWindowIcon(QtGui.QIcon(str(pathlib.Path(
+            pathlib.Path(__file__).parents[0],
+            icon_path,
+        ))))
 
         self.project_filters = [
             ('Parameter Project', ['pmp']),
