@@ -2,6 +2,16 @@
 
 ![Parameter Manager screenshot](/screenshot.png?raw=true)
 
+## Running From Binary
+
+### Windows
+
+- Download artifact from the [build history on AppVeyor](https://ci.appveyor.com/project/KyleAltendorf/pm/history)
+- Extract contents of the `.zip` file
+- Run `epcpm.exe`
+
+A sample project is available in `epcpm/tests/`
+
 ## Running From Source
 
 Instructions are for Python 3.6 but they should work with slight tweaks with 3.5.
