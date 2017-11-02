@@ -26,6 +26,7 @@ a = Analysis(
     pathex=['..'],
     binaries=[],
     datas=[(str(pathlib.Path(p).resolve()), pp) for p, pp in data_files],
+    hiddenimports=['canmatrix.sym'],
     hookspath=[],
     runtime_hooks=[],
     excludes=[],
