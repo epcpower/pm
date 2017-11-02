@@ -42,6 +42,7 @@ class ModelView:
 
 class Window:
     def __init__(self, title, ui_file, icon_path):
+        logging.debug('Working directory: {}'.format(os.getcwd()))
         logging.debug('Loading UI from: {}'.format(ui_file))
 
         self.ui = PyQt5.uic.loadUi(pathlib.Path(
