@@ -41,4 +41,4 @@ Expecting the user to handle properly installing these would be better but is no
 - a bit more, but not nearly as much as Windows
 - Run `venv/bin/epcpm`
 
-A sample project is available in `src/epcpm/test/`
+A sample project is available in `src/epcpm/tests/`
