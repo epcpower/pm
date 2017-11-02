@@ -60,6 +60,7 @@ class Window:
 
         self.ui.setWindowTitle(title)
 
+        logging.debug('Loading icon from: {}'.format(icon_path))
         self.ui.setWindowIcon(QtGui.QIcon(str(icon_path)))
 
         self.project_filters = [
