@@ -274,6 +274,10 @@ class ArrayParameterElement(epyqlib.treenode.TreeNode):
             field=epyqlib.attrsmodel.Reference(),
         ),
     )
+    epyqlib.attrsmodel.attrib(
+        attribute=original,
+        no_column=True,
+    )
 
     def __attrs_post_init__(self):
         super().__init__()
@@ -301,6 +305,10 @@ class ArrayGroupElement(epyqlib.treenode.TreeNode):
         metadata=graham.create_metadata(
             field=epyqlib.attrsmodel.Reference(),
         ),
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=original,
+        no_column=True,
     )
 
     def __attrs_post_init__(self):
@@ -530,24 +538,34 @@ Enumerations,
     ),
 )
 
+
+# TODO: CAMPid 943896754217967154269254167
+def merge(name, *types):
+    return tuple((x, name) for x in types)
+
+
 columns = epyqlib.attrsmodel.columns(
-    (
-        (Parameter, 'name'),
-        (Enumerations, 'name'),
-        (Group, 'name'),
-        (Array, 'name'),
-        (ArrayParameterElement, 'name'),
-        (ArrayGroupElement, 'name'),
-        (Enumeration, 'name'),
-        (Enumerator, 'name'),
-    ),
-    ((Group, 'type_name'), (Parameter, 'type_name')),
-    ((Array, 'length'),),
-    ((Array, 'named_enumerators'),),
-    ((Parameter, 'default'), (ArrayParameterElement, 'default')),
-    ((Parameter, 'minimum'), (ArrayParameterElement, 'minimum')),
-    ((Parameter, 'maximum'), (ArrayParameterElement, 'maximum')),
-    ((Parameter, 'nv'), (ArrayParameterElement, 'nv')),
-    ((Parameter, 'read_only'),),
-    ((Parameter, 'factory'),)
+    merge('name', *types.types.values()),
+    merge('type_name', Parameter, Group),
+    merge('length', Array),
+    merge('named_enumerators', Array),
+    merge('units', Parameter),
+
+    merge('value', Enumerator),
+    merge('default', Parameter, ArrayParameterElement),
+    merge('minimum', Parameter, ArrayParameterElement),
+    merge('maximum', Parameter, ArrayParameterElement),
+
+    merge('nv', Parameter, ArrayParameterElement),
+    merge('read_only', Parameter),
+    merge('factory', Parameter),
+
+    merge('display_hexadecimal', Parameter),
+    merge('decimal_places', Parameter),
+
+    merge('comment', Parameter),
+
+    merge('enumeration_uuid', Parameter),
+    merge('uuid', *types.types.values()),
+
 )

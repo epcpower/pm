@@ -66,6 +66,7 @@ class Signal(epyqlib.treenode.TreeNode):
     )
     signed = attr.ib(
         default=False,
+        convert=epyqlib.attrsmodel.two_state_checkbox,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Boolean(),
         ),
@@ -366,18 +367,31 @@ types = epyqlib.attrsmodel.Types(
     types=(Root, Message, Signal, MultiplexedMessage, Multiplexer),
 )
 
+
+# TODO: CAMPid 943896754217967154269254167
+def merge(name, *types):
+    return tuple((x, name) for x in types)
+
+
 columns = epyqlib.attrsmodel.columns(
-    tuple((x, 'name') for x in types.types.values()),
-    tuple((x, 'identifier') for x in (
-        Message,
-        MultiplexedMessage,
-        Multiplexer,
-    )),
-    ((Signal, 'bits'),),
-    tuple((x, 'length') for x in (Message, Multiplexer)),
-    ((Message, 'extended'),),
-    ((Message, 'cycle_time'),),
-    ((Signal, 'parameter_uuid'),)
+    merge('name', *types.types.values()),
+    merge('identifier', Message, MultiplexedMessage, Multiplexer),
+    merge('length', Message, Multiplexer) + merge('bits', Signal),
+    merge('extended', Message, MultiplexedMessage),
+
+    merge('cycle_time', Message, Multiplexer),
+
+    merge('signed', Signal),
+    merge('factor', Signal),
+
+    merge('sendable', Message, MultiplexedMessage),
+    merge('receivable', Message, MultiplexedMessage),
+    merge('start_bit', Signal),
+    merge('comment', Message, Multiplexer, MultiplexedMessage),
+
+
+    merge('parameter_uuid', Signal),
+    merge('uuid', *types.types.values()),
 )
 
 

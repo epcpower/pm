@@ -1,6 +1,8 @@
 import attr
 import graham
 
+import epyqlib.attrsmodel
+
 import epcpm.symbolmodel
 
 # See file COPYING in this source tree
@@ -56,3 +58,11 @@ def test_all_have_can_drop_on():
 
 def test_all_have_can_delete():
     assert_incomplete_types('can_delete')
+
+
+def test_all_fields_in_columns():
+    epyqlib.tests.test_attrsmodel.all_fields_in_columns(
+        types=epcpm.symbolmodel.types,
+        root_type=epcpm.symbolmodel.Root,
+        columns=epcpm.symbolmodel.columns,
+    )
