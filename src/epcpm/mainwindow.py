@@ -42,17 +42,14 @@ class ModelView:
 
 class Window:
     def __init__(self, title, ui_file, icon_path):
-        # # TODO: CAMPid 980567566238416124867857834291346779
-        # ico_file = os.path.join(QtCore.QFileInfo.absolutePath(QtCore.QFileInfo(__file__)), 'icon.ico')
-        # ico = QtGui.QIcon(ico_file)
-        # self.setWindowIcon(ico)
-
         logging.debug('Loading UI from: {}'.format(ui_file))
 
         self.ui = PyQt5.uic.loadUi(pathlib.Path(
             pathlib.Path(__file__).parents[0],
             ui_file,
         ))
+
+        self.ui.setWindowIcon(QtGui.QIcon(str(icon_path)))
 
         self.ui.action_new.triggered.connect(lambda _: self.open())
         self.ui.action_open.triggered.connect(lambda _: self.open_from_dialog())
