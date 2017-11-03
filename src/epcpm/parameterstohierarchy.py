@@ -76,10 +76,10 @@ class Parameter:
     symbol_root = attr.ib()
 
     def gen(self):
-        signal = self.symbol_root.node_from_uuid(
-            target_uuid=self.wrapped.uuid,
+        signal = self.symbol_root.nodes_by_attribute(
+            attribute_value=self.wrapped.uuid,
             attribute_name='parameter_uuid',
-        )
+        ).pop()
 
         message = signal.tree_parent
 

@@ -257,7 +257,16 @@ def build_multiplexed_message(enumeration_name_to_uuid, frame, group_from_path):
 
                 group = group_from_path[group]
 
-            group.append_child(parameter)
+            same_name_parameters = [
+                node
+                for node in group.children
+                if node.name == parameter.name
+            ]
+
+            if len(same_name_parameters) == 0:
+                group.append_child(parameter)
+            else:
+                parameter, = same_name_parameters
 
             signal = signal_from_matrix(
                 matrix_signal=matrix_signal,
