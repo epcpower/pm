@@ -1,3 +1,4 @@
+import decimal
 import json
 import pathlib
 
@@ -29,6 +30,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
         file_type,
         calc_min_for_none=False,
         calc_max_for_none=False,
+        float_factory=decimal.Decimal,
     ).values()
 
     parameters_root = epcpm.parametermodel.Root()
