@@ -23,6 +23,7 @@ import epcpm.project
 import epcpm.symbolmodel
 import epcpm.symbolstosym
 import epcpm.symtoproject
+import epcpm.valuesetmodel
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
@@ -50,10 +51,32 @@ class Window:
             ui_file,
         ))
 
-        self.ui.action_new.triggered.connect(lambda _: self.open())
-        self.ui.action_open.triggered.connect(lambda _: self.open_from_dialog())
-        self.ui.action_save.triggered.connect(lambda _: self.save())
-        self.ui.action_save_as.triggered.connect(self.save_as)
+        self.ui.action_new_project.triggered.connect(
+            lambda _: self.open_project(),
+        )
+        self.ui.action_open_project.triggered.connect(
+            lambda _: self.open_project_from_dialog(),
+        )
+        self.ui.action_save_project.triggered.connect(
+            lambda _: self.save_project(),
+        )
+        self.ui.action_save_as_project.triggered.connect(
+            lambda _: self.save_as_project(),
+        )
+
+        self.ui.action_new_value_set.triggered.connect(
+            lambda _: self.open_value_set(),
+        )
+        self.ui.action_open_value_set.triggered.connect(
+            lambda _: self.open_value_set_from_dialog(),
+        )
+        self.ui.action_save_value_set.triggered.connect(
+            lambda _: self.save_value_set(),
+        )
+        self.ui.action_save_as_value_set.triggered.connect(
+            lambda _: self.save_as_value_set(),
+        )
+
         self.ui.action_import_sym.triggered.connect(self.import_sym)
         self.ui.action_export_sym.triggered.connect(self.generate_symbol_file)
 
@@ -125,7 +148,7 @@ class Window:
         if filename is None:
             return
 
-        self.open(filename=filename)
+        self.open_project(filename=filename)
 
     def import_sym(self):
         sym_path = epyqlib.utils.qt.file_dialog(
@@ -165,9 +188,9 @@ class Window:
 
         epcpm.project._post_load(project)
 
-        self.open(project=project)
+        self.open_project(project=project)
 
-    def open(self, filename=None, project=None):
+    def open_project(self, filename=None, project=None):
         if project is not None:
             self.project = project
         else:
@@ -232,10 +255,10 @@ class Window:
 
         return
 
-    def save(self):
+    def save_project(self):
         self.project.save(parent=self.ui)
 
-    def save_as(self):
+    def save_as_project(self):
         project = attr.evolve(self.project)
         project.filename = None
         # TODO: this is still going to mutate the same object as the
@@ -244,6 +267,47 @@ class Window:
 
         project.save(parent=self.ui)
         self.project = project
+
+    def open_value_set(self, filename=None, value_set=None):
+        if value_set is not None:
+            self.value_set = value_set
+        else:
+            if filename is None:
+                parameters = self.view_models.get('parameters')
+                if parameters is not None:
+                    parameters = parameters.model
+                self.value_set = epcpm.valuesetmodel.create_blank(
+                    parameter_model=parameters,
+                )
+            else:
+                self.value_set = epcpm.valuesetmodel.loadp(filename)
+
+        view = self.ui.value_set_view
+        model = self.value_set.model
+
+        model_view = ModelView(
+            view=view,
+            model=model,
+            types=epcpm.valuesetmodel.types,
+        )
+
+        view.setSelectionBehavior(view.SelectRows)
+        view.setSelectionMode(view.SingleSelection)
+        view.setDropIndicatorShown(True)
+        view.setDragEnabled(True)
+        view.setAcceptDrops(True)
+
+        self.set_model(name='value_set', view_model=model_view)
+        view.expandAll()
+
+    def open_value_set_from_dialog(self):
+        raise NotImplementedError()
+
+    def save_value_set(self):
+        raise NotImplementedError()
+
+    def save_as_value_set(self):
+        raise NotImplementedError()
 
     def context_menu(self, position, view_model):
         index = view_model.view.indexAt(position)

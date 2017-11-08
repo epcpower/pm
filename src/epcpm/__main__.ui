@@ -14,24 +14,28 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_2">
+   <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QTreeView" name="parameter_view">
-        <property name="alternatingRowColors">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QTreeView" name="symbol_view">
-        <property name="alternatingRowColors">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QTreeView" name="parameter_view">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QTreeView" name="value_set_view">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QTreeView" name="symbol_view">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -48,10 +52,26 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="action_new"/>
-    <addaction name="action_open"/>
-    <addaction name="action_save"/>
-    <addaction name="action_save_as"/>
+    <widget class="QMenu" name="action_new_value_set_2">
+     <property name="title">
+      <string>Value Set</string>
+     </property>
+     <addaction name="action_new_value_set"/>
+     <addaction name="action_open_value_set"/>
+     <addaction name="action_save_value_set"/>
+     <addaction name="action_save_as_value_set"/>
+    </widget>
+    <widget class="QMenu" name="menu_Project">
+     <property name="title">
+      <string>&amp;Project</string>
+     </property>
+     <addaction name="action_new_project"/>
+     <addaction name="action_open_project"/>
+     <addaction name="action_save_project"/>
+     <addaction name="action_save_as_project"/>
+    </widget>
+    <addaction name="menu_Project"/>
+    <addaction name="action_new_value_set_2"/>
     <addaction name="separator"/>
     <addaction name="action_import_sym"/>
     <addaction name="action_export_sym"/>
@@ -66,17 +86,17 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="action_open">
+  <action name="action_open_project">
    <property name="text">
     <string>&amp;Open...</string>
    </property>
   </action>
-  <action name="action_save_as">
+  <action name="action_save_as_project">
    <property name="text">
     <string>Save &amp;As...</string>
    </property>
   </action>
-  <action name="action_save">
+  <action name="action_save_project">
    <property name="text">
     <string>&amp;Save</string>
    </property>
@@ -84,7 +104,7 @@
     <string>Ctrl+S</string>
    </property>
   </action>
-  <action name="action_new">
+  <action name="action_new_project">
    <property name="text">
     <string>&amp;New</string>
    </property>
@@ -102,6 +122,36 @@
   <action name="action_export_sym">
    <property name="text">
     <string>&amp;Export .sym...</string>
+   </property>
+  </action>
+  <action name="action_Project">
+   <property name="text">
+    <string>&amp;Project</string>
+   </property>
+  </action>
+  <action name="action_new_value_set">
+   <property name="text">
+    <string>&amp;New</string>
+   </property>
+  </action>
+  <action name="action_Value_Set">
+   <property name="text">
+    <string>&amp;Value Set...</string>
+   </property>
+  </action>
+  <action name="action_save_value_set">
+   <property name="text">
+    <string>&amp;Save</string>
+   </property>
+  </action>
+  <action name="action_save_as_value_set">
+   <property name="text">
+    <string>Save &amp;As...</string>
+   </property>
+  </action>
+  <action name="action_open_value_set">
+   <property name="text">
+    <string>&amp;Open...</string>
    </property>
   </action>
  </widget>

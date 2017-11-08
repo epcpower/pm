@@ -65,7 +65,7 @@ def main(*args, logger):
     if args.file is not None:
         args.file.close()
         filename = os.path.abspath(args.file.name)
-        window.open(filename=filename)
+        window.open_project(filename=filename)
         args.file.close()
 
     window.ui.show()
