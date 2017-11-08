@@ -116,8 +116,11 @@ class Window:
         view_model.selection.selectionChanged.connect(
             self.selection_changed)
 
-    def open_from_dialog(self):
-        filename = epyqlib.utils.qt.file_dialog(self.project_filters, parent=self.ui)
+    def open_project_from_dialog(self):
+        filename = epyqlib.utils.qt.file_dialog(
+            self.project_filters,
+            parent=self.ui,
+        )
 
         if filename is None:
             return
