@@ -301,13 +301,25 @@ class Window:
         view.expandAll()
 
     def open_value_set_from_dialog(self):
-        raise NotImplementedError()
+        path = epyqlib.utils.qt.file_dialog(
+            attr.fields(epyqlib.pm.valuesetmodel.ValueSet).filters.default,
+            parent=self.ui,
+        )
+
+        if path is None:
+            return
+
+        self.open_value_set(filename=path)
 
     def save_value_set(self):
-        raise NotImplementedError()
+        self.value_set.save(parent=self.ui)
 
     def save_as_value_set(self):
-        raise NotImplementedError()
+        value_set = attr.evolve(self.value_set)
+        value_set.path = None
+
+        value_set.save(parent=self.ui)
+        self.value_set = value_set
 
     def context_menu(self, position, view_model):
         index = view_model.view.indexAt(position)
