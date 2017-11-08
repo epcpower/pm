@@ -15,15 +15,15 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
 
 import epyqlib.attrsmodel
+import epyqlib.pm.parametermodel
+import epyqlib.pm.valuesetmodel
 import epyqlib.utils.qt
 
-import epcpm.parametermodel
 import epcpm.parameterstoc
 import epcpm.project
 import epcpm.symbolmodel
 import epcpm.symbolstosym
 import epcpm.symtoproject
-import epcpm.valuesetmodel
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
@@ -179,7 +179,7 @@ class Window:
 
         project.models.parameters = epyqlib.attrsmodel.Model(
             root=parameters_root,
-            columns=epcpm.parametermodel.columns,
+            columns=epyqlib.pm.parametermodel.columns,
         )
         project.models.symbols = epyqlib.attrsmodel.Model(
             root=symbols_root,
@@ -203,7 +203,7 @@ class Window:
 
         model_views.parameters = ModelView(
             view=self.ui.parameter_view,
-            types=epcpm.parametermodel.types,
+            types=epyqlib.pm.parametermodel.types,
             extras=collections.OrderedDict((
                 ('Generate code...', self.generate_code),
             )),
@@ -276,11 +276,11 @@ class Window:
                 parameters = self.view_models.get('parameters')
                 if parameters is not None:
                     parameters = parameters.model
-                self.value_set = epcpm.valuesetmodel.create_blank(
+                self.value_set = epyqlib.pm.valuesetmodel.create_blank(
                     parameter_model=parameters,
                 )
             else:
-                self.value_set = epcpm.valuesetmodel.loadp(filename)
+                self.value_set = epyqlib.pm.valuesetmodel.loadp(filename)
 
         view = self.ui.value_set_view
         model = self.value_set.model
@@ -288,7 +288,7 @@ class Window:
         model_view = ModelView(
             view=view,
             model=model,
-            types=epcpm.valuesetmodel.types,
+            types=epyqlib.pm.valuesetmodel.types,
         )
 
         view.setSelectionBehavior(view.SelectRows)

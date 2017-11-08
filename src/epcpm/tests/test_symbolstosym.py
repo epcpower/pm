@@ -1,5 +1,7 @@
 import textwrap
 
+import epyqlib.pm.parametermodel
+
 import epcpm.symbolmodel
 import epcpm.symbolstosym
 
@@ -167,15 +169,15 @@ def test_enumerations():
         parameter_model=project.models.parameters,
     )
 
-    on_off = epcpm.parametermodel.Enumeration(name='On Off')
+    on_off = epyqlib.pm.parametermodel.Enumeration(name='On Off')
     parameter_root.append_child(on_off)
-    off = epcpm.parametermodel.Enumerator(name='off', value=0)
-    on = epcpm.parametermodel.Enumerator(name='on', value=1)
+    off = epyqlib.pm.parametermodel.Enumerator(name='off', value=0)
+    on = epyqlib.pm.parametermodel.Enumerator(name='on', value=1)
 
     on_off.append_child(off)
     on_off.append_child(on)
 
-    parameter = epcpm.parametermodel.Parameter(
+    parameter = epyqlib.pm.parametermodel.Parameter(
         enumeration_uuid=on_off.uuid,
     )
     parameter_root.append_child(parameter)

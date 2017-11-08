@@ -1,23 +1,24 @@
-import epcpm.parametermodel
+import epyqlib.pm.parametermodel
+
 import epcpm.parameterstohierarchy
 import epcpm.symbolmodel
 
 
 def test_():
-    parameter_root = epcpm.parametermodel.Root()
+    parameter_root = epyqlib.pm.parametermodel.Root()
 
-    parameters = epcpm.parametermodel.Group(name='Parameters')
+    parameters = epyqlib.pm.parametermodel.Group(name='Parameters')
     parameter_root.append_child(parameters)
 
-    group = epcpm.parametermodel.Group(name='Group A')
+    group = epyqlib.pm.parametermodel.Group(name='Group A')
     parameters.append_child(group)
 
-    parameter_aa = epcpm.parametermodel.Parameter(name='Parameter AA')
+    parameter_aa = epyqlib.pm.parametermodel.Parameter(name='Parameter AA')
     group.append_child(parameter_aa)
-    parameter_ab = epcpm.parametermodel.Parameter(name='Parameter AB')
+    parameter_ab = epyqlib.pm.parametermodel.Parameter(name='Parameter AB')
     group.append_child(parameter_ab)
 
-    parameter_a = epcpm.parametermodel.Parameter(name='Parameter A')
+    parameter_a = epyqlib.pm.parametermodel.Parameter(name='Parameter A')
     parameters.append_child(parameter_a)
 
     symbol_root = epcpm.symbolmodel.Root()

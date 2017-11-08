@@ -4,14 +4,14 @@ import functools
 import attr
 import pycparser
 
-import epcpm.parametermodel
+import epyqlib.pm.parametermodel
 import epyqlib.utils.general
 
 
 builders = epyqlib.utils.general.TypeMap()
 
 
-@builders(epcpm.parametermodel.Root)
+@builders(epyqlib.pm.parametermodel.Root)
 @attr.s
 class Root:
     wrapped = attr.ib()
@@ -43,7 +43,7 @@ class Root:
         return decls
 
 
-@builders(epcpm.parametermodel.Parameter)
+@builders(epyqlib.pm.parametermodel.Parameter)
 @attr.s
 class Parameter:
     wrapped = attr.ib()
@@ -60,7 +60,7 @@ class Parameter:
         return type_name
 
 
-@builders(epcpm.parametermodel.Group)
+@builders(epyqlib.pm.parametermodel.Group)
 @attr.s
 class Group:
     wrapped = attr.ib()
@@ -98,7 +98,7 @@ class Group:
         return epyqlib.utils.general.spaced_to_upper_camel(name) + '_t'
 
 
-@builders(epcpm.parametermodel.Array)
+@builders(epyqlib.pm.parametermodel.Array)
 @attr.s
 class Array:
     wrapped = attr.ib()

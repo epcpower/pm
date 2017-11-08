@@ -5,6 +5,7 @@ import textwrap
 
 import pytest
 
+import epyqlib.pm.parametermodel
 import epyqlib.tests.common
 
 import epcpm.symbolmodel
@@ -65,7 +66,7 @@ def test_load_can_file():
         epyqlib.tests.common.hierarchy_files['customer'],
     )
 
-    assert isinstance(parameter_root, epcpm.parametermodel.Root)
+    assert isinstance(parameter_root, epyqlib.pm.parametermodel.Root)
     assert isinstance(symbol_root, epcpm.symbolmodel.Root)
 
 

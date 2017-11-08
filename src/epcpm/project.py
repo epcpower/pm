@@ -4,9 +4,9 @@ import attr
 import graham
 import marshmallow
 
+import epyqlib.pm.parametermodel
 import epyqlib.utils.qt
 
-import epcpm.parametermodel
 import epcpm.symbolmodel
 
 
@@ -53,15 +53,15 @@ def _post_load(project):
     if models.parameters is None:
         if project.paths.parameters is None:
             models.parameters = epyqlib.attrsmodel.Model(
-                root=epcpm.parametermodel.Root(),
-                columns=epcpm.parametermodel.columns,
+                root=epyqlib.pm.parametermodel.Root(),
+                columns=epyqlib.pm.parametermodel.columns,
             )
         else:
             models.parameters = load_model(
                 project=project,
                 path=project.paths.parameters,
-                root_type=epcpm.parametermodel.Root,
-                columns=epcpm.parametermodel.columns,
+                root_type=epyqlib.pm.parametermodel.Root,
+                columns=epyqlib.pm.parametermodel.columns,
             )
 
     if models.symbols is None:

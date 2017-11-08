@@ -2,9 +2,9 @@ import json
 
 import attr
 
+import epyqlib.pm.parametermodel
 import epyqlib.utils.general
 
-import epcpm.parametermodel
 import epcpm.symbolstosym
 
 builders = epyqlib.utils.general.TypeMap()
@@ -13,7 +13,7 @@ builders = epyqlib.utils.general.TypeMap()
 dehumanize_name = epcpm.symbolstosym.dehumanize_name
 
 
-@builders(epcpm.parametermodel.Root)
+@builders(epyqlib.pm.parametermodel.Root)
 @attr.s
 class Root:
     wrapped = attr.ib()
@@ -36,8 +36,8 @@ class Root:
                 if isinstance(
                     child,
                     (
-                        epcpm.parametermodel.Group,
-                        epcpm.parametermodel.Parameter,
+                        epyqlib.pm.parametermodel.Group,
+                        epyqlib.pm.parametermodel.Parameter,
                         # epcpm.parametermodel.EnumeratedParameter,
                     ),
                 )
@@ -50,7 +50,7 @@ class Root:
         return json.dumps(d, **kwargs)
 
 
-@builders(epcpm.parametermodel.Group)
+@builders(epyqlib.pm.parametermodel.Group)
 @attr.s
 class Group:
     wrapped = attr.ib()
@@ -69,7 +69,7 @@ class Group:
         }
 
 
-@builders(epcpm.parametermodel.Parameter)
+@builders(epyqlib.pm.parametermodel.Parameter)
 @attr.s
 class Parameter:
     wrapped = attr.ib()

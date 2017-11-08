@@ -5,8 +5,11 @@ import textwrap
 import attr
 import canmatrix.canmatrix
 import canmatrix.formats
-import epcpm.symbolmodel
+
+import epyqlib.pm.parametermodel
 import epyqlib.utils.general
+
+import epcpm.symbolmodel
 
 builders = epyqlib.utils.general.TypeMap()
 
@@ -61,7 +64,7 @@ class Root:
             return collected
 
         def collect(node, collected):
-            if isinstance(node, epcpm.parametermodel.Enumeration):
+            if isinstance(node, epyqlib.pm.parametermodel.Enumeration):
                 collected.append(node)
 
         self.parameter_model.root.traverse(

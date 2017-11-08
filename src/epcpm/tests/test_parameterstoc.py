@@ -8,8 +8,8 @@ import pycparser.c_generator
 import pytest
 
 import epyqlib.attrsmodel
+import epyqlib.pm.parametermodel
 
-import epcpm.parametermodel
 import epcpm.parameterstoc
 
 
@@ -111,20 +111,20 @@ def test_pycparser_exploration_wrapped():
 
 
 def test_single_layer_group_to_c():
-    group = epcpm.parametermodel.Group(
+    group = epyqlib.pm.parametermodel.Group(
         name='Group Name',
     )
 
     children = [
-        epcpm.parametermodel.Parameter(
+        epyqlib.pm.parametermodel.Parameter(
             name='Parameter A',
             type_name='int16_t',
         ),
-        epcpm.parametermodel.Parameter(
+        epyqlib.pm.parametermodel.Parameter(
             name='Parameter B',
             type_name='int16_t',
         ),
-        epcpm.parametermodel.Parameter(
+        epyqlib.pm.parametermodel.Parameter(
             name='Parameter C',
             type_name='int16_t',
         ),
@@ -151,16 +151,16 @@ def test_single_layer_group_to_c():
 
 
 def test_nested_group_to_c():
-    inner_inner_group = epcpm.parametermodel.Group(
+    inner_inner_group = epyqlib.pm.parametermodel.Group(
         name='Inner Inner Group Name',
     )
 
     children = [
-        epcpm.parametermodel.Parameter(
+        epyqlib.pm.parametermodel.Parameter(
             name='Parameter F',
             type_name='int16_t',
         ),
-        epcpm.parametermodel.Parameter(
+        epyqlib.pm.parametermodel.Parameter(
             name='Parameter G',
             type_name='int16_t',
         ),
@@ -169,17 +169,17 @@ def test_nested_group_to_c():
     for child in children:
         inner_inner_group.append_child(child)
 
-    inner_group = epcpm.parametermodel.Group(
+    inner_group = epyqlib.pm.parametermodel.Group(
         name='Inner Group Name',
     )
 
     children = [
-        epcpm.parametermodel.Parameter(
+        epyqlib.pm.parametermodel.Parameter(
             name='Parameter D',
             type_name='int16_t',
         ),
         inner_inner_group,
-        epcpm.parametermodel.Parameter(
+        epyqlib.pm.parametermodel.Parameter(
             name='Parameter E',
             type_name='int16_t',
         ),
@@ -188,21 +188,21 @@ def test_nested_group_to_c():
     for child in children:
         inner_group.append_child(child)
 
-    outer_group = epcpm.parametermodel.Group(
+    outer_group = epyqlib.pm.parametermodel.Group(
         name='Outer Group Name',
     )
 
     children = [
-        epcpm.parametermodel.Parameter(
+        epyqlib.pm.parametermodel.Parameter(
             name='Parameter A',
             type_name='int16_t',
         ),
         inner_group,
-        epcpm.parametermodel.Parameter(
+        epyqlib.pm.parametermodel.Parameter(
             name='Parameter B',
             type_name='int16_t',
         ),
-        epcpm.parametermodel.Parameter(
+        epyqlib.pm.parametermodel.Parameter(
             name='Parameter C',
             type_name='int16_t',
         ),
@@ -243,12 +243,12 @@ def test_nested_group_to_c():
 
 
 def test_datalogger_a():
-    data_logger = epcpm.parametermodel.Group(name='Data Logger')
+    data_logger = epyqlib.pm.parametermodel.Group(name='Data Logger')
 
-    chunks_array = epcpm.parametermodel.Array(name='Chunks')
+    chunks_array = epyqlib.pm.parametermodel.Array(name='Chunks')
     data_logger.append_child(chunks_array)
 
-    chunk = epcpm.parametermodel.Group(type_name='Chunk')
+    chunk = epyqlib.pm.parametermodel.Group(type_name='Chunk')
     chunks_array.append_child(chunk)
     chunks_array.length = 4
     chunks_array.children[0].name = 'First'
@@ -256,30 +256,30 @@ def test_datalogger_a():
     chunks_array.children[2].name = 'Third'
     chunks_array.children[3].name = 'Fourth'
 
-    address = epcpm.parametermodel.Parameter(
+    address = epyqlib.pm.parametermodel.Parameter(
         name='Address',
         default=0,
         type_name='int16_t',
     )
     chunk.append_child(address)
-    bytes_ = epcpm.parametermodel.Parameter(
+    bytes_ = epyqlib.pm.parametermodel.Parameter(
         name='Bytes',
         default=0,
         type_name='int16_t',
     )
     chunk.append_child(bytes_)
 
-    post_trigger_duration = epcpm.parametermodel.Parameter(
+    post_trigger_duration = epyqlib.pm.parametermodel.Parameter(
         name='Post Trigger Duration',
         default=500,
         type_name='int16_t',
     )
     data_logger.append_child(post_trigger_duration)
 
-    group = epcpm.parametermodel.Group(name='Group')
+    group = epyqlib.pm.parametermodel.Group(name='Group')
     data_logger.append_child(group)
 
-    param = epcpm.parametermodel.Parameter(
+    param = epyqlib.pm.parametermodel.Parameter(
         name='Param',
         type_name='int16_t',
     )
@@ -354,8 +354,8 @@ typedef struct
 
 
 def test_basic_parameter_array():
-    array = epcpm.parametermodel.Array(name='Array Name')
-    parameter = epcpm.parametermodel.Parameter(
+    array = epyqlib.pm.parametermodel.Array(name='Array Name')
+    parameter = epyqlib.pm.parametermodel.Parameter(
         name='Parameter Name',
         type_name='int16_t',
     )
@@ -388,9 +388,9 @@ def test_basic_parameter_array():
 
 
 def test_grouped_parameter_array():
-    group = epcpm.parametermodel.Group(name='Group Name')
-    array = epcpm.parametermodel.Array(name='Array Name')
-    parameter = epcpm.parametermodel.Parameter(
+    group = epyqlib.pm.parametermodel.Group(name='Group Name')
+    array = epyqlib.pm.parametermodel.Array(name='Array Name')
+    parameter = epyqlib.pm.parametermodel.Parameter(
         name='Parameter Name',
         type_name='int16_t',
     )
@@ -429,9 +429,9 @@ def test_grouped_parameter_array():
 
 
 def test_grouped_parameter_array_no_enum():
-    array = epcpm.parametermodel.Array(name='Array Name')
+    array = epyqlib.pm.parametermodel.Array(name='Array Name')
     array.named_enumerators = False
-    parameter = epcpm.parametermodel.Parameter(
+    parameter = epyqlib.pm.parametermodel.Parameter(
         name='Parameter Name',
         type_name='int16_t',
     )
@@ -459,28 +459,28 @@ def test_grouped_parameter_array_no_enum():
 
 
 def test_line_monitor_params():
-    line_monitoring = epcpm.parametermodel.Group(
+    line_monitoring = epyqlib.pm.parametermodel.Group(
         name='Line Monitoring',
     )
 
-    frequency_limits = epcpm.parametermodel.Array(
+    frequency_limits = epyqlib.pm.parametermodel.Array(
         name='Frequency Limits',
     )
     line_monitoring.append_child(frequency_limits)
 
-    frequency_limit = epcpm.parametermodel.Group(
+    frequency_limit = epyqlib.pm.parametermodel.Group(
         name='First',
         type_name='Frequency Limit',
     )
     frequency_limits.append_child(frequency_limit)
 
-    frequency = epcpm.parametermodel.Parameter(
+    frequency = epyqlib.pm.parametermodel.Parameter(
         name='Frequency',
         type_name='_iq',
     )
     frequency_limit.append_child(frequency)
 
-    clearing_time = epcpm.parametermodel.Parameter(
+    clearing_time = epyqlib.pm.parametermodel.Parameter(
         name='Clearing Time',
         type_name='_iq',
     )
@@ -523,10 +523,10 @@ def test_line_monitor_params():
 
 
 def test_root():
-    root = epcpm.parametermodel.Root()
-    group = epcpm.parametermodel.Group(name='Group')
-    p1 = epcpm.parametermodel.Parameter(name='red', type_name='RedType')
-    p2 = epcpm.parametermodel.Parameter(name='blue', type_name='BlueType')
+    root = epyqlib.pm.parametermodel.Root()
+    group = epyqlib.pm.parametermodel.Group(name='Group')
+    p1 = epyqlib.pm.parametermodel.Parameter(name='red', type_name='RedType')
+    p2 = epyqlib.pm.parametermodel.Parameter(name='blue', type_name='BlueType')
 
     root.append_child(group)
     group.append_child(p1)

@@ -4,20 +4,21 @@ import pycparser.c_ast
 import pycparser.c_generator
 
 import epyqlib.attrsmodel
+import epyqlib.pm.parametermodel
 
-import epcpm.parametermodel
+import epcpm.parameterstoc
 
 
 @click.command()
 @click.option('--parameters', type=click.File(), required=True)
 @click.option('--declaration/--instantiation', default=True)
 def cli(parameters, declaration):
-    root_schema = graham.schema(epcpm.parametermodel.Root)
+    root_schema = graham.schema(epyqlib.pm.parametermodel.Root)
     root = root_schema.loads(parameters.read()).data
 
     model = epyqlib.attrsmodel.Model(
         root=root,
-        columns=epcpm.parametermodel.columns,
+        columns=epyqlib.pm.parametermodel.columns,
     )
 
     builder = epcpm.parameterstoc.builders.wrap(model.root)

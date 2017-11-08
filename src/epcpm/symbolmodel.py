@@ -6,11 +6,10 @@ import marshmallow
 import PyQt5.QtCore
 
 import epyqlib.attrsmodel
+import epyqlib.pm.parametermodel
 import epyqlib.treenode
 import epyqlib.utils.general
 import epyqlib.utils.qt
-
-import epcpm.parametermodel
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
@@ -192,7 +191,7 @@ class Message(epyqlib.treenode.TreeNode):
         return {}
 
     def can_drop_on(self, node):
-        return isinstance(node, epcpm.parametermodel.Parameter)
+        return isinstance(node, epyqlib.pm.parametermodel.Parameter)
 
     def can_delete(self, node=None):
         if node is None:
@@ -261,7 +260,7 @@ class Multiplexer(epyqlib.treenode.TreeNode):
         return {}
 
     def can_drop_on(self, node):
-        return isinstance(node, (epcpm.parametermodel.Parameter, Signal))
+        return isinstance(node, (epyqlib.pm.parametermodel.Parameter, Signal))
 
     def can_delete(self, node=None):
         if node is None:

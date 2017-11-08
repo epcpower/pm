@@ -4,9 +4,9 @@ import pathlib
 
 import canmatrix.formats
 
+import epyqlib.pm.parametermodel
 import epyqlib.utils.general
 
-import epcpm.parametermodel
 import epcpm.symbolmodel
 
 
@@ -33,37 +33,39 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
         float_factory=decimal.Decimal,
     ).values()
 
-    parameters_root = epcpm.parametermodel.Root()
+    parameters_root = epyqlib.pm.parametermodel.Root()
     symbols_root = epcpm.symbolmodel.Root()
 
-    enumerations = epcpm.parametermodel.Enumerations(name='Enumerations')
+    enumerations = epyqlib.pm.parametermodel.Enumerations(name='Enumerations')
     parameters_root.append_child(enumerations)
 
-    parameters = epcpm.parametermodel.Group(name='Parameters')
+    parameters = epyqlib.pm.parametermodel.Group(name='Parameters')
     parameters_root.append_child(parameters)
 
-    other_parameters = epcpm.parametermodel.Group(name='Other')
+    other_parameters = epyqlib.pm.parametermodel.Group(name='Other')
     parameters.append_child(other_parameters)
 
-    ccp = epcpm.parametermodel.Group(name='CCP')
+    ccp = epyqlib.pm.parametermodel.Group(name='CCP')
     parameters_root.append_child(ccp)
 
-    process_to_inverter = epcpm.parametermodel.Group(name='Process To Inverter')
+    process_to_inverter = epyqlib.pm.parametermodel.Group(
+        name='Process To Inverter',
+    )
     parameters_root.append_child(process_to_inverter)
 
-    other = epcpm.parametermodel.Group(name='Other')
+    other = epyqlib.pm.parametermodel.Group(name='Other')
     parameters_root.append_child(other)
 
-    read_nvs = epcpm.parametermodel.Group(name='ReadNV')
+    read_nvs = epyqlib.pm.parametermodel.Group(name='ReadNV')
     other.append_child(read_nvs)
 
-    ccp_counters = epcpm.parametermodel.Group(name='CCP Counters')
+    ccp_counters = epyqlib.pm.parametermodel.Group(name='CCP Counters')
     other.append_child(ccp_counters)
 
     def traverse_hierarchy(children, parent, group_from_path):
         for child in children:
             if isinstance(child, dict):
-                group = epcpm.parametermodel.Group(
+                group = epyqlib.pm.parametermodel.Group(
                     name=child['name'],
                 )
                 parent.append_child(group)
@@ -98,14 +100,14 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
 
     enumeration_name_to_uuid = {}
     for name, values in sorted(matrix.valueTables.items()):
-        enumeration = epcpm.parametermodel.Enumeration(
+        enumeration = epyqlib.pm.parametermodel.Enumeration(
             name=name,
         )
         enumerations.append_child(enumeration)
         enumeration_name_to_uuid[name] = enumeration.uuid
 
         for value, name in values.items():
-            enumerator = epcpm.parametermodel.Enumerator(
+            enumerator = epyqlib.pm.parametermodel.Enumerator(
                 name=name,
                 value=value,
             )
@@ -143,7 +145,7 @@ def build_message(frame, parameter_group, enumeration_name_to_uuid):
         length=frame.size,
         **extras,
     )
-    group = epcpm.parametermodel.Group(
+    group = epyqlib.pm.parametermodel.Group(
         name=humanize_name(frame.name),
     )
     parameter_group.append_child(group)
@@ -329,7 +331,7 @@ def parameter_from_signal(frame, matrix_signal, enumeration_name_to_uuid,
             matrix_signal.enumeration
         ]
 
-    return epcpm.parametermodel.Parameter(
+    return epyqlib.pm.parametermodel.Parameter(
         name=signal_name,
         **extras,
     )
