@@ -65,7 +65,7 @@ class Window:
         )
 
         self.ui.action_new_value_set.triggered.connect(
-            lambda _: self.open_value_set(),
+            lambda _: self.new_value_set(),
         )
         self.ui.action_open_value_set.triggered.connect(
             lambda _: self.open_value_set_from_dialog(),
@@ -112,6 +112,7 @@ class Window:
         self.uuid_notifier.changed.connect(self.symbol_uuid_changed)
 
         self.project = None
+        self.value_set = None
 
         self.set_title()
 
@@ -268,19 +269,55 @@ class Window:
         project.save(parent=self.ui)
         self.project = project
 
-    def open_value_set(self, filename=None, value_set=None):
-        if value_set is not None:
-            self.value_set = value_set
-        else:
-            if filename is None:
-                parameters = self.view_models.get('parameters')
-                if parameters is not None:
-                    parameters = parameters.model
-                self.value_set = epyqlib.pm.valuesetmodel.create_blank(
-                    parameter_model=parameters,
-                )
-            else:
-                self.value_set = epyqlib.pm.valuesetmodel.loadp(filename)
+    def new_value_set(self):
+        parameters = self.view_models.get('parameters')
+        if parameters is not None:
+            parameters = parameters.model
+
+        value_set = epyqlib.pm.valuesetmodel.create_blank(
+            parameter_model=parameters,
+        )
+
+        human_names = QtWidgets.QMessageBox.question(
+            self.ui,
+            'Humanized Names',
+            'Use humanized names in new value set?',
+            buttons=(
+                QtWidgets.QMessageBox.Yes
+                | QtWidgets.QMessageBox.No
+            ),
+            defaultButton=QtWidgets.QMessageBox.Yes,
+        ) == QtWidgets.QMessageBox.Yes
+
+        only_parameters = QtWidgets.QMessageBox.question(
+            self.ui,
+            'Only Parameters',
+            'Only include parameters group in new value set?',
+            buttons=(
+                QtWidgets.QMessageBox.Yes
+                | QtWidgets.QMessageBox.No
+            ),
+            defaultButton=QtWidgets.QMessageBox.No,
+        ) == QtWidgets.QMessageBox.Yes
+
+        base_node = None
+        if only_parameters:
+            base_node, = [
+                node
+                for node in value_set.parameter_model.root.children
+                if node.name == 'Parameters'
+            ]
+
+        epyqlib.pm.valuesetmodel.copy_parameter_data(
+            value_set=value_set,
+            human_names=human_names,
+            base_node=base_node,
+        )
+
+        self.set_active_value_set(value_set)
+
+    def set_active_value_set(self, value_set):
+        self.value_set = value_set
 
         view = self.ui.value_set_view
         model = self.value_set.model
@@ -309,7 +346,9 @@ class Window:
         if path is None:
             return
 
-        self.open_value_set(filename=path)
+        value_set = epyqlib.pm.valuesetmodel.loadp(path)
+
+        self.set_active_value_set(value_set)
 
     def save_value_set(self):
         self.value_set.save(parent=self.ui)

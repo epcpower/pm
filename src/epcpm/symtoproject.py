@@ -320,6 +320,9 @@ def parameter_from_signal(frame, matrix_signal, enumeration_name_to_uuid,
 
     default = attributes.get('GenSigStartValue')
     if default is not None:
+        if matrix_signal.factor is not None:
+            default = decimal.Decimal(default)
+            default *= decimal.Decimal(matrix_signal.factor)
         extras['default'] = default
 
     decimal_places = attributes.get('DisplayDecimalPlaces')
@@ -331,7 +334,12 @@ def parameter_from_signal(frame, matrix_signal, enumeration_name_to_uuid,
             matrix_signal.enumeration
         ]
 
+    if mux_name is not None:
+        extras['original_multiplexer_name'] = mux_name
+
     return epyqlib.pm.parametermodel.Parameter(
         name=signal_name,
+        original_frame_name=frame.name,
+        original_signal_name=matrix_signal.name,
         **extras,
     )
