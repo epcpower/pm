@@ -300,6 +300,20 @@ class Window:
             defaultButton=QtWidgets.QMessageBox.No,
         ) == QtWidgets.QMessageBox.Yes
 
+        calculate_unspecified_min_max = QtWidgets.QMessageBox.question(
+            self.ui,
+            'Calculate Unspecified',
+            (
+                'Calculate unspecified minimum And maximum values from '
+                'symbol ranges?'
+            ),
+            buttons=(
+                QtWidgets.QMessageBox.Yes
+                | QtWidgets.QMessageBox.No
+            ),
+            defaultButton=QtWidgets.QMessageBox.No,
+        ) == QtWidgets.QMessageBox.Yes
+
         base_node = None
         if only_parameters:
             base_node, = [
@@ -312,6 +326,8 @@ class Window:
             value_set=value_set,
             human_names=human_names,
             base_node=base_node,
+            calculate_unspecified_min_max=calculate_unspecified_min_max,
+            symbol_root=self.view_models.get('symbols').model.root,
         )
 
         self.set_active_value_set(value_set)

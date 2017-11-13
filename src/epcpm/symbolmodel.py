@@ -102,6 +102,26 @@ class Signal(epyqlib.treenode.TreeNode):
 
     can_delete = epyqlib.attrsmodel.childless_can_delete
 
+    def calculated_min_max(self):
+        bits = self.bits
+
+        if self.signed:
+            bits -= 1
+
+        r = 2 ** bits
+
+        if self.signed:
+            minimum = -r
+            maximum = r - 1
+        else:
+            minimum = 0
+            maximum = r - 1
+
+        minimum *= self.factor
+        maximum *= self.factor
+
+        return minimum, maximum
+
 
 @graham.schemify(tag='message')
 @epyqlib.attrsmodel.ify()
