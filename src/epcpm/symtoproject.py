@@ -59,6 +59,9 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
     read_nvs = epyqlib.pm.parametermodel.Group(name='ReadNV')
     other.append_child(read_nvs)
 
+    nv_commands = epyqlib.pm.parametermodel.Group(name='NVCommands')
+    other.append_child(nv_commands)
+
     ccp_counters = epyqlib.pm.parametermodel.Group(name='CCP Counters')
     other.append_child(ccp_counters)
 
@@ -86,6 +89,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
     group_from_path = {
         'other_parameters': other_parameters,
         'read_nvs': read_nvs,
+        'nv_commands': nv_commands,
         'ccp': ccp,
         'ccp_counters': ccp_counters,
         'process_to_inverter': process_to_inverter,
@@ -245,8 +249,10 @@ def build_multiplexed_message(enumeration_name_to_uuid, frame, group_from_path):
 
             if group is None:
                 if frame.name.startswith('Parameter'):
-                    if matrix_signal.enumeration == 'ReadNV':
+                    if matrix_signal.enumeration in {'ReadNV', 'Meta'}:
                         group = 'read_nvs'
+                    elif matrix_signal.name.startswith('SaveToEE'):
+                        group = 'nv_commands'
                     else:
                         group = 'other_parameters'
                 elif frame.name.startswith('CCP'):
