@@ -233,12 +233,14 @@ class Multiplexer(epyqlib.treenode.TreeNode):
     )
     identifier = attr.ib(
         default=None,
+        convert=epyqlib.attrsmodel.to_int_or_none,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Integer(allow_none=True),
         )
     )
     length = attr.ib(
         default=0,
+        convert=int,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Int(),
         ),
