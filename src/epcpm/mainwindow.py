@@ -465,7 +465,7 @@ class Window:
 
         try:
             node = model.node_from_uuid(uuid)
-        except epyqlib.attrsmodel.NotFoundError:
+        except epyqlib.treenode.NotFoundError:
             return
 
         index = model.index_from_node(node)
