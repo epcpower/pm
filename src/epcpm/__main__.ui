@@ -30,7 +30,7 @@
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QTreeView" name="symbol_view">
+       <widget class="QTreeView" name="can_view">
        <property name="alternatingRowColors">
         <bool>true</bool>
        </property>

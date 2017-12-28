@@ -7,7 +7,7 @@ import marshmallow
 import epyqlib.pm.parametermodel
 import epyqlib.utils.qt
 
-import epcpm.symbolmodel
+import epcpm.canmodel
 
 
 class ProjectSaveCanceled(Exception):
@@ -64,24 +64,24 @@ def _post_load(project):
                 columns=epyqlib.pm.parametermodel.columns,
             )
 
-    if models.symbols is None:
-        if project.paths.symbols is None:
-            models.symbols = epyqlib.attrsmodel.Model(
-                root=epcpm.symbolmodel.Root(),
-                columns=epcpm.symbolmodel.columns,
+    if models.can is None:
+        if project.paths.can is None:
+            models.can = epyqlib.attrsmodel.Model(
+                root=epcpm.canmodel.Root(),
+                columns=epcpm.canmodel.columns,
             )
         else:
-            models.symbols = load_model(
+            models.can = load_model(
                 project=project,
-                path=project.paths.symbols,
-                root_type=epcpm.symbolmodel.Root,
-                columns=epcpm.symbolmodel.columns,
+                path=project.paths.can,
+                root_type=epcpm.canmodel.Root,
+                columns=epcpm.canmodel.columns,
             )
 
     models.parameters.droppable_from.add(models.parameters.root)
 
-    models.symbols.droppable_from.add(models.parameters.root)
-    models.symbols.droppable_from.add(models.symbols.root)
+    models.can.droppable_from.add(models.parameters.root)
+    models.can.droppable_from.add(models.can.root)
 
 
 @graham.schemify(tag='models')
@@ -93,7 +93,7 @@ class Models:
             field=marshmallow.fields.String()
         ),
     )
-    symbols = attr.ib(
+    can = attr.ib(
         default=None,
         metadata=graham.create_metadata(
             field=marshmallow.fields.String()
@@ -106,7 +106,7 @@ class Models:
 
     def set_all(self, value):
         self.parameters = value
-        self.symbols = value
+        self.can = value
 
     def items(self):
         return attr.asdict(self, recurse=False).items()

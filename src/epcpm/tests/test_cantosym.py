@@ -2,25 +2,25 @@ import textwrap
 
 import epyqlib.pm.parametermodel
 
-import epcpm.symbolmodel
-import epcpm.symbolstosym
+import epcpm.canmodel
+import epcpm.cantosym
 
 
 def test_explore():
-    root = epcpm.symbolmodel.Root()
+    root = epcpm.canmodel.Root()
 
-    message = epcpm.symbolmodel.Message(
+    message = epcpm.canmodel.Message(
         name='Test Message',
     )
     root.append_child(message)
 
-    signal = epcpm.symbolmodel.Signal(
+    signal = epcpm.canmodel.Signal(
         name='Test Signal',
         signed=True,
     )
     message.append_child(signal)
 
-    builder = epcpm.symbolstosym.builders.wrap(root)
+    builder = epcpm.cantosym.builders.wrap(root)
     s = builder.gen()
 
     assert s == textwrap.dedent('''\
@@ -71,10 +71,10 @@ def tidy_sym(s):
 
 
 def test_multiplexed():
-    root = epcpm.symbolmodel.Root()
-    builder = epcpm.symbolstosym.builders.wrap(root)
+    root = epcpm.canmodel.Root()
+    builder = epcpm.cantosym.builders.wrap(root)
 
-    multiplexed_message = epcpm.symbolmodel.MultiplexedMessage(
+    multiplexed_message = epcpm.canmodel.MultiplexedMessage(
         name='Test Multiplexed Message',
         identifier=0xbabeface,
     )
@@ -96,12 +96,12 @@ def test_multiplexed():
 
     # assert tidy_sym(builder.gen()) == tidy_sym(expected)
 
-    multiplex_signal = epcpm.symbolmodel.Signal(
+    multiplex_signal = epcpm.canmodel.Signal(
         name='Multiplexer Signal',
         bits=8,
     )
     multiplexed_message.append_child(multiplex_signal)
-    common_signal = epcpm.symbolmodel.Signal(
+    common_signal = epcpm.canmodel.Signal(
         name='Common Signal',
         signed=True,
     )
@@ -116,12 +116,12 @@ def test_multiplexed():
     # ''')
     # assert tidy_sym(builder.gen()) == tidy_sym(expected)
 
-    multiplexer_a = epcpm.symbolmodel.Multiplexer(
+    multiplexer_a = epcpm.canmodel.Multiplexer(
         name='Test Multiplexer A',
         identifier=1,
     )
     multiplexed_message.append_child(multiplexer_a)
-    signal_a = epcpm.symbolmodel.Signal(
+    signal_a = epcpm.canmodel.Signal(
         name='Signal A',
         signed=True,
     )
@@ -135,12 +135,12 @@ def test_multiplexed():
 
     assert tidy_sym(builder.gen()) == tidy_sym(expected)
 
-    multiplexer_b = epcpm.symbolmodel.Multiplexer(
+    multiplexer_b = epcpm.canmodel.Multiplexer(
         name='Test Multiplexer B',
         identifier=2,
     )
     multiplexed_message.append_child(multiplexer_b)
-    signal_b = epcpm.symbolmodel.Signal(
+    signal_b = epcpm.canmodel.Signal(
         name='Signal B',
         signed=True,
     )
@@ -161,11 +161,11 @@ def test_multiplexed():
 def test_enumerations():
     project = epcpm.project.create_blank()
     parameter_root = project.models.parameters.root
-    symbol_root = project.models.symbols.root
+    can_root = project.models.can.root
 
-    builder = epcpm.symbolstosym.builders.wrap(
-        symbol_root,
-        parameter_uuid_finder=project.models.symbols.node_from_uuid,
+    builder = epcpm.cantosym.builders.wrap(
+        can_root,
+        parameter_uuid_finder=project.models.can.node_from_uuid,
         parameter_model=project.models.parameters,
     )
 
@@ -182,9 +182,9 @@ def test_enumerations():
     )
     parameter_root.append_child(parameter)
 
-    message = epcpm.symbolmodel.Message()
-    symbol_root.append_child(message)
-    signal = epcpm.symbolmodel.Signal(
+    message = epcpm.canmodel.Message()
+    can_root.append_child(message)
+    signal = epcpm.canmodel.Signal(
         parameter_uuid=parameter.uuid,
     )
     message.append_child(signal)

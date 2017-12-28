@@ -380,7 +380,7 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
 
 
 Root = epyqlib.attrsmodel.Root(
-    default_name='Symbols',
+    default_name='CAN',
     valid_types=(Message, MultiplexedMessage)
 )
 

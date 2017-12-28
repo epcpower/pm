@@ -3,6 +3,6 @@
     "paths": {
         "_type": "models",
         "parameters": "example_parameters.json",
-        "symbols": "example_symbols.json"
+        "can": "example_can.json"
     }
 }

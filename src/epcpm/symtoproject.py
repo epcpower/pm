@@ -8,7 +8,7 @@ import canmatrix.formats
 import epyqlib.pm.parametermodel
 import epyqlib.utils.general
 
-import epcpm.symbolmodel
+import epcpm.canmodel
 
 
 def humanize_name(name):
@@ -35,7 +35,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
     ).values()
 
     parameters_root = epyqlib.pm.parametermodel.Root()
-    symbols_root = epcpm.symbolmodel.Root()
+    can_root = epcpm.canmodel.Root()
 
     enumerations = epyqlib.pm.parametermodel.Enumerations(name='Enumerations')
     parameters_root.append_child(enumerations)
@@ -139,7 +139,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                 parameter_from_path=parameter_from_path,
             )
 
-        symbols_root.append_child(message)
+        can_root.append_child(message)
 
     def reorder_children(node, names):
         children_by_name = {
@@ -192,7 +192,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
         parent=parameters,
     )
 
-    return parameters_root, symbols_root
+    return parameters_root, can_root
 
 
 def build_message(frame, parameter_group, enumeration_name_to_uuid):
@@ -204,7 +204,7 @@ def build_message(frame, parameter_group, enumeration_name_to_uuid):
 
     message = message_from_matrix(
         frame=frame,
-        factory=epcpm.symbolmodel.Message,
+        factory=epcpm.canmodel.Message,
         length=frame.size,
         **extras,
     )
@@ -223,7 +223,7 @@ def build_message(frame, parameter_group, enumeration_name_to_uuid):
 
         signal = signal_from_matrix(
             matrix_signal=matrix_signal,
-            factory=epcpm.symbolmodel.Signal,
+            factory=epcpm.canmodel.Signal,
             parameter_uuid=parameter.uuid,
         )
         message.append_child(signal)
@@ -260,7 +260,7 @@ def build_multiplexed_message(enumeration_name_to_uuid, frame, group_from_path,
                               parameter_from_path):
     message = message_from_matrix(
         frame=frame,
-        factory=epcpm.symbolmodel.MultiplexedMessage,
+        factory=epcpm.canmodel.MultiplexedMessage,
     )
     matrix_mux_signal, = (
         s
@@ -268,7 +268,7 @@ def build_multiplexed_message(enumeration_name_to_uuid, frame, group_from_path,
         if s.multiplex == 'Multiplexor'
     )
     mux_signal = signal_from_matrix(
-        factory=epcpm.symbolmodel.Signal,
+        factory=epcpm.canmodel.Signal,
         matrix_signal=matrix_mux_signal,
         signed=False,
     )
@@ -284,7 +284,7 @@ def build_multiplexed_message(enumeration_name_to_uuid, frame, group_from_path,
         if cycle_time is not None:
             extras['cycle_time'] = cycle_time
 
-        multiplexer = epcpm.symbolmodel.Multiplexer(
+        multiplexer = epcpm.canmodel.Multiplexer(
             name=humanize_name(mux_name),
             identifier=value,
             length=frame.size,
@@ -343,7 +343,7 @@ def build_multiplexed_message(enumeration_name_to_uuid, frame, group_from_path,
 
             signal = signal_from_matrix(
                 matrix_signal=matrix_signal,
-                factory=epcpm.symbolmodel.Signal,
+                factory=epcpm.canmodel.Signal,
                 parameter_uuid=parameter.uuid,
             )
 

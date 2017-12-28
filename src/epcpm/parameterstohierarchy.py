@@ -5,19 +5,19 @@ import attr
 import epyqlib.pm.parametermodel
 import epyqlib.utils.general
 
-import epcpm.symbolstosym
+import epcpm.cantosym
 
 builders = epyqlib.utils.general.TypeMap()
 
 
-dehumanize_name = epcpm.symbolstosym.dehumanize_name
+dehumanize_name = epcpm.cantosym.dehumanize_name
 
 
 @builders(epyqlib.pm.parametermodel.Root)
 @attr.s
 class Root:
     wrapped = attr.ib()
-    symbol_root = attr.ib()
+    can_root = attr.ib()
 
     def gen(self, json_output=True, **kwargs):
         parameters = next(
@@ -30,7 +30,7 @@ class Root:
             'children': [
                 builders.wrap(
                     wrapped=child,
-                    symbol_root=self.symbol_root,
+                    can_root=self.can_root,
                 ).gen()
                 for child in parameters.children
                 if isinstance(
@@ -54,7 +54,7 @@ class Root:
 @attr.s
 class Group:
     wrapped = attr.ib()
-    symbol_root = attr.ib()
+    can_root = attr.ib()
 
     def gen(self):
         return {
@@ -62,7 +62,7 @@ class Group:
             'children': [
                 builders.wrap(
                     wrapped=child,
-                    symbol_root=self.symbol_root,
+                    can_root=self.can_root,
                 ).gen()
                 for child in self.wrapped.children
             ],
@@ -73,10 +73,10 @@ class Group:
 @attr.s
 class Parameter:
     wrapped = attr.ib()
-    symbol_root = attr.ib()
+    can_root = attr.ib()
 
     def gen(self):
-        signal = self.symbol_root.nodes_by_attribute(
+        signal = self.can_root.nodes_by_attribute(
             attribute_value=self.wrapped.uuid,
             attribute_name='parameter_uuid',
         ).pop()

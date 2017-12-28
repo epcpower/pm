@@ -1,6 +1,6 @@
 {
     "_type": "root",
-    "name": "Symbols",
+    "name": "CAN",
     "children": [
         {
             "_type": "message",

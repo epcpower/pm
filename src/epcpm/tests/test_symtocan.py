@@ -8,7 +8,7 @@ import pytest
 import epyqlib.pm.parametermodel
 import epyqlib.tests.common
 
-import epcpm.symbolmodel
+import epcpm.canmodel
 import epcpm.symtoproject
 
 
@@ -61,20 +61,20 @@ def empty_hierarchy_file():
 
 
 def test_load_can_file():
-    parameter_root, symbol_root = epcpm.symtoproject.load_can_path(
+    parameter_root, can_root = epcpm.symtoproject.load_can_path(
         epyqlib.tests.common.symbol_files['customer'],
         epyqlib.tests.common.hierarchy_files['customer'],
     )
 
     assert isinstance(parameter_root, epyqlib.pm.parametermodel.Root)
-    assert isinstance(symbol_root, epcpm.symbolmodel.Root)
+    assert isinstance(can_root, epcpm.canmodel.Root)
 
 
 def test_only_one_parameter_per_query_response_pair(
         sym_file,
         empty_hierarchy_file,
 ):
-    parameter_root, symbol_root = epcpm.symtoproject.load_can_file(
+    parameter_root, can_root = epcpm.symtoproject.load_can_file(
         can_file=sym_file,
         file_type='sym',
         parameter_hierarchy_file=empty_hierarchy_file,

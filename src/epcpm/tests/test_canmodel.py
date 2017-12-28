@@ -4,7 +4,7 @@ import graham
 import epyqlib.attrsmodel
 import epyqlib.tests.test_attrsmodel
 
-import epcpm.symbolmodel
+import epcpm.canmodel
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
@@ -17,13 +17,13 @@ def test_hex_field():
     class Test:
         field = attr.ib(
             metadata=graham.create_metadata(
-                field=epcpm.symbolmodel.HexadecimalIntegerField(),
+                field=epcpm.canmodel.HexadecimalIntegerField(),
             ),
         )
         none = attr.ib(
             default=None,
             metadata=graham.create_metadata(
-                field=epcpm.symbolmodel.HexadecimalIntegerField(
+                field=epcpm.canmodel.HexadecimalIntegerField(
                     allow_none=True,
                 ),
             ),
@@ -40,15 +40,15 @@ def test_hex_field():
 def test_all_addable_also_in_types():
     # Since addable types is dynamic and could be anything... this
     # admittedly only checks the addable types on default instances.
-    for cls in epcpm.symbolmodel.types.types.values():
+    for cls in epcpm.canmodel.types.types.values():
         addable_types = cls.all_addable_types().values()
-        assert set(addable_types) - set(epcpm.symbolmodel.types) == set()
+        assert set(addable_types) - set(epcpm.canmodel.types) == set()
 
 
 def assert_incomplete_types(name):
     assert [] == [
         cls
-        for cls in epcpm.symbolmodel.types.types.values()
+        for cls in epcpm.canmodel.types.types.values()
         if not hasattr(cls, name)
     ]
 
@@ -63,7 +63,7 @@ def test_all_have_can_delete():
 
 def test_all_fields_in_columns():
     epyqlib.tests.test_attrsmodel.all_fields_in_columns(
-        types=epcpm.symbolmodel.types,
-        root_type=epcpm.symbolmodel.Root,
-        columns=epcpm.symbolmodel.columns,
+        types=epcpm.canmodel.types,
+        root_type=epcpm.canmodel.Root,
+        columns=epcpm.canmodel.columns,
     )

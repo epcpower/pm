@@ -21,8 +21,8 @@ import epyqlib.utils.qt
 
 import epcpm.parameterstoc
 import epcpm.project
-import epcpm.symbolmodel
-import epcpm.symbolstosym
+import epcpm.canmodel
+import epcpm.cantosym
 import epcpm.symtoproject
 
 # See file COPYING in this source tree
@@ -108,8 +108,8 @@ class Window:
 
         self.view_models = {}
 
-        self.uuid_notifier = epcpm.symbolmodel.ReferencedUuidNotifier()
-        self.uuid_notifier.changed.connect(self.symbol_uuid_changed)
+        self.uuid_notifier = epcpm.canmodel.ReferencedUuidNotifier()
+        self.uuid_notifier.changed.connect(self.can_uuid_changed)
 
         self.project = None
         self.value_set = None
@@ -170,7 +170,7 @@ class Window:
             return
 
         with open(sym_path, 'rb') as sym, open(hierarchy_path) as hierarchy:
-            parameters_root, symbols_root = epcpm.symtoproject.load_can_file(
+            parameters_root, can_root = epcpm.symtoproject.load_can_file(
                 can_file=sym,
                 file_type=str(pathlib.Path(sym.name).suffix[1:]),
                 parameter_hierarchy_file=hierarchy,
@@ -182,9 +182,9 @@ class Window:
             root=parameters_root,
             columns=epyqlib.pm.parametermodel.columns,
         )
-        project.models.symbols = epyqlib.attrsmodel.Model(
-            root=symbols_root,
-            columns=epcpm.symbolmodel.columns,
+        project.models.can = epyqlib.attrsmodel.Model(
+            root=can_root,
+            columns=epcpm.canmodel.columns,
         )
 
         epcpm.project._post_load(project)
@@ -210,9 +210,9 @@ class Window:
             )),
         )
 
-        model_views.symbols = ModelView(
-            view=self.ui.symbol_view,
-            types=epcpm.symbolmodel.types,
+        model_views.can = ModelView(
+            view=self.ui.can_view,
+            types=epcpm.canmodel.types,
         )
 
         self.uuid_notifier.disconnect_view()
@@ -252,7 +252,7 @@ class Window:
 
             view.customContextMenuRequested.connect(m)
 
-        self.uuid_notifier.set_view(self.ui.symbol_view)
+        self.uuid_notifier.set_view(self.ui.can_view)
 
         return
 
@@ -327,7 +327,7 @@ class Window:
             human_names=human_names,
             base_node=base_node,
             calculate_unspecified_min_max=calculate_unspecified_min_max,
-            symbol_root=self.view_models.get('symbols').model.root,
+            can_root=self.view_models.get('can').model.root,
         )
 
         self.set_active_value_set(value_set)
@@ -437,9 +437,9 @@ class Window:
         )
 
     def generate_symbol_file(self):
-        finder = self.view_models['symbols'].model.node_from_uuid
-        builder = epcpm.symbolstosym.builders.wrap(
-            wrapped=self.view_models['symbols'].model.root,
+        finder = self.view_models['can'].model.node_from_uuid
+        builder = epcpm.cantosym.builders.wrap(
+            wrapped=self.view_models['can'].model.root,
             parameter_uuid_finder=finder,
             parameter_model=self.view_models['parameters'].model,
         )
@@ -458,7 +458,7 @@ class Window:
     def selection_changed(self, selected, deselected):
         pass
 
-    def symbol_uuid_changed(self, uuid):
+    def can_uuid_changed(self, uuid):
         view_model = self.view_models['parameters']
         model = view_model.model
         view = view_model.view

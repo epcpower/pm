@@ -22,10 +22,10 @@ def relative_path(target, reference):
 @click.option('--hierarchy', type=click.File(), required=True)
 @click.option('--project', type=click.File('w'), required=True)
 @click.option('--parameters', type=click.File('w'), required=True)
-@click.option('--symbols', type=click.File('w'), required=True)
+@click.option('--can', type=click.File('w'), required=True)
 @click.option('--epyq-value-set', type=click.File('w'))
-def cli(sym, hierarchy, project, parameters, symbols, epyq_value_set):
-    parameters_root, symbols_root = epcpm.symtoproject.load_can_file(
+def cli(sym, hierarchy, project, parameters, can, epyq_value_set):
+    parameters_root, can_root = epcpm.symtoproject.load_can_file(
         can_file=sym,
         file_type=str(pathlib.Path(sym.name).suffix[1:]),
         parameter_hierarchy_file=hierarchy,
@@ -37,23 +37,23 @@ def cli(sym, hierarchy, project, parameters, symbols, epyq_value_set):
     project_model = epcpm.project.Project(
         paths = epcpm.project.Models(
             parameters=relative_path(parameters.name, project_path),
-            symbols=relative_path(symbols.name, project_path),
+            can=relative_path(can.name, project_path),
         ),
         models = epcpm.project.Models(
             parameters=epyqlib.attrsmodel.Model(
                 root=parameters_root,
                 columns=epyqlib.pm.parametermodel.columns,
             ),
-            symbols=epyqlib.attrsmodel.Model(
-                root=symbols_root,
-                columns=epcpm.symbolmodel.columns,
+            can=epyqlib.attrsmodel.Model(
+                root=can_root,
+                columns=epcpm.canmodel.columns,
             ),
         ),
     )
 
     project.write(graham.dumps(project_model, indent=4).data)
     parameters.write(graham.dumps(parameters_root, indent=4).data)
-    symbols.write(graham.dumps(symbols_root, indent=4).data)
+    can.write(graham.dumps(can_root, indent=4).data)
 
     if epyq_value_set is not None:
         value_set = epyqlib.pm.valuesetmodel.create_blank(
@@ -71,7 +71,7 @@ def cli(sym, hierarchy, project, parameters, symbols, epyq_value_set):
             human_names=False,
             base_node=parameters_root,
             calculate_unspecified_min_max=True,
-            symbol_root=symbols_root,
+            symbol_root=can_root,
         )
 
         epyq_value_set.write(graham.dumps(value_set.model.root, indent=4).data)

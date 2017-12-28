@@ -9,7 +9,7 @@ import canmatrix.formats
 import epyqlib.pm.parametermodel
 import epyqlib.utils.general
 
-import epcpm.symbolmodel
+import epcpm.canmodel
 
 builders = epyqlib.utils.general.TypeMap()
 
@@ -19,7 +19,7 @@ def dehumanize_name(name):
     return epyqlib.utils.general.spaced_to_upper_camel(name)
 
 
-@builders(epcpm.symbolmodel.Root)
+@builders(epcpm.canmodel.Root)
 @attr.s
 class Root:
     wrapped = attr.ib()
@@ -76,7 +76,7 @@ class Root:
         return collected
 
 
-@builders(epcpm.symbolmodel.Message)
+@builders(epcpm.canmodel.Message)
 @attr.s
 class Message:
     wrapped = attr.ib()
@@ -107,7 +107,7 @@ class Message:
         return frame
 
 
-@builders(epcpm.symbolmodel.Signal)
+@builders(epcpm.canmodel.Signal)
 @attr.s
 class Signal:
     wrapped = attr.ib()
@@ -170,7 +170,7 @@ class Signal:
         return signal
 
 
-@builders(epcpm.symbolmodel.MultiplexedMessage)
+@builders(epcpm.canmodel.MultiplexedMessage)
 @attr.s
 class MultiplexedMessage:
     wrapped = attr.ib()
@@ -180,7 +180,7 @@ class MultiplexedMessage:
         common_signals = []
         not_signals = []
         for child in self.wrapped.children[1:]:
-            if isinstance(child, epcpm.symbolmodel.Signal):
+            if isinstance(child, epcpm.canmodel.Signal):
                 common_signals.append(child)
             else:
                 not_signals.append(child)

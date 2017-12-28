@@ -1,7 +1,7 @@
 import epyqlib.pm.parametermodel
 
 import epcpm.parameterstohierarchy
-import epcpm.symbolmodel
+import epcpm.canmodel
 
 
 def test_():
@@ -21,30 +21,30 @@ def test_():
     parameter_a = epyqlib.pm.parametermodel.Parameter(name='Parameter A')
     parameters.append_child(parameter_a)
 
-    symbol_root = epcpm.symbolmodel.Root()
+    can_root = epcpm.canmodel.Root()
 
-    multiplexed_message = epcpm.symbolmodel.MultiplexedMessage()
-    symbol_root.append_child(multiplexed_message)
+    multiplexed_message = epcpm.canmodel.MultiplexedMessage()
+    can_root.append_child(multiplexed_message)
 
-    multiplexer_a = epcpm.symbolmodel.Multiplexer(name='Multiplexer A')
+    multiplexer_a = epcpm.canmodel.Multiplexer(name='Multiplexer A')
     multiplexed_message.append_child(multiplexer_a)
 
-    signal_aa = epcpm.symbolmodel.Signal(
+    signal_aa = epcpm.canmodel.Signal(
         name='Signal PAA',
         parameter_uuid=parameter_aa.uuid,
     )
     multiplexer_a.append_child(signal_aa)
 
-    multiplexer_b = epcpm.symbolmodel.Multiplexer(name='Multiplexer B')
+    multiplexer_b = epcpm.canmodel.Multiplexer(name='Multiplexer B')
     multiplexed_message.append_child(multiplexer_b)
 
-    signal_ab = epcpm.symbolmodel.Signal(
+    signal_ab = epcpm.canmodel.Signal(
         name='Signal PAB',
         parameter_uuid=parameter_ab.uuid,
     )
     multiplexer_b.append_child(signal_ab)
 
-    signal_a = epcpm.symbolmodel.Signal(
+    signal_a = epcpm.canmodel.Signal(
         name='Signal PA',
         parameter_uuid=parameter_a.uuid,
     )
@@ -74,7 +74,7 @@ def test_():
 
     builder = epcpm.parameterstohierarchy.builders.wrap(
         wrapped=parameter_root,
-        symbol_root=symbol_root,
+        can_root=can_root,
     )
 
     assert builder.gen(json_output=False) == expected

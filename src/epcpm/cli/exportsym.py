@@ -4,7 +4,7 @@ import click
 
 import epcpm.parameterstohierarchy
 import epcpm.project
-import epcpm.symbolstosym
+import epcpm.cantosym
 
 
 def relative_path(target, reference):
@@ -26,14 +26,14 @@ def relative_path(target, reference):
 def cli(project_file, sym_file, hierarchy_file):
     project = epcpm.project.load(project_file)
 
-    sym_builder = epcpm.symbolstosym.builders.wrap(
-        wrapped=project.models.symbols.root,
-        parameter_uuid_finder=project.models.symbols.node_from_uuid,
+    sym_builder = epcpm.cantosym.builders.wrap(
+        wrapped=project.models.can.root,
+        parameter_uuid_finder=project.models.can.node_from_uuid,
     )
 
     hierarchy_builder = epcpm.parameterstohierarchy.builders.wrap(
         wrapped=project.models.parameters.root,
-        symbol_root=project.models.symbols.root,
+        can_root=project.models.can.root,
     )
 
     sym = sym_builder.gen()

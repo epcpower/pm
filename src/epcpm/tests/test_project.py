@@ -11,13 +11,13 @@ reference_string = textwrap.dedent('''\
     "paths": {
         "_type": "models",
         "parameters": "parameters.json",
-        "symbols": "symbols.json"
+        "can": "can.json"
     }
 }''')
 
 reference_project = epcpm.project.Project()
 reference_project.paths.parameters = 'parameters.json'
-reference_project.paths.symbols = 'symbols.json'
+reference_project.paths.can = 'can.json'
 
 
 def test_save():
@@ -33,7 +33,7 @@ def test_load():
 def test_model_iterable():
     model = epcpm.project.Models()
 
-    assert tuple(model) == ('parameters', 'symbols')
+    assert tuple(model) == ('parameters', 'can')
 
 
 def test_model_set_all():
@@ -49,7 +49,7 @@ def test_model_set_all():
 def test_model_items():
     model = epcpm.project.Models()
 
-    assert tuple(model.items()) == (('parameters', None), ('symbols', None))
+    assert tuple(model.items()) == (('parameters', None), ('can', None))
 
 
 def test_model_values():
@@ -58,7 +58,7 @@ def test_model_values():
     for name in model:
         model[name] = name + '_'
 
-    assert tuple(model.values()) == ('parameters_', 'symbols_')
+    assert tuple(model.values()) == ('parameters_', 'can_')
 
 
 def test_model_getitem():
