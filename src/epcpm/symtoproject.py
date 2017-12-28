@@ -1,3 +1,4 @@
+import collections
 import decimal
 import json
 import pathlib
@@ -68,6 +69,9 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
     def traverse_hierarchy(children, parent, group_from_path):
         for child in children:
             if isinstance(child, dict):
+                if child.get('children') is None:
+                    continue
+
                 group = epyqlib.pm.parametermodel.Group(
                     name=child['name'],
                 )
@@ -80,8 +84,6 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                         parent=group,
                         group_from_path=group_from_path,
                     )
-                # if child.get('unreferenced'):
-                #     traverse_hierarchy(child['children'], group)
             else:
                 group_from_path[('ParameterQuery',) + tuple(child)] = parent
                 group_from_path[('ParameterResponse',) + tuple(child)] = parent
@@ -95,7 +97,10 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
         'process_to_inverter': process_to_inverter,
         'other': other,
     }
-    parameter_hierarchy = json.load(parameter_hierarchy_file)
+    parameter_hierarchy = json.load(
+        parameter_hierarchy_file,
+        object_pairs_hook=collections.OrderedDict,
+    )
     traverse_hierarchy(
         children=parameter_hierarchy['children'],
         parent=parameters,
@@ -117,6 +122,8 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
             )
             enumeration.append_child(enumerator)
 
+    parameter_from_path = {}
+
     for frame in matrix.frames:
         if len(frame.mux_names) == 0:
             message = build_message(
@@ -129,9 +136,61 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                 enumeration_name_to_uuid=enumeration_name_to_uuid,
                 frame=frame,
                 group_from_path=group_from_path,
+                parameter_from_path=parameter_from_path,
             )
 
         symbols_root.append_child(message)
+
+    def reorder_children(node, names):
+        children_by_name = {
+            child.name: child
+            for child in node.children
+        }
+
+        for name in names:
+            child = children_by_name[name]
+            node.remove_child(child=child)
+            node.append_child(child)
+
+    def traverse_hierarchy_to_reorder(children, parent):
+        for child in children:
+            if isinstance(child, dict):
+                child_objects = parent.children_by_attribute(
+                    name='name',
+                    value=child['name'],
+                )
+                if len(child_objects) == 1:
+                    child_object, = child_objects
+                else:
+                    # TODO: just get rid of this debugging if and adjust above
+                    raise Exception()
+
+                subchildren = child.get('children')
+                if subchildren is None:
+                    continue
+
+                subchild_names = []
+                for subchild in subchildren:
+                    if isinstance(subchild, dict):
+                        name = subchild['name']
+                    else:
+                        # Query and response point the same place
+                        signal_path = ('ParameterQuery',) + tuple(subchild)
+                        name = parameter_from_path[signal_path].name
+
+                    subchild_names.append(name)
+
+                reorder_children(node=child_object, names=subchild_names)
+
+                traverse_hierarchy_to_reorder(
+                    children=subchildren,
+                    parent=child_object,
+                )
+
+    traverse_hierarchy_to_reorder(
+        children=parameter_hierarchy['children'],
+        parent=parameters,
+    )
 
     return parameters_root, symbols_root
 
@@ -197,7 +256,8 @@ def signal_from_matrix(matrix_signal, factory, **extras):
     )
 
 
-def build_multiplexed_message(enumeration_name_to_uuid, frame, group_from_path):
+def build_multiplexed_message(enumeration_name_to_uuid, frame, group_from_path,
+                              parameter_from_path):
     message = message_from_matrix(
         frame=frame,
         factory=epcpm.symbolmodel.MultiplexedMessage,
@@ -277,6 +337,9 @@ def build_multiplexed_message(enumeration_name_to_uuid, frame, group_from_path):
                 group.append_child(parameter)
             else:
                 parameter, = same_name_parameters
+
+            signal_path = (frame.name, mux_name, matrix_signal.name)
+            parameter_from_path[signal_path] = parameter
 
             signal = signal_from_matrix(
                 matrix_signal=matrix_signal,
