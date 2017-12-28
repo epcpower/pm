@@ -38,6 +38,8 @@ def cli(project_file, sym_file, hierarchy_file):
 
     sym = sym_builder.gen()
     hierarchy = hierarchy_builder.gen(indent=4)
+    if hierarchy[-1] != '\n':
+        hierarchy += '\n'
 
     sym_file.write(sym)
     hierarchy_file.write(hierarchy)
