@@ -28,6 +28,12 @@ class Root:
 
     def gen(self):
         matrix = canmatrix.canmatrix.CanMatrix()
+        # TODO: this shouldn't need to be copied from:
+        #           canmatrix.sym.load()
+        matrix.addSignalDefines("GenSigStartValue", 'FLOAT -3.4E+038 3.4E+038')
+        matrix.addSignalDefines("HexadecimalOutput", 'BOOL False True')
+        matrix.addSignalDefines("DisplayDecimalPlaces", 'INT 0 65535')
+        matrix.addSignalDefines("LongName", 'STR')
 
         enumerations = self.collect_enumerations()
 
@@ -162,7 +168,10 @@ class Signal:
             attributes['HexadecimalOutput'] = parameter.display_hexadecimal
 
             if parameter.default is not None:
-                attributes['GenSigStartValue'] = parameter.default
+                # TODO: it seems this shouldn't be needed...  0754397432978432
+                attributes['GenSigStartValue'] = (
+                    parameter.default / self.wrapped.factor
+                )
 
             if parameter.decimal_places is not None:
                 attributes['DisplayDecimalPlaces'] = parameter.decimal_places

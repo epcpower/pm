@@ -391,6 +391,7 @@ def parameter_from_signal(frame, matrix_signal, enumeration_name_to_uuid,
     if default is not None:
         if matrix_signal.factor is not None:
             default = decimal.Decimal(default)
+            # TODO: it seems this shouldn't be needed...  0754397432978432
             default *= decimal.Decimal(matrix_signal.factor)
         extras['default'] = default
 
