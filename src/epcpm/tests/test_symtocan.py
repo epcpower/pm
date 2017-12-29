@@ -18,6 +18,9 @@ def sym_file():
     FormatVersion=5.0 // Do not edit this line!
     Title="canmatrix-Export"
     
+    {ENUMS}
+    enum AccessLevel(0="User", 1="Engineering", 2="Factory")
+
     {SEND}
     
     [ParameterQuery]
@@ -26,6 +29,7 @@ def sym_file():
     DLC=8
     Mux=TestMux 0,14 0 
     Var=TestParam unsigned 14,2 /f:0.01  /min:0.01  /max:0.2 /p:2 /d:0.02
+    Var=FactoryParam unsigned 14,2 /f:0.01  /min:0.01  /max:0.2 /p:2 /d:0.02  // before <factory> after
     
     {SENDRECEIVE}
     
@@ -35,6 +39,7 @@ def sym_file():
     DLC=8
     Mux=TestMux 0,14 0 
     Var=TestParam unsigned 14,2 /f:0.01  /min:0.01  /max:0.2 /p:2 /d:0.02
+    Var=FactoryParam unsigned 14,2 /f:0.01  /min:0.01  /max:0.2 /p:2 /d:0.02  // before <factory> after
     ''').encode('utf-8'))
 
 
@@ -48,6 +53,10 @@ def hierarchy_file():
                     [
                         "TestMux",
                         "TestParam"
+                    ],
+                    [
+                        "TestMux",
+                        "FactoryParam"
                     ]
                 ]
             }
@@ -86,7 +95,38 @@ def test_only_one_parameter_per_query_response_pair(
         if node.name == 'Parameters'
     )
 
-    assert len(parameters.children[0].children) == 1
+    assert len(parameters.children[0].children) == 2
+
+
+def test_access_level(sym_file, hierarchy_file):
+    parameter_root, symbol_root = epcpm.symtoproject.load_can_file(
+        can_file=sym_file,
+        file_type='sym',
+        parameter_hierarchy_file=hierarchy_file,
+    )
+
+    access_levels, = parameter_root.nodes_by_attribute(
+        attribute_name='name',
+        attribute_value='AccessLevel',
+    )
+
+    regular_parameter, = parameter_root.nodes_by_attribute(
+        attribute_name='name',
+        attribute_value='Test Mux : Test Param',
+    )
+
+    assert regular_parameter.access_level_uuid == access_levels.default().uuid
+
+    factory_parameter, = parameter_root.nodes_by_attribute(
+        attribute_name='name',
+        attribute_value='Test Mux : Factory Param',
+    )
+
+    assert (
+        factory_parameter.access_level_uuid
+        == access_levels.by_name('factory').uuid
+    )
+    assert '<factory>' not in factory_parameter.comment
 
 
 def test_accurate_decimal(sym_file, hierarchy_file):

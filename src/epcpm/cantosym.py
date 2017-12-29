@@ -23,6 +23,7 @@ def dehumanize_name(name):
 @attr.s
 class Root:
     wrapped = attr.ib()
+    access_levels = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
     parameter_model = attr.ib(default=None)
 
@@ -51,6 +52,7 @@ class Root:
         for child in self.wrapped.children:
             frame = builders.wrap(
                 wrapped=child,
+                access_levels=self.access_levels,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             ).gen()
             matrix.frames.addFrame(frame)
@@ -70,7 +72,14 @@ class Root:
             return collected
 
         def collect(node, collected):
-            if isinstance(node, epyqlib.pm.parametermodel.Enumeration):
+            is_enumeration = isinstance(
+                node,
+                (
+                    epyqlib.pm.parametermodel.Enumeration,
+                    epyqlib.pm.parametermodel.AccessLevels,
+                )
+            )
+            if is_enumeration:
                 collected.append(node)
 
         self.parameter_model.root.traverse(
@@ -86,6 +95,7 @@ class Root:
 @attr.s
 class Message:
     wrapped = attr.ib()
+    access_levels = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
@@ -119,7 +129,7 @@ class Signal:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
-    def gen(self, multiplex_id=None):
+    def gen(self, multiplex_id=None, skip_access_level=False):
         extras = {}
         can_find_parameter = (
             self.wrapped.parameter_uuid is not None
@@ -136,7 +146,23 @@ class Signal:
                 extras['max'] = parameter.maximum
 
             if parameter.comment is not None:
-                extras['comment'] = parameter.comment
+                comment = parameter.comment.strip()
+                if len(comment) > 0:
+                    extras['comment'] = comment
+
+            handle_access_level = (
+                    not skip_access_level
+                    and parameter.access_level_uuid is not None
+            )
+            if handle_access_level:
+                access_level = self.parameter_uuid_finder(
+                    parameter.access_level_uuid
+                )
+                if access_level != access_level.tree_parent.default():
+                    extras['comment'] = '{} <{}>'.format(
+                        extras.get('comment', ''),
+                        access_level.name.casefold(),
+                    ).strip()
 
             if parameter.units is not None:
                 extras['unit'] = parameter.units
@@ -183,6 +209,7 @@ class Signal:
 @attr.s
 class MultiplexedMessage:
     wrapped = attr.ib()
+    access_levels = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
@@ -240,12 +267,46 @@ class MultiplexedMessage:
                 dehumanize_name(multiplexer.name)
             )
 
+            def param_special(signal):
+                folded = signal.name.casefold()
+
+                return folded.startswith('read param - ') or folded == 'meta'
+
+            signal_access_levels = set()
+
+            for signal in multiplexer.children:
+                if param_special(signal):
+                    continue
+
+                parameter = self.parameter_uuid_finder(signal.parameter_uuid)
+                uuid = parameter.access_level_uuid
+
+                if uuid is None:
+                    access_level = self.access_levels.default()
+                else:
+                    access_level = self.parameter_uuid_finder(uuid)
+
+                signal_access_levels.add(access_level)
+
+            all_access_levels_match = len(signal_access_levels) == 1
+
+            if all_access_levels_match:
+                access_level = signal_access_levels.pop()
+                if access_level != access_level.tree_parent.default():
+                    mux_signal.comments[multiplexer.identifier] = (
+                        '{} <{}>'.format(
+                            mux_signal.comments.get(multiplexer.identifier, ''),
+                            access_level.name.casefold(),
+                        ).strip()
+                    )
+
             for signal in multiplexer.children:
                 signal = builders.wrap(
                     wrapped=signal,
                     parameter_uuid_finder=self.parameter_uuid_finder,
                 ).gen(
                     multiplex_id=multiplexer.identifier,
+                    skip_access_level=all_access_levels_match,
                 )
 
                 frame.signals.append(signal)
