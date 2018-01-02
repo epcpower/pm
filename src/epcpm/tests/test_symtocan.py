@@ -126,7 +126,7 @@ def test_access_level(sym_file, hierarchy_file):
         factory_parameter.access_level_uuid
         == access_levels.by_name('factory').uuid
     )
-    assert '<factory>' not in factory_parameter.comment
+    assert 'before  after' == factory_parameter.comment
 
 
 def test_accurate_decimal(sym_file, hierarchy_file):

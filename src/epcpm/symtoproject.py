@@ -2,7 +2,9 @@ import collections
 import decimal
 import json
 import pathlib
+import re
 
+import attr
 import canmatrix.formats
 
 import epyqlib.pm.parametermodel
@@ -399,6 +401,49 @@ def strip_access_level(string, access_levels):
     return string, access_level
 
 
+@attr.s
+class NvMeta:
+    format = attr.ib()
+    factor = attr.ib(default=None)
+    cast = attr.ib(default=False)
+
+
+nv_pattern = re.compile('<nv:(.*?)>')
+
+
+def strip_nv(string):
+    tags = nv_pattern.search(string)
+
+    if tags is None:
+        return string, None
+
+    flags, *tags, format = tags[1].split(':')
+
+    extras = {}
+
+    flags = set(flags)
+    if 'c' in flags:
+        flags.remove('c')
+        extras['cast'] = True
+
+    if len(flags) > 0:
+        raise Exception('Unknown flags found {}'.format(''.join(sorted(flags))))
+
+    for tag in tags:
+        if tag.startswith('f'):
+            extras['factor'] = tag[1:]
+        else:
+            raise Exception('Unknown tag found {}'.format(repr(tag)))
+
+    return (
+        nv_pattern.sub('', string),
+        NvMeta(
+            format=format,
+            **extras,
+        ),
+    )
+
+
 def parameter_from_signal(
         frame,
         frame_access_level,
@@ -439,6 +484,8 @@ def parameter_from_signal(
             access_levels=access_levels,
         )
 
+        comment, nv_meta = strip_nv(string=comment)
+
         folded = matrix_signal.name.casefold()
 
         if folded.startswith('readparam') or folded == 'meta':
@@ -452,6 +499,11 @@ def parameter_from_signal(
                 ),
                 key=lambda x: x.value,
             )
+
+            if nv_meta is not None:
+                extras['nv_format'] = nv_meta.format
+                extras['nv_factor'] = nv_meta.factor
+                extras['nv_cast'] = nv_meta.cast
 
         if len(comment) > 0:
             extras['comment'] = comment
