@@ -20,6 +20,7 @@ setuptools.setup(
             'epcparameterstoc = epcpm.cli.parameterstoc:cli',
             'epcimportsym = epcpm.cli.importsym:cli',
             'epcexportsym = epcpm.cli.exportsym:cli',
+            'epcexportdocx = epcpm.cli.exportdocx:cli',
         ],
     },
     install_requires=[
