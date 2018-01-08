@@ -8,8 +8,9 @@ import epcpm.project
 @click.command()
 @click.option('--project', 'project_file', type=click.File(), required=True)
 @click.option('--docx', 'docx_file', type=click.File('wb'), required=True)
+@click.option('--template', type=click.File('rb'))
 @click.option('--access-level', default='user')
-def cli(project_file, docx_file, access_level):
+def cli(project_file, docx_file, template, access_level):
     project = epcpm.project.load(project_file)
 
     access_levels, = project.models.parameters.root.nodes_by_filter(
@@ -21,10 +22,13 @@ def cli(project_file, docx_file, access_level):
         ),
     )
 
+    access_level = access_levels.default()
+
     docx_builder = epcpm.parameterstodocx.builders.wrap(
         wrapped=project.models.parameters.root,
         can_root=project.models.can.root,
-        # access_levels=access_levels,
+        template=template,
+        access_level=access_level,
     )
 
     doc = docx_builder.gen()

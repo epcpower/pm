@@ -20,6 +20,9 @@ class Row:
     fill = attr.ib(default='')
     factor = attr.ib(default='')
     units = attr.ib(default='')
+    default = attr.ib(default='')
+    minimum = attr.ib(default='')
+    maximum = attr.ib(default='')
     enumeration = attr.ib(default='')
     comment = attr.ib(default='')
 
@@ -30,6 +33,9 @@ class Row:
             *((self.fill,) * (max_indent - self.indent - 1)),
             self.factor,
             self.units,
+            self.default,
+            self.minimum,
+            self.maximum,
             self.enumeration,
             self.comment,
         )
@@ -40,43 +46,59 @@ class Row:
 class Root:
     wrapped = attr.ib()
     can_root = attr.ib()
+    template = attr.ib()
+    access_level = attr.ib()
 
     def gen(self):
         headings = Row(
             name='Name',
             factor='Factor',
             units='Units',
+            default='Default',
+            minimum='Min',
+            maximum='Max',
             enumeration='Enumeration',
             comment='Comment',
         )
         max_indent = 5
         fill_width = 0.25
-        name_width = 2
+        name_width = 2.75
         widths = Row(
             name=name_width - (fill_width * (max_indent - 1)),
-            indent=max_indent,
+            indent=max_indent - 1,
             fill=fill_width,
             factor=0.625,
             units=0.625,
+            default=0.875,
+            minimum=0.625,
+            maximum=0.625,
             enumeration=1.5,
             comment=None,
         )
+
+        for heading, width in zip(headings.to_tuple(), widths.to_tuple()):
+            print(heading, width)
 
         table = epyqlib.cangenmanual.Table(
             title=None,
             headings=headings.to_tuple(),
             widths=widths.to_tuple(),
+            total_width=10,
         )
 
         import time
         start = time.monotonic()
 
         for child in self.wrapped.children:
+            if child.name == 'Other':
+                continue
+
             try:
                 builder = builders.wrap(
                     wrapped=child,
                     parameter_root=self.wrapped,
                     can_root=self.can_root,
+                    access_level=self.access_level,
                 )
             except KeyError:
                 continue
@@ -92,7 +114,7 @@ class Root:
 
         table.rows = tuple(
             row.to_tuple(max_indent=max_indent)
-            for row in table.rows[:100]
+            for row in table.rows
         )
 
         now = time.monotonic()
@@ -100,12 +122,13 @@ class Root:
         start = now
         print('rows converted', int(delta))
 
-        doc = docx.Document()
-
-        for section in doc.sections:
-            section.orientation = docx.enum.section.WD_ORIENT.LANDSCAPE
+        if self.template is not None:
+            doc = docx.Document(self.template)
+        else:
+            doc = docx.Document()
 
         doc_table = doc.add_table(rows=0, cols=len(table.headings))
+        doc_table.autofit = False
 
         table.fill_docx(doc_table)
 
@@ -128,6 +151,9 @@ class Root:
         start = now
         print('table filled', int(delta))
 
+        for section in doc.sections:
+            section.orientation = docx.enum.section.WD_ORIENTATION.LANDSCAPE
+
         return doc
 
 
@@ -137,6 +163,7 @@ class Group:
     wrapped = attr.ib()
     parameter_root = attr.ib()
     can_root = attr.ib()
+    access_level = attr.ib()
 
     def gen(self, indent):
         rows = [
@@ -151,6 +178,7 @@ class Group:
                 wrapped=child,
                 parameter_root=self.parameter_root,
                 can_root=self.can_root,
+                access_level=self.access_level,
             )
             rows.extend(builder.gen(indent=indent + 1))
 
@@ -163,8 +191,21 @@ class Parameter:
     wrapped = attr.ib()
     parameter_root = attr.ib()
     can_root = attr.ib()
+    access_level = attr.ib()
 
     def gen(self, indent):
+        try:
+            access_level = self.parameter_root.nodes_by_attribute(
+                attribute_value=self.wrapped.access_level_uuid,
+                attribute_name='uuid',
+            ).pop()
+        except epyqlib.treenode.NotFoundError:
+            pass
+        else:
+            if access_level.value > self.access_level.value:
+                print('skipping', self.wrapped.name)
+                return []
+
         signal = self.can_root.nodes_by_attribute(
             attribute_value=self.wrapped.uuid,
             attribute_name='parameter_uuid',
@@ -186,6 +227,18 @@ class Parameter:
         except epyqlib.treenode.NotFoundError:
             enumeration = ''
 
+        default = self.wrapped.default
+        if default is None:
+            default = ''
+
+        minimum = self.wrapped.minimum
+        if minimum is None:
+            minimum = ''
+
+        maximum = self.wrapped.maximum
+        if maximum is None:
+            maximum = ''
+
         comment = self.wrapped.comment
         if comment is None:
             comment = ''
@@ -196,6 +249,9 @@ class Parameter:
                 indent=indent,
                 factor=factor,
                 units=units,
+                default=default,
+                minimum=minimum,
+                maximum=maximum,
                 enumeration=enumeration,
                 comment=comment,
             ),
