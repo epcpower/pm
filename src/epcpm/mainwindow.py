@@ -131,6 +131,9 @@ class Window:
         view_model.proxy.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
         view_model.proxy.setSourceModel(view_model.model)
         view_model.view.setModel(view_model.proxy)
+        view_model.view.setItemDelegate(view_model.model.delegate(
+            proxy=view_model.proxy,
+        ))
 
         view_model.selection = view_model.view.selectionModel()
 
