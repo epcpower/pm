@@ -23,8 +23,8 @@ def based_int(v):
     return int(v)
 
 
-def hex_upper(v, width=8, prefix='0x'):
-    return f'{prefix}{v:0{width}X}'
+def hex_upper(_, value, width=8, prefix='0x', model=None):
+    return f'{prefix}{value:0{width}X}'
 
 
 class HexadecimalIntegerField(marshmallow.fields.Field):
