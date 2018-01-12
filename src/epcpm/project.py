@@ -83,6 +83,19 @@ def _post_load(project):
     models.can.droppable_from.add(models.parameters.root)
     models.can.droppable_from.add(models.can.root)
 
+    enumerations_root, = (
+        child
+        for child in models.parameters.root.children
+        if child.name == 'Enumerations'
+    )
+    models.parameters.list_selection_roots['enumerations'] = enumerations_root
+
+    models.parameters.list_selection_roots['access level'], = (
+        child
+        for child in enumerations_root.children
+        if child.name == 'AccessLevel'
+    )
+
 
 @graham.schemify(tag='models')
 @attr.s
