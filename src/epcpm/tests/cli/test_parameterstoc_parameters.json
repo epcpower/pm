@@ -1,0 +1,39 @@
+{
+    "_type": "root",
+    "name": "Parameters",
+    "children": [
+        {
+            "_type": "group",
+            "name": "Green",
+            "type_name": "Green Type",
+            "children": [
+                {
+                    "_type": "parameter",
+                    "name": "Red",
+                    "type_name": "RedType",
+                    "default": null,
+                    "minimum": null,
+                    "maximum": null,
+                    "nv": false,
+                    "read_only": false,
+                    "factory": false,
+                    "uuid": "1a4d1d7a-aff8-4714-b539-9557b9623f5c"
+                }
+            ],
+            "uuid": "b97f42c6-bbd8-43ac-92d2-0e414ae1a419"
+        },
+        {
+            "_type": "parameter",
+            "name": "Blue",
+            "type_name": "BlueType",
+            "default": null,
+            "minimum": null,
+            "maximum": null,
+            "nv": false,
+            "read_only": false,
+            "factory": false,
+            "uuid": "a64b5a30-a287-49cd-80ac-c23f5533d664"
+        }
+    ],
+    "uuid": "e3c940a6-a0d0-497d-bd1a-26d704b3e614"
+}

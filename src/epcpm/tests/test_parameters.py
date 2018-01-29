@@ -1,7 +1,8 @@
 from pytestqt import qtbot
 
-import pm.parameters
-import pm.mainwindow
+import epcpm.mainwindow
+
+import epyqlib.pm.parametermodel
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
@@ -9,7 +10,7 @@ __license__ = 'GPLv2+'
 
 
 def test_default_ranges():
-    p = pm.parameters.Parameter(name='default_min_max')
+    p = epyqlib.pm.parametermodel.Parameter(name='default_min_max')
     assert p.minimum is None
     assert p.maximum is None
 

@@ -1,0 +1,8 @@
+{
+    "paths": {
+        "parameters": "test_parameterstoc_parameters.json",
+        "can": "test_parameterstoc_can.json",
+        "_type": "models"
+    },
+    "_type": "project"
+}

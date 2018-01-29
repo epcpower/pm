@@ -17,22 +17,31 @@ setuptools.setup(
             'epcpm = epcpm.__main__:_entry_point',
         ],
         'console_scripts': [
-            'epcparameterstoc = epcpm.parameterstoc:cli',
+            'epcparameterstoc = epcpm.cli.parameterstoc:cli',
+            'epcimportsym = epcpm.cli.importsym:cli',
+            'epcexportsym = epcpm.cli.exportsym:cli',
+            'epcexportdocx = epcpm.cli.exportdocx:cli',
         ],
     },
     install_requires=[
+        'canmatrix',
+        'click',
+        'graham',
+        'pycparser',
         'pyqt5',
         'sip',
-        'click',
     ],
     extras_require={
-        'tests': [
+        'test': [
             'codecov',
             'pytest',
             'pytest-cov',
             'pytest-qt',
             'tox',
         ],
+        'build': [
+            'pyinstaller',
+        ]
     },
     setup_requires=[
         'setuptools_scm',

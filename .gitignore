@@ -81,4 +81,5 @@ target/
 .vagrant/
 
 # Generated files
-/epyq/revision.py
+/src/epcpm/__version.py
+/src/epcpm/__build.py

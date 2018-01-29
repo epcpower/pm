@@ -1,0 +1,106 @@
+{
+    "_type": "root",
+    "name": "CAN",
+    "children": [
+        {
+            "_type": "message",
+            "name": "CommandVF",
+            "identifier": "0xcffae41",
+            "extended": true,
+            "length": 0,
+            "cycle_time": null,
+            "comment": null,
+            "children": [
+                {
+                    "_type": "signal",
+                    "name": "Voltage",
+                    "bits": 0,
+                    "signed": false,
+                    "factor": "1",
+                    "parameter_uuid": "c25cd4e2-b2a8-4106-8610-4e0db6033a17",
+                    "uuid": "02b7c6f9-8447-4a84-b107-385749066bd3"
+                },
+                {
+                    "_type": "signal",
+                    "name": "Frequency",
+                    "bits": 0,
+                    "signed": false,
+                    "factor": "1",
+                    "parameter_uuid": "422638c9-87d1-4c86-aa8c-73bd8bfff99c",
+                    "uuid": "4cfe3c01-4543-456b-8396-2793faafec95"
+                }
+            ],
+            "uuid": "38127a59-0c93-4d7f-bc2b-d9d68bfa00c3"
+        },
+        {
+            "_type": "message",
+            "name": "New Message",
+            "identifier": "0x1fffffff",
+            "extended": true,
+            "length": 0,
+            "cycle_time": null,
+            "comment": null,
+            "children": [
+                {
+                    "_type": "signal",
+                    "name": "paramAAb",
+                    "bits": 0,
+                    "signed": false,
+                    "factor": "1",
+                    "parameter_uuid": "6516a19e-ecb8-4cd9-acc1-3894193886f7",
+                    "uuid": "2759cd9c-e53e-44f3-974e-2a7c343a2d0a"
+                }
+            ],
+            "uuid": "d4352853-eaa6-48a0-8fd5-e1ae50d46f27"
+        },
+        {
+            "_type": "multiplexed_message",
+            "name": "New Multiplexed Message",
+            "identifier": "0x1fffffff",
+            "extended": true,
+            "comment": null,
+            "children": [
+                {
+                    "_type": "signal",
+                    "name": "Mux Signal",
+                    "bits": 2,
+                    "signed": false,
+                    "factor": "1",
+                    "parameter_uuid": null,
+                    "uuid": "c03fda26-bdbb-4dc7-8a2b-f0da0d32b48a"
+                },
+                {
+                    "_type": "signal",
+                    "name": "Common Signal",
+                    "bits": 0,
+                    "signed": false,
+                    "factor": "1",
+                    "parameter_uuid": null,
+                    "uuid": "bed79739-bedd-429d-bd96-63bf8213252a"
+                },
+                {
+                    "_type": "multiplexer",
+                    "name": "Multiplexer A",
+                    "identifier": 1,
+                    "length": 0,
+                    "cycle_time": null,
+                    "comment": null,
+                    "children": [],
+                    "uuid": "1491d55a-ef3d-4079-9443-3a0790b033b9"
+                },
+                {
+                    "_type": "multiplexer",
+                    "name": "Multiplexer B",
+                    "identifier": 2,
+                    "length": 0,
+                    "cycle_time": null,
+                    "comment": null,
+                    "children": [],
+                    "uuid": "4e06142b-b91c-4916-985f-509336ed3b1d"
+                }
+            ],
+            "uuid": "dc33ff0f-43c9-4f96-a19c-6d41a263ebd7"
+        }
+    ],
+    "uuid": "89dfcb54-0745-4b91-8a86-370be820a2a2"
+}

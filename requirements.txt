@@ -1,8 +1,12 @@
-tox==2.8.2
+-e sub/graham
+-e sub/pycparser
+-e sub/canmatrix
+
 -e sub/epyqlib
+
 attrs==17.2.0
-requests==2.18.4
-pyqt5==5.9
-sip==4.19.3
 click==6.7
-pycparser==2.18
+pyqt5==5.9
+requests==2.18.4
+sip==4.19.3
+tox==2.8.2

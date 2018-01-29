@@ -1,6 +1,7 @@
 import argparse
-import functools
 import logging
+import os.path
+import pathlib
 import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -30,13 +31,16 @@ def main(*args, logger):
     )
 
     sys.excepthook = epyqlib.utils.qt.exception_message_box
+
+    os_signal_timer = epyqlib.utils.qt.setup_sigint()
+
     QtCore.qInstallMessageHandler(epyqlib.utils.qt.message_handler)
 
     app.setStyleSheet('QMessageBox {{ messagebox-text-interaction-flags: {}; }}'
                       .format(QtCore.Qt.TextBrowserInteraction))
 
     app.setOrganizationName('EPC Power Corp.')
-    app.setApplicationName('EPyQ')
+    app.setApplicationName('EPC Parameter Management')
 
     args = parse_args(args=args)
 
@@ -50,11 +54,18 @@ def main(*args, logger):
             if args.verbose >= 3:
                 logging.getLogger().setLevel(logging.DEBUG)
 
-    window = epcpm.mainwindow.Window(ui_file='__main__.ui')
-    epyqlib.utils.qt.exception_message_box_register_parent(parent=window)
+    window = epcpm.mainwindow.Window(
+        title='EPC Parameter Manager',
+        ui_file='__main__.ui',
+        icon_path='icon.ico',
+    )
+
+    epyqlib.utils.qt.exception_message_box_register_parent(parent=window.ui)
 
     if args.file is not None:
-        window.open(file=args.file)
+        args.file.close()
+        filename = os.path.abspath(args.file.name)
+        window.open_project(filename=filename)
         args.file.close()
 
     window.ui.show()
@@ -63,13 +74,11 @@ def main(*args, logger):
 
 
 def _entry_point():
-    import traceback
-
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     stream_handler = logging.StreamHandler()
-    file_handler = logging.FileHandler('pm.log')
+    file_handler = logging.FileHandler('epcpm.log')
 
     for handler in (stream_handler, file_handler):
         handler.setFormatter(formatter)
@@ -77,10 +86,11 @@ def _entry_point():
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
 
-    def excepthook(excType, excValue, tracebackobj):
-        logger.error('Uncaught exception hooked:\n' +
-            traceback.format_exception(excType, excValue, tracebackobj))
-
-    sys.excepthook = excepthook
+    sys.excepthook = epyqlib.utils.general.exception_logger
 
     return main(*sys.argv[1:], logger=logger)
+
+
+# for PyInstaller
+if __name__ == '__main__':
+    sys.exit(_entry_point())
