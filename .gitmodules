@@ -1,6 +1,6 @@
 [submodule "sub/epyqlib"]
 	path = sub/epyqlib
-	url = https://epc-phab.exana.io/diffusion/ST
+	url = https://github.com/altendky/st
 	branch = lib
 [submodule "sub/canmatrix"]
 	path = sub/canmatrix
