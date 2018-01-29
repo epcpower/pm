@@ -12,9 +12,7 @@ build_script:
   - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
   - python -c "import sys; print(sys.version)"
   - pip install --user tox
-  - copy /y .gitmodules.github .gitmodules
   - git submodule update --init
-  - git checkout -- .gitmodules
   - python venv.py
   - copy "%PYTHON%\\python3.dll" "venv\\Scripts"
   - venv\\Scripts\\pip install -r requirements.txt
