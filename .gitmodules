@@ -1,7 +1,6 @@
 [submodule "sub/epyqlib"]
 	path = sub/epyqlib
-	url = https://github.com/altendky/st
-	branch = lib
+	url = https://github.com/altendky/stlib
 [submodule "sub/canmatrix"]
 	path = sub/canmatrix
 	url = https://github.com/ebroecker/canmatrix
