@@ -43,6 +43,9 @@ def sym_file():
     ''').encode('utf-8'))
 
 
+other_group_name = 'Uncategorized Stuff'
+
+
 @pytest.fixture
 def hierarchy_file():
     return io.StringIO(json.dumps({
@@ -59,7 +62,11 @@ def hierarchy_file():
                         "FactoryParam"
                     ]
                 ]
-            }
+            },
+            {
+                'name': other_group_name,
+                'unreferenced': True,
+            },
         ]
     }))
 
@@ -67,6 +74,11 @@ def hierarchy_file():
 @pytest.fixture
 def empty_hierarchy_file():
     return io.StringIO('{"children": []}')
+
+
+def test_other_group_name(hierarchy_file):
+    hierarchy = json.load(hierarchy_file)
+    assert epcpm.symtoproject.get_other_name(hierarchy) == other_group_name
 
 
 def test_load_can_file():

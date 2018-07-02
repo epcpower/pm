@@ -27,6 +27,21 @@ def load_can_path(can_path, hierarchy_path):
         )
 
 
+def get_other_name(hierarchy):
+    other_names = [
+        child['name']
+        for child in hierarchy['children']
+        if isinstance(child, dict) and child.get('unreferenced', False)
+    ]
+
+    if not other_names:
+        other_name = 'Other'
+    else:
+        other_name, = other_names
+
+    return other_name
+
+
 def load_can_file(can_file, file_type, parameter_hierarchy_file):
     matrix, = canmatrix.formats.load(
         can_file,
@@ -45,7 +60,13 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
     parameters = epyqlib.pm.parametermodel.Group(name='Parameters')
     parameters_root.append_child(parameters)
 
-    other_parameters = epyqlib.pm.parametermodel.Group(name='Other')
+    parameter_hierarchy = json.load(
+        parameter_hierarchy_file,
+        object_pairs_hook=collections.OrderedDict,
+    )
+
+    other_name = get_other_name(parameter_hierarchy)
+    other_parameters = epyqlib.pm.parametermodel.Group(name=other_name)
     parameters.append_child(other_parameters)
 
     ccp = epyqlib.pm.parametermodel.Group(name='CCP')
@@ -98,10 +119,6 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
         'process_to_inverter': process_to_inverter,
         'other': other,
     }
-    parameter_hierarchy = json.load(
-        parameter_hierarchy_file,
-        object_pairs_hook=collections.OrderedDict,
-    )
     traverse_hierarchy(
         children=parameter_hierarchy['children'],
         parent=parameters,
