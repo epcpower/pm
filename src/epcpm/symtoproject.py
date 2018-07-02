@@ -71,7 +71,8 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
     def traverse_hierarchy(children, parent, group_from_path):
         for child in children:
             if isinstance(child, dict):
-                if child.get('children') is None:
+                subchildren = child.get('children')
+                if subchildren is None:
                     continue
 
                 group = epyqlib.pm.parametermodel.Group(
@@ -79,13 +80,11 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                 )
                 parent.append_child(group)
 
-                subchildren = child.get('children')
-                if subchildren is not None:
-                    traverse_hierarchy(
-                        children=subchildren,
-                        parent=group,
-                        group_from_path=group_from_path,
-                    )
+                traverse_hierarchy(
+                    children=subchildren,
+                    parent=group,
+                    group_from_path=group_from_path,
+                )
             else:
                 group_from_path[('ParameterQuery',) + tuple(child)] = parent
                 group_from_path[('ParameterResponse',) + tuple(child)] = parent
