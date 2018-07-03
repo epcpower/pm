@@ -4,7 +4,7 @@
 
 -e sub/epyqlib
 
-attrs==17.2.0
+attrs==18.1.0
 click==6.7
 pyqt5==5.9
 requests==2.18.4
