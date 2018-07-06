@@ -378,8 +378,8 @@ class Window:
         self.value_set = value_set
 
     def context_menu(self, position, view_model):
-        index = view_model.view.indexAt(position)
-        index = view_model.view.model().mapToSource(index)
+        view_index = view_model.view.indexAt(position)
+        index = view_model.view.model().mapToSource(view_index)
 
         model = view_model.model
         node = model.node_from_index(index)
@@ -406,7 +406,10 @@ class Window:
         if len(extra_actions) > 0:
             menu.addSeparator()
 
+        expand_tree = menu.addAction('Expand Tree')
         expand_all = menu.addAction('Expand All')
+        menu.addSeparator()
+        collapse_tree = menu.addAction('Collapse Tree')
         collapse_all = menu.addAction('Collapse All')
 
         action = menu.exec(
@@ -419,8 +422,20 @@ class Window:
                 extra(node)
             elif action is delete:
                 node.tree_parent.remove_child(child=node)
+            elif action is expand_tree:
+                epyqlib.utils.qt.set_expanded_tree(
+                    view=view_model.view,
+                    index=view_index,
+                    expanded=True,
+                )
             elif action is expand_all:
                 view_model.view.expandAll()
+            elif action is collapse_tree:
+                epyqlib.utils.qt.set_expanded_tree(
+                    view=view_model.view,
+                    index=view_index,
+                    expanded=False,
+                )
             elif action is collapse_all:
                 view_model.view.collapseAll()
             else:
