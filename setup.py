@@ -30,7 +30,6 @@ setuptools.setup(
         'graham',
         'pycparser',
         'pyqt5',
-        'sip',
     ],
     extras_require={
         'test': [

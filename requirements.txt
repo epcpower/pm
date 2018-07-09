@@ -6,7 +6,6 @@
 
 attrs==18.1.0
 click==6.7
-pyqt5==5.9
+pyqt5==5.11.2
 requests==2.18.4
-sip==4.19.3
 tox==2.8.2
