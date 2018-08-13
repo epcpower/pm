@@ -103,6 +103,16 @@ def _post_load(project):
             if child.name == 'AccessLevel'
         )
     models.parameters.list_selection_roots['access level'] = access_level_root
+    
+    if enumerations_root is None:
+        visibility_root = None
+    else:
+        visibility_root, = (
+            child
+            for child in enumerations_root.children
+            if child.name == 'CmmControlsVariant'
+       )
+    models.parameters.list_selection_roots['visibility'] = visibility_root
 
 
 @graham.schemify(tag='models')

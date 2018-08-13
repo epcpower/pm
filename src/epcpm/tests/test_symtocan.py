@@ -20,7 +20,8 @@ def sym_file():
     
     {ENUMS}
     enum AccessLevel(0="User", 1="Engineering", 2="Factory")
-
+    enum CmmControlsVariant(0="None", 1="MG3", 2="MG4", 3="DG", 4="HY", 5="DC")
+    
     {SEND}
     
     [ParameterQuery]

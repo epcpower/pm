@@ -127,6 +127,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
 
     enumeration_name_to_uuid = {}
     access_levels = None
+    variants = None
     for name, values in sorted(matrix.valueTables.items()):
         if name == 'AccessLevel':
             enumeration = epyqlib.pm.parametermodel.AccessLevels(name=name)
@@ -135,6 +136,9 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
         else:
             enumeration = epyqlib.pm.parametermodel.Enumeration(name=name)
             enumerator_type = epyqlib.pm.parametermodel.Enumerator
+            
+        if name == 'CmmControlsVariant':
+            variants = enumeration
 
         enumerations.append_child(enumeration)
         enumeration_name_to_uuid[name] = enumeration.uuid
@@ -152,6 +156,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                 parameter_group=parameters_root,
                 enumeration_name_to_uuid=enumeration_name_to_uuid,
                 access_levels=access_levels,
+                variants=variants,
             )
         else:
             message = build_multiplexed_message(
@@ -160,6 +165,7 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
                 group_from_path=group_from_path,
                 parameter_from_path=parameter_from_path,
                 access_levels=access_levels,
+                variants=variants,
             )
 
         can_root.append_child(message)
@@ -223,6 +229,7 @@ def build_message(
         parameter_group,
         enumeration_name_to_uuid,
         access_levels,
+        variants,
 ):
     extras = {}
 
@@ -240,6 +247,8 @@ def build_message(
         name=humanize_name(frame.name),
     )
     parameter_group.append_child(group)
+    
+    dodo, variant_cfgs = strip_variant_parameter(string='', variants=variants)
 
     for matrix_signal in frame.signals:
         parameter = parameter_from_signal(
@@ -248,6 +257,8 @@ def build_message(
             matrix_signal=matrix_signal,
             enumeration_name_to_uuid=enumeration_name_to_uuid,
             access_levels=access_levels,
+            variants=variants,
+            frame_variants=variant_cfgs
         )
         group.append_child(parameter)
 
@@ -292,6 +303,7 @@ def build_multiplexed_message(
         group_from_path,
         parameter_from_path,
         access_levels,
+        variants,
 ):
     message = message_from_matrix(
         frame=frame,
@@ -316,6 +328,11 @@ def build_multiplexed_message(
             mux_comment, access_level = strip_access_level(
                 string=mux_comment,
                 access_levels=access_levels,
+            )
+            
+            mux_comment, variant_cfgs = strip_variant_parameter(
+                string=mux_comment,
+                variants=variants,
             )
 
             if len(mux_comment) > 0:
@@ -344,6 +361,8 @@ def build_multiplexed_message(
                 mux_name=mux_name,
                 enumeration_name_to_uuid=enumeration_name_to_uuid,
                 access_levels=access_levels,
+                variants=variants,
+                frame_variants=variant_cfgs,
             )
 
             group = group_from_path.get(
@@ -398,7 +417,7 @@ def build_multiplexed_message(
 def strip_tag(string, tag):
     present = tag in string
 
-    if tag in string:
+    if present:
         string = string.replace(tag, '').strip()
 
     return string, present
@@ -415,6 +434,26 @@ def strip_access_level(string, access_levels):
         access_level = access_levels.by_name('factory')
 
     return string, access_level
+
+
+def strip_variant_parameter(string, variants):
+    variants = [
+        variant 
+        for variant in variants.children 
+        if variant.name != 'None'
+    ]
+    
+    selected_variants = []
+    
+    for variant in variants:
+        string, present = strip_tag(string, f'<{variant.name}>')
+        if present:
+            selected_variants.append(variant)
+    
+    if len(selected_variants) == 0:
+        selected_variants = variants
+        
+    return string, selected_variants
 
 
 @attr.s
@@ -466,6 +505,8 @@ def parameter_from_signal(
         matrix_signal,
         enumeration_name_to_uuid,
         access_levels,
+        variants,
+        frame_variants,
         mux_name=None,
 ):
     extras = {}
@@ -495,11 +536,21 @@ def parameter_from_signal(
     access_level = access_levels.default()
 
     if matrix_signal.comment is not None:
+        comment = matrix_signal.comment
         comment, signal_access_level = strip_access_level(
-            string=matrix_signal.comment,
+            string=comment,
             access_levels=access_levels,
         )
+        
+        comment, variant_cfgs = strip_variant_parameter(
+            string=comment,
+            variants=variants,
+        )
 
+        #only variants in both lists:
+        vis_list = list(set(frame_variants).intersection(variant_cfgs))
+        extras['visibility'] = vis_list[0].uuid #todo this only allows one variant selection
+        
         comment, nv_meta = strip_nv(string=comment)
 
         folded = matrix_signal.name.casefold()

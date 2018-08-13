@@ -4,6 +4,9 @@ import graham
 
 import epcpm.project
 
+import pathlib
+
+import epyqlib.pm
 
 reference_string = textwrap.dedent('''\
 {
@@ -69,3 +72,13 @@ def test_model_getitem():
         values.append(model[name])
 
     assert values == [None, None]
+
+
+def test_model_proper_selection_roots():
+    project = epcpm.project.loadp(
+        pathlib.Path(__file__).with_name('example_project.pmp')
+    )
+
+    expected = epyqlib.pm.parametermodel.types.list_selection_roots()
+    
+    assert set(project.models.parameters.list_selection_roots.keys()) == expected
