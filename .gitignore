@@ -83,3 +83,5 @@ target/
 # Generated files
 /src/epcpm/__version.py
 /src/epcpm/__build.py
+/lextab.py
+/yacctab.py
