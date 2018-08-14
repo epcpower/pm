@@ -248,7 +248,7 @@ def build_message(
     )
     parameter_group.append_child(group)
     
-    dodo, variant_cfgs = strip_variant_parameter(string='', variants=variants)
+    variant_cfgs = strip_variant_parameter(string='', variants=variants)[1]
 
     for matrix_signal in frame.signals:
         parameter = parameter_from_signal(
