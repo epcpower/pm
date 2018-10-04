@@ -3,4 +3,4 @@ codecov==2.0.5
 pytest==3.2.2
 pytest-cov==2.5.1
 pytest-qt==2.2.0
-twisted==18.9.0rc0
+twisted==18.9.0rc1
