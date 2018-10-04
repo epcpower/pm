@@ -15,7 +15,6 @@ build_script:
   - git submodule update --init
   - python venv.py
   - copy "%PYTHON%\\python3.dll" "venv\\Scripts"
-  - venv\\Scripts\\pip install -r requirements.txt
   - venv\\Scripts\\pip install -r requirements.build
   - venv\\Scripts\\pip install -r requirements.test
   - venv\\Scripts\\pip freeze
