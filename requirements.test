@@ -1,8 +1,0 @@
--r requirements.txt
-codecov==2.0.5
-pytest==3.2.2
-pytest-cov==2.5.1
-pytest-qt==2.2.0
-Twisted==18.9.0rc1
-Twisted[osx_platform]==18.9.0rc1; platform_system == "Darwin"
-Twisted[windows_platform]==18.9.0rc1; platform_system == "Windows"
