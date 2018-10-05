@@ -366,6 +366,7 @@ def assert_signal_list_equal(
     )
 
     case_insensitive = (
+        'controlsvariant',
         'current',
         'didt',
         'dqccterm',
