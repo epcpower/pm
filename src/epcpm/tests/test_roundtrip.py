@@ -372,6 +372,7 @@ def assert_signal_list_equal(
         'dqccterm',
         'freq',
         'gain',
+        'hardwaresvariant',
         'level',
         'limit',
         'max',
