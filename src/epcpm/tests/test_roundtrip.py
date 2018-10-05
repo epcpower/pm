@@ -370,6 +370,7 @@ def assert_signal_list_equal(
         'current',
         'didt',
         'dqccterm',
+        'dummy',
         'freq',
         'gain',
         'hardwarevariant',
