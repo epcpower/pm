@@ -246,7 +246,10 @@ def test_access_level():
     parameter_root = project.models.parameters.root
     can_root = project.models.can.root
 
-    access_levels = epyqlib.pm.parametermodel.AccessLevels(name='AccessLevel')
+    access_levels = epyqlib.pm.parametermodel.AccessLevels(
+        name='AccessLevel',
+        uuid='54bb11bb-a39d-4b30-a597-da3fbeda4d7a',
+    )
     parameter_root.append_child(access_levels)
 
     builder = epcpm.cantosym.builders.wrap(
@@ -256,13 +259,24 @@ def test_access_level():
         access_levels=access_levels,
     )
 
-    user = epyqlib.pm.parametermodel.Enumerator(name='user', value=0)
-    factory = epyqlib.pm.parametermodel.Enumerator(name='factory', value=1)
+    user = epyqlib.pm.parametermodel.Enumerator(
+        name='user',
+        value=0,
+        uuid='b4c58cf9-3705-4e73-8e31-09f8da22ff61',
+    )
+    factory = epyqlib.pm.parametermodel.Enumerator(
+        name='factory',
+        value=1,
+
+    )
 
     access_levels.append_child(user)
     access_levels.append_child(factory)
 
-    enumerations = epyqlib.pm.parametermodel.Enumerations(name='Enumerations')
+    enumerations = epyqlib.pm.parametermodel.Enumerations(
+        name='Enumerations',
+        uuid='1936c213-5230-454a-81f9-c8099046a19d',
+    )
     parameter_root.append_child(enumerations)
 
     enumerations.append_child(access_levels)
@@ -270,26 +284,32 @@ def test_access_level():
     parameter = epyqlib.pm.parametermodel.Parameter(
         name='Factory Parameter',
         access_level_uuid=factory.uuid,
+        uuid='40477147-cd0b-407a-9dc1-805d3205214b',
     )
     parameter_root.append_child(parameter)
 
     access_level_parameter = epyqlib.pm.parametermodel.Parameter(
         name='Access Parameter',
         enumeration_uuid=access_levels.uuid,
+        uuid='908f42e7-7632-47bc-a8c7-eb1eca4e277c',
     )
     parameter_root.append_child(access_level_parameter)
 
-    message = epcpm.canmodel.Message()
+    message = epcpm.canmodel.Message(
+
+    )
     can_root.append_child(message)
     signal = epcpm.canmodel.Signal(
         name='Factory Signal',
         parameter_uuid=parameter.uuid,
+        uuid='07047416-73e3-48bd-8c0c-85c1de078200',
     )
     message.append_child(signal)
 
     access_level_signal = epcpm.canmodel.Signal(
         name='Access Signal',
         parameter_uuid=access_level_parameter.uuid,
+        uuid='4f62704f-6548-4f80-b7b7-702f214a394b',
     )
     message.append_child(access_level_signal)
 
