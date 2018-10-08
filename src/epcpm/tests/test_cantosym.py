@@ -250,7 +250,6 @@ def test_access_level():
         name='AccessLevel',
         uuid='54bb11bb-a39d-4b30-a597-da3fbeda4d7a',
     )
-    parameter_root.append_child(access_levels)
 
     builder = epcpm.cantosym.builders.wrap(
         can_root,
