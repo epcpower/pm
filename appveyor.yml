@@ -21,7 +21,6 @@ build_script:
   - venv\\Scripts\\pip freeze
   - ps: if (Get-ChildItem Env:PHRASE -ErrorAction SilentlyContinue) {$Env:PHRASE | Out-File sub/epyqlib/epyqlib/resources/code -Encoding ascii -NoNewline}
   - venv\\Scripts\\pyinstaller pyinstaller.spec
-  - mkdir "EPCPM %APPVEYOR_BUILD_VERSION%"
   - move "dist\epcpm" "EPCPM %APPVEYOR_BUILD_VERSION%"
 #  - venv\\Scripts\\python sub\\epyqlib\\deploy_win.py --name epcpm
 #  - move ..\\*.exe .
