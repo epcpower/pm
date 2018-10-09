@@ -454,8 +454,17 @@ class Window:
 
     def generate_symbol_file(self):
         finder = self.view_models['can'].model.node_from_uuid
+        access_levels, = self.project.models.parameters.root.nodes_by_filter(
+            filter=(
+                lambda node: isinstance(
+                    node,
+                    epyqlib.pm.parametermodel.AccessLevels
+                )
+            ),
+        )
         builder = epcpm.cantosym.builders.wrap(
             wrapped=self.view_models['can'].model.root,
+            access_levels=access_levels,
             parameter_uuid_finder=finder,
             parameter_model=self.view_models['parameters'].model,
         )
