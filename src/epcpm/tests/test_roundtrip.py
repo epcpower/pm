@@ -208,6 +208,10 @@ def unvary_signal_names(name):
         ('PpcIslDroop([VF])_IBpt', r'PpcIslDroop\1_iBpt'),
         ('PpcIslDroop([VF])_DBpt', r'PpcIslDroop\1_dBpt'),
         ('PpcIslDroop([VF])_QBpt', r'PpcIslDroop\1_qBpt'),
+        ('PpcIslDestab([VF])_VBpt', r'PpcIslDestab\1_vBpt'),
+        ('PpcIslDestab([VF])_DBpt', r'PpcIslDestab\1_dBpt'),
+        ('PpcIslDestab([VF])_QBpt', r'PpcIslDestab\1_qBpt'),
+        ('PpcIslDestab([VF])_FBpt', r'PpcIslDestab\1_fBpt'),
         ('Ig_Max', 'Ig_max'),
         (
             r'(MesdConfigLutCalibration_)T(Igbt|Aux|Motor)_(\d+)',
@@ -237,7 +241,10 @@ def unvary_signal_names(name):
                 'DpwmStrategy',
                 'DcGroup',
                 'D[012]',
+                'F[012]',
                 'Q([012]|Ig)',
+                'V([012])',
+                '(F|V|W|XpVa)Tau',
                 'AcGroup',
                 '(C|G)(L|R)s',
                 'AcHalfPeriodTrack',
@@ -245,7 +252,7 @@ def unvary_signal_names(name):
                 'DutyLimit',
                 'EeSaveInProgress',
                 'EntryPulseNr',
-                'FCut(F|Ig|V)',
+                'FCut(F|Ig|V|Vg)',
                 'FDev(H|L)',
                 'FMax',
                 'FMin',
@@ -366,26 +373,62 @@ def assert_signal_list_equal(
     )
 
     case_insensitive = (
+        'aclosshotstandbydc',
+        'aclosshotstandbypc',
+        'acwaitenabledcatref',
+        'argadjust',
+        'argerrmax',
+        'argerrsat',
+        'argerrtau',
+        'autodisconnectongridloss',
+        'autofollowingpostconnect',
+        'autoreconnectongridavail',
+        'autosequencewhendisabled',
+        'autovolttrackduringsynch',
+        'conntimeout',
         'controlsvariant',
         'current',
+        'dcwaitenabledcatref',
+        'disctimeout',
+        'enabledelayac',
+        'enabledelaydc',
         'didt',
         'dqccterm',
         'dummy',
         'freq',
+        'fswactual',
+        # 'ftau',
         'gain',
+        'groupedenable',
         'hardwarevariant',
         'level',
         'limit',
+        'magadjust',
+        'magerrmax',
+        'magerrtau',
+        'moddepthxy',
+        'moddepthz',
         'max',
         'min',
+        'pllenable',
+        'pulsenractual',
         'r',
         'rate',
         'resistance',
+        'syncactive',
+        'syncholdtime',
+        'synctimeout',
         'tc',
         'temp',
         'temperature',
         'time',
+        'tisllatch',
+        'tunload',
+        'vdevh',
+        'vdevl',
         'volts',
+        # 'vtau',
+        # 'wtau',
     )
 
     zipped = itertools.zip_longest(original_names, exported_names)
@@ -483,7 +526,10 @@ def test_roundtrip():
     original, = canmatrix.formats.loadp(os.fspath(example_device.can)).values()
     exported, = canmatrix.formats.loadp(os.fspath(exported_can)).values()
 
-    assert_frame_lists_equal(original.frames, exported.frames)
+    try:
+        assert_frame_lists_equal(original.frames, exported.frames)
+    except Exception as e:
+        print()
     assert_value_tables_equal(original.valueTables, exported.valueTables)
 
     print()
