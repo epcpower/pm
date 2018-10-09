@@ -448,7 +448,6 @@ class ReferencedUuidNotifier(PyQt5.QtCore.QObject):
 
     def current_changed(self, current, previous):
         index, model = epyqlib.utils.qt.resolve_index_to_model(
-            view=self.view,
             index=current,
         )
         node = model.node_from_index(index)
