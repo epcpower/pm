@@ -24,7 +24,7 @@ build_script:
   - move "dist\epcpm" "EPCPM %APPVEYOR_BUILD_VERSION%"
 #  - venv\\Scripts\\python sub\\epyqlib\\deploy_win.py --name epcpm
 #  - move ..\\*.exe .
-  - 7z a "EPCPM %APPVEYOR_BUILD_VERSION%.zip" -r "EPCPM %APPVEYOR_BUILD_VERSION%"
+  - 7z a "EPCPM %APPVEYOR_BUILD_VERSION%.zip" "EPCPM %APPVEYOR_BUILD_VERSION%"
   - ps: Get-ChildItem .\*.zip | % { Push-AppveyorArtifact $_.FullName }
   - venv\\Scripts\\pytest epcpm.tests --pyargs
 
