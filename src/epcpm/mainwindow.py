@@ -237,7 +237,7 @@ class Window:
                 model_view.model = model
 
             self.set_model(name=name, view_model=model_view)
-            view.expandAll()
+            view.collapseAll()
             for i in range(model_view.model.columnCount(QtCore.QModelIndex())):
                 view.resizeColumnToContents(i)
 
