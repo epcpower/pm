@@ -236,6 +236,8 @@ class Window:
             else:
                 model_view.model = model
 
+            model.update_nodes()
+
             self.set_model(name=name, view_model=model_view)
             view.collapseAll()
             for i in range(model_view.model.columnCount(QtCore.QModelIndex())):
