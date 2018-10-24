@@ -1,21 +1,25 @@
-attrs==18.1.0
-click==6.7
+attrs==18.2.0
+click==7.0
 pyinstaller==3.4
 pyqt5==5.11.2
 requests==2.18.4
 tox==2.8.2
 
 codecov==2.0.5
-pytest==3.2.2
+pytest==3.8.2
 pytest-cov==2.5.1
-pytest-qt==2.2.0
-Twisted==18.9.0rc1
+pytest-qt==3.2.1
+Twisted==18.9.0
 Twisted[osx_platform]==18.9.0rc1; platform_system == "Darwin"
 Twisted[windows_platform]==18.9.0rc1; platform_system == "Windows"
 
--e sub/graham
--e sub/pycparser
--e sub/canmatrix
+git+https://github.com/altendky/qt5reactor@ce3ea2dad6d71adb10cde79b64bc0c7d27e9139c#egg=qt5reactor
+git+https://github.com/altendky/pytest-twisted@6f04ba3ad806b3b40602999e71c28633c36d81f9#egg=pytest-twisted
+python-can==2.2.1
+
+git+https://github.com/ebroecker/canmatrix@82ece227cd2b5a7ced2e0f75610708ff1231ca04#egg=canmatrix
+git+https://github.com/altendky/graham@790cbbb93a6446dedefc39773717aab66df120a1#egg=graham
+git+https://github.com/altendky/pycparser@b19d2b7cb78bccc89ef187c1c4eb5db0fdd3bbf9#egg=pycparser
 
 -e sub/epyqlib
 
