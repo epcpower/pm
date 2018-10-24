@@ -1,12 +1,3 @@
 [submodule "sub/epyqlib"]
 	path = sub/epyqlib
 	url = https://github.com/altendky/stlib
-[submodule "sub/canmatrix"]
-	path = sub/canmatrix
-	url = https://github.com/ebroecker/canmatrix
-[submodule "sub/graham"]
-	path = sub/graham
-	url = https://github.com/altendky/graham
-[submodule "sub/pycparser"]
-	path = sub/pycparser
-	url = https://github.com/altendky/pycparser
