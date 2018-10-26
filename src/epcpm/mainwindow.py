@@ -240,7 +240,10 @@ class Window:
 
             self.set_model(name=name, view_model=model_view)
             view.collapseAll()
-            for i in range(model_view.model.model.columnCount(QtCore.QModelIndex())):
+            column_count = (
+                model_view.model.model.columnCount(QtCore.QModelIndex())
+            )
+            for i in range(column_count):
                 view.resizeColumnToContents(i)
 
             view.setContextMenuPolicy(
