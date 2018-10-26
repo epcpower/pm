@@ -5,7 +5,7 @@ import epyqlib.pm.parametermodel
 
 import epcpm.canmodel
 import epcpm.cantosym
-
+import epcpm.project
 
 # def test_explore():
 #     root = epcpm.canmodel.Root()
@@ -74,16 +74,25 @@ def tidy_sym(s):
 def test_multiplexed():
     root = epcpm.canmodel.Root()
 
-    parameter_root = epyqlib.pm.parametermodel.Root()
+    parameter_root = epyqlib.pm.parametermodel.Root(
+        uuid='5ad34154-f585-40bc-992a-0c9685cbdb26',
+    )
     model = epyqlib.attrsmodel.Model(
         root=parameter_root,
         columns=epyqlib.pm.parametermodel.columns,
     )
-    model.add_drop_sources(model.root)
-    access_levels = epyqlib.pm.parametermodel.AccessLevels()
-    access_level = epyqlib.pm.parametermodel.AccessLevel(value=0)
+    model.add_drop_sources(model)
+    access_levels = epyqlib.pm.parametermodel.AccessLevels(
+        uuid='284090fd-6893-4800-92bc-035dbf25909c',
+    )
+    access_level = epyqlib.pm.parametermodel.AccessLevel(
+        value=0,
+        uuid='40ced595-a5f3-41ee-9156-eb0ac343c9a5',
+    )
     access_levels.append_child(access_level)
-    enumerations = epyqlib.pm.parametermodel.Enumerations()
+    enumerations = epyqlib.pm.parametermodel.Enumerations(
+        uuid='af9bfcf3-1858-4fb9-b238-a7641bcffcd4',
+    )
     enumerations.append_child(access_levels)
     parameter_root.append_child(enumerations)
     builder = epcpm.cantosym.builders.wrap(
@@ -118,11 +127,13 @@ def test_multiplexed():
     multiplex_signal = epcpm.canmodel.Signal(
         name='Multiplexer Signal',
         bits=8,
+        uuid='c812b3be-c883-4828-8695-0f61db24fde3',
     )
     multiplexed_message.append_child(multiplex_signal)
     common_signal = epcpm.canmodel.Signal(
         name='Common Signal',
         signed=True,
+        uuid='3ecc047e-e88c-4917-b22c-2751db6db705',
     )
     multiplexed_message.append_child(common_signal)
 
@@ -135,18 +146,22 @@ def test_multiplexed():
     # ''')
     # assert tidy_sym(builder.gen()) == tidy_sym(expected)
 
-    parameter_a = epyqlib.pm.parametermodel.Parameter()
+    parameter_a = epyqlib.pm.parametermodel.Parameter(
+        uuid='c56650d0-252d-4b88-a645-fecd23dda1b6',
+    )
     parameter_root.append_child(parameter_a)
 
     multiplexer_a = epcpm.canmodel.Multiplexer(
         name='Test Multiplexer A',
         identifier=1,
+        uuid='bc872648-94d2-4bee-8a4f-5654cac93d38',
     )
     multiplexed_message.append_child(multiplexer_a)
     signal_a = epcpm.canmodel.Signal(
         name='Signal A',
         signed=True,
         parameter_uuid=parameter_a.uuid,
+        uuid='cc5a8db2-b3da-4f2e-b8c6-83569b9c6824',
     )
     multiplexer_a.append_child(signal_a)
 
@@ -158,18 +173,22 @@ def test_multiplexed():
 
     assert tidy_sym(builder.gen()) == tidy_sym(expected)
 
-    parameter_b = epyqlib.pm.parametermodel.Parameter()
+    parameter_b = epyqlib.pm.parametermodel.Parameter(
+        uuid='c6956fa5-15cc-48f4-a0a7-c4b691f14fec',
+    )
     parameter_root.append_child(parameter_b)
 
     multiplexer_b = epcpm.canmodel.Multiplexer(
         name='Test Multiplexer B',
         identifier=2,
+        uuid='7efd7e89-71f8-400b-b11d-7f49642309f8',
     )
     multiplexed_message.append_child(multiplexer_b)
     signal_b = epcpm.canmodel.Signal(
         name='Signal B',
         signed=True,
         parameter_uuid=parameter_b.uuid,
+        uuid='b69c211b-0e0c-4ba1-947e-ea47a1baf11d',
     )
     multiplexer_b.append_child(signal_b)
 

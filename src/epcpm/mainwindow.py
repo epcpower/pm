@@ -129,7 +129,7 @@ class Window:
 
         view_model.proxy = QtCore.QSortFilterProxyModel()
         view_model.proxy.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
-        view_model.proxy.setSourceModel(view_model.model)
+        view_model.proxy.setSourceModel(view_model.model.model)
         view_model.view.setModel(view_model.proxy)
         view_model.view.setItemDelegate(epyqlib.attrsmodel.create_delegate())
 
@@ -240,7 +240,7 @@ class Window:
 
             self.set_model(name=name, view_model=model_view)
             view.collapseAll()
-            for i in range(model_view.model.columnCount(QtCore.QModelIndex())):
+            for i in range(model_view.model.model.columnCount(QtCore.QModelIndex())):
                 view.resizeColumnToContents(i)
 
             view.setContextMenuPolicy(

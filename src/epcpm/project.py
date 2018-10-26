@@ -78,10 +78,10 @@ def _post_load(project):
                 columns=epcpm.canmodel.columns,
             )
 
-    models.parameters.droppable_from.add(models.parameters.root)
+    models.parameters.droppable_from.add(models.parameters)
 
-    models.can.droppable_from.add(models.parameters.root)
-    models.can.droppable_from.add(models.can.root)
+    models.can.droppable_from.add(models.parameters)
+    models.can.droppable_from.add(models.can)
 
     enumerations_root = [
         child
