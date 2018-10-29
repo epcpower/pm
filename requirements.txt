@@ -2,7 +2,7 @@ attrs==18.2.0
 click==7.0
 pyinstaller==3.4
 pyqt5==5.11.2
-requests==2.19.0
+requests==2.20.0
 tox==2.8.2
 
 codecov==2.0.5
