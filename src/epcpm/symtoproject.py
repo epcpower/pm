@@ -248,7 +248,7 @@ def build_message(
     )
     parameter_group.append_child(group)
     
-    variant_cfgs = strip_variant_parameter(string='', variants=variants)[1]
+    variant_cfgs = strip_variant_parameter_tag(string='', variants=variants)[1]
 
     for matrix_signal in frame.signals:
         parameter = parameter_from_signal(
@@ -330,7 +330,7 @@ def build_multiplexed_message(
                 access_levels=access_levels,
             )
             
-            mux_comment, variant_cfgs = strip_variant_parameter(
+            mux_comment, variant_cfgs = strip_variant_parameter_tag(
                 string=mux_comment,
                 variants=variants,
             )
@@ -436,7 +436,7 @@ def strip_access_level(string, access_levels):
     return string, access_level
 
 
-def strip_variant_parameter(string, variants):
+def strip_variant_parameter_tag(string, variants):
     variants = [
         variant 
         for variant in variants.children 
@@ -542,7 +542,7 @@ def parameter_from_signal(
             access_levels=access_levels,
         )
         
-        comment, variant_cfgs = strip_variant_parameter(
+        comment, variant_cfgs = strip_variant_parameter_tag(
             string=comment,
             variants=variants,
         )

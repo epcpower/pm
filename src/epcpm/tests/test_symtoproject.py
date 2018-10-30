@@ -51,7 +51,7 @@ def test_strip_access_level_normal(access_levels):
 def test_strip_variant_parameter_specific(variant_cfgs):
     comment = 'abc <HY> <DG> <MG4> def'
       
-    stripped, variants = epcpm.symtoproject.strip_variant_parameter(comment, variant_cfgs)
+    stripped, variants = epcpm.symtoproject.strip_variant_parameter_tag(comment, variant_cfgs)
     variant_names = [
         variant.name 
         for variant in variants
@@ -63,7 +63,7 @@ def test_strip_variant_parameter_specific(variant_cfgs):
 def test_strip_variant_parameter_normal(variant_cfgs):
     comment = 'abc def'
       
-    stripped, variants = epcpm.symtoproject.strip_variant_parameter(comment, variant_cfgs)
+    stripped, variants = epcpm.symtoproject.strip_variant_parameter_tag(comment, variant_cfgs)
     variant_names = [
         variant.name 
         for variant in variants
