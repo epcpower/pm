@@ -285,7 +285,7 @@ def test_access_level():
     factory = epyqlib.pm.parametermodel.Enumerator(
         name='factory',
         value=1,
-
+        uuid='f5dc405f-a0ed-4590-9553-bf3f1efec23a',
     )
 
     access_levels.append_child(user)
