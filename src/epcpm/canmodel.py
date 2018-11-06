@@ -43,7 +43,11 @@ class HexadecimalIntegerField(marshmallow.fields.Field):
 
 @staticmethod
 def child_from(node):
-    return Signal(name=node.name, parameter_uuid=str(node.uuid))
+    if isinstance(node, epyqlib.pm.parametermodel.Parameter):
+        return Signal(name=node.name, parameter_uuid=node.uuid)
+
+    if isinstance(node, epyqlib.pm.parametermodel.Table):
+        return Table(table_uuid=node.uuid)
 
 
 @graham.schemify(tag='signal')
@@ -282,7 +286,13 @@ class Multiplexer(epyqlib.treenode.TreeNode):
         return {}
 
     def can_drop_on(self, node):
-        return isinstance(node, (epyqlib.pm.parametermodel.Parameter, Signal))
+        return isinstance(
+            node,
+            (
+                epyqlib.pm.parametermodel.Parameter,
+                Signal,
+            ),
+        )
 
     def can_delete(self, node=None):
         if node is None:
@@ -357,8 +367,16 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
+    child_from = child_from
+
     def can_drop_on(self, node):
-        return isinstance(node, tuple(self.addable_types().values()))
+        return isinstance(
+            node,
+            (
+                *self.addable_types().values(),
+                epyqlib.pm.parametermodel.Table,
+            ),
+        )
 
     def can_delete(self, node=None):
         if node is None:
@@ -368,24 +386,114 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
 
     @classmethod
     def all_addable_types(cls):
-        return epyqlib.attrsmodel.create_addable_types((Signal, Multiplexer))
+        return epyqlib.attrsmodel.create_addable_types(
+            (
+                Signal,
+                Multiplexer,
+                Table,
+            ),
+        )
 
     def addable_types(self):
         types = (Signal,)
 
         if len(self.children) > 0:
-            types += (Multiplexer,)
+            types += (Multiplexer, Table)
 
         return epyqlib.attrsmodel.create_addable_types(types)
 
 
+@graham.schemify(tag='table')
+@epyqlib.attrsmodel.ify()
+@epyqlib.utils.qt.pyqtify()
+@attr.s(hash=False)
+class Table(epyqlib.treenode.TreeNode):
+    name = attr.ib(
+        default='New Table',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    multiplexer_range_first = attr.ib(
+        default=0x1fffffff,
+        convert=based_int,
+        metadata=graham.create_metadata(
+            field=HexadecimalIntegerField(),
+        ),
+    )
+    multiplexer_range_last = attr.ib(
+        default=0x1fffffff,
+        convert=based_int,
+        metadata=graham.create_metadata(
+            field=HexadecimalIntegerField(),
+        ),
+    )
+
+    table_uuid = epyqlib.attrsmodel.attr_uuid(
+        default=None,
+        allow_none=True,
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=table_uuid,
+        human_name='Table UUID',
+    )
+
+    children = attr.ib(
+        default=attr.Factory(list),
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(fields=(
+                marshmallow.fields.Nested(graham.schema(MultiplexedMessage)),
+            )),
+        ),
+    )
+
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    @classmethod
+    def all_addable_types(cls):
+        return epyqlib.attrsmodel.create_addable_types(())
+
+    def addable_types(self):
+        return {}
+
+    def can_drop_on(self, node):
+        return isinstance(node, epyqlib.pm.parametermodel.Table)
+
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+        return True
+
+    def update(self):
+        if self.table_uuid is None:
+            return
+
+        root = self.find_root()
+        model = root.model
+
+        table = model.node_from_uuid(self.table_uuid)
+        leaves = table.group.leaves()
+
+        for leaf in leaves:
+            path_string = '/'.join(model.node_from_uuid(u).name for u in leaf.path)
+
+            multiplexer = Multiplexer(name=path_string)
+            signal = Signal(parameter_uuid=leaf.uuid)
+            multiplexer.append_child(signal)
+            self.append_child(multiplexer)
+
+
 Root = epyqlib.attrsmodel.Root(
     default_name='CAN',
-    valid_types=(Message, MultiplexedMessage)
+    valid_types=(Message, MultiplexedMessage, Table),
 )
 
 types = epyqlib.attrsmodel.Types(
-    types=(Root, Message, Signal, MultiplexedMessage, Multiplexer),
+    types=(Root, Message, Signal, MultiplexedMessage, Multiplexer, Table),
 )
 
 
@@ -397,10 +505,14 @@ def merge(name, *types):
 columns = epyqlib.attrsmodel.columns(
     merge('name', *types.types.values()),
     merge('identifier', Message, MultiplexedMessage, Multiplexer),
+    merge('multiplexer_range_first', Table),
+    merge('multiplexer_range_last', Table),
     merge('length', Message, Multiplexer) + merge('bits', Signal),
     merge('extended', Message, MultiplexedMessage),
 
     merge('cycle_time', Message, Multiplexer),
+
+    merge('table_uuid', Table),
 
     merge('signed', Signal),
     merge('factor', Signal),
@@ -447,9 +559,10 @@ class ReferencedUuidNotifier(PyQt5.QtCore.QObject):
         self.selection_model = None
 
     def current_changed(self, current, previous):
-        index, model = epyqlib.utils.qt.resolve_index_to_model(
+        index = epyqlib.utils.qt.resolve_index_to_model(
             index=current,
         )
+        model = index.data(epyqlib.utils.qt.UserRoles.attrs_model)
         node = model.node_from_index(index)
         if isinstance(node, Signal):
             self.changed.emit(node.parameter_uuid)

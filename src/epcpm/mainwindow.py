@@ -383,13 +383,14 @@ class Window:
         self.value_set = value_set
 
     def context_menu(self, position, view_model):
-        view_index = view_model.view.indexAt(position)
-        index = view_model.view.model().mapToSource(view_index)
+        view = view_model.view
+        view_index = view.indexAt(position)
+        index = view.model().mapToSource(view_index)
 
         model = view_model.model
         node = model.node_from_index(index)
 
-        menu = QtWidgets.QMenu(parent=view_model.view)
+        menu = QtWidgets.QMenu(parent=view)
 
         delete = None
         addable_types = node.addable_types()
@@ -400,6 +401,9 @@ class Window:
 
         if node.can_delete():
             delete = menu.addAction('Delete')
+
+        update = menu.addAction('Update')
+        update.setEnabled(hasattr(node, 'update'))
 
         menu.addSeparator()
 
@@ -418,7 +422,7 @@ class Window:
         collapse_all = menu.addAction('Collapse All')
 
         action = menu.exec(
-            view_model.view.viewport().mapToGlobal(position)
+            view.viewport().mapToGlobal(position)
         )
 
         if action is not None:
@@ -427,24 +431,34 @@ class Window:
                 extra(node)
             elif action is delete:
                 node.tree_parent.remove_child(child=node)
+            elif action is update:
+                node.update()
             elif action is expand_tree:
                 epyqlib.utils.qt.set_expanded_tree(
-                    view=view_model.view,
+                    view=view,
                     index=view_index,
                     expanded=True,
                 )
             elif action is expand_all:
-                view_model.view.expandAll()
+                view.expandAll()
             elif action is collapse_tree:
                 epyqlib.utils.qt.set_expanded_tree(
-                    view=view_model.view,
+                    view=view,
                     index=view_index,
                     expanded=False,
                 )
             elif action is collapse_all:
-                view_model.view.collapseAll()
+                view.collapseAll()
             else:
-                node.append_child(actions[action]())
+                new_node = actions[action]()
+                node.append_child(new_node)
+                new_index = model.index_from_node(new_node)
+                view_index = epyqlib.utils.qt.resolve_index_from_model(
+                    model=model.model,
+                    view=view,
+                    index=new_index,
+                )
+                view.setCurrentIndex(view_index)
 
     def generate_code(self, node):
         builder = epcpm.parameterstoc.builders.wrap(node)
@@ -495,12 +509,12 @@ class Window:
 
         try:
             node = model.node_from_uuid(uuid)
-        except epyqlib.treenode.NotFoundError:
+        except epyqlib.attrsmodel.NotFoundError:
             return
 
         index = model.index_from_node(node)
         index = epyqlib.utils.qt.resolve_index_from_model(
-            model=model,
+            model=model.model,
             view=view,
             index=index,
         )
