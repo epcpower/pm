@@ -1,3 +1,5 @@
+import collections
+
 import attr
 import graham
 
@@ -105,6 +107,16 @@ class SampleModel:
         self.model.update_nodes()
 
 
+def count_types(sequence):
+    counts = collections.defaultdict(int)
+
+    for element in sequence:
+        counts[type(element)] += 1
+
+
+    return counts
+
+
 def test_table_update_unlinked():
     parameter_model = epyqlib.tests.pm.test_parametermodel.SampleModel.build()
     parameter_model.fill()
@@ -116,11 +128,24 @@ def test_table_update_unlinked():
     can_table = can_model.parameters_message.child_from(parameter_model.table)
     can_model.parameters_message.append_child(can_table)
 
+    assert count_types(can_table.children) == {}
+
+    expected_counts = {
+        epcpm.canmodel.Signal: 2,
+        epcpm.canmodel.Multiplexer: 8,
+    }
+
+    can_table.update()
+    for child, bits in zip(can_table.children, (8, 16)):
+        child.bits = bits
+
+    can_table.update()
+    assert count_types(can_table.children) == expected_counts
+
+    can_table.update()
+    assert count_types(can_table.children) == expected_counts
+
+    can_table.table_uuid = None
     can_table.update()
 
-    length = len(can_table.children)
-
-    can_table.update()
-
-    assert len(can_table.children) == length
-
+    assert count_types(can_table.children) == {}

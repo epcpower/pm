@@ -1,4 +1,4 @@
-import collections
+import itertools
 
 import attr
 import graham
@@ -63,6 +63,7 @@ class Signal(epyqlib.treenode.TreeNode):
     )
     bits = attr.ib(
         default=0,
+        converter=int,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Integer(),
         ),
@@ -332,6 +333,13 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.Boolean(),
         ),
     )
+    length = attr.ib(
+        default=0,
+        convert=int,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(),
+        ),
+    )
     sendable = attr.ib(
         default=True,
         convert=epyqlib.attrsmodel.two_state_checkbox,
@@ -469,25 +477,84 @@ class Table(epyqlib.treenode.TreeNode):
         return True
 
     def update(self):
+        for child in reversed(self.children):
+            if isinstance(child, Multiplexer):
+                self.remove_child(child=child)
+
+        array_uuid_to_signal = {
+            child.parameter_uuid: child
+            for child in self.children
+            if isinstance(child, Signal)
+        }
+
+        for signal in array_uuid_to_signal.values():
+            self.remove_child(child=signal)
+
         if self.table_uuid is None:
             return
-
-        for child in reversed(self.children):
-            self.remove_child(child=child)
 
         root = self.find_root()
         model = root.model
 
         table = model.node_from_uuid(self.table_uuid)
-        leaves = table.group.leaves()
 
-        for leaf in leaves:
-            path_string = '/'.join(model.node_from_uuid(u).name for u in leaf.path)
+        arrays = [
+            child
+            for child in table.children
+            if isinstance(child, epyqlib.pm.parametermodel.Array)
+        ]
 
-            multiplexer = Multiplexer(name=path_string)
-            signal = Signal(parameter_uuid=leaf.uuid)
-            multiplexer.append_child(signal)
-            self.append_child(multiplexer)
+        for array in arrays:
+            signal = array_uuid_to_signal.get(array.uuid)
+
+            if signal is None:
+                signal = Signal(
+                    name=array.name,
+                    parameter_uuid=array.uuid,
+                )
+
+            self.append_child(signal)
+
+        array_uuid_to_signal = {
+            child.parameter_uuid: child
+            for child in self.children
+            if isinstance(child, Signal)
+        }
+
+        array_groups = [
+            list(group[1])
+            for group in itertools.groupby(
+                table.group.leaves(),
+                key=lambda leaf: leaf.path[:-1],
+            )
+        ]
+
+        for array_group in array_groups:
+            signal = array_uuid_to_signal[array_group[0].path[-2]]
+
+            path = [
+                model.node_from_uuid(u).name
+                for u in array_group[0].path
+            ]
+
+            if signal.bits == 0:
+                continue
+
+            # TODO: actually calculate space to use
+            per_message = int(48 / signal.bits)
+
+            chunks = list(
+                epyqlib.utils.general.chunker(array_group, n=per_message),
+            )
+            for i, chunk in enumerate(chunks):
+                path_string = '/'.join(path + [str(i)])
+                multiplexer = Multiplexer(name=path_string)
+
+                for signal in chunk:
+                    signal = Signal(parameter_uuid=signal.uuid)
+                    multiplexer.append_child(signal)
+
+                self.append_child(multiplexer)
 
 
 Root = epyqlib.attrsmodel.Root(
@@ -510,7 +577,10 @@ columns = epyqlib.attrsmodel.columns(
     merge('identifier', Message, MultiplexedMessage, Multiplexer),
     merge('multiplexer_range_first', Table),
     merge('multiplexer_range_last', Table),
-    merge('length', Message, Multiplexer) + merge('bits', Signal),
+    (
+        merge('length', Message, Multiplexer, MultiplexedMessage)
+        + merge('bits', Signal)
+    ),
     merge('extended', Message, MultiplexedMessage),
 
     merge('cycle_time', Message, Multiplexer),
