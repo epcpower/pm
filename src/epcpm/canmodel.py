@@ -472,6 +472,9 @@ class Table(epyqlib.treenode.TreeNode):
         if self.table_uuid is None:
             return
 
+        for child in reversed(self.children):
+            self.remove_child(child=child)
+
         root = self.find_root()
         model = root.model
 

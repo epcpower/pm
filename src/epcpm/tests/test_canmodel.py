@@ -118,3 +118,9 @@ def test_table_update_unlinked():
 
     can_table.update()
 
+    length = len(can_table.children)
+
+    can_table.update()
+
+    assert len(can_table.children) == length
+
