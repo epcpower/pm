@@ -1,0 +1,874 @@
+{
+    "_type": "root",
+    "name": "CAN",
+    "children": [
+        {
+            "_type": "multiplexed_message",
+            "name": "Tables",
+            "identifier": "0x1fffffff",
+            "extended": true,
+            "length": 0,
+            "sendable": true,
+            "receivable": true,
+            "comment": null,
+            "children": [
+                {
+                    "_type": "table",
+                    "name": "First Table",
+                    "multiplexer_range_first": "0x1fffffff",
+                    "multiplexer_range_last": "0x1fffffff",
+                    "table_uuid": "3cbae19b-6259-46bd-8b2e-0a9857800b8d",
+                    "children": [
+                        {
+                            "_type": "signal",
+                            "name": "Array One",
+                            "bits": 8,
+                            "signed": false,
+                            "factor": "1",
+                            "start_bit": 0,
+                            "parameter_uuid": "d6e895c6-9d8e-4f8a-b605-2c618d12ec43",
+                            "uuid": "2968bf76-fe27-4234-957c-b6acecfc357e"
+                        },
+                        {
+                            "_type": "signal",
+                            "name": "Array Two",
+                            "bits": 16,
+                            "signed": false,
+                            "factor": "1",
+                            "start_bit": 0,
+                            "parameter_uuid": "7e914db1-467f-46a1-9562-f9141029cf9e",
+                            "uuid": "3cd5cb7b-aec2-4ff2-92f0-c09650043413"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-0/ET-0/Array One/AO-0/0",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "3c35fc49-3879-493e-9a65-120289af3174",
+                                    "uuid": "f4c97d86-539b-48e9-aa1d-0e1a94ef7cc3"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "91f9311c-9ac7-4ebc-bbbf-c1c68658961e",
+                                    "uuid": "40f3893e-5769-48e0-a6e8-cbd7edc0b276"
+                                }
+                            ],
+                            "uuid": "6d197b9a-2b35-4533-a7e8-bbb502e8c1a4"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-0/ET-0/Array Two/AT-0/0",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "ebc8c0df-ee80-40f3-a5d3-655d31c16d1a",
+                                    "uuid": "4f38aa9c-42cb-45d9-8dda-64a6113ae584"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "82a938cf-480e-42cd-a09c-908308ec2a6e",
+                                    "uuid": "708444e8-5665-4b16-ba83-955821c9b25c"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "31371e4a-3c38-4f88-b00b-4928834a604d",
+                                    "uuid": "25996de6-1f4f-4ba5-b0be-699cac3cd510"
+                                }
+                            ],
+                            "uuid": "52430ff4-cbe8-4035-8160-8fb6fbd46b6b"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-0/ET-0/Array Two/AT-0/1",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "818f219d-c83d-4b60-a41d-40f2f584e2c4",
+                                    "uuid": "4adb18b4-ccd8-435a-a6f4-2ec5c3ccfe88"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "7571ac1d-8610-4aaa-bf15-761c267af931",
+                                    "uuid": "4ba7f8df-307e-4311-8e0f-a8bc46022629"
+                                }
+                            ],
+                            "uuid": "46e03604-b41f-46eb-997b-3fb106afa108"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-0/ET-1/Array One/AO-0/0",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "136ff1f5-ca06-4153-81ee-fa40cc3dc435",
+                                    "uuid": "e4572e9b-94f5-43b2-afea-38f476cb0a9d"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "605e463c-1a0a-43b9-aee4-1cceeb083bd9",
+                                    "uuid": "703dbb08-53d1-4572-b058-d90e2a66fc1d"
+                                }
+                            ],
+                            "uuid": "e2b49348-8985-4a15-b31a-a57deee84a21"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-0/ET-1/Array Two/AT-0/0",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "873406b0-4233-4905-ab36-83e2db5f8ddf",
+                                    "uuid": "ced8148d-79a1-482d-953b-4e3311a268bc"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "28ac2cea-e49c-4d38-b1c2-e5c12c77cb06",
+                                    "uuid": "75b51240-9a8a-406a-875b-fdb0aa722589"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "b54e0e81-0d18-49b2-8a56-6afab1ed90e9",
+                                    "uuid": "06cbb60c-ce67-49c4-afdf-ef84dc6fd966"
+                                }
+                            ],
+                            "uuid": "4bc7935d-e00b-4a33-a715-bf7dcebbdb2e"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-0/ET-1/Array Two/AT-0/1",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "e37b544c-05f9-465a-80da-22014b05c073",
+                                    "uuid": "770044ef-b611-414c-8c89-0a87445aa95b"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "593a0774-6245-48ba-b793-a504bebb3483",
+                                    "uuid": "2ec5cfe1-5add-4151-86aa-3b848d77ce50"
+                                }
+                            ],
+                            "uuid": "501bc13d-cddb-4f01-8b3f-fbea13df7410"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-0/ET-2/Array One/AO-0/0",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "daa02874-0c7c-4952-a04c-3e9f6e782922",
+                                    "uuid": "57e74396-29d8-4a55-a836-58e323ca54b5"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "72599f6e-7101-41a5-9a69-9b4b758c6f65",
+                                    "uuid": "6a22d1fc-0b64-49d6-bca1-0db7746d3949"
+                                }
+                            ],
+                            "uuid": "f0ad915f-032b-4ca2-8891-c5ccc1f4fd4f"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-0/ET-2/Array Two/AT-0/0",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "7c9986b4-4f33-4589-9df5-277b9efcff96",
+                                    "uuid": "82be1be7-dfae-49e9-a423-e2bf0f3e890f"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "1ac47faa-c593-408b-8ee8-9dc59b263a95",
+                                    "uuid": "b187f447-01dd-4088-81ee-cd6fb5bd7395"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "e8d3fb8f-fb9e-4ab6-a101-bc46297735b6",
+                                    "uuid": "d9f4396a-635c-446b-9ebb-a521fe856fb7"
+                                }
+                            ],
+                            "uuid": "c6c1a28d-325d-4044-b867-937bd42f23b4"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-0/ET-2/Array Two/AT-0/1",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "6c6e5f08-8527-431b-b4bf-ac580176def9",
+                                    "uuid": "3efb5662-f01c-4211-a159-ea364cdc3038"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "e56c7d88-2cf8-433e-9b7a-0a8bd94e77a5",
+                                    "uuid": "0292f0df-d16c-4204-8ad3-eb04428150f9"
+                                }
+                            ],
+                            "uuid": "dff0a689-fac3-41ab-9e2a-15f3819f9524"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-0/ET-3/Array One/AO-0/0",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "6ba77051-7464-4f9c-b956-dc461ced4e55",
+                                    "uuid": "d0df399c-b3cf-4518-adf0-17c1ffefd74b"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "782b86d3-bb9a-4ab2-bd5f-a473018e8f72",
+                                    "uuid": "4a93a787-d0fc-4c45-8bf9-843363d3089d"
+                                }
+                            ],
+                            "uuid": "85e5eb13-cea3-481e-9568-c2a3a6bd2227"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-0/ET-3/Array Two/AT-0/0",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "d1de03c2-27d5-48b7-a165-601c4c61442c",
+                                    "uuid": "414177f4-786c-47b3-b0d4-421fedfac8d5"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "86f0ce0a-6a39-415b-87be-66f0aa39fd22",
+                                    "uuid": "71aa5884-2e51-4384-8525-8dc6bb6be0bb"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "557e3977-8bfa-4786-b3b2-ba280882623c",
+                                    "uuid": "d68547a5-d161-4b39-95cf-521801fcd408"
+                                }
+                            ],
+                            "uuid": "1149a688-de98-4f37-885b-d041b955e1fe"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-0/ET-3/Array Two/AT-0/1",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "baa7ef92-4791-4328-8372-d02ca1b0bd41",
+                                    "uuid": "9704314b-0d70-4688-ab61-6b536e8efe1e"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "11b58a6b-71e4-4bab-b65d-59bdb19c561b",
+                                    "uuid": "d10d4c60-6762-4923-bde6-be8b6e2e4921"
+                                }
+                            ],
+                            "uuid": "d9eb4a15-44a3-4e65-9ba8-6de8257f6de2"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-1/ET-0/Array One/AO-0/0",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "5f0e1f2a-123c-43b3-9c10-90d2aa71f4d1",
+                                    "uuid": "a7b5fb2b-50e2-45e0-af7c-4eb47fe7e5d6"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "9c4835ce-0f7e-48be-804b-04f2595bbf3c",
+                                    "uuid": "1ab18497-5549-4e8b-be4d-f51cc3fc5d4b"
+                                }
+                            ],
+                            "uuid": "7ed3964a-fad9-4fb0-bc20-fea10aa34c05"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-1/ET-0/Array Two/AT-0/0",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "246d9469-13b4-4a70-922b-2cd279163d21",
+                                    "uuid": "3c82fc30-1609-4a20-b172-abd115ddf9f1"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "5bf4ed1d-2d94-450c-93aa-af5651a60c9c",
+                                    "uuid": "df6a1e81-5047-4347-a06a-cb37136459b0"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "46e36349-a4b3-421e-9472-4ef10efcbd6c",
+                                    "uuid": "e0f08e07-a6e4-4118-8b4a-f4fb62aaa9e8"
+                                }
+                            ],
+                            "uuid": "7b2ba7b2-d7eb-48f4-914c-7ec7a0d9934f"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-1/ET-0/Array Two/AT-0/1",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "419692df-00e0-4a19-8311-ec59368d6690",
+                                    "uuid": "96cc90f8-831e-4047-b4e7-79786ba8edc6"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "953d43f2-cb80-4965-b3d2-133bd82d5c47",
+                                    "uuid": "b314b597-017a-4eb2-b87b-fa1ea0d70148"
+                                }
+                            ],
+                            "uuid": "b14be730-5a1c-4f5e-9eaf-8f4f2da42a47"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-1/ET-1/Array One/AO-0/0",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "93b984e7-bb83-4bf6-902c-af2c3b123601",
+                                    "uuid": "67b44dea-3343-419f-a375-49e2854cb22c"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "60f78b9f-73ef-4c3a-bea2-338450156776",
+                                    "uuid": "727fa5d0-cfc8-4896-8fc7-d58755e10d99"
+                                }
+                            ],
+                            "uuid": "1d336978-3254-4c1b-8c56-5eb641815532"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-1/ET-1/Array Two/AT-0/0",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "c7112333-970a-4d5b-8d13-6ee00525a9ab",
+                                    "uuid": "d9037f26-61e4-4678-9a6b-3ba9fc4c5e1e"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "8912fabf-009a-47aa-9a89-238f0a8db45e",
+                                    "uuid": "56b0e16b-a4f4-4feb-8b3c-038e23f92da5"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "5c5bf637-fd64-4596-bf2b-a499eb210b27",
+                                    "uuid": "d87794de-432b-4dcc-9ed1-65d06631d3d9"
+                                }
+                            ],
+                            "uuid": "a50ccca1-28b1-4611-8357-8a1d73d91307"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-1/ET-1/Array Two/AT-0/1",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "20d838a2-4f2f-41a2-ab07-ab6ef055fac9",
+                                    "uuid": "e4306253-84e9-4872-8b77-19d23ff9690d"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "f3b03a18-756e-41f4-8b8b-708b076eeb0a",
+                                    "uuid": "7f9ab9f7-3e33-4764-ac1e-2ab8da4552e6"
+                                }
+                            ],
+                            "uuid": "1338a3b5-2f39-4ed5-93a7-bb6e8f0b525f"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-1/ET-2/Array One/AO-0/0",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "d2dd81bb-47de-47d4-a99f-f049d257418a",
+                                    "uuid": "458425a7-ce4b-4dd1-9c5c-1cdc81291dec"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "8cbc04c9-2744-4c3a-8c1b-e5f2bd61a930",
+                                    "uuid": "a13ff371-6d3a-44c7-b012-81c186cf57a6"
+                                }
+                            ],
+                            "uuid": "06b31a94-8f90-499e-962e-a9d122c9ec13"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-1/ET-2/Array Two/AT-0/0",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "392d55e7-5171-46dd-b95d-50558ac5fe50",
+                                    "uuid": "aba86d22-721d-4d08-89ab-772bdd234549"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "5a2ec56c-c529-4eb4-9db3-f1f047990712",
+                                    "uuid": "4bcbe2ca-bf5e-4d3a-8388-be8331598193"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "83c0d035-49e7-4a18-897e-c0facbe09b41",
+                                    "uuid": "ca720292-20e0-4756-af28-1ab7cc6c3555"
+                                }
+                            ],
+                            "uuid": "c7c3093f-ae09-4991-9354-e612a511543a"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-1/ET-2/Array Two/AT-0/1",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "bd22aa32-5be3-4283-afdc-f401e70fa85e",
+                                    "uuid": "941d6be7-e0f4-4e2a-b844-40f82c222790"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "c74e4922-4332-432e-acc2-f9b57efa8b13",
+                                    "uuid": "6e48ed91-f96d-458a-900d-4e366e33bf9a"
+                                }
+                            ],
+                            "uuid": "0af17531-cbcd-4fea-abb9-4be8b6769134"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-1/ET-3/Array One/AO-0/0",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "e5f76eac-af40-4015-980c-104e9efd0491",
+                                    "uuid": "ce52bc92-d724-4450-b99b-8ff55a4f1504"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "b922a47c-62b7-4921-bd21-37cf2faad4a8",
+                                    "uuid": "78a91afd-5ae2-43b3-bcb1-18e018ee6b0a"
+                                }
+                            ],
+                            "uuid": "709d625b-3e27-48dc-9652-872d29157ea0"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-1/ET-3/Array Two/AT-0/0",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "fbb0d791-b262-4212-8a25-34366a7fd223",
+                                    "uuid": "148492da-fbfc-4054-9abd-635dd5a6a15c"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "9d157f76-aff5-4140-beae-d7a2c1d663a7",
+                                    "uuid": "6147c80d-3ef2-48ec-b85e-2a690920007e"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "e94167d5-df48-495b-ab02-8db8a4e4fed9",
+                                    "uuid": "cb493ff3-d9b6-4f53-a645-2898e690d276"
+                                }
+                            ],
+                            "uuid": "83e298a6-824e-4a9d-a64e-3e99c51966ed"
+                        },
+                        {
+                            "_type": "multiplexer",
+                            "name": "EO-1/ET-3/Array Two/AT-0/1",
+                            "identifier": null,
+                            "length": 0,
+                            "cycle_time": null,
+                            "comment": null,
+                            "children": [
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "b9af2996-e6fb-432b-abc7-d6872db67766",
+                                    "uuid": "c64df070-ddb8-4895-8991-6ae916177ce1"
+                                },
+                                {
+                                    "_type": "signal",
+                                    "name": "New Signal",
+                                    "bits": 0,
+                                    "signed": false,
+                                    "factor": "1",
+                                    "start_bit": 0,
+                                    "parameter_uuid": "a8e6f226-30ca-4d97-848c-5cd892be06eb",
+                                    "uuid": "80ac0747-1840-47ba-9717-0b905c91e020"
+                                }
+                            ],
+                            "uuid": "51103642-e461-40fd-920a-da564f9c6ac4"
+                        }
+                    ],
+                    "uuid": "e9322ea9-34ff-46a1-9984-918221158518"
+                }
+            ],
+            "uuid": "cd4f0887-9020-4283-9238-37954e7ef855"
+        }
+    ],
+    "uuid": "ca271941-a68f-4ca8-a9b9-1bc5c5116365"
+}

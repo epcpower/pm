@@ -1,4 +1,5 @@
 import collections
+import pathlib
 
 import attr
 import graham
@@ -12,6 +13,9 @@ import epcpm.canmodel
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
+
+
+here = pathlib.Path(__file__).parent
 
 
 def test_hex_field():
@@ -48,20 +52,16 @@ def test_all_addable_also_in_types():
         assert set(addable_types) - set(epcpm.canmodel.types) == set()
 
 
-def assert_incomplete_types(name):
-    assert [] == [
-        cls
-        for cls in epcpm.canmodel.types.types.values()
-        if not hasattr(cls, name)
-    ]
-
-
 def test_all_have_can_drop_on():
-    assert_incomplete_types('can_drop_on')
+    epyqlib.tests.test_attrsmodel.all_have_can_drop_on(
+        types=epcpm.canmodel.types,
+    )
 
 
 def test_all_have_can_delete():
-    assert_incomplete_types('can_delete')
+    epyqlib.tests.test_attrsmodel.all_have_can_delete(
+        types=epcpm.canmodel.types,
+    )
 
 
 def test_all_fields_in_columns():
@@ -118,26 +118,21 @@ def count_types(sequence):
 
 
 def test_table_update_unlinked():
-    parameter_model = epyqlib.tests.pm.test_parametermodel.SampleModel.build()
-    parameter_model.fill()
-
-    can_model = SampleModel.build()
-    can_model.fill()
-    can_model.model.add_drop_sources(parameter_model.model)
-
-    can_table = can_model.parameters_message.child_from(parameter_model.table)
-    can_model.parameters_message.append_child(can_table)
-
-    assert count_types(can_table.children) == {}
+    project = epcpm.project.loadp(here/'project'/'project.pmp')
 
     expected_counts = {
         epcpm.canmodel.Signal: 2,
-        epcpm.canmodel.Multiplexer: 8,
+        epcpm.canmodel.Multiplexer: 24,
     }
 
-    can_table.update()
-    for child, bits in zip(can_table.children, (8, 16)):
-        child.bits = bits
+    can_table, = project.models.can.root.nodes_by_attribute(
+        attribute_value='First Table',
+        attribute_name='name',
+    )
+    parameter_table = project.models.parameters.node_from_uuid(
+        can_table.table_uuid,
+    )
+    parameter_table.update()
 
     can_table.update()
     assert count_types(can_table.children) == expected_counts

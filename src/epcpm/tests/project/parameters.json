@@ -1,0 +1,712 @@
+{
+    "_type": "root",
+    "name": "Parameters",
+    "children": [
+        {
+            "_type": "enumerations",
+            "name": "Enumerations",
+            "children": [
+                {
+                    "_type": "enumeration",
+                    "name": "AccessLevel",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "You",
+                            "value": null,
+                            "uuid": "dbc24ded-2934-4268-97e5-4ff709e5ebe0"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Me",
+                            "value": null,
+                            "uuid": "6a6600ce-6303-4ca2-8e60-e3f75dadb61e"
+                        }
+                    ],
+                    "uuid": "a8fdfa3c-d4ce-4846-b62c-ce634703e137"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "CmmControlsVariant",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "This",
+                            "value": null,
+                            "uuid": "5fb6d52a-621b-4f12-8d53-e7094662178c"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "That",
+                            "value": null,
+                            "uuid": "a0c7f83b-ed8d-46b8-841c-62837e780f05"
+                        }
+                    ],
+                    "uuid": "61b850b0-aa94-4b95-9a29-e0fd8d8d52d4"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "Enumeration One",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "EO-0",
+                            "value": null,
+                            "uuid": "485328aa-0ae6-4270-80b9-cd01d33da916"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "EO-1",
+                            "value": null,
+                            "uuid": "5674f3ae-f0d8-4467-a23f-7f1e0f55b870"
+                        }
+                    ],
+                    "uuid": "423b8468-bc75-4b2a-9584-a3a4e52b7533"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "Enumeration Two",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "ET-0",
+                            "value": null,
+                            "uuid": "0e127fd2-71d0-4cd8-abe0-ebdf6f0c1746"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "ET-1",
+                            "value": null,
+                            "uuid": "b19aa305-f665-4c80-bbff-37d26967c6cb"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "ET-2",
+                            "value": null,
+                            "uuid": "33ff2301-b01a-44b2-b858-2f5c18dd4655"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "ET-3",
+                            "value": null,
+                            "uuid": "8cd725bd-6673-4382-9e40-1bb0175b08af"
+                        }
+                    ],
+                    "uuid": "c73f5b76-3e28-468b-8116-fee370d6b0b8"
+                }
+            ],
+            "uuid": "94345b59-5ba3-44e4-b78d-6f80569d9d73"
+        },
+        {
+            "_type": "group",
+            "name": "Tables",
+            "type_name": null,
+            "children": [
+                {
+                    "_type": "table",
+                    "name": "First Table",
+                    "children": [
+                        {
+                            "_type": "table_enumeration_reference",
+                            "name": "Enumeration Reference One",
+                            "uuid": "69530db6-cdcd-48a2-a7b8-5cbf506bac52",
+                            "enumeration_uuid": "423b8468-bc75-4b2a-9584-a3a4e52b7533"
+                        },
+                        {
+                            "_type": "table_enumeration_reference",
+                            "name": "Enumeration Reference Two",
+                            "uuid": "587df9c9-0500-4fb6-b2bf-c08898026015",
+                            "enumeration_uuid": "c73f5b76-3e28-468b-8116-fee370d6b0b8"
+                        },
+                        {
+                            "_type": "table_group_element",
+                            "name": null,
+                            "children": [
+                                {
+                                    "_type": "table_group_element",
+                                    "name": "EO-0",
+                                    "children": [
+                                        {
+                                            "_type": "table_group_element",
+                                            "name": "ET-0",
+                                            "children": [
+                                                {
+                                                    "_type": "table_group_element",
+                                                    "name": "Array One",
+                                                    "children": [
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AO-0",
+                                                            "uuid": "3c35fc49-3879-493e-9a65-120289af3174"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AO-1",
+                                                            "uuid": "91f9311c-9ac7-4ebc-bbbf-c1c68658961e"
+                                                        }
+                                                    ],
+                                                    "uuid": "cd7f3f6b-a3b1-4198-bc36-2952b8dc97eb"
+                                                },
+                                                {
+                                                    "_type": "table_group_element",
+                                                    "name": "Array Two",
+                                                    "children": [
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-0",
+                                                            "uuid": "ebc8c0df-ee80-40f3-a5d3-655d31c16d1a"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-1",
+                                                            "uuid": "82a938cf-480e-42cd-a09c-908308ec2a6e"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-2",
+                                                            "uuid": "31371e4a-3c38-4f88-b00b-4928834a604d"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-3",
+                                                            "uuid": "818f219d-c83d-4b60-a41d-40f2f584e2c4"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-4",
+                                                            "uuid": "7571ac1d-8610-4aaa-bf15-761c267af931"
+                                                        }
+                                                    ],
+                                                    "uuid": "1f7c048c-7356-4424-80dd-53eac3dc2146"
+                                                }
+                                            ],
+                                            "uuid": "9092938b-1d42-4313-b207-f0ab9044b378"
+                                        },
+                                        {
+                                            "_type": "table_group_element",
+                                            "name": "ET-1",
+                                            "children": [
+                                                {
+                                                    "_type": "table_group_element",
+                                                    "name": "Array One",
+                                                    "children": [
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AO-0",
+                                                            "uuid": "136ff1f5-ca06-4153-81ee-fa40cc3dc435"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AO-1",
+                                                            "uuid": "605e463c-1a0a-43b9-aee4-1cceeb083bd9"
+                                                        }
+                                                    ],
+                                                    "uuid": "15eb6543-a2f5-4557-854d-9ef7e1500912"
+                                                },
+                                                {
+                                                    "_type": "table_group_element",
+                                                    "name": "Array Two",
+                                                    "children": [
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-0",
+                                                            "uuid": "873406b0-4233-4905-ab36-83e2db5f8ddf"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-1",
+                                                            "uuid": "28ac2cea-e49c-4d38-b1c2-e5c12c77cb06"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-2",
+                                                            "uuid": "b54e0e81-0d18-49b2-8a56-6afab1ed90e9"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-3",
+                                                            "uuid": "e37b544c-05f9-465a-80da-22014b05c073"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-4",
+                                                            "uuid": "593a0774-6245-48ba-b793-a504bebb3483"
+                                                        }
+                                                    ],
+                                                    "uuid": "96e22569-87c9-455a-8198-5deba9f025ad"
+                                                }
+                                            ],
+                                            "uuid": "7d3ed73b-bafe-4b0d-b9a1-08587ce946c8"
+                                        },
+                                        {
+                                            "_type": "table_group_element",
+                                            "name": "ET-2",
+                                            "children": [
+                                                {
+                                                    "_type": "table_group_element",
+                                                    "name": "Array One",
+                                                    "children": [
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AO-0",
+                                                            "uuid": "daa02874-0c7c-4952-a04c-3e9f6e782922"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AO-1",
+                                                            "uuid": "72599f6e-7101-41a5-9a69-9b4b758c6f65"
+                                                        }
+                                                    ],
+                                                    "uuid": "e02f86c6-69bf-48df-b61f-8df95b547157"
+                                                },
+                                                {
+                                                    "_type": "table_group_element",
+                                                    "name": "Array Two",
+                                                    "children": [
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-0",
+                                                            "uuid": "7c9986b4-4f33-4589-9df5-277b9efcff96"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-1",
+                                                            "uuid": "1ac47faa-c593-408b-8ee8-9dc59b263a95"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-2",
+                                                            "uuid": "e8d3fb8f-fb9e-4ab6-a101-bc46297735b6"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-3",
+                                                            "uuid": "6c6e5f08-8527-431b-b4bf-ac580176def9"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-4",
+                                                            "uuid": "e56c7d88-2cf8-433e-9b7a-0a8bd94e77a5"
+                                                        }
+                                                    ],
+                                                    "uuid": "219bf4fa-8c80-4104-8180-a2e6053f07ac"
+                                                }
+                                            ],
+                                            "uuid": "77a838bf-f4cd-4236-a4f0-b03ac677888c"
+                                        },
+                                        {
+                                            "_type": "table_group_element",
+                                            "name": "ET-3",
+                                            "children": [
+                                                {
+                                                    "_type": "table_group_element",
+                                                    "name": "Array One",
+                                                    "children": [
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AO-0",
+                                                            "uuid": "6ba77051-7464-4f9c-b956-dc461ced4e55"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AO-1",
+                                                            "uuid": "782b86d3-bb9a-4ab2-bd5f-a473018e8f72"
+                                                        }
+                                                    ],
+                                                    "uuid": "9c531f17-7a81-4f48-b2c6-fdf9cbaa310f"
+                                                },
+                                                {
+                                                    "_type": "table_group_element",
+                                                    "name": "Array Two",
+                                                    "children": [
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-0",
+                                                            "uuid": "d1de03c2-27d5-48b7-a165-601c4c61442c"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-1",
+                                                            "uuid": "86f0ce0a-6a39-415b-87be-66f0aa39fd22"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-2",
+                                                            "uuid": "557e3977-8bfa-4786-b3b2-ba280882623c"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-3",
+                                                            "uuid": "baa7ef92-4791-4328-8372-d02ca1b0bd41"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-4",
+                                                            "uuid": "11b58a6b-71e4-4bab-b65d-59bdb19c561b"
+                                                        }
+                                                    ],
+                                                    "uuid": "1981736c-c850-4373-b2b7-96859fb02108"
+                                                }
+                                            ],
+                                            "uuid": "be9cec45-b925-4832-bbce-e90b1b96a54c"
+                                        }
+                                    ],
+                                    "uuid": "63b25e8f-6af6-4195-b064-a716073b1b48"
+                                },
+                                {
+                                    "_type": "table_group_element",
+                                    "name": "EO-1",
+                                    "children": [
+                                        {
+                                            "_type": "table_group_element",
+                                            "name": "ET-0",
+                                            "children": [
+                                                {
+                                                    "_type": "table_group_element",
+                                                    "name": "Array One",
+                                                    "children": [
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AO-0",
+                                                            "uuid": "5f0e1f2a-123c-43b3-9c10-90d2aa71f4d1"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AO-1",
+                                                            "uuid": "9c4835ce-0f7e-48be-804b-04f2595bbf3c"
+                                                        }
+                                                    ],
+                                                    "uuid": "ca007936-4e0d-49d4-8a70-d4dd81b2c84a"
+                                                },
+                                                {
+                                                    "_type": "table_group_element",
+                                                    "name": "Array Two",
+                                                    "children": [
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-0",
+                                                            "uuid": "246d9469-13b4-4a70-922b-2cd279163d21"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-1",
+                                                            "uuid": "5bf4ed1d-2d94-450c-93aa-af5651a60c9c"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-2",
+                                                            "uuid": "46e36349-a4b3-421e-9472-4ef10efcbd6c"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-3",
+                                                            "uuid": "419692df-00e0-4a19-8311-ec59368d6690"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-4",
+                                                            "uuid": "953d43f2-cb80-4965-b3d2-133bd82d5c47"
+                                                        }
+                                                    ],
+                                                    "uuid": "3f780c04-8819-4ab4-b31d-3e03714c5003"
+                                                }
+                                            ],
+                                            "uuid": "ad62833a-0146-4d8a-bf77-7c8fa9a4cbf2"
+                                        },
+                                        {
+                                            "_type": "table_group_element",
+                                            "name": "ET-1",
+                                            "children": [
+                                                {
+                                                    "_type": "table_group_element",
+                                                    "name": "Array One",
+                                                    "children": [
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AO-0",
+                                                            "uuid": "93b984e7-bb83-4bf6-902c-af2c3b123601"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AO-1",
+                                                            "uuid": "60f78b9f-73ef-4c3a-bea2-338450156776"
+                                                        }
+                                                    ],
+                                                    "uuid": "22f943f2-6e6a-43ee-a6c0-4c4500c438fd"
+                                                },
+                                                {
+                                                    "_type": "table_group_element",
+                                                    "name": "Array Two",
+                                                    "children": [
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-0",
+                                                            "uuid": "c7112333-970a-4d5b-8d13-6ee00525a9ab"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-1",
+                                                            "uuid": "8912fabf-009a-47aa-9a89-238f0a8db45e"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-2",
+                                                            "uuid": "5c5bf637-fd64-4596-bf2b-a499eb210b27"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-3",
+                                                            "uuid": "20d838a2-4f2f-41a2-ab07-ab6ef055fac9"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-4",
+                                                            "uuid": "f3b03a18-756e-41f4-8b8b-708b076eeb0a"
+                                                        }
+                                                    ],
+                                                    "uuid": "2f4b4783-c144-49e9-ad8e-5824134ea713"
+                                                }
+                                            ],
+                                            "uuid": "bf36b90c-adc9-4a9c-ba96-8e22cf6dabf6"
+                                        },
+                                        {
+                                            "_type": "table_group_element",
+                                            "name": "ET-2",
+                                            "children": [
+                                                {
+                                                    "_type": "table_group_element",
+                                                    "name": "Array One",
+                                                    "children": [
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AO-0",
+                                                            "uuid": "d2dd81bb-47de-47d4-a99f-f049d257418a"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AO-1",
+                                                            "uuid": "8cbc04c9-2744-4c3a-8c1b-e5f2bd61a930"
+                                                        }
+                                                    ],
+                                                    "uuid": "387ef5b0-3f3d-4e2b-80e8-2639741a5777"
+                                                },
+                                                {
+                                                    "_type": "table_group_element",
+                                                    "name": "Array Two",
+                                                    "children": [
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-0",
+                                                            "uuid": "392d55e7-5171-46dd-b95d-50558ac5fe50"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-1",
+                                                            "uuid": "5a2ec56c-c529-4eb4-9db3-f1f047990712"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-2",
+                                                            "uuid": "83c0d035-49e7-4a18-897e-c0facbe09b41"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-3",
+                                                            "uuid": "bd22aa32-5be3-4283-afdc-f401e70fa85e"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-4",
+                                                            "uuid": "c74e4922-4332-432e-acc2-f9b57efa8b13"
+                                                        }
+                                                    ],
+                                                    "uuid": "bc97374b-34b6-4597-9fab-4c8ee31ae754"
+                                                }
+                                            ],
+                                            "uuid": "7fc306e1-fb21-47f5-95f2-b211098f6e7e"
+                                        },
+                                        {
+                                            "_type": "table_group_element",
+                                            "name": "ET-3",
+                                            "children": [
+                                                {
+                                                    "_type": "table_group_element",
+                                                    "name": "Array One",
+                                                    "children": [
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AO-0",
+                                                            "uuid": "e5f76eac-af40-4015-980c-104e9efd0491"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AO-1",
+                                                            "uuid": "b922a47c-62b7-4921-bd21-37cf2faad4a8"
+                                                        }
+                                                    ],
+                                                    "uuid": "94e3b290-1574-4e37-9bc9-5882a334e533"
+                                                },
+                                                {
+                                                    "_type": "table_group_element",
+                                                    "name": "Array Two",
+                                                    "children": [
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-0",
+                                                            "uuid": "fbb0d791-b262-4212-8a25-34366a7fd223"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-1",
+                                                            "uuid": "9d157f76-aff5-4140-beae-d7a2c1d663a7"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-2",
+                                                            "uuid": "e94167d5-df48-495b-ab02-8db8a4e4fed9"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-3",
+                                                            "uuid": "b9af2996-e6fb-432b-abc7-d6872db67766"
+                                                        },
+                                                        {
+                                                            "_type": "table_array_element",
+                                                            "name": "AT-4",
+                                                            "uuid": "a8e6f226-30ca-4d97-848c-5cd892be06eb"
+                                                        }
+                                                    ],
+                                                    "uuid": "535d8a81-295a-4d3c-9612-bc7be6e98122"
+                                                }
+                                            ],
+                                            "uuid": "aaf7a3e2-e220-42f2-a4ca-1a0ec4c5b8bf"
+                                        }
+                                    ],
+                                    "uuid": "72b1d545-caf4-49d8-b465-183312b6f4ba"
+                                }
+                            ],
+                            "uuid": "90cdde43-7cdf-4e24-bf7c-816039147429"
+                        },
+                        {
+                            "_type": "array",
+                            "name": "Array One",
+                            "named_enumerators": true,
+                            "children": [
+                                {
+                                    "_type": "parameter",
+                                    "name": "AO-0",
+                                    "type_name": null,
+                                    "default": null,
+                                    "minimum": null,
+                                    "maximum": null,
+                                    "units": null,
+                                    "enumeration_uuid": null,
+                                    "decimal_places": null,
+                                    "display_hexadecimal": false,
+                                    "nv_format": null,
+                                    "nv_factor": null,
+                                    "nv_cast": false,
+                                    "read_only": false,
+                                    "access_level_uuid": null,
+                                    "parameter_uuid": null,
+                                    "comment": null,
+                                    "original_frame_name": null,
+                                    "original_multiplexer_name": null,
+                                    "original_signal_name": null,
+                                    "visibility": null,
+                                    "uuid": "565123ca-035c-475d-bd71-e2e0e1ab3ad3"
+                                },
+                                {
+                                    "_type": "array_parameter_element",
+                                    "name": "AO-1",
+                                    "default": null,
+                                    "minimum": null,
+                                    "maximum": null,
+                                    "nv_format": null,
+                                    "uuid": "ca8e06f7-1ac6-41b0-baf7-710d20fb62d3",
+                                    "original": "565123ca-035c-475d-bd71-e2e0e1ab3ad3"
+                                }
+                            ],
+                            "uuid": "d6e895c6-9d8e-4f8a-b605-2c618d12ec43"
+                        },
+                        {
+                            "_type": "array",
+                            "name": "Array Two",
+                            "named_enumerators": true,
+                            "children": [
+                                {
+                                    "_type": "parameter",
+                                    "name": "AT-0",
+                                    "type_name": null,
+                                    "default": null,
+                                    "minimum": null,
+                                    "maximum": null,
+                                    "units": null,
+                                    "enumeration_uuid": null,
+                                    "decimal_places": null,
+                                    "display_hexadecimal": false,
+                                    "nv_format": null,
+                                    "nv_factor": null,
+                                    "nv_cast": false,
+                                    "read_only": false,
+                                    "access_level_uuid": null,
+                                    "parameter_uuid": null,
+                                    "comment": null,
+                                    "original_frame_name": null,
+                                    "original_multiplexer_name": null,
+                                    "original_signal_name": null,
+                                    "visibility": null,
+                                    "uuid": "8375387f-a542-496e-b9fa-4a5e2037402f"
+                                },
+                                {
+                                    "_type": "array_parameter_element",
+                                    "name": "AT-1",
+                                    "default": null,
+                                    "minimum": null,
+                                    "maximum": null,
+                                    "nv_format": null,
+                                    "uuid": "4d67999e-87b3-47dd-9fb4-268dca1ff8dc",
+                                    "original": "8375387f-a542-496e-b9fa-4a5e2037402f"
+                                },
+                                {
+                                    "_type": "array_parameter_element",
+                                    "name": "AT-2",
+                                    "default": null,
+                                    "minimum": null,
+                                    "maximum": null,
+                                    "nv_format": null,
+                                    "uuid": "c3367a79-8c08-4ded-86c3-90e96a193414",
+                                    "original": "8375387f-a542-496e-b9fa-4a5e2037402f"
+                                },
+                                {
+                                    "_type": "array_parameter_element",
+                                    "name": "AT-3",
+                                    "default": null,
+                                    "minimum": null,
+                                    "maximum": null,
+                                    "nv_format": null,
+                                    "uuid": "331e3eff-4d24-4ef6-8cdd-338a35f86e14",
+                                    "original": "8375387f-a542-496e-b9fa-4a5e2037402f"
+                                },
+                                {
+                                    "_type": "array_parameter_element",
+                                    "name": "AT-4",
+                                    "default": null,
+                                    "minimum": null,
+                                    "maximum": null,
+                                    "nv_format": null,
+                                    "uuid": "0232d27b-c3a4-427e-98ee-5981f0c0e1c9",
+                                    "original": "8375387f-a542-496e-b9fa-4a5e2037402f"
+                                }
+                            ],
+                            "uuid": "7e914db1-467f-46a1-9562-f9141029cf9e"
+                        }
+                    ],
+                    "uuid": "3cbae19b-6259-46bd-8b2e-0a9857800b8d"
+                }
+            ],
+            "uuid": "c3d1c4b2-bd53-4e76-b95c-5518eb50f4aa"
+        }
+    ],
+    "uuid": "7e8d0420-fda2-4ec2-ab36-f52a48b48d6f"
+}

@@ -47,7 +47,7 @@ def child_from(node):
         return Signal(name=node.name, parameter_uuid=node.uuid)
 
     if isinstance(node, epyqlib.pm.parametermodel.Table):
-        return Table(table_uuid=node.uuid)
+        return CanTable(table_uuid=node.uuid)
 
 
 @graham.schemify(tag='signal')
@@ -367,6 +367,7 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
             field=graham.fields.MixedList(fields=(
                 marshmallow.fields.Nested(graham.schema(Signal)),
                 marshmallow.fields.Nested(graham.schema(Multiplexer)),
+                marshmallow.fields.Nested('CanTable'),
             )),
         ),
     )
@@ -398,7 +399,7 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
             (
                 Signal,
                 Multiplexer,
-                Table,
+                CanTable,
             ),
         )
 
@@ -406,16 +407,16 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
         types = (Signal,)
 
         if len(self.children) > 0:
-            types += (Multiplexer, Table)
+            types += (Multiplexer, CanTable)
 
         return epyqlib.attrsmodel.create_addable_types(types)
 
 
-@graham.schemify(tag='table')
+@graham.schemify(tag='table', register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
-class Table(epyqlib.treenode.TreeNode):
+class CanTable(epyqlib.treenode.TreeNode):
     name = attr.ib(
         default='New Table',
         metadata=graham.create_metadata(
@@ -450,7 +451,8 @@ class Table(epyqlib.treenode.TreeNode):
         default=attr.Factory(list),
         metadata=graham.create_metadata(
             field=graham.fields.MixedList(fields=(
-                marshmallow.fields.Nested(graham.schema(MultiplexedMessage)),
+                marshmallow.fields.Nested(graham.schema(Multiplexer)),
+                marshmallow.fields.Nested(graham.schema(Signal)),
             )),
         ),
     )
@@ -559,11 +561,11 @@ class Table(epyqlib.treenode.TreeNode):
 
 Root = epyqlib.attrsmodel.Root(
     default_name='CAN',
-    valid_types=(Message, MultiplexedMessage, Table),
+    valid_types=(Message, MultiplexedMessage, CanTable),
 )
 
 types = epyqlib.attrsmodel.Types(
-    types=(Root, Message, Signal, MultiplexedMessage, Multiplexer, Table),
+    types=(Root, Message, Signal, MultiplexedMessage, Multiplexer, CanTable),
 )
 
 
@@ -575,8 +577,8 @@ def merge(name, *types):
 columns = epyqlib.attrsmodel.columns(
     merge('name', *types.types.values()),
     merge('identifier', Message, MultiplexedMessage, Multiplexer),
-    merge('multiplexer_range_first', Table),
-    merge('multiplexer_range_last', Table),
+    merge('multiplexer_range_first', CanTable),
+    merge('multiplexer_range_last', CanTable),
     (
         merge('length', Message, Multiplexer, MultiplexedMessage)
         + merge('bits', Signal)
@@ -585,7 +587,7 @@ columns = epyqlib.attrsmodel.columns(
 
     merge('cycle_time', Message, Multiplexer),
 
-    merge('table_uuid', Table),
+    merge('table_uuid', CanTable),
 
     merge('signed', Signal),
     merge('factor', Signal),
