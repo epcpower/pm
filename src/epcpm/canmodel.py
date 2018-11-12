@@ -424,14 +424,14 @@ class CanTable(epyqlib.treenode.TreeNode):
         ),
     )
     multiplexer_range_first = attr.ib(
-        default=0x1fffffff,
+        default=0,
         convert=based_int,
         metadata=graham.create_metadata(
             field=HexadecimalIntegerField(),
         ),
     )
     multiplexer_range_last = attr.ib(
-        default=0x1fffffff,
+        default=0x100,
         convert=based_int,
         metadata=graham.create_metadata(
             field=HexadecimalIntegerField(),
@@ -531,6 +531,8 @@ class CanTable(epyqlib.treenode.TreeNode):
             )
         ]
 
+        mux_value = self.multiplexer_range_first
+
         for array_group in array_groups:
             signal = array_uuid_to_signal[array_group[0].path[-2]]
 
@@ -550,10 +552,14 @@ class CanTable(epyqlib.treenode.TreeNode):
             )
             for i, chunk in enumerate(chunks):
                 path_string = '/'.join(path + [str(i)])
-                multiplexer = Multiplexer(name=path_string)
+                multiplexer = Multiplexer(
+                    name=path_string,
+                    identifier=mux_value,
+                )
+                mux_value += 1
 
                 for signal in chunk:
-                    signal = Signal(parameter_uuid=signal.uuid)
+                    signal = Signal(parameter_uuid=signal.original.uuid)
                     multiplexer.append_child(signal)
 
                 self.append_child(multiplexer)

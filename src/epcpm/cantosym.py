@@ -240,6 +240,10 @@ class MultiplexedMessage:
         for child in self.wrapped.children[1:]:
             if isinstance(child, epcpm.canmodel.Signal):
                 common_signals.append(child)
+            elif isinstance(child, epcpm.canmodel.CanTable):
+                for subchild in child.children:
+                    if isinstance(subchild, epcpm.canmodel.Multiplexer):
+                        not_signals.append(subchild)
             else:
                 not_signals.append(child)
 

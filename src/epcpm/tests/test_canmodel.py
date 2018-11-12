@@ -118,13 +118,12 @@ def count_types(sequence):
 
 
 def test_table_update_unlinked():
-    project = epcpm.project.loadp(here/'project'/'project.pmp')
-
     expected_counts = {
         epcpm.canmodel.Signal: 2,
         epcpm.canmodel.Multiplexer: 24,
     }
 
+    project = epcpm.project.loadp(here/'project'/'project.pmp')
     can_table, = project.models.can.root.nodes_by_attribute(
         attribute_value='First Table',
         attribute_name='name',

@@ -1,3 +1,4 @@
+import pathlib
 import textwrap
 
 import epyqlib.attrsmodel
@@ -6,6 +7,10 @@ import epyqlib.pm.parametermodel
 import epcpm.canmodel
 import epcpm.cantosym
 import epcpm.project
+
+
+here = pathlib.Path(__file__).parent
+
 
 # def test_explore():
 #     root = epcpm.canmodel.Root()
@@ -348,3 +353,196 @@ def test_access_level():
     ''')
 
     assert tidy_sym(builder.gen()) == tidy_sym(expected)
+
+
+def test_table():
+    project = epcpm.project.loadp(here/'project'/'project.pmp')
+    can_table, = project.models.can.root.nodes_by_attribute(
+        attribute_value='First Table',
+        attribute_name='name',
+    )
+    access_levels, = project.models.parameters.root.nodes_by_attribute(
+        attribute_value='AccessLevel',
+        attribute_name='name',
+    )
+    parameter_table = project.models.parameters.node_from_uuid(
+        can_table.table_uuid,
+    )
+    parameter_table.update()
+
+    can_table.update()
+
+    builder = epcpm.cantosym.builders.wrap(
+        project.models.can.root,
+        parameter_uuid_finder=project.models.can.node_from_uuid,
+        parameter_model=project.models.parameters,
+        access_levels=access_levels,
+    )
+
+    result = builder.gen()
+    print(result)
+
+    expected = textwrap.dedent('''\
+    FormatVersion=5.0 // Do not edit this line!
+    Title="canmatrix-Export"
+    {ENUMS}
+    
+    
+    {SENDRECEIVE}
+    
+    [Tables]
+    ID=1FFFFFFFh
+    Type=Extended
+    DLC=0
+    Mux=EO_0/ET_0/ArrayOne/AO_0/0 0,8 5 
+    Var=NewSignal unsigned 0,0 /ln:"AO-0"
+    Var=NewSignal unsigned 0,0 /ln:"AO-1"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_0/ET_0/ArrayTwo/AT_0/0 0,8 6 
+    Var=NewSignal unsigned 0,0 /ln:"AT-0"
+    Var=NewSignal unsigned 0,0 /ln:"AT-1"
+    Var=NewSignal unsigned 0,0 /ln:"AT-2"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_0/ET_0/ArrayTwo/AT_0/1 0,8 7 
+    Var=NewSignal unsigned 0,0 /ln:"AT-3"
+    Var=NewSignal unsigned 0,0 /ln:"AT-4"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_0/ET_1/ArrayOne/AO_0/0 0,8 8 
+    Var=NewSignal unsigned 0,0 /ln:"AO-0"
+    Var=NewSignal unsigned 0,0 /ln:"AO-1"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_0/ET_1/ArrayTwo/AT_0/0 0,8 9 
+    Var=NewSignal unsigned 0,0 /ln:"AT-0"
+    Var=NewSignal unsigned 0,0 /ln:"AT-1"
+    Var=NewSignal unsigned 0,0 /ln:"AT-2"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_0/ET_1/ArrayTwo/AT_0/1 0,8 0Ah
+    Var=NewSignal unsigned 0,0 /ln:"AT-3"
+    Var=NewSignal unsigned 0,0 /ln:"AT-4"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_0/ET_2/ArrayOne/AO_0/0 0,8 0Bh
+    Var=NewSignal unsigned 0,0 /ln:"AO-0"
+    Var=NewSignal unsigned 0,0 /ln:"AO-1"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_0/ET_2/ArrayTwo/AT_0/0 0,8 0Ch
+    Var=NewSignal unsigned 0,0 /ln:"AT-0"
+    Var=NewSignal unsigned 0,0 /ln:"AT-1"
+    Var=NewSignal unsigned 0,0 /ln:"AT-2"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_0/ET_2/ArrayTwo/AT_0/1 0,8 0Dh
+    Var=NewSignal unsigned 0,0 /ln:"AT-3"
+    Var=NewSignal unsigned 0,0 /ln:"AT-4"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_0/ET_3/ArrayOne/AO_0/0 0,8 0Eh
+    Var=NewSignal unsigned 0,0 /ln:"AO-0"
+    Var=NewSignal unsigned 0,0 /ln:"AO-1"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_0/ET_3/ArrayTwo/AT_0/0 0,8 0Fh
+    Var=NewSignal unsigned 0,0 /ln:"AT-0"
+    Var=NewSignal unsigned 0,0 /ln:"AT-1"
+    Var=NewSignal unsigned 0,0 /ln:"AT-2"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_0/ET_3/ArrayTwo/AT_0/1 0,8 10h
+    Var=NewSignal unsigned 0,0 /ln:"AT-3"
+    Var=NewSignal unsigned 0,0 /ln:"AT-4"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_1/ET_0/ArrayOne/AO_0/0 0,8 11h
+    Var=NewSignal unsigned 0,0 /ln:"AO-0"
+    Var=NewSignal unsigned 0,0 /ln:"AO-1"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_1/ET_0/ArrayTwo/AT_0/0 0,8 12h
+    Var=NewSignal unsigned 0,0 /ln:"AT-0"
+    Var=NewSignal unsigned 0,0 /ln:"AT-1"
+    Var=NewSignal unsigned 0,0 /ln:"AT-2"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_1/ET_0/ArrayTwo/AT_0/1 0,8 13h
+    Var=NewSignal unsigned 0,0 /ln:"AT-3"
+    Var=NewSignal unsigned 0,0 /ln:"AT-4"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_1/ET_1/ArrayOne/AO_0/0 0,8 14h
+    Var=NewSignal unsigned 0,0 /ln:"AO-0"
+    Var=NewSignal unsigned 0,0 /ln:"AO-1"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_1/ET_1/ArrayTwo/AT_0/0 0,8 15h
+    Var=NewSignal unsigned 0,0 /ln:"AT-0"
+    Var=NewSignal unsigned 0,0 /ln:"AT-1"
+    Var=NewSignal unsigned 0,0 /ln:"AT-2"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_1/ET_1/ArrayTwo/AT_0/1 0,8 16h
+    Var=NewSignal unsigned 0,0 /ln:"AT-3"
+    Var=NewSignal unsigned 0,0 /ln:"AT-4"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_1/ET_2/ArrayOne/AO_0/0 0,8 17h
+    Var=NewSignal unsigned 0,0 /ln:"AO-0"
+    Var=NewSignal unsigned 0,0 /ln:"AO-1"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_1/ET_2/ArrayTwo/AT_0/0 0,8 18h
+    Var=NewSignal unsigned 0,0 /ln:"AT-0"
+    Var=NewSignal unsigned 0,0 /ln:"AT-1"
+    Var=NewSignal unsigned 0,0 /ln:"AT-2"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_1/ET_2/ArrayTwo/AT_0/1 0,8 19h
+    Var=NewSignal unsigned 0,0 /ln:"AT-3"
+    Var=NewSignal unsigned 0,0 /ln:"AT-4"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_1/ET_3/ArrayOne/AO_0/0 0,8 1Ah
+    Var=NewSignal unsigned 0,0 /ln:"AO-0"
+    Var=NewSignal unsigned 0,0 /ln:"AO-1"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_1/ET_3/ArrayTwo/AT_0/0 0,8 1Bh
+    Var=NewSignal unsigned 0,0 /ln:"AT-0"
+    Var=NewSignal unsigned 0,0 /ln:"AT-1"
+    Var=NewSignal unsigned 0,0 /ln:"AT-2"
+    
+    [Tables]
+    DLC=0
+    Mux=EO_1/ET_3/ArrayTwo/AT_0/1 0,8 1Ch
+    Var=NewSignal unsigned 0,0 /ln:"AT-3"
+    Var=NewSignal unsigned 0,0 /ln:"AT-4"
+    ''')
+
+    assert tidy_sym(result) == tidy_sym(expected)
