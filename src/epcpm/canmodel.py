@@ -97,6 +97,18 @@ class Signal(epyqlib.treenode.TreeNode):
         human_name='Parameter UUID',
     )
 
+    path = attr.ib(
+        factory=tuple,
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=path,
+        no_column=True,
+    )
+    graham.attrib(
+        attribute=path,
+        field=graham.fields.Tuple(marshmallow.fields.UUID()),
+    )
+
     uuid = epyqlib.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
@@ -272,6 +284,31 @@ class Multiplexer(epyqlib.treenode.TreeNode):
             )),
         ),
     )
+
+    path = attr.ib(
+        factory=tuple,
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=path,
+        no_column=True,
+    )
+    graham.attrib(
+        attribute=path,
+        field=graham.fields.Tuple(marshmallow.fields.UUID()),
+    )
+
+    path_children = attr.ib(
+        factory=tuple,
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=path_children,
+        no_column=True,
+    )
+    graham.attrib(
+        attribute=path_children,
+        field=graham.fields.Tuple(marshmallow.fields.UUID()),
+    )
+
     uuid = epyqlib.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
@@ -479,10 +516,6 @@ class CanTable(epyqlib.treenode.TreeNode):
         return True
 
     def update(self):
-        for child in reversed(self.children):
-            if isinstance(child, Multiplexer):
-                self.remove_child(child=child)
-
         array_uuid_to_signal = {
             child.parameter_uuid: child
             for child in self.children
@@ -492,6 +525,8 @@ class CanTable(epyqlib.treenode.TreeNode):
         for signal in array_uuid_to_signal.values():
             self.remove_child(child=signal)
 
+        nodes = self.recursively_remove_children()
+
         if self.table_uuid is None:
             return
 
@@ -499,6 +534,14 @@ class CanTable(epyqlib.treenode.TreeNode):
         model = root.model
 
         table = model.node_from_uuid(self.table_uuid)
+
+        old_by_path = {}
+        for node in nodes:
+            if isinstance(node, Multiplexer):
+                path = (*node.path, node.path_children)
+            else:
+                path = node.path
+            old_by_path[path] = node
 
         arrays = [
             child
@@ -517,12 +560,6 @@ class CanTable(epyqlib.treenode.TreeNode):
 
             self.append_child(signal)
 
-        array_uuid_to_signal = {
-            child.parameter_uuid: child
-            for child in self.children
-            if isinstance(child, Signal)
-        }
-
         array_groups = [
             list(group[1])
             for group in itertools.groupby(
@@ -536,11 +573,6 @@ class CanTable(epyqlib.treenode.TreeNode):
         for array_group in array_groups:
             signal = array_uuid_to_signal[array_group[0].path[-2]]
 
-            path = [
-                model.node_from_uuid(u).name
-                for u in array_group[0].path
-            ]
-
             if signal.bits == 0:
                 continue
 
@@ -551,15 +583,41 @@ class CanTable(epyqlib.treenode.TreeNode):
                 epyqlib.utils.general.chunker(array_group, n=per_message),
             )
             for i, chunk in enumerate(chunks):
-                path_string = '/'.join(path + [str(i)])
-                multiplexer = Multiplexer(
-                    name=path_string,
-                    identifier=mux_value,
+                path = array_group[0].path
+
+                path_string = '/'.join(
+                    [
+                        model.node_from_uuid(u).name
+                        for u in path
+                    ]
+                    + [str(i)]
                 )
+                multiplexer_path = chunk[0].path[:-1]
+                multiplexer_path_children = tuple(
+                    element.path[-1]
+                    for element in chunk
+                )
+                multiplexer = old_by_path.get(
+                    (*multiplexer_path, multiplexer_path_children)
+                )
+                if multiplexer is None:
+                    multiplexer = Multiplexer(
+                        name=path_string,
+                        identifier=mux_value,
+                        path=multiplexer_path,
+                        path_children=multiplexer_path_children,
+                    )
                 mux_value += 1
 
                 for signal in chunk:
-                    signal = Signal(parameter_uuid=signal.original.uuid)
+                    signal_path = signal.path
+
+                    signal = old_by_path.get(signal_path)
+                    if signal is None:
+                        signal = Signal(
+                            parameter_uuid=signal.original.uuid,
+                            path=signal_path,
+                        )
                     multiplexer.append_child(signal)
 
                 self.append_child(multiplexer)

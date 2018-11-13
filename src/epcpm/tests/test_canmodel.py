@@ -1,4 +1,5 @@
 import collections
+import json
 import pathlib
 
 import attr
@@ -16,6 +17,9 @@ __license__ = 'GPLv2+'
 
 
 here = pathlib.Path(__file__).parent
+
+with open(here/'project'/'can.json') as f:
+    serialized_sample = f.read()
 
 
 def test_hex_field():
@@ -133,7 +137,6 @@ def test_table_update_unlinked():
     )
     parameter_table.update()
 
-    can_table.update()
     assert count_types(can_table.children) == expected_counts
 
     can_table.update()
@@ -143,3 +146,63 @@ def test_table_update_unlinked():
     can_table.update()
 
     assert count_types(can_table.children) == {}
+
+
+def test_table_update_same_uuid():
+    project = epcpm.project.loadp(here/'project'/'project.pmp')
+    can_table, = project.models.can.root.nodes_by_attribute(
+        attribute_value='First Table',
+        attribute_name='name',
+    )
+    parameter_table = project.models.parameters.node_from_uuid(
+        can_table.table_uuid,
+    )
+    parameter_table.update()
+
+    # TODO: CAMPid 9784566547216435136479765479163496731
+    def collect(node):
+        def collect(node, payload):
+            payload[node.uuid] = node.name
+
+        results = {}
+
+        node.traverse(
+            call_this=collect,
+            internal_nodes=True,
+            payload=results,
+        )
+
+        return results
+
+    can_table.update()
+
+    original = collect(can_table)
+
+    can_table.update()
+
+    after_update = collect(can_table)
+
+    assert after_update == original
+
+
+def test_sample_dumps_consistently():
+    project = epcpm.project.loadp(here/'project'/'project.pmp')
+    can_table, = project.models.can.root.nodes_by_attribute(
+        attribute_value='First Table',
+        attribute_name='name',
+    )
+    parameter_table = project.models.parameters.node_from_uuid(
+        can_table.table_uuid,
+    )
+    parameter_table.update()
+    can_table.update()
+
+    dumped = graham.dumps(project.models.can.root, indent=4)
+
+    def load(s):
+        return json.loads(s, object_pairs_hook=collections.OrderedDict)
+
+    print()
+    print(dumped.data)
+
+    assert load(dumped.data) == load(serialized_sample)
