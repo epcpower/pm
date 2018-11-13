@@ -609,13 +609,14 @@ class CanTable(epyqlib.treenode.TreeNode):
                     )
                 mux_value += 1
 
-                for signal in chunk:
-                    signal_path = signal.path
+                for array_element in chunk:
+                    signal_path = array_element.path
 
                     signal = old_by_path.get(signal_path)
                     if signal is None:
                         signal = Signal(
-                            parameter_uuid=signal.original.uuid,
+                            name=array_element.name,
+                            parameter_uuid=array_element.uuid,
                             path=signal_path,
                         )
                     multiplexer.append_child(signal)

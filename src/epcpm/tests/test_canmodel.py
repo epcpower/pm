@@ -7,6 +7,7 @@ import graham
 import pytest
 
 import epyqlib.attrsmodel
+import epyqlib.pm.parametermodel
 import epyqlib.tests.pm.test_parametermodel
 import epyqlib.tests.test_attrsmodel
 
@@ -26,6 +27,7 @@ with open(here/'project'/'can.json') as f:
 @attr.s
 class SampleModelFromFile:
     root = attr.ib()
+    parameter_root = attr.ib()
     model = attr.ib()
     parameter_model = attr.ib()
     table = attr.ib()
@@ -45,6 +47,7 @@ class SampleModelFromFile:
 
         sample_model = cls(
             root=project.models.can.root,
+            parameter_root=project.models.parameters.root,
             model=project.models.can,
             parameter_model=project.models.parameters,
             table=can_table,
@@ -227,3 +230,19 @@ def test_sample_dumps_consistently(sample):
     print(dumped.data)
 
     assert load(dumped.data) == load(serialized_sample)
+
+
+def test_add_enumerator_update_table(sample):
+    enumeration, = sample.parameter_root.nodes_by_attribute(
+        attribute_value='Enumeration Two',
+        attribute_name='name',
+    )
+
+    enumeration.append_child(epyqlib.pm.parametermodel.Enumerator(
+        name='ET-New',
+        value=42,
+        uuid='173ba72c-bf2a-42a1-aab6-3e5fc49f10e7',
+    ))
+
+    sample.parameter_table.update()
+    sample.table.update()
