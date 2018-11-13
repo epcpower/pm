@@ -4,6 +4,7 @@ import pathlib
 
 import attr
 import graham
+import pytest
 
 import epyqlib.attrsmodel
 import epyqlib.tests.pm.test_parametermodel
@@ -20,6 +21,47 @@ here = pathlib.Path(__file__).parent
 
 with open(here/'project'/'can.json') as f:
     serialized_sample = f.read()
+
+
+@attr.s
+class SampleModelFromFile:
+    root = attr.ib()
+    model = attr.ib()
+    parameter_model = attr.ib()
+    table = attr.ib()
+    parameter_table = attr.ib()
+    project = attr.ib()
+
+    @classmethod
+    def build(cls):
+        project = epcpm.project.loadp(here / 'project' / 'project.pmp')
+        can_table, = project.models.can.root.nodes_by_attribute(
+            attribute_value='First Table',
+            attribute_name='name',
+        )
+        parameter_table = project.models.parameters.node_from_uuid(
+            can_table.table_uuid,
+        )
+
+        sample_model = cls(
+            root=project.models.can.root,
+            model=project.models.can,
+            parameter_model=project.models.parameters,
+            table=can_table,
+            parameter_table=parameter_table,
+            project=project,
+        )
+
+        return sample_model
+
+
+@pytest.fixture
+def sample():
+    sample_model = SampleModelFromFile.build()
+    sample_model.parameter_table.update()
+    sample_model.table.update()
+
+    return sample_model
 
 
 def test_hex_field():
@@ -148,17 +190,7 @@ def test_table_update_unlinked():
     assert count_types(can_table.children) == {}
 
 
-def test_table_update_same_uuid():
-    project = epcpm.project.loadp(here/'project'/'project.pmp')
-    can_table, = project.models.can.root.nodes_by_attribute(
-        attribute_value='First Table',
-        attribute_name='name',
-    )
-    parameter_table = project.models.parameters.node_from_uuid(
-        can_table.table_uuid,
-    )
-    parameter_table.update()
-
+def test_table_update_same_uuid(sample):
     # TODO: CAMPid 9784566547216435136479765479163496731
     def collect(node):
         def collect(node, payload):
@@ -174,30 +206,19 @@ def test_table_update_same_uuid():
 
         return results
 
-    can_table.update()
+    sample.table.update()
 
-    original = collect(can_table)
+    original = collect(sample.table)
 
-    can_table.update()
+    sample.table.update()
 
-    after_update = collect(can_table)
+    after_update = collect(sample.table)
 
     assert after_update == original
 
 
-def test_sample_dumps_consistently():
-    project = epcpm.project.loadp(here/'project'/'project.pmp')
-    can_table, = project.models.can.root.nodes_by_attribute(
-        attribute_value='First Table',
-        attribute_name='name',
-    )
-    parameter_table = project.models.parameters.node_from_uuid(
-        can_table.table_uuid,
-    )
-    parameter_table.update()
-    can_table.update()
-
-    dumped = graham.dumps(project.models.can.root, indent=4)
+def test_sample_dumps_consistently(sample):
+    dumped = graham.dumps(sample.root, indent=4)
 
     def load(s):
         return json.loads(s, object_pairs_hook=collections.OrderedDict)
