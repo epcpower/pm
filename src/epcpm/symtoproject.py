@@ -42,7 +42,12 @@ def get_other_name(hierarchy):
     return other_name
 
 
-def load_can_file(can_file, file_type, parameter_hierarchy_file):
+def load_can_file(
+        can_file,
+        file_type,
+        parameter_hierarchy_file,
+        add_tables=False,
+):
     matrix, = canmatrix.formats.load(
         can_file,
         file_type,
@@ -220,6 +225,9 @@ def load_can_file(can_file, file_type, parameter_hierarchy_file):
         children=parameter_hierarchy['children'],
         parent=parameters,
     )
+
+    if add_tables:
+        go_add_tables(parameters_root=parameters_root)
 
     return parameters_root, can_root
 
@@ -412,6 +420,248 @@ def build_multiplexed_message(
             multiplexer.append_child(signal)
 
     return message
+
+
+def go_add_tables(parameters_root):
+    line_monitoring = parameters_root.descendent(
+        'Parameters',
+        '1. AC',
+        '9. Line Monitoring',
+    )
+    enumerations_group = parameters_root.descendent('Enumerations')
+
+    @attr.s
+    class EnumerationDefinition:
+        name = attr.ib()
+        value_names = attr.ib(converter=tuple)
+
+        def create(self):
+            enumeration = epyqlib.pm.parametermodel.Enumeration(
+                name=self.name,
+            )
+            for value, name in enumerate(self.value_names):
+                enumerator = epyqlib.pm.parametermodel.Enumerator(
+                    name=name,
+                    value=value,
+                )
+                enumeration.append_child(enumerator)
+
+            return enumeration
+
+    @attr.s
+    class ArrayDefinition:
+        name = attr.ib()
+        length = attr.ib()
+        parameter = attr.ib()
+
+        def create(self):
+            array = epyqlib.pm.parametermodel.Array(
+                name=self.name,
+            )
+            array.append_child(self.parameter)
+            array.length = self.length
+
+            name_length = len('{}'.format(self.length - 1))
+
+            for i, node in enumerate(array.children):
+                node.name = '{:0{}}'.format(i, name_length)
+
+            return array
+
+    @attr.s
+    class TableDefinition:
+        parent = attr.ib()
+        name = attr.ib()
+        enumerations = attr.ib(converter=tuple)
+        arrays = attr.ib(converter=tuple)
+
+        def create(self):
+            table = epyqlib.pm.parametermodel.Table(name=self.name)
+            self.parent.append_child(table)
+
+            for enumeration in self.enumerations:
+                reference = epyqlib.pm.parametermodel.TableEnumerationReference(
+                    name=enumeration.name,
+                    enumeration_uuid=enumeration.uuid,
+                )
+
+                table.append_child(reference)
+
+            for array in self.arrays:
+                table.append_child(array)
+
+            return table
+
+    low_high = EnumerationDefinition(
+        name='LowHigh',
+        value_names=(
+            'Low',
+            'High',
+        )
+    ).create()
+
+    ridethrough_trip = EnumerationDefinition(
+        name='RideThroughTrip',
+        value_names=(
+            'Ride Through',
+            'Trip',
+        )
+    ).create()
+
+    curves = EnumerationDefinition(
+        name='Curves',
+        value_names=(
+            '0',
+            '1',
+            '2',
+            '3',
+        )
+    ).create()
+
+    enumerations = (
+        low_high,
+        ridethrough_trip,
+        curves,
+    )
+
+    for enumeration in enumerations:
+        enumerations_group.append_child(enumeration)
+
+    curve_points = 10
+
+    tables_group = epyqlib.pm.parametermodel.Group(
+        name='New Tables',
+    )
+    line_monitoring.append_child(tables_group)
+
+    frequency_table = TableDefinition(
+        parent=tables_group,
+        name='Frequency',
+        enumerations=(
+            low_high,
+            ridethrough_trip,
+            curves,
+        ),
+        arrays=(
+            ArrayDefinition(
+                name='Seconds',
+                length=curve_points,
+                parameter=epyqlib.pm.parametermodel.Parameter(
+                    units='s',
+                ),
+            ).create(),
+            ArrayDefinition(
+                name='Hertz',
+                length=curve_points,
+                parameter=epyqlib.pm.parametermodel.Parameter(
+                    units='Hz',
+                ),
+            ).create(),
+        ),
+    ).create()
+
+    voltage_table = TableDefinition(
+        parent=tables_group,
+        name='Voltage',
+        enumerations=(
+            low_high,
+            ridethrough_trip,
+            curves,
+        ),
+        arrays=(
+            ArrayDefinition(
+                name='Seconds',
+                length=curve_points,
+                parameter=epyqlib.pm.parametermodel.Parameter(
+                    units='s',
+                ),
+            ).create(),
+            ArrayDefinition(
+                name='Percent',
+                length=curve_points,
+                parameter=epyqlib.pm.parametermodel.Parameter(
+                    units='percent',
+                ),
+            ).create(),
+        ),
+    ).create()
+
+    volt_var_table = TableDefinition(
+        parent=tables_group,
+        name='VoltVar',
+        enumerations=(curves,),
+        arrays=(
+            ArrayDefinition(
+                name='Volts',
+                length=curve_points,
+                parameter=epyqlib.pm.parametermodel.Parameter(
+                    units='% nominal V',
+                ),
+            ).create(),
+            ArrayDefinition(
+                name='VAr',
+                length=curve_points,
+                parameter=epyqlib.pm.parametermodel.Parameter(
+                    units='% nominal VAr',
+                ),
+            ).create(),
+        ),
+    ).create()
+
+    hertz_watts_table = TableDefinition(
+        parent=tables_group,
+        name='HzWatts',
+        enumerations=(curves,),
+        arrays=(
+            ArrayDefinition(
+                name='Hertz',
+                length=curve_points,
+                parameter=epyqlib.pm.parametermodel.Parameter(
+                    units='Hz',
+                ),
+            ).create(),
+            ArrayDefinition(
+                name='Percent Nominal Power',
+                length=curve_points,
+                parameter=epyqlib.pm.parametermodel.Parameter(
+                    units='% nominal Power',
+                ),
+            ).create(),
+        ),
+    ).create()
+
+    volt_watts_table = TableDefinition(
+        parent=tables_group,
+        name='VoltWatts',
+        enumerations=(curves,),
+        arrays=(
+            ArrayDefinition(
+                name='Volts',
+                length=curve_points,
+                parameter=epyqlib.pm.parametermodel.Parameter(
+                    units='V',
+                ),
+            ).create(),
+            ArrayDefinition(
+                name='Percent Nominal Power',
+                length=curve_points,
+                parameter=epyqlib.pm.parametermodel.Parameter(
+                    units='% nominal Power',
+                ),
+            ).create(),
+        ),
+    ).create()
+
+    tables = (
+        frequency_table,
+        voltage_table,
+        volt_var_table,
+        hertz_watts_table,
+        volt_watts_table,
+    )
+
+    for table in tables:
+        table.update()
 
 
 def strip_tag(string, tag):

@@ -87,3 +87,53 @@ class Parameter:
             dehumanize_name(message.name),
             dehumanize_name(signal.name),
         ]
+
+
+@builders(epyqlib.pm.parametermodel.Table)
+@attr.s
+class Table:
+    wrapped = attr.ib()
+    can_root = attr.ib()
+
+    def gen(self):
+        group, = (
+            child
+            for child in self.wrapped.children
+            if isinstance(child, epyqlib.pm.parametermodel.TableGroupElement)
+        )
+        return {
+            'name': self.wrapped.name,
+            'children': builders.wrap(
+                wrapped=group,
+                can_root=self.can_root,
+            ).gen()['children'],
+        }
+
+
+@builders(epyqlib.pm.parametermodel.TableGroupElement)
+@attr.s
+class TableGroupElement:
+    wrapped = attr.ib()
+    can_root = attr.ib()
+
+    def gen(self):
+        return {
+            'name': self.wrapped.name,
+            'children': [
+                builders.wrap(
+                    wrapped=child,
+                    can_root=self.can_root,
+                ).gen()
+                for child in self.wrapped.children
+            ],
+        }
+
+
+@builders(epyqlib.pm.parametermodel.TableArrayElement)
+@attr.s
+class TableArrayElement:
+    wrapped = attr.ib()
+    can_root = attr.ib()
+
+    def gen(self):
+        return self.wrapped.name

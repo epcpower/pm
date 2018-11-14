@@ -24,11 +24,13 @@ def relative_path(target, reference):
 @click.option('--parameters', type=click.File('w'), required=True)
 @click.option('--can', type=click.File('w'), required=True)
 @click.option('--epyq-value-set', type=click.File('w'))
-def cli(sym, hierarchy, project, parameters, can, epyq_value_set):
+@click.option('--add-tables/--no-add-tables', default=False)
+def cli(sym, hierarchy, project, parameters, can, epyq_value_set, add_tables):
     parameters_root, can_root = epcpm.symtoproject.load_can_file(
         can_file=sym,
         file_type=str(pathlib.Path(sym.name).suffix[1:]),
         parameter_hierarchy_file=hierarchy,
+        add_tables=add_tables,
     )
 
     project_path = pathlib.Path(project.name).parents[0]

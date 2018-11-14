@@ -34,6 +34,7 @@ def test_import():
             '--project', project,
             '--can', round_trip / 'can.json',
             '--parameters', round_trip / 'parameters.json',
+            '--add-tables',
         ],
         catch_exceptions=False,
     )
