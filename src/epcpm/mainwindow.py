@@ -405,11 +405,11 @@ class Window:
 
         menu.addSeparator()
 
-        delete = menu.addAction('Delete')
-        delete.setEnabled(node.can_delete())
-
         update = menu.addAction('Update')
         update.setEnabled(hasattr(node, 'update'))
+
+        delete = menu.addAction('Delete')
+        delete.setEnabled(node.can_delete())
 
         menu.addSeparator()
 
