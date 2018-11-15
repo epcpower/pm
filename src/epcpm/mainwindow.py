@@ -386,6 +386,7 @@ class Window:
     def context_menu(self, position, view_model):
         view = view_model.view
         view_index = view.indexAt(position)
+        index_is_valid = view_index.isValid()
         index = view.model().mapToSource(view_index)
 
         model = view_model.model
@@ -417,9 +418,11 @@ class Window:
             menu.addSeparator()
 
         expand_tree = menu.addAction('Expand Tree')
+        expand_tree.setEnabled(index_is_valid)
         expand_all = menu.addAction('Expand All')
         menu.addSeparator()
         collapse_tree = menu.addAction('Collapse Tree')
+        collapse_tree.setEnabled(index_is_valid)
         collapse_all = menu.addAction('Collapse All')
 
         action = menu.exec(
