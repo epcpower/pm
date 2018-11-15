@@ -175,6 +175,7 @@ class Window:
                 can_file=sym,
                 file_type=str(pathlib.Path(sym.name).suffix[1:]),
                 parameter_hierarchy_file=hierarchy,
+                add_tables=True,
             )
 
         project = epcpm.project.Project()
