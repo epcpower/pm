@@ -394,14 +394,14 @@ class Window:
 
         menu = QtWidgets.QMenu(parent=view)
 
+        add_submenu = menu.addMenu('Add')
+
         addable_types = node.addable_types()
         actions = {
-            menu.addAction('Add {}'.format(name)): t
+            add_submenu.addAction('Add {}'.format(name)): t
             for name, t in addable_types.items()
         }
-        if len(actions) == 0:
-            no_addable_child_types = menu.addAction('No addable child types')
-            no_addable_child_types.setDisabled(True)
+        add_submenu.setDisabled(len(actions) == 0)
 
         menu.addSeparator()
 
