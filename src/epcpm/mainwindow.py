@@ -394,15 +394,19 @@ class Window:
 
         menu = QtWidgets.QMenu(parent=view)
 
-        delete = None
         addable_types = node.addable_types()
         actions = {
             menu.addAction('Add {}'.format(name)): t
             for name, t in addable_types.items()
         }
+        if len(actions) == 0:
+            no_addable_child_types = menu.addAction('No addable child types')
+            no_addable_child_types.setDisabled(True)
 
-        if node.can_delete():
-            delete = menu.addAction('Delete')
+        menu.addSeparator()
+
+        delete = menu.addAction('Delete')
+        delete.setEnabled(node.can_delete())
 
         update = menu.addAction('Update')
         update.setEnabled(hasattr(node, 'update'))
