@@ -527,10 +527,5 @@ def test_roundtrip():
     original, = canmatrix.formats.loadp(os.fspath(example_device.can)).values()
     exported, = canmatrix.formats.loadp(os.fspath(exported_can)).values()
 
-    try:
-        assert_frame_lists_equal(original.frames, exported.frames)
-    except Exception as e:
-        print()
+    assert_frame_lists_equal(original.frames, exported.frames)
     assert_value_tables_equal(original.valueTables, exported.valueTables)
-
-    print()
