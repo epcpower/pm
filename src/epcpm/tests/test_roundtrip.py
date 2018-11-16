@@ -87,31 +87,36 @@ def assert_signals_equal(
     )
 
     if 'LongName' in original.attributes:
-        assert original.attributes == exported.attributes
+        assert exported.attributes == original.attributes
     else:
         tweaked = dict(exported.attributes)
         tweaked.pop('LongName', None)
-        assert original.attributes == tweaked
+        assert tweaked == original.attributes
 
     factory = '<factory>'
+    configs = ('<HY>', '<MG3>', '<MG4>', '<DG>', '<DC>')
 
     def split_and_access_level(comment):
 
         split = comment.split()
 
         return (
-            factory if factory in split else None,
-            [x for x in split if x != factory],
+            factory in split,
+            (
+                tag in split
+                for tag in configs
+            ),
+            [x for x in split if x not in (factory, *configs)],
         )
 
-    original_factory, original_comment = split_and_access_level(
-        original.comment,
+    original_factory, original_configs, original_comment = (
+        split_and_access_level(original.comment)
     )
-    exported_factory, exported_comment = split_and_access_level(
-        exported.comment,
+    exported_factory, exported_configs, exported_comment = (
+        split_and_access_level(exported.comment)
     )
 
-    assert original_comment == exported_comment
+    assert exported_comment == original_comment
 
     not_applicable = (
         'readparam_command',
@@ -130,50 +135,62 @@ def assert_signals_equal(
         exported_mux, = exported_mux if exported_mux else (None,)
 
         if original_mux is None:
-            assert original_mux == exported_mux
+            assert exported_mux == original_mux
 
-        original_access_level = original_factory == factory
-        if original_mux is not None:
-            original_access_level = (
-                    original_access_level
-                    or (
-                            original is not original_mux
-                            and factory in original_mux.comments[
-                                original.multiplex]
-                    )
-            )
-        else:
-            original_access_level = (
-                    original_access_level
-                    or factory in original_frame.comment
-            )
+        def tagged_including_mux_check(tag, tagged, signal, mux):
+            if mux is not None:
+                return (
+                        tagged
+                        or (
+                                signal is not mux
+                                and tag in mux.comments[
+                                    signal.multiplex]
+                        )
+                )
 
-        exported_access_level = exported_factory == factory
-        if exported_mux is not None:
-            exported_access_level = (
-                    exported_access_level
-                    or (
-                            exported is not exported_mux
-                            and factory in exported_mux.comments[
-                                exported.multiplex]
-                    )
-            )
-        else:
-            exported_access_level = (
-                    exported_access_level
-                    or factory in exported_frame.comment
+            return (
+                    tagged
+                    or tag in original_frame.comment
             )
 
-        access_level_matches = original_access_level == exported_access_level
+        original_access_level = tagged_including_mux_check(
+            tag=factory,
+            tagged=original_factory,
+            signal=original,
+            mux=original_mux,
+        )
+        exported_access_level = tagged_including_mux_check(
+            tag=factory,
+            tagged=exported_factory,
+            signal=exported,
+            mux=exported_mux,
+        )
 
-        assert access_level_matches
+        assert exported_access_level == original_access_level
+
+        z = zip(configs, original_configs, exported_configs)
+        for config, original_tagged, exported_tagged in z:
+            original_config = tagged_including_mux_check(
+                tag=config,
+                tagged=original_tagged,
+                signal=original,
+                mux=original_mux,
+            )
+            exported_config = tagged_including_mux_check(
+                tag=config,
+                tagged=exported_tagged,
+                signal=exported,
+                mux=exported_mux,
+            )
+
+            # TODO: 0985098454587998709809879180745
+            #       disabled until we deal with actually handling multiple
+            #       items
+            # assert exported_config == original_config, (config, exported.comment, original.comment, original.name)
 
     assert_varied_dict_equal(original.values, exported.values)
 
-    _, original_comments = split_and_access_level(original.comment)
-    _, exported_comments = split_and_access_level(exported.comment)
-
-    assert original_comments == exported_comments
+    assert exported_comment == original_comment
 
 
 def get_name(x):
@@ -435,9 +452,9 @@ def assert_signal_list_equal(
     zipped = itertools.zip_longest(original_names, exported_names)
     for original_name, exported_name in zipped:
         if original_name.casefold() in case_insensitive:
-            assert original_name.casefold() == exported_name.casefold()
+            assert exported_name.casefold() == original_name.casefold()
         else:
-            assert original_name == exported_name
+            assert exported_name == original_name
 
     def key(x):
         return (
@@ -461,7 +478,7 @@ def assert_signal_list_equal(
 
 def assert_attributes_equal(original, exported, *, attributes):
     for attribute in attributes:
-        assert getattr(original, attribute) == getattr(exported, attribute)
+        assert getattr(exported, attribute) == getattr(original, attribute)
 
 
 def assert_varied_dict_equal(original, exported):
@@ -470,10 +487,10 @@ def assert_varied_dict_equal(original, exported):
         sorted(exported.items()),
     )
     for (original_value, original_name), (exported_value, exported_name) in zipped:
-        assert original_value == exported_value
+        assert exported_value == original_value
 
         tweaked = unvary_signal_names(exported_name)
-        assert original_name == tweaked
+        assert tweaked == original_name
 
 
 def assert_frames_equal(original, exported):
@@ -509,7 +526,7 @@ def assert_frame_lists_equal(original, exported):
     original_names = collect_attribute(original, 'name')
     exported_names = collect_attribute(exported, 'name')
 
-    assert original_names == exported_names
+    assert exported_names == original_names
 
     zipped = itertools.zip_longest(
         sorted(original, key=get_name),
@@ -520,7 +537,7 @@ def assert_frame_lists_equal(original, exported):
 
 
 def assert_value_tables_equal(original, exported):
-    return original == exported
+    return exported == original
 
 
 def test_roundtrip():

@@ -799,7 +799,9 @@ def parameter_from_signal(
 
         #only variants in both lists:
         vis_list = list(set(frame_variants).intersection(variant_cfgs))
-        extras['visibility'] = vis_list[0].uuid #todo this only allows one variant selection
+        # TODO: 0985098454587998709809879180745
+        #       this only allows one variant selection
+        extras['visibility'] = vis_list[0].uuid
         
         comment, nv_meta = strip_nv(string=comment)
 

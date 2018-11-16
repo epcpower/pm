@@ -132,7 +132,12 @@ class Signal:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
-    def gen(self, multiplex_id=None, skip_access_level=False):
+    def gen(
+            self,
+            multiplex_id=None,
+            skip_access_level=False,
+            skip_configuration=False,
+    ):
         extras = {}
         can_find_parameter = (
             self.wrapped.parameter_uuid is not None
@@ -165,6 +170,20 @@ class Signal:
                     extras['comment'] = '{} <{}>'.format(
                         extras.get('comment', ''),
                         access_level.name.casefold(),
+                    ).strip()
+
+            handle_configuration = (
+                    not skip_configuration
+                    and parameter.visibility is not None
+            )
+            if handle_configuration:
+                configuration = self.parameter_uuid_finder(
+                    parameter.visibility
+                )
+                if configuration is not None:
+                    extras['comment'] = '{} <{}>'.format(
+                        extras.get('comment', ''),
+                        configuration.name,
                     ).strip()
 
             if parameter.nv_format is not None:
