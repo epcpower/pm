@@ -1,5 +1,6 @@
 import collections
 import decimal
+import functools
 import json
 import pathlib
 import re
@@ -172,6 +173,43 @@ def load_can_file(
                 access_levels=access_levels,
                 variants=variants,
             )
+
+            def interesting_signal_attributes(signal):
+                return (
+                     signal.name,
+                     signal.bits,
+                     signal.signed,
+                     signal.factor,
+                     signal.start_bit,
+                 )
+
+            multiplexers = [
+                mux
+                for mux in message.children
+                if isinstance(mux, epcpm.canmodel.Multiplexer)
+            ]
+
+            common_signals_dict = functools.reduce(
+                epyqlib.utils.general.intersect_dicts,
+                 (
+                     {
+                         interesting_signal_attributes(signal): signal
+                         for signal in mux.children
+                     }
+                     for mux in multiplexers
+                 ),
+            )
+
+            common_signals = list(common_signals_dict.values())
+            common_signals_check = list(common_signals_dict.keys())
+
+            for mux in multiplexers:
+                for child in list(mux.children):
+                    if interesting_signal_attributes(child) in common_signals_check:
+                        mux.remove_child(child=child)
+
+            for signal in reversed(common_signals):
+                message.insert_child(1, signal)
 
         can_root.append_child(message)
 
