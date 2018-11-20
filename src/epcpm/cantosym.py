@@ -308,8 +308,11 @@ class MultiplexedMessage:
                 )
                 frame.signals.append(matrix_signal)
 
+            name = multiplexer.name
+            if isinstance(multiplexer.tree_parent, epcpm.canmodel.CanTable):
+                name = multiplexer.tree_parent.name + '_' + name
             frame.mux_names[multiplexer.identifier] = (
-                dehumanize_name(multiplexer.name)
+                dehumanize_name(name)
             )
 
             def param_special(signal):

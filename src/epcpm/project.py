@@ -115,6 +115,7 @@ def _post_load(project):
     models.parameters.list_selection_roots['visibility'] = visibility_root
 
     models.parameters.update_nodes()
+    models.can.update_nodes()
 
 
 @graham.schemify(tag='models')

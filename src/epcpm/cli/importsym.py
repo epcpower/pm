@@ -30,7 +30,6 @@ def cli(sym, hierarchy, project, parameters, can, epyq_value_set, add_tables):
         can_file=sym,
         file_type=str(pathlib.Path(sym.name).suffix[1:]),
         parameter_hierarchy_file=hierarchy,
-        add_tables=add_tables,
     )
 
     project_path = pathlib.Path(project.name).parents[0]
@@ -52,6 +51,14 @@ def cli(sym, hierarchy, project, parameters, can, epyq_value_set, add_tables):
             ),
         ),
     )
+
+    epcpm.project._post_load(project_model)
+
+    if add_tables:
+        epcpm.symtoproject.go_add_tables(
+            parameters_root=project_model.models.parameters.root,
+            can_root=project_model.models.can.root,
+        )
 
     project.write(graham.dumps(project_model, indent=4).data)
     parameters.write(graham.dumps(parameters_root, indent=4).data)

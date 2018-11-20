@@ -515,7 +515,7 @@ class CanTable(epyqlib.treenode.TreeNode):
 
         return True
 
-    def update(self):
+    def update(self, table=None):
         array_uuid_to_signal = {
             child.parameter_uuid: child
             for child in self.children
@@ -533,7 +533,11 @@ class CanTable(epyqlib.treenode.TreeNode):
         root = self.find_root()
         model = root.model
 
-        table = model.node_from_uuid(self.table_uuid)
+        if table is None:
+            table = model.node_from_uuid(self.table_uuid)
+        else:
+            if table.uuid != self.table_uuid:
+                raise ConsistencyError()
 
         old_by_path = {}
         for node in nodes:
@@ -557,6 +561,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                     name=array.name,
                     parameter_uuid=array.uuid,
                 )
+                array_uuid_to_signal[array.uuid] = signal
 
             self.append_child(signal)
 
@@ -585,7 +590,7 @@ class CanTable(epyqlib.treenode.TreeNode):
             for i, chunk in enumerate(chunks):
                 path = array_group[0].path
 
-                path_string = '/'.join(
+                path_string = '_'.join(
                     [
                         model.node_from_uuid(u).name
                         for u in path
@@ -609,6 +614,9 @@ class CanTable(epyqlib.treenode.TreeNode):
                     )
                 mux_value += 1
 
+                bits = signal.bits
+                start_bit = 64 - per_message * bits
+
                 for array_element in chunk:
                     signal_path = array_element.path
 
@@ -616,10 +624,13 @@ class CanTable(epyqlib.treenode.TreeNode):
                     if signal is None:
                         signal = Signal(
                             name=array_element.name,
+                            start_bit=start_bit,
+                            bits=bits,
                             parameter_uuid=array_element.uuid,
                             path=signal_path,
                         )
                     multiplexer.append_child(signal)
+                    start_bit += bits
 
                 self.append_child(multiplexer)
 

@@ -8,6 +8,7 @@ import re
 import attr
 import canmatrix.formats
 
+import epyqlib.attrsmodel
 import epyqlib.pm.parametermodel
 import epyqlib.utils.general
 
@@ -264,9 +265,6 @@ def load_can_file(
         parent=parameters,
     )
 
-    if add_tables:
-        go_add_tables(parameters_root=parameters_root)
-
     return parameters_root, can_root
 
 
@@ -460,15 +458,28 @@ def build_multiplexed_message(
     return message
 
 
-def go_add_tables(parameters_root):
+def go_add_tables(parameters_root, can_root):
+    def is_a_table(node):
+        comment = getattr(node, 'comment', None)
+        if comment is None:
+            return False
+
+        return '<table>' in comment
+
+    can_table_stuff = can_root.nodes_by_filter(filter=is_a_table)
+    for node in can_table_stuff:
+        node.tree_parent.remove_child(child=node)
+
     line_monitoring = parameters_root.descendent(
         'Parameters',
         '1. AC',
         '9. Line Monitoring',
     )
     enumerations_group = parameters_root.descendent('Enumerations')
+    existing_tables = line_monitoring.descendent('Tables')
+    line_monitoring.remove_child(child=existing_tables)
 
-    @attr.s
+    @attr.s(frozen=True)
     class EnumerationDefinition:
         name = attr.ib()
         value_names = attr.ib(converter=tuple)
@@ -486,7 +497,7 @@ def go_add_tables(parameters_root):
 
             return enumeration
 
-    @attr.s
+    @attr.s(frozen=True)
     class ArrayDefinition:
         name = attr.ib()
         length = attr.ib()
@@ -506,7 +517,7 @@ def go_add_tables(parameters_root):
 
             return array
 
-    @attr.s
+    @attr.s(frozen=True)
     class TableDefinition:
         parent = attr.ib()
         name = attr.ib()
@@ -568,7 +579,7 @@ def go_add_tables(parameters_root):
     curve_points = 10
 
     tables_group = epyqlib.pm.parametermodel.Group(
-        name='New Tables',
+        name='Tables',
     )
     line_monitoring.append_child(tables_group)
 
@@ -582,14 +593,14 @@ def go_add_tables(parameters_root):
         ),
         arrays=(
             ArrayDefinition(
-                name='Seconds',
+                name='seconds',
                 length=curve_points,
                 parameter=epyqlib.pm.parametermodel.Parameter(
-                    units='s',
+                    units='seconds',
                 ),
             ).create(),
             ArrayDefinition(
-                name='Hertz',
+                name='hertz',
                 length=curve_points,
                 parameter=epyqlib.pm.parametermodel.Parameter(
                     units='Hz',
@@ -690,16 +701,108 @@ def go_add_tables(parameters_root):
         ),
     ).create()
 
-    tables = (
-        frequency_table,
-        voltage_table,
-        volt_var_table,
-        hertz_watts_table,
-        volt_watts_table,
-    )
+    @attr.s
+    class CanTableDefinition:
+        signals = attr.ib()
+        range = attr.ib()
 
-    for table in tables:
+    tables = {
+        frequency_table: CanTableDefinition(
+            range=range(0x195, 0x215),
+            signals = {
+                'seconds': {
+                    'bits': 16,
+                    'signed': False,
+                    'factor': '0.01',
+                },
+                'hertz': {
+                    'bits': 16,
+                    'signed': False,
+                    'factor': '0.01',
+                },
+            },
+        ),
+        voltage_table: CanTableDefinition(
+            range=range(0x215, 0x295),
+            signals = {
+                'Seconds': {
+                    'bits': 16,
+                    'signed': False,
+                    'factor': '0.01',
+                },
+                'Percent': {
+                    'bits': 16,
+                    'signed': False,
+                    'factor': '0.1',
+                },
+            },
+        ),
+        volt_var_table: CanTableDefinition(
+            range=range(0x295, 0x2b9),
+            signals = {
+                'Volts': {
+                    'bits': 16,
+                    'signed': False,
+                    'factor': '0.1',
+                },
+                'VAr': {
+                    'bits': 16,
+                    'signed': True,
+                    'factor': '0.1',
+                },
+            },
+        ),
+        hertz_watts_table: CanTableDefinition(
+            range=range(0x2b9, 0x2dd),
+            signals = {
+                'Hertz': {
+                    'bits': 16,
+                    'signed': False,
+                    'factor': '0.01',
+                },
+                'Percent Nominal Power': {
+                    'bits': 16,
+                    'signed': True,
+                    'factor': '0.1',
+                },
+            },
+        ),
+        volt_watts_table: CanTableDefinition(
+            range=range(0x2dd, 0x300),
+            signals = {
+                'Volts': {
+                    'bits': 16,
+                    'signed': False,
+                    'factor': '0.01',
+                },
+                'Percent Nominal Power': {
+                    'bits': 16,
+                    'signed': True,
+                    'factor': '0.1',
+                },
+            },
+        ),
+    }
+
+    for table, can_table_definition in tables.items():
         table.update()
+
+        for name in ('Parameter Query', 'Parameter Response'):
+            can_group = can_root.descendent(name)
+
+            can_table = can_group.child_from(table)
+            can_table.name = table.name
+            can_table.multiplexer_range_first = can_table_definition.range[0]
+            can_table.multiplexer_range_second = can_table_definition.range[-1]
+            can_group.append_child(can_table)
+            can_table.update()
+
+            for signal, values in can_table_definition.signals.items():
+                signal = can_table.descendent(signal)
+                for name, value in values.items():
+                    setattr(signal, name, value)
+
+            can_table.update()
 
 
 def strip_tag(string, tag):
