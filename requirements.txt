@@ -17,7 +17,7 @@ git+https://github.com/altendky/qt5reactor@ce3ea2dad6d71adb10cde79b64bc0c7d27e91
 git+https://github.com/altendky/pytest-twisted@6f04ba3ad806b3b40602999e71c28633c36d81f9#egg=pytest-twisted
 python-can==2.2.1
 
-git+https://github.com/ebroecker/canmatrix@82ece227cd2b5a7ced2e0f75610708ff1231ca04#egg=canmatrix
+git+https://github.com/ebroecker/canmatrix@b738b139ed6c1af009871ff356bd97dcfb2cc8ba#egg=canmatrix
 git+https://github.com/altendky/graham@89f3b3e6aad3b98bafa83f28fbbc11bb92df6ad8#egg=graham
 git+https://github.com/altendky/pycparser@b19d2b7cb78bccc89ef187c1c4eb5db0fdd3bbf9#egg=pycparser
 

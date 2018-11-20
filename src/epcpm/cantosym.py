@@ -58,7 +58,7 @@ class Root:
                 access_levels=self.access_levels,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             ).gen()
-            matrix.frames.addFrame(frame)
+            matrix.addFrame(frame)
 
         codec = 'utf-8'
 
@@ -104,9 +104,9 @@ class Message:
     def gen(self):
         frame = canmatrix.canmatrix.Frame(
             name=dehumanize_name(self.wrapped.name),
-            Id=self.wrapped.identifier,
+            id=self.wrapped.identifier,
             extended=self.wrapped.extended,
-            dlc=self.wrapped.length,
+            size=self.wrapped.length,
             comment=self.wrapped.comment,
         )
 
@@ -219,7 +219,7 @@ class Signal:
         signal = canmatrix.canmatrix.Signal(
             name=dehumanize_name(self.wrapped.name),
             multiplex=multiplex_id,
-            signalSize=self.wrapped.bits,
+            size=self.wrapped.bits,
             is_signed=self.wrapped.signed,
             factor=self.wrapped.factor,
             startBit=self.wrapped.start_bit,
@@ -268,9 +268,9 @@ class MultiplexedMessage:
 
         frame = canmatrix.canmatrix.Frame(
             name=dehumanize_name(self.wrapped.name),
-            Id=self.wrapped.identifier,
+            id=self.wrapped.identifier,
             extended=self.wrapped.extended,
-            dlc=not_signals[0].length,
+            size=not_signals[0].length,
             comment=self.wrapped.comment,
             attributes={
                 'Receivable': str(self.wrapped.receivable),

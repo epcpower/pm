@@ -295,7 +295,7 @@ def message_from_matrix(frame, factory, **extras):
 
 def signal_from_matrix(matrix_signal, factory, **extras):
     extras.setdefault('name', humanize_name(matrix_signal.name))
-    extras.setdefault('bits', matrix_signal.signalsize)
+    extras.setdefault('bits', matrix_signal.size)
     extras.setdefault('factor', matrix_signal.factor)
     extras.setdefault('signed', matrix_signal.is_signed)
     extras.setdefault('start_bit', matrix_signal.getStartbit())
