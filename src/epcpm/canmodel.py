@@ -1,4 +1,5 @@
 import itertools
+import string
 
 import attr
 import graham
@@ -77,6 +78,7 @@ class Signal(epyqlib.treenode.TreeNode):
     )
     factor = attr.ib(
         default=1,
+        converter=epyqlib.attrsmodel.to_decimal_or_none,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Decimal(as_string=True),
         ),
@@ -587,7 +589,7 @@ class CanTable(epyqlib.treenode.TreeNode):
             chunks = list(
                 epyqlib.utils.general.chunker(array_group, n=per_message),
             )
-            for i, chunk in enumerate(chunks):
+            for chunk, letter in zip(chunks, string.ascii_uppercase):
                 path = array_group[0].path
 
                 path_string = '_'.join(
@@ -595,7 +597,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                         model.node_from_uuid(u).name
                         for u in path
                     ]
-                    + [str(i)]
+                    + [letter]
                 )
                 multiplexer_path = chunk[0].path[:-1]
                 multiplexer_path_children = tuple(
@@ -614,23 +616,23 @@ class CanTable(epyqlib.treenode.TreeNode):
                     )
                 mux_value += 1
 
-                bits = signal.bits
-                start_bit = 64 - per_message * bits
+                start_bit = 64 - per_message * signal.bits
 
                 for array_element in chunk:
                     signal_path = array_element.path
 
-                    signal = old_by_path.get(signal_path)
-                    if signal is None:
-                        signal = Signal(
+                    new_signal = old_by_path.get(signal_path)
+                    if new_signal is None:
+                        new_signal = Signal(
                             name=array_element.name,
                             start_bit=start_bit,
-                            bits=bits,
+                            bits=signal.bits,
+                            factor=signal.factor,
                             parameter_uuid=array_element.uuid,
                             path=signal_path,
                         )
-                    multiplexer.append_child(signal)
-                    start_bit += bits
+                    multiplexer.append_child(new_signal)
+                    start_bit += signal.bits
 
                 self.append_child(multiplexer)
 

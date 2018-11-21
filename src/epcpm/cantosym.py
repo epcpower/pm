@@ -256,6 +256,7 @@ class MultiplexedMessage:
     def gen(self):
         common_signals = []
         not_signals = []
+        table_multiplexers = set()
         for child in self.wrapped.children[1:]:
             if isinstance(child, epcpm.canmodel.Signal):
                 common_signals.append(child)
@@ -263,6 +264,7 @@ class MultiplexedMessage:
                 for subchild in child.children:
                     if isinstance(subchild, epcpm.canmodel.Multiplexer):
                         not_signals.append(subchild)
+                        table_multiplexers.add(subchild)
             else:
                 not_signals.append(child)
 
@@ -299,6 +301,14 @@ class MultiplexedMessage:
                     multiplexer.comment
                 )
 
+            if multiplexer in table_multiplexers:
+                mux_signal.comments[multiplexer.identifier] = (
+                    '{} <{}>'.format(
+                        mux_signal.comments.get(multiplexer.identifier, ''),
+                        'table',
+                    ).strip()
+                )
+
             for signal in common_signals:
                 matrix_signal = builders.wrap(
                     wrapped=signal,
@@ -310,7 +320,7 @@ class MultiplexedMessage:
 
             name = multiplexer.name
             if isinstance(multiplexer.tree_parent, epcpm.canmodel.CanTable):
-                name = multiplexer.tree_parent.name + '_' + name
+                name = multiplexer.tree_parent.name + name
             frame.mux_names[multiplexer.identifier] = (
                 dehumanize_name(name)
             )

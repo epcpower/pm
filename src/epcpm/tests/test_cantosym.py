@@ -394,153 +394,153 @@ def test_table():
     ID=1FFFFFFFh
     Type=Extended
     DLC=0
-    Mux=EO_0/ET_0/ArrayOne/AO_0/0 0,8 5 
+    Mux=FirstTableEO_0/ET_0/ArrayOne/AO_0/0 0,8 5 	// <table>
     Var=AO_0 unsigned 0,0 /ln:"AO-0"
     Var=AO_1 unsigned 0,0 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=EO_0/ET_0/ArrayTwo/AT_0/0 0,8 6 
+    Mux=FirstTableEO_0/ET_0/ArrayTwo/AT_0/0 0,8 6 	// <table>
     Var=AT_0 unsigned 0,0 /ln:"AT-0"
     Var=AT_1 unsigned 0,0 /ln:"AT-1"
     Var=AT_2 unsigned 0,0 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=EO_0/ET_0/ArrayTwo/AT_0/1 0,8 7 
+    Mux=FirstTableEO_0/ET_0/ArrayTwo/AT_0/1 0,8 7 	// <table>
     Var=AT_3 unsigned 0,0 /ln:"AT-3"
     Var=AT_4 unsigned 0,0 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=EO_0/ET_1/ArrayOne/AO_0/0 0,8 8 
+    Mux=FirstTableEO_0/ET_1/ArrayOne/AO_0/0 0,8 8 	// <table>
     Var=AO_0 unsigned 0,0 /ln:"AO-0"
     Var=AO_1 unsigned 0,0 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=EO_0/ET_1/ArrayTwo/AT_0/0 0,8 9 
+    Mux=FirstTableEO_0/ET_1/ArrayTwo/AT_0/0 0,8 9 	// <table>
     Var=AT_0 unsigned 0,0 /ln:"AT-0"
     Var=AT_1 unsigned 0,0 /ln:"AT-1"
     Var=AT_2 unsigned 0,0 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=EO_0/ET_1/ArrayTwo/AT_0/1 0,8 0Ah
+    Mux=FirstTableEO_0/ET_1/ArrayTwo/AT_0/1 0,8 0Ah	// <table>
     Var=AT_3 unsigned 0,0 /ln:"AT-3"
     Var=AT_4 unsigned 0,0 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=EO_0/ET_2/ArrayOne/AO_0/0 0,8 0Bh
+    Mux=FirstTableEO_0/ET_2/ArrayOne/AO_0/0 0,8 0Bh	// <table>
     Var=AO_0 unsigned 0,0 /ln:"AO-0"
     Var=AO_1 unsigned 0,0 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=EO_0/ET_2/ArrayTwo/AT_0/0 0,8 0Ch
+    Mux=FirstTableEO_0/ET_2/ArrayTwo/AT_0/0 0,8 0Ch	// <table>
     Var=AT_0 unsigned 0,0 /ln:"AT-0"
     Var=AT_1 unsigned 0,0 /ln:"AT-1"
     Var=AT_2 unsigned 0,0 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=EO_0/ET_2/ArrayTwo/AT_0/1 0,8 0Dh
+    Mux=FirstTableEO_0/ET_2/ArrayTwo/AT_0/1 0,8 0Dh	// <table>
     Var=AT_3 unsigned 0,0 /ln:"AT-3"
     Var=AT_4 unsigned 0,0 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=EO_0/ET_3/ArrayOne/AO_0/0 0,8 0Eh
+    Mux=FirstTableEO_0/ET_3/ArrayOne/AO_0/0 0,8 0Eh	// <table>
     Var=AO_0 unsigned 0,0 /ln:"AO-0"
     Var=AO_1 unsigned 0,0 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=EO_0/ET_3/ArrayTwo/AT_0/0 0,8 0Fh
+    Mux=FirstTableEO_0/ET_3/ArrayTwo/AT_0/0 0,8 0Fh	// <table>
     Var=AT_0 unsigned 0,0 /ln:"AT-0"
     Var=AT_1 unsigned 0,0 /ln:"AT-1"
     Var=AT_2 unsigned 0,0 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=EO_0/ET_3/ArrayTwo/AT_0/1 0,8 10h
+    Mux=FirstTableEO_0/ET_3/ArrayTwo/AT_0/1 0,8 10h	// <table>
     Var=AT_3 unsigned 0,0 /ln:"AT-3"
     Var=AT_4 unsigned 0,0 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=EO_1/ET_0/ArrayOne/AO_0/0 0,8 11h
+    Mux=FirstTableEO_1/ET_0/ArrayOne/AO_0/0 0,8 11h	// <table>
     Var=AO_0 unsigned 0,0 /ln:"AO-0"
     Var=AO_1 unsigned 0,0 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=EO_1/ET_0/ArrayTwo/AT_0/0 0,8 12h
+    Mux=FirstTableEO_1/ET_0/ArrayTwo/AT_0/0 0,8 12h	// <table>
     Var=AT_0 unsigned 0,0 /ln:"AT-0"
     Var=AT_1 unsigned 0,0 /ln:"AT-1"
     Var=AT_2 unsigned 0,0 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=EO_1/ET_0/ArrayTwo/AT_0/1 0,8 13h
+    Mux=FirstTableEO_1/ET_0/ArrayTwo/AT_0/1 0,8 13h	// <table>
     Var=AT_3 unsigned 0,0 /ln:"AT-3"
     Var=AT_4 unsigned 0,0 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=EO_1/ET_1/ArrayOne/AO_0/0 0,8 14h
+    Mux=FirstTableEO_1/ET_1/ArrayOne/AO_0/0 0,8 14h	// <table>
     Var=AO_0 unsigned 0,0 /ln:"AO-0"
     Var=AO_1 unsigned 0,0 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=EO_1/ET_1/ArrayTwo/AT_0/0 0,8 15h
+    Mux=FirstTableEO_1/ET_1/ArrayTwo/AT_0/0 0,8 15h	// <table>
     Var=AT_0 unsigned 0,0 /ln:"AT-0"
     Var=AT_1 unsigned 0,0 /ln:"AT-1"
     Var=AT_2 unsigned 0,0 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=EO_1/ET_1/ArrayTwo/AT_0/1 0,8 16h
+    Mux=FirstTableEO_1/ET_1/ArrayTwo/AT_0/1 0,8 16h	// <table>
     Var=AT_3 unsigned 0,0 /ln:"AT-3"
     Var=AT_4 unsigned 0,0 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=EO_1/ET_2/ArrayOne/AO_0/0 0,8 17h
+    Mux=FirstTableEO_1/ET_2/ArrayOne/AO_0/0 0,8 17h	// <table>
     Var=AO_0 unsigned 0,0 /ln:"AO-0"
     Var=AO_1 unsigned 0,0 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=EO_1/ET_2/ArrayTwo/AT_0/0 0,8 18h
+    Mux=FirstTableEO_1/ET_2/ArrayTwo/AT_0/0 0,8 18h	// <table>
     Var=AT_0 unsigned 0,0 /ln:"AT-0"
     Var=AT_1 unsigned 0,0 /ln:"AT-1"
     Var=AT_2 unsigned 0,0 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=EO_1/ET_2/ArrayTwo/AT_0/1 0,8 19h
+    Mux=FirstTableEO_1/ET_2/ArrayTwo/AT_0/1 0,8 19h	// <table>
     Var=AT_3 unsigned 0,0 /ln:"AT-3"
     Var=AT_4 unsigned 0,0 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=EO_1/ET_3/ArrayOne/AO_0/0 0,8 1Ah
+    Mux=FirstTableEO_1/ET_3/ArrayOne/AO_0/0 0,8 1Ah	// <table>
     Var=AO_0 unsigned 0,0 /ln:"AO-0"
     Var=AO_1 unsigned 0,0 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=EO_1/ET_3/ArrayTwo/AT_0/0 0,8 1Bh
+    Mux=FirstTableEO_1/ET_3/ArrayTwo/AT_0/0 0,8 1Bh	// <table>
     Var=AT_0 unsigned 0,0 /ln:"AT-0"
     Var=AT_1 unsigned 0,0 /ln:"AT-1"
     Var=AT_2 unsigned 0,0 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=EO_1/ET_3/ArrayTwo/AT_0/1 0,8 1Ch
+    Mux=FirstTableEO_1/ET_3/ArrayTwo/AT_0/1 0,8 1Ch	// <table>
     Var=AT_3 unsigned 0,0 /ln:"AT-3"
     Var=AT_4 unsigned 0,0 /ln:"AT-4"
     ''')

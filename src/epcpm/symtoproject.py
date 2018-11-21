@@ -510,10 +510,10 @@ def go_add_tables(parameters_root, can_root):
             array.append_child(self.parameter)
             array.length = self.length
 
-            name_length = len('{}'.format(self.length - 1))
+            name_length = len('{}'.format(self.length))
 
-            for i, node in enumerate(array.children):
-                node.name = '{:0{}}'.format(i, name_length)
+            for i, node in enumerate(array.children, start=1):
+                node.name = '_{:0{}}'.format(i, name_length)
 
             return array
 
@@ -597,6 +597,7 @@ def go_add_tables(parameters_root, can_root):
                 length=curve_points,
                 parameter=epyqlib.pm.parametermodel.Parameter(
                     units='seconds',
+                    decimal_places=2,
                 ),
             ).create(),
             ArrayDefinition(
@@ -604,6 +605,7 @@ def go_add_tables(parameters_root, can_root):
                 length=curve_points,
                 parameter=epyqlib.pm.parametermodel.Parameter(
                     units='Hz',
+                    decimal_places=2,
                 ),
             ).create(),
         ),
@@ -623,6 +625,7 @@ def go_add_tables(parameters_root, can_root):
                 length=curve_points,
                 parameter=epyqlib.pm.parametermodel.Parameter(
                     units='s',
+                    decimal_places=2,
                 ),
             ).create(),
             ArrayDefinition(
@@ -630,6 +633,7 @@ def go_add_tables(parameters_root, can_root):
                 length=curve_points,
                 parameter=epyqlib.pm.parametermodel.Parameter(
                     units='percent',
+                    decimal_places=1,
                 ),
             ).create(),
         ),
@@ -645,6 +649,7 @@ def go_add_tables(parameters_root, can_root):
                 length=curve_points,
                 parameter=epyqlib.pm.parametermodel.Parameter(
                     units='% nominal V',
+                    decimal_places=1,
                 ),
             ).create(),
             ArrayDefinition(
@@ -652,6 +657,7 @@ def go_add_tables(parameters_root, can_root):
                 length=curve_points,
                 parameter=epyqlib.pm.parametermodel.Parameter(
                     units='% nominal VAr',
+                    decimal_places=1,
                 ),
             ).create(),
         ),
@@ -667,6 +673,7 @@ def go_add_tables(parameters_root, can_root):
                 length=curve_points,
                 parameter=epyqlib.pm.parametermodel.Parameter(
                     units='Hz',
+                    decimal_places=2,
                 ),
             ).create(),
             ArrayDefinition(
@@ -674,6 +681,7 @@ def go_add_tables(parameters_root, can_root):
                 length=curve_points,
                 parameter=epyqlib.pm.parametermodel.Parameter(
                     units='% nominal Power',
+                    decimal_places=1,
                 ),
             ).create(),
         ),
@@ -689,6 +697,7 @@ def go_add_tables(parameters_root, can_root):
                 length=curve_points,
                 parameter=epyqlib.pm.parametermodel.Parameter(
                     units='V',
+                    decimal_places=2,
                 ),
             ).create(),
             ArrayDefinition(
@@ -696,6 +705,7 @@ def go_add_tables(parameters_root, can_root):
                 length=curve_points,
                 parameter=epyqlib.pm.parametermodel.Parameter(
                     units='% nominal Power',
+                    decimal_places=1,
                 ),
             ).create(),
         ),
@@ -709,7 +719,7 @@ def go_add_tables(parameters_root, can_root):
     tables = {
         frequency_table: CanTableDefinition(
             range=range(0x195, 0x215),
-            signals = {
+            signals={
                 'seconds': {
                     'bits': 16,
                     'signed': False,
@@ -724,7 +734,7 @@ def go_add_tables(parameters_root, can_root):
         ),
         voltage_table: CanTableDefinition(
             range=range(0x215, 0x295),
-            signals = {
+            signals={
                 'Seconds': {
                     'bits': 16,
                     'signed': False,
@@ -739,7 +749,7 @@ def go_add_tables(parameters_root, can_root):
         ),
         volt_var_table: CanTableDefinition(
             range=range(0x295, 0x2b9),
-            signals = {
+            signals={
                 'Volts': {
                     'bits': 16,
                     'signed': False,
@@ -754,7 +764,7 @@ def go_add_tables(parameters_root, can_root):
         ),
         hertz_watts_table: CanTableDefinition(
             range=range(0x2b9, 0x2dd),
-            signals = {
+            signals={
                 'Hertz': {
                     'bits': 16,
                     'signed': False,
@@ -769,7 +779,7 @@ def go_add_tables(parameters_root, can_root):
         ),
         volt_watts_table: CanTableDefinition(
             range=range(0x2dd, 0x300),
-            signals = {
+            signals={
                 'Volts': {
                     'bits': 16,
                     'signed': False,
