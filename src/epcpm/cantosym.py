@@ -15,8 +15,9 @@ builders = epyqlib.utils.general.TypeMap()
 
 
 def dehumanize_name(name):
-    name = name.replace('-', '_')
-    return epyqlib.utils.general.spaced_to_upper_camel(name)
+    return name
+#     name = name.replace('-', '_')
+#     return epyqlib.utils.general.spaced_to_upper_camel(name)
 
 
 @builders(epcpm.canmodel.Root)

@@ -14,8 +14,9 @@ import epcpm.canmodel
 
 
 def humanize_name(name):
-    name = name.replace('_', ' - ')
-    return epyqlib.utils.general.underscored_camel_to_title_spaced(name)
+    return name
+#     name = name.replace('_', ' - ')
+#     return epyqlib.utils.general.underscored_camel_to_title_spaced(name)
 
 
 def load_can_path(can_path, hierarchy_path):
@@ -426,7 +427,7 @@ def go_add_tables(parameters_root):
     line_monitoring = parameters_root.descendent(
         'Parameters',
         '1. AC',
-        '9. Line Monitoring',
+        '10. Line Monitoring',
     )
     enumerations_group = parameters_root.descendent('Enumerations')
 

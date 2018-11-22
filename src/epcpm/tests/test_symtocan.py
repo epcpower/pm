@@ -125,14 +125,14 @@ def test_access_level(sym_file, hierarchy_file):
 
     regular_parameter, = parameter_root.nodes_by_attribute(
         attribute_name='name',
-        attribute_value='Test Mux : Test Param',
+        attribute_value='TestMux : TestParam',
     )
 
     assert regular_parameter.access_level_uuid == access_levels.default().uuid
 
     factory_parameter, = parameter_root.nodes_by_attribute(
         attribute_name='name',
-        attribute_value='Test Mux : Factory Param',
+        attribute_value='TestMux : FactoryParam',
     )
 
     assert (
@@ -164,7 +164,7 @@ def test_accurate_decimal(sym_file, hierarchy_file):
     test_parameter = next(
         node
         for node in test_group.children
-        if node.name.endswith('Test Param')
+        if node.name.endswith('TestParam')
     )
 
     # TODO: default is probably in wrong scaling
