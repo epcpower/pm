@@ -1,3 +1,4 @@
+import decimal
 import itertools
 import os
 import pathlib
@@ -60,12 +61,28 @@ def test_export():
     assert result.exit_code == 0
 
 
+def normalized_attributes(attributes):
+    attributes = dict(attributes)
+
+    if 'GenSigStartValue' in attributes:
+        attributes['GenSigStartValue'] = decimal.Decimal(
+            attributes['GenSigStartValue'],
+        )
+
+    return attributes
+
+
 def assert_signals_equal(
         original,
         original_frame,
         exported,
         exported_frame,
 ):
+    print(
+        original_frame.name,
+        original_frame.mux_names.get(original.multiplex),
+        original.name,
+    )
     assert_attributes_equal(
         original=original,
         exported=exported,
@@ -80,18 +97,27 @@ def assert_signals_equal(
             'multiplex',
             'factor',
             'offset',
-            'signalsize',
-            'startbit',
+            'size',
+            'startBit',
             'unit',
         ),
     )
 
-    if 'LongName' in original.attributes:
-        assert exported.attributes == original.attributes
-    else:
-        tweaked = dict(exported.attributes)
+    tweaked = dict(exported.attributes)
+    if 'LongName' not in original.attributes:
         tweaked.pop('LongName', None)
-        assert tweaked == original.attributes
+
+    tweaked_attributes = normalized_attributes(tweaked)
+    original_attributes = normalized_attributes(original.attributes)
+
+    if 'GenSigStartValue' in original_attributes:
+        diff = abs(
+            tweaked_attributes.pop('GenSigStartValue')
+            - original_attributes.pop('GenSigStartValue')
+        )
+        assert diff < 1
+
+    assert tweaked_attributes == original_attributes, original.name
 
     factory = '<factory>'
     configs = ('<HY>', '<MG3>', '<MG4>', '<DG>', '<DC>')
@@ -116,7 +142,7 @@ def assert_signals_equal(
         split_and_access_level(exported.comment)
     )
 
-    assert exported_comment == original_comment
+    assert exported_comment == original_comment, original.name
 
     not_applicable = (
         'readparam_command',
@@ -135,7 +161,7 @@ def assert_signals_equal(
         exported_mux, = exported_mux if exported_mux else (None,)
 
         if original_mux is None:
-            assert exported_mux == original_mux
+            assert exported_mux == original_mux, original.name
 
         def tagged_including_mux_check(tag, tagged, signal, mux):
             if mux is not None:
@@ -166,7 +192,7 @@ def assert_signals_equal(
             mux=exported_mux,
         )
 
-        assert exported_access_level == original_access_level
+        assert exported_access_level == original_access_level, original.name
 
         z = zip(configs, original_configs, exported_configs)
         for config, original_tagged, exported_tagged in z:
@@ -190,7 +216,7 @@ def assert_signals_equal(
 
     assert_varied_dict_equal(original.values, exported.values)
 
-    assert exported_comment == original_comment
+    assert exported_comment == original_comment, original.name
 
 
 def get_name(x):
@@ -452,9 +478,12 @@ def assert_signal_list_equal(
     zipped = itertools.zip_longest(original_names, exported_names)
     for original_name, exported_name in zipped:
         if original_name.casefold() in case_insensitive:
-            assert exported_name.casefold() == original_name.casefold()
+            assert (
+                exported_name.casefold()
+                == original_name.casefold()
+            ), original.name
         else:
-            assert exported_name == original_name
+            assert exported_name == original_name, original.name
 
     def key(x):
         return (
@@ -478,7 +507,9 @@ def assert_signal_list_equal(
 
 def assert_attributes_equal(original, exported, *, attributes):
     for attribute in attributes:
-        assert getattr(exported, attribute) == getattr(original, attribute)
+        assert (
+            getattr(exported, attribute) == getattr(original, attribute)
+        ), (original.name, attribute)
 
 
 def assert_varied_dict_equal(original, exported):
@@ -487,10 +518,10 @@ def assert_varied_dict_equal(original, exported):
         sorted(exported.items()),
     )
     for (original_value, original_name), (exported_value, exported_name) in zipped:
-        assert exported_value == original_value
+        assert exported_value == original_value, original.name
 
         tweaked = unvary_signal_names(exported_name)
-        assert tweaked == original_name
+        assert tweaked == original_name, original.name
 
 
 def assert_frames_equal(original, exported):
@@ -526,7 +557,7 @@ def assert_frame_lists_equal(original, exported):
     original_names = collect_attribute(original, 'name')
     exported_names = collect_attribute(exported, 'name')
 
-    assert exported_names == original_names
+    assert exported_names == original_names, original.name
 
     zipped = itertools.zip_longest(
         sorted(original, key=get_name),

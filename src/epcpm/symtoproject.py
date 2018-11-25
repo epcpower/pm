@@ -204,13 +204,14 @@ def load_can_file(
             common_signals = list(common_signals_dict.values())
             common_signals_check = list(common_signals_dict.keys())
 
-            for mux in multiplexers:
-                for child in list(mux.children):
-                    if interesting_signal_attributes(child) in common_signals_check:
-                        mux.remove_child(child=child)
-
-            for signal in reversed(common_signals):
-                message.insert_child(1, signal)
+            # TODO: maybe coming back...  maybe
+            # for mux in multiplexers:
+            #     for child in list(mux.children):
+            #         if interesting_signal_attributes(child) in common_signals_check:
+            #             mux.remove_child(child=child)
+            #
+            # for signal in reversed(common_signals):
+            #     message.insert_child(1, signal)
 
         can_root.append_child(message)
 
