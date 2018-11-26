@@ -15,8 +15,9 @@ builders = epyqlib.utils.general.TypeMap()
 
 
 def dehumanize_name(name):
-    name = name.replace('-', '_')
-    return epyqlib.utils.general.spaced_to_upper_camel(name)
+    return name
+#     name = name.replace('-', '_')
+#     return epyqlib.utils.general.spaced_to_upper_camel(name)
 
 
 @builders(epcpm.canmodel.Root)
@@ -58,7 +59,7 @@ class Root:
                 access_levels=self.access_levels,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             ).gen()
-            matrix.frames.addFrame(frame)
+            matrix.addFrame(frame)
 
         codec = 'utf-8'
 
@@ -104,9 +105,9 @@ class Message:
     def gen(self):
         frame = canmatrix.canmatrix.Frame(
             name=dehumanize_name(self.wrapped.name),
-            Id=self.wrapped.identifier,
+            id=self.wrapped.identifier,
             extended=self.wrapped.extended,
-            dlc=self.wrapped.length,
+            size=self.wrapped.length,
             comment=self.wrapped.comment,
         )
 
@@ -219,7 +220,7 @@ class Signal:
         signal = canmatrix.canmatrix.Signal(
             name=dehumanize_name(self.wrapped.name),
             multiplex=multiplex_id,
-            signalSize=self.wrapped.bits,
+            size=self.wrapped.bits,
             is_signed=self.wrapped.signed,
             factor=self.wrapped.factor,
             startBit=self.wrapped.start_bit,
@@ -270,9 +271,9 @@ class MultiplexedMessage:
 
         frame = canmatrix.canmatrix.Frame(
             name=dehumanize_name(self.wrapped.name),
-            Id=self.wrapped.identifier,
+            id=self.wrapped.identifier,
             extended=self.wrapped.extended,
-            dlc=not_signals[0].length,
+            size=not_signals[0].length,
             comment=self.wrapped.comment,
             attributes={
                 'Receivable': str(self.wrapped.receivable),
@@ -308,15 +309,6 @@ class MultiplexedMessage:
                         'table',
                     ).strip()
                 )
-
-            for signal in common_signals:
-                matrix_signal = builders.wrap(
-                    wrapped=signal,
-                    parameter_uuid_finder=self.parameter_uuid_finder,
-                ).gen(
-                    multiplex_id=multiplexer.identifier,
-                )
-                frame.signals.append(matrix_signal)
 
             name = multiplexer.name
             if isinstance(multiplexer.tree_parent, epcpm.canmodel.CanTable):
@@ -368,5 +360,23 @@ class MultiplexedMessage:
                 )
 
                 frame.signals.append(signal)
+
+            frame_signal_names = [
+                signal.name
+                for signal in frame.signals
+                if signal.multiplex == multiplexer.identifier
+            ]
+
+            for signal in reversed(common_signals):
+                if signal.name in frame_signal_names:
+                    continue
+
+                matrix_signal = builders.wrap(
+                    wrapped=signal,
+                    parameter_uuid_finder=self.parameter_uuid_finder,
+                ).gen(
+                    multiplex_id=multiplexer.identifier,
+                )
+                frame.signals.insert(0, matrix_signal)
 
         return frame

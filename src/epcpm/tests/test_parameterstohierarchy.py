@@ -56,18 +56,18 @@ def test_():
                 'name': 'Group A',
                 'children': [
                     [
-                        'MultiplexerA',
-                        'SignalPAA',
+                        'Multiplexer A',
+                        'Signal PAA',
                     ],
                     [
-                        'MultiplexerB',
-                        'SignalPAB',
+                        'Multiplexer B',
+                        'Signal PAB',
                     ],
                 ]
             },
             [
-                'MultiplexerB',
-                'SignalPA',
+                'Multiplexer B',
+                'Signal PA',
             ],
         ]
     }

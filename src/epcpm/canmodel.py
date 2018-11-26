@@ -567,10 +567,76 @@ class CanTable(epyqlib.treenode.TreeNode):
 
             self.append_child(signal)
 
+        def my_sorted(sequence, order):
+            s = sequence
+
+            for o, r in reversed(order):
+                s = sorted(
+                    s,
+                    key=lambda x: model.node_from_uuid(x.path[o]).name
+                )
+
+            return s
+
+        def my_sorted(sequence, order):
+            s = sequence
+            for o, r in reversed(order):
+                d = {c: i for i, c in enumerate(r)}
+                s = sorted(s, key=lambda x: d[model.node_from_uuid(x.path[o]).name])
+
+            return s
+
+        leaves = table.group.leaves()
+        if table.name == 'Frequency':
+            leaves = my_sorted(
+                leaves,
+                (
+                    (1, ('RideThrough', 'Trip')),
+                    (0, ('Low', 'High')),
+                    (2, ('0', '1', '2', '3')),
+                    (3, ('seconds', 'hertz')),
+                ),
+            )
+        elif table.name == 'Voltage':
+            leaves = my_sorted(
+                leaves,
+                (
+                    (1, ('RideThrough', 'Trip')),
+                    (0, ('Low', 'High')),
+                    (2, ('0', '1', '2', '3')),
+                    (3, ('seconds', 'percent')),
+                ),
+            )
+        elif table.name == 'VoltVar':
+            leaves = my_sorted(
+                leaves,
+                (
+                    (0, ('0', '1', '2', '3')),
+                    (1, ('Settings', 'percent_nominal_volts',
+                         'percent_nominal_var')),
+                ),
+            )
+        elif table.name == 'HertzWatts':
+            leaves = my_sorted(
+                leaves,
+                (
+                    (0, ('0', '1', '2', '3')),
+                    (1, ('Settings', 'hertz', 'percent_nominal_pwr')),
+                ),
+            )
+        elif table.name == 'HertzWatts':
+            leaves = my_sorted(
+                leaves,
+                (
+                    (0, ('0', '1', '2', '3')),
+                    (1, ('Settings', 'percent_nominal_volts', 'percent_nominal_pwr')),
+                ),
+            )
+
         array_groups = [
             list(group[1])
             for group in itertools.groupby(
-                table.group.leaves(),
+                leaves,
                 key=lambda leaf: leaf.path[:-1],
             )
         ]
@@ -592,13 +658,26 @@ class CanTable(epyqlib.treenode.TreeNode):
             for chunk, letter in zip(chunks, string.ascii_uppercase):
                 path = array_group[0].path
 
-                path_string = '_'.join(
-                    [
-                        model.node_from_uuid(u).name
-                        for u in path
-                    ]
-                    + [letter]
-                )
+                path_nodes = [model.node_from_uuid(u) for u in path]
+
+                enumerators = []
+                other = []
+                for node in path_nodes[:-1]:
+                    if len(other) > 0:
+                        other.append(node.name)
+                        continue
+
+                    if node.tree_parent.name != 'Curves' and isinstance(node, epyqlib.pm.parametermodel.Enumerator):
+                        enumerators.append(node.name)
+                        continue
+
+                    other.append(node.name)
+
+                path_string = '_'.join([
+                    ''.join(name for name in enumerators),
+                    *other,
+                    *([letter] if len(chunks) > 1 else []),
+                ])
                 multiplexer_path = chunk[0].path[:-1]
                 multiplexer_path_children = tuple(
                     element.path[-1]
@@ -617,6 +696,8 @@ class CanTable(epyqlib.treenode.TreeNode):
                 mux_value += 1
 
                 start_bit = 64 - per_message * signal.bits
+                if signal.name == 'Settings':
+                    start_bit = 64 - len(chunk) * signal.bits
 
                 for array_element in chunk:
                     signal_path = array_element.path
@@ -628,6 +709,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                             start_bit=start_bit,
                             bits=signal.bits,
                             factor=signal.factor,
+                            signed=signal.signed,
                             parameter_uuid=array_element.uuid,
                             path=signal_path,
                         )

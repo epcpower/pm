@@ -108,7 +108,7 @@ def test_multiplexed():
     )
 
     multiplexed_message = epcpm.canmodel.MultiplexedMessage(
-        name='Test Multiplexed Message',
+        name='TestMultiplexedMessage',
         identifier=0xbabeface,
     )
     root.append_child(multiplexed_message)
@@ -130,13 +130,13 @@ def test_multiplexed():
     # assert tidy_sym(builder.gen()) == tidy_sym(expected)
 
     multiplex_signal = epcpm.canmodel.Signal(
-        name='Multiplexer Signal',
+        name='MultiplexerSignal',
         bits=8,
         uuid='c812b3be-c883-4828-8695-0f61db24fde3',
     )
     multiplexed_message.append_child(multiplex_signal)
     common_signal = epcpm.canmodel.Signal(
-        name='Common Signal',
+        name='CommonSignal',
         signed=True,
         uuid='3ecc047e-e88c-4917-b22c-2751db6db705',
     )
@@ -157,13 +157,13 @@ def test_multiplexed():
     parameter_root.append_child(parameter_a)
 
     multiplexer_a = epcpm.canmodel.Multiplexer(
-        name='Test Multiplexer A',
+        name='TestMultiplexerA',
         identifier=1,
         uuid='bc872648-94d2-4bee-8a4f-5654cac93d38',
     )
     multiplexed_message.append_child(multiplexer_a)
     signal_a = epcpm.canmodel.Signal(
-        name='Signal A',
+        name='SignalA',
         signed=True,
         parameter_uuid=parameter_a.uuid,
         uuid='cc5a8db2-b3da-4f2e-b8c6-83569b9c6824',
@@ -184,13 +184,13 @@ def test_multiplexed():
     parameter_root.append_child(parameter_b)
 
     multiplexer_b = epcpm.canmodel.Multiplexer(
-        name='Test Multiplexer B',
+        name='TestMultiplexerB',
         identifier=2,
         uuid='7efd7e89-71f8-400b-b11d-7f49642309f8',
     )
     multiplexed_message.append_child(multiplexer_b)
     signal_b = epcpm.canmodel.Signal(
-        name='Signal B',
+        name='SignalB',
         signed=True,
         parameter_uuid=parameter_b.uuid,
         uuid='b69c211b-0e0c-4ba1-947e-ea47a1baf11d',
@@ -227,7 +227,7 @@ def test_enumerations():
         access_levels=access_levels,
     )
 
-    on_off = epyqlib.pm.parametermodel.Enumeration(name='On Off')
+    on_off = epyqlib.pm.parametermodel.Enumeration(name='OnOff')
     parameter_root.append_child(on_off)
     off = epyqlib.pm.parametermodel.Enumerator(name='off', value=0)
     on = epyqlib.pm.parametermodel.Enumerator(name='on', value=1)
@@ -255,11 +255,11 @@ def test_enumerations():
     
     {SENDRECEIVE}
     
-    [NewMessage]
+    [New Message]
     ID=1FFFFFFFh
     Type=Extended
     DLC=0
-    Var=NewSignal unsigned 0,0 /e:OnOff /ln:"New Parameter"
+    Var=New Signal unsigned 0,0 /e:OnOff /ln:"New Parameter"
     ''')
 
     assert tidy_sym(builder.gen()) == tidy_sym(expected)
@@ -323,14 +323,14 @@ def test_access_level():
     )
     can_root.append_child(message)
     signal = epcpm.canmodel.Signal(
-        name='Factory Signal',
+        name='FactorySignal',
         parameter_uuid=parameter.uuid,
         uuid='07047416-73e3-48bd-8c0c-85c1de078200',
     )
     message.append_child(signal)
 
     access_level_signal = epcpm.canmodel.Signal(
-        name='Access Signal',
+        name='AccessSignal',
         parameter_uuid=access_level_parameter.uuid,
         uuid='4f62704f-6548-4f80-b7b7-702f214a394b',
     )
@@ -344,7 +344,7 @@ def test_access_level():
 
     {SENDRECEIVE}
 
-    [NewMessage]
+    [New Message]
     ID=1FFFFFFFh
     Type=Extended
     DLC=0
@@ -394,155 +394,155 @@ def test_table():
     ID=1FFFFFFFh
     Type=Extended
     DLC=0
-    Mux=FirstTableEO_0/ET_0/ArrayOne/AO_0/0 0,8 5 	// <table>
-    Var=AO_0 unsigned 0,0 /ln:"AO-0"
-    Var=AO_1 unsigned 0,0 /ln:"AO-1"
+    Mux=First TableEO-0/ET-0/Array One/AO-0/0 0,8 5 	// <table>
+    Var=AO-0 unsigned 0,0 /ln:"AO-0"
+    Var=AO-1 unsigned 0,0 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_0/ET_0/ArrayTwo/AT_0/0 0,8 6 	// <table>
-    Var=AT_0 unsigned 0,0 /ln:"AT-0"
-    Var=AT_1 unsigned 0,0 /ln:"AT-1"
-    Var=AT_2 unsigned 0,0 /ln:"AT-2"
+    Mux=First TableEO-0/ET-0/Array Two/AT-0/0 0,8 6 	// <table>
+    Var=AT-0 unsigned 0,0 /ln:"AT-0"
+    Var=AT-1 unsigned 0,0 /ln:"AT-1"
+    Var=AT-2 unsigned 0,0 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_0/ET_0/ArrayTwo/AT_0/1 0,8 7 	// <table>
-    Var=AT_3 unsigned 0,0 /ln:"AT-3"
-    Var=AT_4 unsigned 0,0 /ln:"AT-4"
+    Mux=First TableEO-0/ET-0/Array Two/AT-0/1 0,8 7 	// <table>
+    Var=AT-3 unsigned 0,0 /ln:"AT-3"
+    Var=AT-4 unsigned 0,0 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_0/ET_1/ArrayOne/AO_0/0 0,8 8 	// <table>
-    Var=AO_0 unsigned 0,0 /ln:"AO-0"
-    Var=AO_1 unsigned 0,0 /ln:"AO-1"
+    Mux=First TableEO-0/ET-1/Array One/AO-0/0 0,8 8 	// <table>
+    Var=AO-0 unsigned 0,0 /ln:"AO-0"
+    Var=AO-1 unsigned 0,0 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_0/ET_1/ArrayTwo/AT_0/0 0,8 9 	// <table>
-    Var=AT_0 unsigned 0,0 /ln:"AT-0"
-    Var=AT_1 unsigned 0,0 /ln:"AT-1"
-    Var=AT_2 unsigned 0,0 /ln:"AT-2"
+    Mux=First TableEO-0/ET-1/Array Two/AT-0/0 0,8 9 	// <table>
+    Var=AT-0 unsigned 0,0 /ln:"AT-0"
+    Var=AT-1 unsigned 0,0 /ln:"AT-1"
+    Var=AT-2 unsigned 0,0 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_0/ET_1/ArrayTwo/AT_0/1 0,8 0Ah	// <table>
-    Var=AT_3 unsigned 0,0 /ln:"AT-3"
-    Var=AT_4 unsigned 0,0 /ln:"AT-4"
+    Mux=First TableEO-0/ET-1/Array Two/AT-0/1 0,8 0Ah	// <table>
+    Var=AT-3 unsigned 0,0 /ln:"AT-3"
+    Var=AT-4 unsigned 0,0 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_0/ET_2/ArrayOne/AO_0/0 0,8 0Bh	// <table>
-    Var=AO_0 unsigned 0,0 /ln:"AO-0"
-    Var=AO_1 unsigned 0,0 /ln:"AO-1"
+    Mux=First TableEO-0/ET-2/Array One/AO-0/0 0,8 0Bh	// <table>
+    Var=AO-0 unsigned 0,0 /ln:"AO-0"
+    Var=AO-1 unsigned 0,0 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_0/ET_2/ArrayTwo/AT_0/0 0,8 0Ch	// <table>
-    Var=AT_0 unsigned 0,0 /ln:"AT-0"
-    Var=AT_1 unsigned 0,0 /ln:"AT-1"
-    Var=AT_2 unsigned 0,0 /ln:"AT-2"
+    Mux=First TableEO-0/ET-2/Array Two/AT-0/0 0,8 0Ch	// <table>
+    Var=AT-0 unsigned 0,0 /ln:"AT-0"
+    Var=AT-1 unsigned 0,0 /ln:"AT-1"
+    Var=AT-2 unsigned 0,0 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_0/ET_2/ArrayTwo/AT_0/1 0,8 0Dh	// <table>
-    Var=AT_3 unsigned 0,0 /ln:"AT-3"
-    Var=AT_4 unsigned 0,0 /ln:"AT-4"
+    Mux=First TableEO-0/ET-2/Array Two/AT-0/1 0,8 0Dh	// <table>
+    Var=AT-3 unsigned 0,0 /ln:"AT-3"
+    Var=AT-4 unsigned 0,0 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_0/ET_3/ArrayOne/AO_0/0 0,8 0Eh	// <table>
-    Var=AO_0 unsigned 0,0 /ln:"AO-0"
-    Var=AO_1 unsigned 0,0 /ln:"AO-1"
+    Mux=First TableEO-0/ET-3/Array One/AO-0/0 0,8 0Eh	// <table>
+    Var=AO-0 unsigned 0,0 /ln:"AO-0"
+    Var=AO-1 unsigned 0,0 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_0/ET_3/ArrayTwo/AT_0/0 0,8 0Fh	// <table>
-    Var=AT_0 unsigned 0,0 /ln:"AT-0"
-    Var=AT_1 unsigned 0,0 /ln:"AT-1"
-    Var=AT_2 unsigned 0,0 /ln:"AT-2"
+    Mux=First TableEO-0/ET-3/Array Two/AT-0/0 0,8 0Fh	// <table>
+    Var=AT-0 unsigned 0,0 /ln:"AT-0"
+    Var=AT-1 unsigned 0,0 /ln:"AT-1"
+    Var=AT-2 unsigned 0,0 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_0/ET_3/ArrayTwo/AT_0/1 0,8 10h	// <table>
-    Var=AT_3 unsigned 0,0 /ln:"AT-3"
-    Var=AT_4 unsigned 0,0 /ln:"AT-4"
+    Mux=First TableEO-0/ET-3/Array Two/AT-0/1 0,8 10h	// <table>
+    Var=AT-3 unsigned 0,0 /ln:"AT-3"
+    Var=AT-4 unsigned 0,0 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_1/ET_0/ArrayOne/AO_0/0 0,8 11h	// <table>
-    Var=AO_0 unsigned 0,0 /ln:"AO-0"
-    Var=AO_1 unsigned 0,0 /ln:"AO-1"
+    Mux=First TableEO-1/ET-0/Array One/AO-0/0 0,8 11h	// <table>
+    Var=AO-0 unsigned 0,0 /ln:"AO-0"
+    Var=AO-1 unsigned 0,0 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_1/ET_0/ArrayTwo/AT_0/0 0,8 12h	// <table>
-    Var=AT_0 unsigned 0,0 /ln:"AT-0"
-    Var=AT_1 unsigned 0,0 /ln:"AT-1"
-    Var=AT_2 unsigned 0,0 /ln:"AT-2"
+    Mux=First TableEO-1/ET-0/Array Two/AT-0/0 0,8 12h	// <table>
+    Var=AT-0 unsigned 0,0 /ln:"AT-0"
+    Var=AT-1 unsigned 0,0 /ln:"AT-1"
+    Var=AT-2 unsigned 0,0 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_1/ET_0/ArrayTwo/AT_0/1 0,8 13h	// <table>
-    Var=AT_3 unsigned 0,0 /ln:"AT-3"
-    Var=AT_4 unsigned 0,0 /ln:"AT-4"
+    Mux=First TableEO-1/ET-0/Array Two/AT-0/1 0,8 13h	// <table>
+    Var=AT-3 unsigned 0,0 /ln:"AT-3"
+    Var=AT-4 unsigned 0,0 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_1/ET_1/ArrayOne/AO_0/0 0,8 14h	// <table>
-    Var=AO_0 unsigned 0,0 /ln:"AO-0"
-    Var=AO_1 unsigned 0,0 /ln:"AO-1"
+    Mux=First TableEO-1/ET-1/Array One/AO-0/0 0,8 14h	// <table>
+    Var=AO-0 unsigned 0,0 /ln:"AO-0"
+    Var=AO-1 unsigned 0,0 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_1/ET_1/ArrayTwo/AT_0/0 0,8 15h	// <table>
-    Var=AT_0 unsigned 0,0 /ln:"AT-0"
-    Var=AT_1 unsigned 0,0 /ln:"AT-1"
-    Var=AT_2 unsigned 0,0 /ln:"AT-2"
+    Mux=First TableEO-1/ET-1/Array Two/AT-0/0 0,8 15h	// <table>
+    Var=AT-0 unsigned 0,0 /ln:"AT-0"
+    Var=AT-1 unsigned 0,0 /ln:"AT-1"
+    Var=AT-2 unsigned 0,0 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_1/ET_1/ArrayTwo/AT_0/1 0,8 16h	// <table>
-    Var=AT_3 unsigned 0,0 /ln:"AT-3"
-    Var=AT_4 unsigned 0,0 /ln:"AT-4"
+    Mux=First TableEO-1/ET-1/Array Two/AT-0/1 0,8 16h	// <table>
+    Var=AT-3 unsigned 0,0 /ln:"AT-3"
+    Var=AT-4 unsigned 0,0 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_1/ET_2/ArrayOne/AO_0/0 0,8 17h	// <table>
-    Var=AO_0 unsigned 0,0 /ln:"AO-0"
-    Var=AO_1 unsigned 0,0 /ln:"AO-1"
+    Mux=First TableEO-1/ET-2/Array One/AO-0/0 0,8 17h	// <table>
+    Var=AO-0 unsigned 0,0 /ln:"AO-0"
+    Var=AO-1 unsigned 0,0 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_1/ET_2/ArrayTwo/AT_0/0 0,8 18h	// <table>
-    Var=AT_0 unsigned 0,0 /ln:"AT-0"
-    Var=AT_1 unsigned 0,0 /ln:"AT-1"
-    Var=AT_2 unsigned 0,0 /ln:"AT-2"
+    Mux=First TableEO-1/ET-2/Array Two/AT-0/0 0,8 18h	// <table>
+    Var=AT-0 unsigned 0,0 /ln:"AT-0"
+    Var=AT-1 unsigned 0,0 /ln:"AT-1"
+    Var=AT-2 unsigned 0,0 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_1/ET_2/ArrayTwo/AT_0/1 0,8 19h	// <table>
-    Var=AT_3 unsigned 0,0 /ln:"AT-3"
-    Var=AT_4 unsigned 0,0 /ln:"AT-4"
+    Mux=First TableEO-1/ET-2/Array Two/AT-0/1 0,8 19h	// <table>
+    Var=AT-3 unsigned 0,0 /ln:"AT-3"
+    Var=AT-4 unsigned 0,0 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_1/ET_3/ArrayOne/AO_0/0 0,8 1Ah	// <table>
-    Var=AO_0 unsigned 0,0 /ln:"AO-0"
-    Var=AO_1 unsigned 0,0 /ln:"AO-1"
+    Mux=First TableEO-1/ET-3/Array One/AO-0/0 0,8 1Ah	// <table>
+    Var=AO-0 unsigned 0,0 /ln:"AO-0"
+    Var=AO-1 unsigned 0,0 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_1/ET_3/ArrayTwo/AT_0/0 0,8 1Bh	// <table>
-    Var=AT_0 unsigned 0,0 /ln:"AT-0"
-    Var=AT_1 unsigned 0,0 /ln:"AT-1"
-    Var=AT_2 unsigned 0,0 /ln:"AT-2"
+    Mux=First TableEO-1/ET-3/Array Two/AT-0/0 0,8 1Bh	// <table>
+    Var=AT-0 unsigned 0,0 /ln:"AT-0"
+    Var=AT-1 unsigned 0,0 /ln:"AT-1"
+    Var=AT-2 unsigned 0,0 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=FirstTableEO_1/ET_3/ArrayTwo/AT_0/1 0,8 1Ch	// <table>
-    Var=AT_3 unsigned 0,0 /ln:"AT-3"
-    Var=AT_4 unsigned 0,0 /ln:"AT-4"
+    Mux=First TableEO-1/ET-3/Array Two/AT-0/1 0,8 1Ch	// <table>
+    Var=AT-3 unsigned 0,0 /ln:"AT-3"
+    Var=AT-4 unsigned 0,0 /ln:"AT-4"
     ''')
 
     assert tidy_sym(result) == tidy_sym(expected)
