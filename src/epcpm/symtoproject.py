@@ -521,6 +521,20 @@ def go_add_tables(parameters_root, can_root):
             return array
 
     @attr.s(frozen=True)
+    class GroupDefinition:
+        name = attr.ib()
+        parameters = attr.ib()
+
+        def create(self):
+            group = epyqlib.pm.parametermodel.Group(
+                name=self.name,
+            )
+            for parameter in self.parameters:
+                group.append_child(parameter)
+
+            return group
+
+    @attr.s(frozen=True)
     class TableDefinition:
         parent = attr.ib()
         name = attr.ib()
@@ -570,10 +584,20 @@ def go_add_tables(parameters_root, can_root):
         )
     ).create()
 
+    volt_var_y_scale = EnumerationDefinition(
+        name='VoltVarYScale',
+        value_names=(
+            "rated reactive power with vars precedence",
+            "rated reactive power with watts precedence",
+            "available reactive power with watts precedence",
+        ),
+    ).create()
+
     enumerations = (
         low_high,
         ridethrough_trip,
         curves,
+        volt_var_y_scale
     )
 
     for enumeration in enumerations:
@@ -642,16 +666,24 @@ def go_add_tables(parameters_root, can_root):
         ),
     ).create()
 
-    settings = ArrayDefinition(
+    settings = GroupDefinition(
         name='Settings',
-        length=3,
-        parameter=epyqlib.pm.parametermodel.Parameter(
-            units='%/minute',
+        parameters=(
+            epyqlib.pm.parametermodel.Parameter(
+                name='YScale',
+                enumeration_uuid=volt_var_y_scale.uuid,
+                maximum=3,
+            ),
+            epyqlib.pm.parametermodel.Parameter(
+                name='RampRateIncrement',
+                units='%/minute',
+            ),
+            epyqlib.pm.parametermodel.Parameter(
+                name='RampRateDecrement',
+                units='%/minute',
+            ),
         ),
     ).create()
-    settings.children[0].name = 'YScale'
-    settings.children[1].name = 'RampRateIncrement'
-    settings.children[2].name = 'RampRateDecrement'
 
     volt_var_table = TableDefinition(
         parent=tables_group,
@@ -787,10 +819,17 @@ def go_add_tables(parameters_root, can_root):
         volt_var_table: CanTableDefinition(
             range=range(0x295, 0x2b9),
             signals={
-                'Settings': {
+                'YScale': {
+                    'bits': 2,
+                    'signed': False,
+                },
+                'RampRateIncrement': {
                     'bits': 16,
                     'signed': False,
-                    'factor': '1',
+                },
+                'RampRateDecrement': {
+                    'bits': 16,
+                    'signed': False,
                 },
                 'percent_nominal_volts': {
                     'bits': 16,

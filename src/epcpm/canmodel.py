@@ -552,7 +552,23 @@ class CanTable(epyqlib.treenode.TreeNode):
         arrays = [
             child
             for child in table.children
-            if isinstance(child, epyqlib.pm.parametermodel.Array)
+            if isinstance(
+                child,
+                (
+                    epyqlib.pm.parametermodel.Array,
+                ),
+            )
+        ]
+
+        groups = [
+            child
+            for child in table.children
+            if isinstance(
+                child,
+                (
+                    epyqlib.pm.parametermodel.Group,
+                ),
+            )
         ]
 
         for array in arrays:
@@ -567,16 +583,18 @@ class CanTable(epyqlib.treenode.TreeNode):
 
             self.append_child(signal)
 
-        def my_sorted(sequence, order):
-            s = sequence
+        for group in groups:
+            for parameter in group.children:
+                signal = array_uuid_to_signal.get(parameter.uuid)
 
-            for o, r in reversed(order):
-                s = sorted(
-                    s,
-                    key=lambda x: model.node_from_uuid(x.path[o]).name
-                )
+                if signal is None:
+                    signal = Signal(
+                        name=parameter.name,
+                        parameter_uuid=parameter.uuid,
+                    )
+                    array_uuid_to_signal[parameter.uuid] = signal
 
-            return s
+                self.append_child(signal)
 
         def my_sorted(sequence, order):
             s = sequence
@@ -644,13 +662,24 @@ class CanTable(epyqlib.treenode.TreeNode):
         mux_value = self.multiplexer_range_first
 
         for array_group in array_groups:
-            signal = array_uuid_to_signal[array_group[0].path[-2]]
+            is_group = False
+            try:
+                signal = array_uuid_to_signal[array_group[0].path[-2]]
+            except KeyError:
+                # TODO: for groups, explicitly choose this instead of
+                #       failing to it
+                signal = array_uuid_to_signal[array_group[0].path[-1]]
+                is_group = True
 
             if signal.bits == 0:
                 continue
 
-            # TODO: actually calculate space to use
-            per_message = int(48 / signal.bits)
+            if not is_group:
+                # TODO: actually calculate space to use
+                per_message = int(48 / signal.bits)
+            else:
+                # TODO: yeah...
+                per_message = 9999
 
             chunks = list(
                 epyqlib.utils.general.chunker(array_group, n=per_message),
@@ -695,26 +724,37 @@ class CanTable(epyqlib.treenode.TreeNode):
                     )
                 mux_value += 1
 
-                start_bit = 64 - per_message * signal.bits
-                if signal.name == 'Settings':
-                    start_bit = 64 - len(chunk) * signal.bits
+                if not is_group:
+                    start_bit = 64 - per_message * signal.bits
+                    if signal.name == 'Settings':
+                        start_bit = 64 - len(chunk) * signal.bits
+                else:
+                    total_bits = sum(
+                        array_uuid_to_signal[element.path[-1]].bits
+                        for element in chunk
+                    )
+                    start_bit = 64 - total_bits
 
                 for array_element in chunk:
+                    if is_group:
+                        reference_signal = array_uuid_to_signal[array_element.path[-1]]
+                    else:
+                        reference_signal = signal
                     signal_path = array_element.path
 
                     new_signal = old_by_path.get(signal_path)
                     if new_signal is None:
                         new_signal = Signal(
                             name=array_element.name,
-                            start_bit=start_bit,
-                            bits=signal.bits,
-                            factor=signal.factor,
-                            signed=signal.signed,
+                            start_bit=start_bit if array_element.name != 'YScale' else 16,
+                            bits=reference_signal.bits,
+                            factor=reference_signal.factor,
+                            signed=reference_signal.signed,
                             parameter_uuid=array_element.uuid,
                             path=signal_path,
                         )
                     multiplexer.append_child(new_signal)
-                    start_bit += signal.bits
+                    start_bit += new_signal.bits
 
                 self.append_child(multiplexer)
 
