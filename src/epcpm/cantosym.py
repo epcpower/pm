@@ -302,6 +302,7 @@ class MultiplexedMessage:
                     multiplexer.comment
                 )
 
+            # TODO: backmatching
             if multiplexer in table_multiplexers:
                 mux_signal.comments[multiplexer.identifier] = (
                     '{} <{}>'.format(

@@ -596,6 +596,7 @@ class CanTable(epyqlib.treenode.TreeNode):
 
                 self.append_child(signal)
 
+        # TODO: backmatching
         def my_sorted(sequence, order):
             s = sequence
             for o, r in reversed(order):
@@ -604,6 +605,7 @@ class CanTable(epyqlib.treenode.TreeNode):
 
             return s
 
+        # TODO: backmatching
         leaves = table.group.leaves()
         if table.name == 'Frequency':
             leaves = my_sorted(
@@ -651,6 +653,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                 ),
             )
 
+        # TODO: this is arrays and groups...
         array_groups = [
             list(group[1])
             for group in itertools.groupby(
@@ -696,6 +699,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                         other.append(node.name)
                         continue
 
+                    # TODO: backmatching
                     if node.tree_parent.name != 'Curves' and isinstance(node, epyqlib.pm.parametermodel.Enumerator):
                         enumerators.append(node.name)
                         continue
@@ -724,6 +728,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                     )
                 mux_value += 1
 
+                # TODO: backmatching
                 if not is_group:
                     start_bit = 64 - per_message * signal.bits
                     if signal.name == 'Settings':
@@ -746,6 +751,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                     if new_signal is None:
                         new_signal = Signal(
                             name=array_element.name,
+                            # TODO: backmatching
                             start_bit=start_bit if array_element.name != 'YScale' else 16,
                             bits=reference_signal.bits,
                             factor=reference_signal.factor,

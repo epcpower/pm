@@ -190,6 +190,7 @@ class Window:
 
         epcpm.project._post_load(project)
 
+        # TODO: backmatching
         epcpm.symtoproject.go_add_tables(
             parameters_root=project.models.parameters.root,
             can_root=project.models.can.root,

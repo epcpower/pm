@@ -461,6 +461,7 @@ def build_multiplexed_message(
     return message
 
 
+# TODO: backmatching
 def go_add_tables(parameters_root, can_root):
     def is_a_table(node):
         comment = getattr(node, 'comment', None)
@@ -482,6 +483,7 @@ def go_add_tables(parameters_root, can_root):
     existing_tables = line_monitoring.descendent('Tables')
     line_monitoring.remove_child(child=existing_tables)
 
+    # TODO: convert to function
     @attr.s(frozen=True)
     class EnumerationDefinition:
         name = attr.ib()
@@ -500,6 +502,7 @@ def go_add_tables(parameters_root, can_root):
 
             return enumeration
 
+    # TODO: convert to function
     @attr.s(frozen=True)
     class ArrayDefinition:
         name = attr.ib()
@@ -520,6 +523,7 @@ def go_add_tables(parameters_root, can_root):
 
             return array
 
+    # TODO: convert to function
     @attr.s(frozen=True)
     class GroupDefinition:
         name = attr.ib()
@@ -534,6 +538,7 @@ def go_add_tables(parameters_root, can_root):
 
             return group
 
+    # TODO: convert to function
     @attr.s(frozen=True)
     class TableDefinition:
         parent = attr.ib()
