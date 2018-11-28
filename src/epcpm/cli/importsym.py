@@ -53,6 +53,8 @@ def cli(sym, hierarchy, project, parameters, can, epyq_value_set, add_tables):
         ),
     )
 
+    epcpm.project._post_load(project_model)
+
     project.write(graham.dumps(project_model, indent=4).data)
     parameters.write(graham.dumps(parameters_root, indent=4).data)
     can.write(graham.dumps(can_root, indent=4).data)

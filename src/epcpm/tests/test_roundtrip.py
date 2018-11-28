@@ -483,7 +483,7 @@ def assert_signal_list_equal(
                 == original_name.casefold()
             ), original.name
         else:
-            assert exported_name == original_name, original.name
+            assert exported_name == original_name
 
     def key(x):
         return (
@@ -518,10 +518,10 @@ def assert_varied_dict_equal(original, exported):
         sorted(exported.items()),
     )
     for (original_value, original_name), (exported_value, exported_name) in zipped:
-        assert exported_value == original_value, original.name
+        assert exported_value == original_value
 
         tweaked = unvary_signal_names(exported_name)
-        assert tweaked == original_name, original.name
+        assert tweaked == original_name
 
 
 def assert_frames_equal(original, exported):
@@ -573,7 +573,9 @@ def assert_value_tables_equal(original, exported):
 
 def test_roundtrip():
     original, = canmatrix.formats.loadp(os.fspath(example_device.can)).values()
+    assert original.load_errors == []
     exported, = canmatrix.formats.loadp(os.fspath(exported_can)).values()
+    assert exported.load_errors == []
 
     assert_frame_lists_equal(original.frames, exported.frames)
     assert_value_tables_equal(original.valueTables, exported.valueTables)

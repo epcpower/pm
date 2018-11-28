@@ -77,6 +77,7 @@ class Signal(epyqlib.treenode.TreeNode):
     )
     factor = attr.ib(
         default=1,
+        converter=epyqlib.attrsmodel.to_decimal_or_none,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Decimal(as_string=True),
         ),
