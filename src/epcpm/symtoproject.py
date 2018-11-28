@@ -213,7 +213,7 @@ def load_can_file(
             #             mux.remove_child(child=child)
 
             for signal in reversed(common_signals):
-                message.insert_child(1, attr.evolve(signal, uuid=uuid.uuid4()))
+                message.insert_child(1, attr.evolve(signal, uuid=attr.NOTHING))
 
         can_root.append_child(message)
 
