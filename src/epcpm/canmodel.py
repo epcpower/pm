@@ -1,4 +1,5 @@
 import itertools
+import string
 
 import attr
 import graham
@@ -14,6 +15,10 @@ import epyqlib.utils.qt
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
+
+
+class ConsistencyError(Exception):
+    pass
 
 
 def based_int(v):
@@ -516,7 +521,7 @@ class CanTable(epyqlib.treenode.TreeNode):
 
         return True
 
-    def update(self):
+    def update(self, table=None):
         array_uuid_to_signal = {
             child.parameter_uuid: child
             for child in self.children
@@ -534,7 +539,10 @@ class CanTable(epyqlib.treenode.TreeNode):
         root = self.find_root()
         model = root.model
 
-        table = model.node_from_uuid(self.table_uuid)
+        if table is None:
+            table = model.node_from_uuid(self.table_uuid)
+        elif table.uuid != self.table_uuid:
+            raise ConsistencyError()
 
         old_by_path = {}
         for node in nodes:
@@ -550,6 +558,12 @@ class CanTable(epyqlib.treenode.TreeNode):
             if isinstance(child, epyqlib.pm.parametermodel.Array)
         ]
 
+        groups = [
+            child
+            for child in table.children
+            if isinstance(child, epyqlib.pm.parametermodel.Group)
+        ]
+
         for array in arrays:
             signal = array_uuid_to_signal.get(array.uuid)
 
@@ -558,41 +572,139 @@ class CanTable(epyqlib.treenode.TreeNode):
                     name=array.name,
                     parameter_uuid=array.uuid,
                 )
+                array_uuid_to_signal[array.uuid] = signal
 
             self.append_child(signal)
 
-        array_groups = [
+        for group in groups:
+            for parameter in group.children:
+                signal = array_uuid_to_signal.get(parameter.uuid)
+
+                if signal is None:
+                    signal = Signal(
+                        name=parameter.name,
+                        parameter_uuid=parameter.uuid,
+                    )
+                    array_uuid_to_signal[parameter.uuid] = signal
+
+                self.append_child(signal)
+
+        # TODO: backmatching
+        def my_sorted(sequence, order):
+            s = sequence
+            for o, r in reversed(order):
+                d = {c: i for i, c in enumerate(r)}
+                s = sorted(s, key=lambda x: d[model.node_from_uuid(x.path[o]).name])
+
+            return s
+
+        # TODO: backmatching
+        leaves = table.group.leaves()
+        if table.name == 'Frequency':
+            leaves = my_sorted(
+                leaves,
+                (
+                    (1, ('RideThrough', 'Trip')),
+                    (0, ('Low', 'High')),
+                    (2, ('0', '1', '2', '3')),
+                    (3, ('seconds', 'hertz')),
+                ),
+            )
+        elif table.name == 'Voltage':
+            leaves = my_sorted(
+                leaves,
+                (
+                    (1, ('RideThrough', 'Trip')),
+                    (0, ('Low', 'High')),
+                    (2, ('0', '1', '2', '3')),
+                    (3, ('seconds', 'percent')),
+                ),
+            )
+        elif table.name == 'VoltVar':
+            leaves = my_sorted(
+                leaves,
+                (
+                    (0, ('0', '1', '2', '3')),
+                    (1, ('Settings', 'percent_nominal_volts',
+                         'percent_nominal_var')),
+                ),
+            )
+        elif table.name == 'HertzWatts':
+            leaves = my_sorted(
+                leaves,
+                (
+                    (0, ('0', '1', '2', '3')),
+                    (1, ('Settings', 'hertz', 'percent_nominal_pwr')),
+                ),
+            )
+        elif table.name == 'HertzWatts':
+            leaves = my_sorted(
+                leaves,
+                (
+                    (0, ('0', '1', '2', '3')),
+                    (1, ('Settings', 'percent_nominal_volts', 'percent_nominal_pwr')),
+                ),
+            )
+
+        # TODO: this is arrays and groups...
+        leaf_groups = [
             list(group[1])
             for group in itertools.groupby(
-                table.group.leaves(),
+                leaves,
                 key=lambda leaf: leaf.path[:-1],
             )
         ]
 
         mux_value = self.multiplexer_range_first
 
-        for array_group in array_groups:
-            signal = array_uuid_to_signal[array_group[0].path[-2]]
+        for leaf_group in leaf_groups:
+            is_group = False
+            type_reference = leaf_group[0].original.tree_parent
+            if isinstance(type_reference, epyqlib.pm.parametermodel.Array):
+                signal = array_uuid_to_signal[leaf_group[0].path[-2]]
+            elif isinstance(type_reference, epyqlib.pm.parametermodel.Group):
+                signal = array_uuid_to_signal[leaf_group[0].path[-1]]
+                is_group = True
+            else:
+                raise ConsistencyError()
 
             if signal.bits == 0:
                 continue
 
-            # TODO: actually calculate space to use
-            per_message = int(48 / signal.bits)
+            if not is_group:
+                # TODO: actually calculate space to use
+                per_message = int(48 / signal.bits)
+            else:
+                # TODO: yeah...
+                per_message = 9999
 
             chunks = list(
-                epyqlib.utils.general.chunker(array_group, n=per_message),
+                epyqlib.utils.general.chunker(leaf_group, n=per_message),
             )
-            for i, chunk in enumerate(chunks):
-                path = array_group[0].path
+            for chunk, letter in zip(chunks, string.ascii_uppercase):
+                path = chunk[0].path
 
-                path_string = '/'.join(
-                    [
-                        model.node_from_uuid(u).name
-                        for u in path
-                    ]
-                    + [str(i)]
-                )
+                path_nodes = [model.node_from_uuid(u) for u in path]
+
+                enumerators = []
+                other = []
+                for node in path_nodes[:-1]:
+                    if len(other) > 0:
+                        other.append(node.name)
+                        continue
+
+                    # TODO: backmatching
+                    if node.tree_parent.name != 'Curves' and isinstance(node, epyqlib.pm.parametermodel.Enumerator):
+                        enumerators.append(node.name)
+                        continue
+
+                    other.append(node.name)
+
+                path_string = '_'.join([
+                    ''.join(name for name in enumerators),
+                    *other,
+                    *([letter] if len(chunks) > 1 else []),
+                ])
                 multiplexer_path = chunk[0].path[:-1]
                 multiplexer_path_children = tuple(
                     element.path[-1]
@@ -610,17 +722,39 @@ class CanTable(epyqlib.treenode.TreeNode):
                     )
                 mux_value += 1
 
+                # TODO: backmatching
+                if not is_group:
+                    start_bit = 64 - per_message * signal.bits
+                    if signal.name == 'Settings':
+                        start_bit = 64 - len(chunk) * signal.bits
+                else:
+                    total_bits = sum(
+                        array_uuid_to_signal[element.path[-1]].bits
+                        for element in chunk
+                    )
+                    start_bit = 64 - total_bits
+
                 for array_element in chunk:
+                    if is_group:
+                        reference_signal = array_uuid_to_signal[array_element.path[-1]]
+                    else:
+                        reference_signal = signal
                     signal_path = array_element.path
 
-                    signal = old_by_path.get(signal_path)
-                    if signal is None:
-                        signal = Signal(
+                    new_signal = old_by_path.get(signal_path)
+                    if new_signal is None:
+                        new_signal = Signal(
                             name=array_element.name,
+                            # TODO: backmatching
+                            start_bit=start_bit if array_element.name != 'YScale' else 16,
+                            bits=reference_signal.bits,
+                            factor=reference_signal.factor,
+                            signed=reference_signal.signed,
                             parameter_uuid=array_element.uuid,
                             path=signal_path,
                         )
-                    multiplexer.append_child(signal)
+                    multiplexer.append_child(new_signal)
+                    start_bit += new_signal.bits
 
                 self.append_child(multiplexer)
 

@@ -257,6 +257,7 @@ class MultiplexedMessage:
     def gen(self):
         common_signals = []
         not_signals = []
+        table_multiplexers = set()
         for child in self.wrapped.children[1:]:
             if isinstance(child, epcpm.canmodel.Signal):
                 common_signals.append(child)
@@ -264,6 +265,7 @@ class MultiplexedMessage:
                 for subchild in child.children:
                     if isinstance(subchild, epcpm.canmodel.Multiplexer):
                         not_signals.append(subchild)
+                        table_multiplexers.add(subchild)
             else:
                 not_signals.append(child)
 
@@ -300,17 +302,20 @@ class MultiplexedMessage:
                     multiplexer.comment
                 )
 
-            for signal in common_signals:
-                matrix_signal = builders.wrap(
-                    wrapped=signal,
-                    parameter_uuid_finder=self.parameter_uuid_finder,
-                ).gen(
-                    multiplex_id=multiplexer.identifier,
+            # TODO: backmatching
+            if multiplexer in table_multiplexers:
+                mux_signal.comments[multiplexer.identifier] = (
+                    '{} <{}>'.format(
+                        mux_signal.comments.get(multiplexer.identifier, ''),
+                        'table',
+                    ).strip()
                 )
-                frame.signals.append(matrix_signal)
 
+            name = multiplexer.name
+            if isinstance(multiplexer.tree_parent, epcpm.canmodel.CanTable):
+                name = multiplexer.tree_parent.name + name
             frame.mux_names[multiplexer.identifier] = (
-                dehumanize_name(multiplexer.name)
+                dehumanize_name(name)
             )
 
             def param_special(signal):
@@ -356,5 +361,23 @@ class MultiplexedMessage:
                 )
 
                 frame.signals.append(signal)
+
+            frame_signal_names = [
+                signal.name
+                for signal in frame.signals
+                if signal.multiplex == multiplexer.identifier
+            ]
+
+            for signal in reversed(common_signals):
+                if signal.name in frame_signal_names:
+                    continue
+
+                matrix_signal = builders.wrap(
+                    wrapped=signal,
+                    parameter_uuid_finder=self.parameter_uuid_finder,
+                ).gen(
+                    multiplex_id=multiplexer.identifier,
+                )
+                frame.signals.insert(0, matrix_signal)
 
         return frame
