@@ -15,7 +15,7 @@ import epyqlib.attrsmodel
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s
-class DataPoint:
+class DataPoint(epyqlib.treenode.TreeNode):
     factor = attr.ib(
         default=0,
         converter=int,
@@ -25,23 +25,27 @@ class DataPoint:
     ) # referencing another data point uuid
     units = attr.ib(
         default=None,
+        convert=epyqlib.attrsmodel.to_str_or_none,
         metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
+            field=marshmallow.fields.String(allow_none=True),
         ),
     )
     description = attr.ib(
         default=None,
+        convert=epyqlib.attrsmodel.to_str_or_none,
         metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
+            field=marshmallow.fields.String(allow_none=True),
         ),
     )
-    rw = attr.ib(
-        default='r',
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(), #maybe Dict instead?
-        ),
+    parameter_uuid = epyqlib.attrsmodel.attr_uuid(
+        default=None,
+        allow_none=True,
     )
-    type = attr.ib(
+    epyqlib.attrsmodel.attrib(
+        attribute=parameter_uuid,
+        human_name='Parameter UUID',
+    )
+    type = attr.ib( #TODO enumeration reference/list_selection_root something something ... words
         default='uint16',
         metadata=graham.create_metadata(
             field=marshmallow.fields.Dict(),
@@ -82,8 +86,9 @@ class DataPoint:
     )
     notes = attr.ib(
         default=None,
+        convert=epyqlib.attrsmodel.to_str_or_none,
         metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
+            field=marshmallow.fields.String(allow_none=True),
         ),
     )
 
@@ -102,6 +107,8 @@ class DataPoint:
 
 #     getter_code = attr.ib()
 #     setter_code = attr.ib()
+    def __attrs_post_init__(self):
+        super().__init__()
 
 
 @graham.schemify(tag='sunspec_enumeration', register=True)
@@ -110,6 +117,9 @@ class DataPoint:
 @attr.s
 class Enumeration:
     enumeration_uuid = epyqlib.attrsmodel.attr_uuid() # references to parametermodel.Enumeration
+
+    def __attrs_post_init__(self):
+        super().__init__()
 
 
 @graham.schemify(tag='sunspec_bit_field', register=True)
@@ -124,7 +134,7 @@ class BitField:
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s
-class Model:
+class Model(epyqlib.treenode.TreeNode):
     id = attr.ib(
         default=0,
         converter=int,
@@ -160,6 +170,9 @@ class Model:
             )),
         ),
     )
+
+    def __attrs_post_init__(self):
+        super().__init__()
 
 
 #class Repeating...?
