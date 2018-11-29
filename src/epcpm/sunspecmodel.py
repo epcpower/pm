@@ -45,7 +45,13 @@ class DataPoint(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.Dict(),
         ),
     )
-    enumeration_uuid = epyqlib.attrsmodel.attr_uuid()  # probably to parametermodel.Enumeration (applicable point)
+    enumeration_uuid = epyqlib.attrsmodel.attr_uuid(
+        default=None,
+        allow_none=True,
+        human_name='Enumeration',
+        data_display=epyqlib.attrsmodel.name_from_uuid,
+        list_selection_root='enumerations',
+    )  # probably to parametermodel.Enumeration (applicable point)
     offset = attr.ib(
         default=0,
         converter=int,
