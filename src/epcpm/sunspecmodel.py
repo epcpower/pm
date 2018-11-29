@@ -15,7 +15,7 @@ import epyqlib.pm.parametermodel
 @graham.schemify(tag='data_point', register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
-@attr.s
+@attr.s(hash=False)
 class DataPoint(epyqlib.treenode.TreeNode):
     factor = attr.ib(
         default=0,
@@ -116,7 +116,7 @@ class DataPoint(epyqlib.treenode.TreeNode):
 @graham.schemify(tag='sunspec_enumeration', register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
-@attr.s
+@attr.s(hash=False)
 class Enumeration:
     enumeration_uuid = epyqlib.attrsmodel.attr_uuid() # references to parametermodel.Enumeration
 
@@ -137,7 +137,7 @@ class Enumeration:
 @graham.schemify(tag='sunspec_bit_field', register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
-@attr.s
+@attr.s(hash=False)
 class BitField:
     enumeration_uuid = epyqlib.attrsmodel.attr_uuid() #maybe this should be a bitfield_uuid?  IDK
     #how we plan to use it, but I can see how an enum could be used to define a bitfield
