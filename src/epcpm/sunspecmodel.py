@@ -157,7 +157,7 @@ class BitField:
 @graham.schemify(tag='sunspec_model', register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
-@attr.s
+@attr.s(hash=False)
 class Model(epyqlib.treenode.TreeNode):
     id = attr.ib(
         default=0,

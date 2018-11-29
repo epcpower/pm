@@ -24,6 +24,7 @@ import epcpm.project
 import epcpm.canmodel
 import epcpm.cantosym
 import epcpm.symtoproject
+import epcpm.sunspecmodel
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
@@ -106,6 +107,11 @@ class Window:
             ('All Files', ['*'])
         ]
 
+        self.sunspec_filters = [
+            ('CAN Symbols', ['sym']),
+            ('All Files', ['*'])
+        ]
+
         self.view_models = {}
 
         self.uuid_notifier = epcpm.canmodel.ReferencedUuidNotifier()
@@ -171,11 +177,13 @@ class Window:
             return
 
         with open(sym_path, 'rb') as sym, open(hierarchy_path) as hierarchy:
-            parameters_root, can_root = epcpm.symtoproject.load_can_file(
-                can_file=sym,
-                file_type=str(pathlib.Path(sym.name).suffix[1:]),
-                parameter_hierarchy_file=hierarchy,
-                add_tables=True,
+            parameters_root, can_root, sunspec_root = (
+                epcpm.symtoproject.load_can_file(
+                    can_file=sym,
+                    file_type=str(pathlib.Path(sym.name).suffix[1:]),
+                    parameter_hierarchy_file=hierarchy,
+                    add_tables=True,
+                )
             )
 
         project = epcpm.project.Project()
@@ -187,6 +195,10 @@ class Window:
         project.models.can = epyqlib.attrsmodel.Model(
             root=can_root,
             columns=epcpm.canmodel.columns,
+        )
+        project.models.sunspec = epyqlib.attrsmodel.Model(
+            root=sunspec_root,
+            columns=epcpm.sunspecmodel.columns,
         )
 
         epcpm.project._post_load(project)
@@ -215,6 +227,11 @@ class Window:
         model_views.can = ModelView(
             view=self.ui.can_view,
             types=epcpm.canmodel.types,
+        )
+
+        model_views.sunspec = ModelView(
+            view=self.ui.sunspec_view,
+            types=epcpm.sunspecmodel.types,
         )
 
         self.uuid_notifier.disconnect_view()

@@ -12,6 +12,7 @@ import epyqlib.pm.parametermodel
 import epyqlib.utils.general
 
 import epcpm.canmodel
+import epcpm.sunspecmodel
 
 
 def humanize_name(name):
@@ -269,7 +270,9 @@ def load_can_file(
     if add_tables:
         go_add_tables(parameters_root=parameters_root)
 
-    return parameters_root, can_root
+    sunspec_root = epcpm.sunspecmodel.Root()
+
+    return parameters_root, can_root, sunspec_root
 
 
 def build_message(

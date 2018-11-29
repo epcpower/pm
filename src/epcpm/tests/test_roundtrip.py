@@ -35,6 +35,7 @@ def test_import():
             '--project', project,
             '--can', round_trip / 'can.json',
             '--parameters', round_trip / 'parameters.json',
+            '--sunspec', round_trip / 'sunspec.json',
             '--add-tables',
         ],
         catch_exceptions=False,

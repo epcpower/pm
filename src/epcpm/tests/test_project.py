@@ -14,13 +14,15 @@ reference_string = textwrap.dedent('''\
     "paths": {
         "_type": "models",
         "parameters": "parameters.json",
-        "can": "can.json"
+        "can": "can.json",
+        "sunspec": "sunspec.json"
     }
 }''')
 
 reference_project = epcpm.project.Project()
 reference_project.paths.parameters = 'parameters.json'
 reference_project.paths.can = 'can.json'
+reference_project.paths.sunspec = 'sunspec.json'
 
 
 def test_save():
@@ -36,7 +38,7 @@ def test_load():
 def test_model_iterable():
     model = epcpm.project.Models()
 
-    assert tuple(model) == ('parameters', 'can')
+    assert tuple(model) == ('parameters', 'can', 'sunspec')
 
 
 def test_model_set_all():
@@ -52,7 +54,13 @@ def test_model_set_all():
 def test_model_items():
     model = epcpm.project.Models()
 
-    assert tuple(model.items()) == (('parameters', None), ('can', None))
+    expected = (
+        ('parameters', None),
+        ('can', None),
+        ('sunspec', None),
+    )
+
+    assert tuple(model.items()) == expected
 
 
 def test_model_values():
@@ -61,7 +69,7 @@ def test_model_values():
     for name in model:
         model[name] = name + '_'
 
-    assert tuple(model.values()) == ('parameters_', 'can_')
+    assert tuple(model.values()) == ('parameters_', 'can_', 'sunspec_')
 
 
 def test_model_getitem():
@@ -71,7 +79,7 @@ def test_model_getitem():
     for name in model:
         values.append(model[name])
 
-    assert values == [None, None]
+    assert values == [None, None, None]
 
 
 def test_model_proper_selection_roots():

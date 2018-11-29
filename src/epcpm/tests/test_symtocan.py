@@ -83,20 +83,21 @@ def test_other_group_name(hierarchy_file):
 
 
 def test_load_can_file():
-    parameter_root, can_root = epcpm.symtoproject.load_can_path(
+    parameter_root, can_root, sunspec_root = epcpm.symtoproject.load_can_path(
         epyqlib.tests.common.symbol_files['customer'],
         epyqlib.tests.common.hierarchy_files['customer'],
     )
 
     assert isinstance(parameter_root, epyqlib.pm.parametermodel.Root)
     assert isinstance(can_root, epcpm.canmodel.Root)
+    assert isinstance(sunspec_root, epcpm.sunspecmodel.Root)
 
 
 def test_only_one_parameter_per_query_response_pair(
         sym_file,
         empty_hierarchy_file,
 ):
-    parameter_root, can_root = epcpm.symtoproject.load_can_file(
+    parameter_root, *_ = epcpm.symtoproject.load_can_file(
         can_file=sym_file,
         file_type='sym',
         parameter_hierarchy_file=empty_hierarchy_file,
@@ -112,7 +113,7 @@ def test_only_one_parameter_per_query_response_pair(
 
 
 def test_access_level(sym_file, hierarchy_file):
-    parameter_root, symbol_root = epcpm.symtoproject.load_can_file(
+    parameter_root, *_ = epcpm.symtoproject.load_can_file(
         can_file=sym_file,
         file_type='sym',
         parameter_hierarchy_file=hierarchy_file,
@@ -143,7 +144,7 @@ def test_access_level(sym_file, hierarchy_file):
 
 
 def test_accurate_decimal(sym_file, hierarchy_file):
-    parameter_root, symbol_root = epcpm.symtoproject.load_can_file(
+    parameter_root, *_ = epcpm.symtoproject.load_can_file(
         can_file=sym_file,
         file_type='sym',
         parameter_hierarchy_file=hierarchy_file,

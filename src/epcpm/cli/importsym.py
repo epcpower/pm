@@ -23,10 +23,20 @@ def relative_path(target, reference):
 @click.option('--project', type=click.File('w'), required=True)
 @click.option('--parameters', type=click.File('w'), required=True)
 @click.option('--can', type=click.File('w'), required=True)
+@click.option('--sunspec', type=click.File('w'), required=True)
 @click.option('--epyq-value-set', type=click.File('w'))
 @click.option('--add-tables/--no-add-tables', default=False)
-def cli(sym, hierarchy, project, parameters, can, epyq_value_set, add_tables):
-    parameters_root, can_root = epcpm.symtoproject.load_can_file(
+def cli(
+        sym,
+        hierarchy,
+        project,
+        parameters,
+        can,
+        sunspec,
+        epyq_value_set,
+        add_tables,
+):
+    parameters_root, can_root, sunspec_root = epcpm.symtoproject.load_can_file(
         can_file=sym,
         file_type=str(pathlib.Path(sym.name).suffix[1:]),
         parameter_hierarchy_file=hierarchy,
@@ -40,6 +50,7 @@ def cli(sym, hierarchy, project, parameters, can, epyq_value_set, add_tables):
         paths = epcpm.project.Models(
             parameters=relative_path(parameters.name, project_path),
             can=relative_path(can.name, project_path),
+            sunspec=relative_path(sunspec.name, project_path),
         ),
         models = epcpm.project.Models(
             parameters=epyqlib.attrsmodel.Model(
@@ -50,6 +61,10 @@ def cli(sym, hierarchy, project, parameters, can, epyq_value_set, add_tables):
                 root=can_root,
                 columns=epcpm.canmodel.columns,
             ),
+            sunspec=epyqlib.attrsmodel.Model(
+                root=sunspec_root,
+                columns=epcpm.sunspecmodel.columns,
+            ),
         ),
     )
 
@@ -58,6 +73,7 @@ def cli(sym, hierarchy, project, parameters, can, epyq_value_set, add_tables):
     project.write(graham.dumps(project_model, indent=4).data)
     parameters.write(graham.dumps(parameters_root, indent=4).data)
     can.write(graham.dumps(can_root, indent=4).data)
+    sunspec.write(graham.dumps(sunspec_root, indent=4).data)
 
     if epyq_value_set is not None:
         value_set = epyqlib.pm.valuesetmodel.create_blank(

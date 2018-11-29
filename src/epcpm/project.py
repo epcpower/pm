@@ -78,10 +78,27 @@ def _post_load(project):
                 columns=epcpm.canmodel.columns,
             )
 
+    if models.sunspec is None:
+        if project.paths.sunspec is None:
+            models.sunspec = epyqlib.attrsmodel.Model(
+                root=epcpm.sunspecmodel.Root(),
+                columns=epcpm.sunspecmodel.columns,
+            )
+        else:
+            models.sunspec = load_model(
+                project=project,
+                path=project.paths.sunspec,
+                root_type=epcpm.sunspecmodel.Root,
+                columns=epcpm.sunspecmodel.columns,
+            )
+
     models.parameters.droppable_from.add(models.parameters)
 
     models.can.droppable_from.add(models.parameters)
     models.can.droppable_from.add(models.can)
+
+    models.sunspec.droppable_from.add(models.parameters)
+    models.sunspec.droppable_from.add(models.sunspec)
 
     enumerations_root = [
         child
@@ -133,6 +150,12 @@ class Models:
             field=marshmallow.fields.String()
         ),
     )
+    sunspec = attr.ib(
+        default=None,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String()
+        ),
+    )
 
     @classmethod
     def __iter__(cls):
@@ -141,6 +164,7 @@ class Models:
     def set_all(self, value):
         self.parameters = value
         self.can = value
+        self.sunspec = value
 
     def items(self):
         return attr.asdict(self, recurse=False).items()
