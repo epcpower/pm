@@ -86,6 +86,7 @@ class DataPoint(epyqlib.treenode.TreeNode):
         ),
     )
 
+    uuid = epyqlib.attrsmodel.attr_uuid()
     # value  doesn't make sense here, this is interface definition, not a
     #       value set
 
@@ -119,6 +120,8 @@ class DataPoint(epyqlib.treenode.TreeNode):
 class Enumeration:
     enumeration_uuid = epyqlib.attrsmodel.attr_uuid() # references to parametermodel.Enumeration
 
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
     def __attrs_post_init__(self):
         super().__init__()
 
@@ -138,6 +141,7 @@ class Enumeration:
 class BitField:
     enumeration_uuid = epyqlib.attrsmodel.attr_uuid() #maybe this should be a bitfield_uuid?  IDK
     #how we plan to use it, but I can see how an enum could be used to define a bitfield
+    uuid = epyqlib.attrsmodel.attr_uuid()
     def __attrs_post_init__(self):
         super().__init__()
 
@@ -191,6 +195,8 @@ class Model(epyqlib.treenode.TreeNode):
         ),
     )
 
+    uuid = epyqlib.attrsmodel.attr_uuid()
+    
     def __attrs_post_init__(self):
         super().__init__()
 
@@ -239,5 +245,5 @@ columns = epyqlib.attrsmodel.columns(
     merge('label', DataPoint),
     merge('description', DataPoint),
     merge('notes', DataPoint),
-    #merge('uuid', *types.types.values()),
+    merge('uuid', *types.types.values()),
 )
