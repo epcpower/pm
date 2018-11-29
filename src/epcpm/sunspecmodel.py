@@ -16,13 +16,45 @@ import epyqlib.attrsmodel
 @epyqlib.utils.qt.pyqtify()
 @attr.s
 class DataPoint:
-    factor = attr.ib() # referencing another data point uuid
-    units = attr.ib()
-    description = attr.ib()
-    rw = attr.ib()
-    type = attr.ib()
-    enumeration_uuid = attr.ib()  # probably to parametermodel.Enumeration (applicable point)
-    offset = attr.ib() # this is somewhat redundant with the position in the list of data
+    factor = attr.ib(
+        default=0,
+        converter=int,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(),
+        ),
+    ) # referencing another data point uuid
+    units = attr.ib(
+        default=None,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    description = attr.ib(
+        default=None,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    rw = attr.ib(
+        default='r',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(), #maybe Dict instead?
+        ),
+    )
+    type = attr.ib(
+        default='uint16',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Dict(),
+        ),
+    )
+    enumeration_uuid = epyqlib.attrsmodel.attr_uuid()  # probably to parametermodel.Enumeration (applicable point)
+    offset = attr.ib(
+        default=0,
+        converter=int,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(),
+        ),
+    ) # this is somewhat redundant with the position in the list of data
             # points but helpful for keeping things from incidentally floating
             # around especially in custom models where we have no sunspec
             # model to be validating against
@@ -30,10 +62,30 @@ class DataPoint:
 
     # size is purely calculated from the type
 
-    name = attr.ib()
-    label = attr.ib()  # long name, short description, somewhere between name and description
-    description = attr.ib()
-    notes = attr.ib()
+    name = attr.ib(
+        default='New data point',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    label = attr.ib(
+        default='New label',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )  # long name, short description, somewhere between name and description
+    description = attr.ib(
+        default='New label',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    notes = attr.ib(
+        default=None,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
 
     # value  doesn't make sense here, this is interface definition, not a
     #       value set
@@ -48,8 +100,8 @@ class DataPoint:
     # last access time?
     # time = time
 
-    getter_code = attr.ib()
-    setter_code = attr.ib()
+#     getter_code = attr.ib()
+#     setter_code = attr.ib()
 
 
 @graham.schemify(tag='sunspec_enumeration', register=True)
@@ -57,7 +109,7 @@ class DataPoint:
 @epyqlib.utils.qt.pyqtify()
 @attr.s
 class Enumeration:
-    enumeration_uuid = attr.ib() # references to parametermodel.Enumeration
+    enumeration_uuid = epyqlib.attrsmodel.attr_uuid() # references to parametermodel.Enumeration
 
 
 @graham.schemify(tag='sunspec_bit_field', register=True)
@@ -73,8 +125,20 @@ class BitField:
 @epyqlib.utils.qt.pyqtify()
 @attr.s
 class Model:
-    id = attr.ib() # 103
-    length = attr.ib() # 50, in the spirit of over constraining like how
+    id = attr.ib(
+        default=0,
+        converter=int,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(),
+        ),
+    ) # 103
+    length = attr.ib(
+        default=0,
+        converter=int,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(),
+        ),
+    ) # 50, in the spirit of over constraining like how
                         # data points have their offset
 
     # ?
