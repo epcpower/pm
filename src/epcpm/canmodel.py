@@ -17,6 +17,10 @@ __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
+class ConsistencyError(Exception):
+    pass
+
+
 def based_int(v):
     if isinstance(v, str):
         return int(v, 0)
@@ -537,9 +541,8 @@ class CanTable(epyqlib.treenode.TreeNode):
 
         if table is None:
             table = model.node_from_uuid(self.table_uuid)
-        else:
-            if table.uuid != self.table_uuid:
-                raise ConsistencyError()
+        elif table.uuid != self.table_uuid:
+            raise ConsistencyError()
 
         old_by_path = {}
         for node in nodes:
@@ -552,23 +555,13 @@ class CanTable(epyqlib.treenode.TreeNode):
         arrays = [
             child
             for child in table.children
-            if isinstance(
-                child,
-                (
-                    epyqlib.pm.parametermodel.Array,
-                ),
-            )
+            if isinstance(child, epyqlib.pm.parametermodel.Array)
         ]
 
         groups = [
             child
             for child in table.children
-            if isinstance(
-                child,
-                (
-                    epyqlib.pm.parametermodel.Group,
-                ),
-            )
+            if isinstance(child, epyqlib.pm.parametermodel.Group)
         ]
 
         for array in arrays:
@@ -654,7 +647,7 @@ class CanTable(epyqlib.treenode.TreeNode):
             )
 
         # TODO: this is arrays and groups...
-        array_groups = [
+        leaf_groups = [
             list(group[1])
             for group in itertools.groupby(
                 leaves,
@@ -664,15 +657,16 @@ class CanTable(epyqlib.treenode.TreeNode):
 
         mux_value = self.multiplexer_range_first
 
-        for array_group in array_groups:
+        for leaf_group in leaf_groups:
             is_group = False
-            try:
-                signal = array_uuid_to_signal[array_group[0].path[-2]]
-            except KeyError:
-                # TODO: for groups, explicitly choose this instead of
-                #       failing to it
-                signal = array_uuid_to_signal[array_group[0].path[-1]]
+            type_reference = leaf_group[0].original.tree_parent
+            if isinstance(type_reference, epyqlib.pm.parametermodel.Array):
+                signal = array_uuid_to_signal[leaf_group[0].path[-2]]
+            elif isinstance(type_reference, epyqlib.pm.parametermodel.Group):
+                signal = array_uuid_to_signal[leaf_group[0].path[-1]]
                 is_group = True
+            else:
+                raise ConsistencyError()
 
             if signal.bits == 0:
                 continue
@@ -685,10 +679,10 @@ class CanTable(epyqlib.treenode.TreeNode):
                 per_message = 9999
 
             chunks = list(
-                epyqlib.utils.general.chunker(array_group, n=per_message),
+                epyqlib.utils.general.chunker(leaf_group, n=per_message),
             )
             for chunk, letter in zip(chunks, string.ascii_uppercase):
-                path = array_group[0].path
+                path = chunk[0].path
 
                 path_nodes = [model.node_from_uuid(u) for u in path]
 
