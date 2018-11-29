@@ -3,6 +3,7 @@ import graham
 import marshmallow
 
 import epyqlib.attrsmodel
+import epyqlib.pm.parametermodel
 
 # sunspec enumerations will be stored in parametermodel.Enumeration and be
 # mappable into the sunspec interface
@@ -24,13 +25,6 @@ class DataPoint(epyqlib.treenode.TreeNode):
         ),
     ) # referencing another data point uuid
     units = attr.ib(
-        default=None,
-        convert=epyqlib.attrsmodel.to_str_or_none,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(allow_none=True),
-        ),
-    )
-    description = attr.ib(
         default=None,
         convert=epyqlib.attrsmodel.to_str_or_none,
         metadata=graham.create_metadata(
@@ -79,7 +73,7 @@ class DataPoint(epyqlib.treenode.TreeNode):
         ),
     )  # long name, short description, somewhere between name and description
     description = attr.ib(
-        default='New label',
+        default='New description',
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(),
         ),
@@ -110,6 +104,13 @@ class DataPoint(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
+    def can_drop_on(self, node):
+        return False
+
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
 
 @graham.schemify(tag='sunspec_enumeration', register=True)
 @epyqlib.attrsmodel.ify()
@@ -121,13 +122,32 @@ class Enumeration:
     def __attrs_post_init__(self):
         super().__init__()
 
+    def can_drop_on(self, node):
+        #isintance(node, DictPair)?
+        return False
+
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
 
 @graham.schemify(tag='sunspec_bit_field', register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s
 class BitField:
-    pass
+    enumeration_uuid = epyqlib.attrsmodel.attr_uuid() #maybe this should be a bitfield_uuid?  IDK
+    #how we plan to use it, but I can see how an enum could be used to define a bitfield
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    def can_drop_on(self, node):
+        #isintance(node, DictPair)?
+        return False
+
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
 
 
 @graham.schemify(tag='sunspec_model', register=True)
@@ -174,18 +194,30 @@ class Model(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
+    def can_drop_on(self, node):
+        return isinstance(
+            node,
+            (
+                epyqlib.pm.parametermodel.Parameter,
+                DataPoint,
+            ),
+        )
+
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
 
 #class Repeating...?
 
 
 Root = epyqlib.attrsmodel.Root(
     default_name='SunSpec',
-    valid_types=(Model,),
+    valid_types=(Model, DataPoint),
 )
 
 
 types = epyqlib.attrsmodel.Types(
-    types=(Root,),
+    types=(Root, Model, DataPoint, Enumeration, BitField),
 )
 
 
@@ -195,6 +227,17 @@ def merge(name, *types):
 
 
 columns = epyqlib.attrsmodel.columns(
-    merge('name', *types.types.values()),
-    merge('uuid', *types.types.values()),
+    merge('id', Model),
+    merge('length', Model),
+    merge('factor', DataPoint),
+    merge('units', DataPoint),
+    merge('parameter_uuid', DataPoint),
+    merge('type', DataPoint),
+    merge('enumeration_uuid', DataPoint, Enumeration, BitField),
+    merge('offset', DataPoint),
+    merge('name', DataPoint),
+    merge('label', DataPoint),
+    merge('description', DataPoint),
+    merge('notes', DataPoint),
+    #merge('uuid', *types.types.values()),
 )
