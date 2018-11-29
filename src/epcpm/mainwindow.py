@@ -182,7 +182,6 @@ class Window:
                     can_file=sym,
                     file_type=str(pathlib.Path(sym.name).suffix[1:]),
                     parameter_hierarchy_file=hierarchy,
-                    add_tables=True,
                 )
             )
 
@@ -202,6 +201,12 @@ class Window:
         )
 
         epcpm.project._post_load(project)
+
+        # TODO: backmatching
+        epcpm.symtoproject.go_add_tables(
+            parameters_root=project.models.parameters.root,
+            can_root=project.models.can.root,
+        )
 
         self.open_project(project=project)
 
