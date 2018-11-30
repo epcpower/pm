@@ -107,11 +107,6 @@ class Window:
             ('All Files', ['*'])
         ]
 
-        self.sunspec_filters = [
-            ('CAN Symbols', ['sym']),
-            ('All Files', ['*'])
-        ]
-
         self.view_models = {}
 
         self.uuid_notifier = epcpm.canmodel.ReferencedUuidNotifier()
