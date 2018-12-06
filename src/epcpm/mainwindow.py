@@ -23,6 +23,7 @@ import epcpm.parameterstoc
 import epcpm.project
 import epcpm.canmodel
 import epcpm.cantosym
+import epcpm.smdxtosunspec
 import epcpm.symtoproject
 import epcpm.sunspecmodel
 
@@ -80,6 +81,7 @@ class Window:
 
         self.ui.action_import_sym.triggered.connect(self.import_sym)
         self.ui.action_export_sym.triggered.connect(self.generate_symbol_file)
+        self.ui.action_import_smdx.triggered.connect(self.import_smdx)
 
         self.ui.action_about.triggered.connect(self.about_dialog)
 
@@ -104,6 +106,11 @@ class Window:
 
         self.can_filters = [
             ('CAN Symbols', ['sym']),
+            ('All Files', ['*'])
+        ]
+
+        self.smdx_filters = [
+            ('SunSpec SMDX', ['xml']),
             ('All Files', ['*'])
         ]
 
@@ -204,6 +211,26 @@ class Window:
         )
 
         self.open_project(project=project)
+
+    def import_smdx(self):
+        selected = epyqlib.utils.qt.file_dialog(
+            filters=self.smdx_filters,
+            parent=self.ui,
+            path_factory=pathlib.Path,
+            multiple=True,
+        )
+
+        for smdx_path in selected:
+            id = int(
+                smdx_path.name.partition('smdx_')[2].rpartition('.xml')[0],
+            )
+
+            model = epcpm.smdxtosunspec.import_model(
+                model_id=id,
+                paths=[smdx_path.parent],
+            )
+
+            self.view_models['sunspec'].model.root.append_child(model)
 
     def open_project(self, filename=None, project=None):
         if project is not None:

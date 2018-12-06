@@ -1,0 +1,582 @@
+<sunSpecModels v="1">
+  <!-- 103: inverter -->
+  <model id="103" len="50" name="inverter">
+    <block len="50">
+      <point id="A" offset="0" type="uint16" mandatory="true" sf="A_SF" units="A"/>
+      <point id="AphA" offset="1" type="uint16" mandatory="true" sf="A_SF" units="A"/>
+      <point id="AphB" offset="2" type="uint16" mandatory="true" sf="A_SF" units="A"/>
+      <point id="AphC" offset="3" type="uint16" mandatory="true" sf="A_SF" units="A"/>
+      <point id="A_SF" offset="4" type="sunssf" mandatory="true"/>
+      <point id="PPVphAB" offset="5" type="uint16" sf="V_SF" units="V"/>
+      <point id="PPVphBC" offset="6" type="uint16" sf="V_SF" units="V"/>
+      <point id="PPVphCA" offset="7" type="uint16" sf="V_SF" units="V"/>
+      <point id="PhVphA" offset="8" type="uint16" mandatory="true" sf="V_SF" units="V"/>
+      <point id="PhVphB" offset="9" type="uint16" mandatory="true" sf="V_SF" units="V"/>
+      <point id="PhVphC" offset="10" type="uint16" mandatory="true" sf="V_SF" units="V"/>
+      <point id="V_SF" offset="11" type="sunssf" mandatory="true"/>
+      <point id="W" offset="12" type="int16" mandatory="true" sf="W_SF" units="W"/>
+      <point id="W_SF" offset="13" type="sunssf" mandatory="true" access="rw"/>
+      <point id="Hz" offset="14" type="uint16" mandatory="true" sf="Hz_SF" units="Hz"/>
+      <point id="Hz_SF" offset="15" type="sunssf" mandatory="true"/>
+      <point id="VA" offset="16" type="int16" sf="VA_SF" units="VA"/>
+      <point id="VA_SF" offset="17" type="sunssf" access="rw"/>
+      <point id="VAr" offset="18" type="int16" sf="VAr_SF" units="VAr"/>
+      <point id="VAr_SF" offset="19" type="sunssf" access="rw"/>
+      <point id="PF" offset="20" type="int16" sf="PF_SF"/>
+      <point id="PF_SF" offset="21" type="sunssf"/>
+      <point id="WH" offset="22" type="acc32" mandatory="true" sf="WH_SF" units="Wh"/>
+      <point id="WH_SF" offset="24" type="sunssf" mandatory="true"/>
+      <point id="DCA" offset="25" type="uint16" sf="DCA_SF" units="A"/>
+      <point id="DCA_SF" offset="26" type="sunssf"/>
+      <point id="DCV" offset="27" type="uint16" sf="DCV_SF" units="V"/>
+      <point id="DCV_SF" offset="28" type="sunssf"/>
+      <point id="DCW" offset="29" type="int16" sf="DCW_SF" units="W"/>
+      <point id="DCW_SF" offset="30" type="sunssf" access="rw"/>
+      <point id="TmpCab" offset="31" type="int16" mandatory="true" sf="Tmp_SF" units="C"/>
+      <point id="TmpSnk" offset="32" type="int16" sf="Tmp_SF" units="C"/>
+      <point id="TmpTrns" offset="33" type="int16" sf="Tmp_SF" units="C"/>
+      <point id="TmpOt" offset="34" type="int16" sf="Tmp_SF" units="C"/>
+      <point id="Tmp_SF" offset="35" type="sunssf" mandatory="true"/>
+      <point id="St" offset="36" type="enum16" mandatory="true">
+        <symbol id="OFF">1</symbol>
+        <symbol id="SLEEPING">2</symbol>
+        <symbol id="STARTING">3</symbol>
+        <symbol id="MPPT">4</symbol>
+        <symbol id="THROTTLED">5</symbol>
+        <symbol id="SHUTTING_DOWN">6</symbol>
+        <symbol id="FAULT">7</symbol>
+        <symbol id="STANDBY">8</symbol>
+      </point>
+      <point id="StVnd" offset="37" type="enum16">
+        <symbol id="POR">0</symbol>
+        <symbol id="READY">1</symbol>
+        <symbol id="FOLLOWING">2</symbol>
+        <symbol id="FAULT">3</symbol>
+        <symbol id="FORMING">4</symbol>
+        <symbol id="RECONNECT_DELAY">5</symbol>
+        <symbol id="AREA_EPS_LOST">7</symbol>
+        <symbol id="CHARGE">8</symbol>
+        <symbol id="RIDETHRU">9</symbol>
+        <symbol id="CESSATION">10</symbol>
+        <symbol id="TRANS">11</symbol>
+      </point>
+      <point id="Evt1" offset="38" type="bitfield32" mandatory="true">
+        <symbol id="GROUND_FAULT">0</symbol>
+        <symbol id="DC_OVER_VOLT">1</symbol>
+        <symbol id="AC_DISCONNECT">2</symbol>
+        <symbol id="DC_DISCONNECT">3</symbol>
+        <symbol id="GRID_DISCONNECT">4</symbol>
+        <symbol id="CABINET_OPEN">5</symbol>
+        <symbol id="MANUAL_SHUTDOWN">6</symbol>
+        <symbol id="OVER_TEMP">7</symbol>
+        <symbol id="OVER_FREQUENCY">8</symbol>
+        <symbol id="UNDER_FREQUENCY">9</symbol>
+        <symbol id="AC_OVER_VOLT">10</symbol>
+        <symbol id="AC_UNDER_VOLT">11</symbol>
+        <symbol id="BLOWN_STRING_FUSE">12</symbol>
+        <symbol id="UNDER_TEMP">13</symbol>
+        <symbol id="MEMORY_LOSS">14</symbol>
+        <symbol id="HW_TEST_FAILURE">15</symbol>
+      </point>
+      <point id="Evt2" offset="40" type="bitfield32" mandatory="true"/>
+      <point id="EvtVnd1" offset="42" type="bitfield32">
+        <symbol id="HARDWARE_ENABLE">0</symbol>
+        <symbol id="AC_PWR_AVAIL">1</symbol>
+        <symbol id="DC_PWR_AVAIL">2</symbol>
+        <symbol id="PWR_CRCT_EN">3</symbol>
+        <symbol id="MX1">4</symbol>
+        <symbol id="MX2">5</symbol>
+        <symbol id="K1">6</symbol>
+        <symbol id="K2">7</symbol>
+        <symbol id="CTL_MSG_VALID">8</symbol>
+        <symbol id="PWR_CMD_VALID">9</symbol>
+        <symbol id="CUR_CMD_VALID">10</symbol>
+        <symbol id="PH_ROTAT_STAT">11</symbol>
+        <symbol id="LV_DETECTED">12</symbol>
+        <symbol id="RSVD">13</symbol>
+        <symbol id="REM_AC_AVAIL">14</symbol>
+        <symbol id="REM_PH_ROTAT_STAT">15</symbol>
+        <symbol id="REM_LV_DETECTED">16</symbol>
+        <symbol id="DI1_STAT">17</symbol>
+        <symbol id="DI2_STAT">18</symbol>
+        <symbol id="DI3_STAT">19</symbol>
+        <symbol id="DI4_STAT">20</symbol>
+        <symbol id="DO1_STAT">21</symbol>
+        <symbol id="DO2_STAT">22</symbol>
+        <symbol id="DO3_STAT">23</symbol>
+        <symbol id="DO4_STAT">24</symbol>
+        <symbol id="DC_CMD_VALID">25</symbol>
+      </point>
+      <point id="EvtVnd2" offset="44" type="bitfield32"/>
+      <point id="EvtVnd3" offset="46" type="bitfield32"/>
+      <point id="EvtVnd4" offset="48" type="bitfield32"/>
+    </block>
+  </model>
+  <strings id="103" locale="en">
+    <model>
+      <label>Inverter (Three Phase)</label>
+      <description>Include this model for three phase inverter monitoring</description>
+      <notes></notes>
+    </model>
+    <point id="A">
+      <label>Amps</label>
+      <description>AC Current</description>
+      <notes>Sum of active phases</notes>
+    </point>
+    <point id="AphA">
+      <label>Amps PhaseA</label>
+      <description>Phase A Current</description>
+      <notes>Connected Phase</notes>
+    </point>
+    <point id="AphB">
+      <label>Amps PhaseB</label>
+      <description>Phase B Current</description>
+      <notes>Connected Phase</notes>
+    </point>
+    <point id="AphC">
+      <label>Amps PhaseC</label>
+      <description>Phase C Current</description>
+      <notes>Connected Phase</notes>
+    </point>
+    <point id="PPVphAB">
+      <label>Phase Voltage AB</label>
+      <description>Phase Voltage AB</description>
+      <notes></notes>
+    </point>
+    <point id="PPVphBC">
+      <label>Phase Voltage BC</label>
+      <description>Phase Voltage BC</description>
+      <notes></notes>
+    </point>
+    <point id="PPVphCA">
+      <label>Phase Voltage CA</label>
+      <description>Phase Voltage CA</description>
+      <notes></notes>
+    </point>
+    <point id="PhVphA">
+      <label>Phase Voltage AN</label>
+      <description>Phase Voltage AN</description>
+      <notes></notes>
+    </point>
+    <point id="PhVphB">
+      <label>Phase Voltage BN</label>
+      <description>Phase Voltage BN</description>
+      <notes></notes>
+    </point>
+    <point id="PhVphC">
+      <label>Phase Voltage CN</label>
+      <description>Phase Voltage CN</description>
+      <notes></notes>
+    </point>
+    <point id="W">
+      <label>Watts</label>
+      <description>AC Power</description>
+      <notes></notes>
+    </point>
+    <point id="Hz">
+      <label>Hz</label>
+      <description>Line Frequency</description>
+      <notes></notes>
+    </point>
+    <point id="VA">
+      <label>VA</label>
+      <description>AC Apparent Power</description>
+      <notes></notes>
+    </point>
+    <point id="VAr">
+      <label>VAr</label>
+      <description>AC Reactive Power</description>
+      <notes></notes>
+    </point>
+    <point id="PF">
+      <label>PF</label>
+      <description>AC Power Factor</description>
+      <notes></notes>
+    </point>
+    <point id="WH">
+      <label>WattHours</label>
+      <description>AC Energy</description>
+      <notes></notes>
+    </point>
+    <point id="DCA">
+      <label>DC Amps</label>
+      <description>DC Current</description>
+      <notes></notes>
+    </point>
+    <point id="DCV">
+      <label>DC Voltage</label>
+      <description>DC Voltage</description>
+      <notes></notes>
+    </point>
+    <point id="DCW">
+      <label>DC Watts</label>
+      <description>DC Power</description>
+      <notes></notes>
+    </point>
+    <point id="TmpCab">
+      <label>Cabinet Temperature</label>
+      <description>Cabinet Temperature</description>
+      <notes>Module internal ambient temperature.</notes>
+    </point>
+    <point id="TmpSnk">
+      <label>Heat Sink Temperature</label>
+      <description>Heat Sink Temperature</description>
+      <notes></notes>
+    </point>
+    <point id="TmpTrns">
+      <label>Transformer Temperature</label>
+      <description>Transformer Temperature</description>
+      <notes>Not implemented</notes>
+    </point>
+    <point id="TmpOt">
+      <label>Other Temperature</label>
+      <description>Other Temperature</description>
+      <notes>Not implemented</notes>
+    </point>
+    <point id="St">
+      <label>Operating State</label>
+      <description>Not implemented.  Use StVnd</description>
+      <notes></notes>
+      <symbol id="OFF">
+        <label>Off</label>
+        <description>Device is not operating</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="SLEEPING">
+        <label>Sleeping</label>
+        <description>Device is sleeping / auto-shudown</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="STARTING">
+        <label>Starting</label>
+        <description>Device is staring up</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="MPPT">
+        <label>MPPT</label>
+        <description>Device is auto tracking maximum power point</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="THROTTLED">
+        <label>Throttled</label>
+        <description>Device is operating at reduced power output</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="SHUTTING_DOWN">
+        <label>Shutting down</label>
+        <description>Device is shutting down</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="FAULT">
+        <label>Fault</label>
+        <description>One or more faults exist</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="STANDBY">
+        <label>Standby</label>
+        <description>Device is in standby mode</description>
+        <notes></notes>
+      </symbol>
+    </point>
+    <point id="StVnd">
+      <label>Vendor Operating State</label>
+      <description>Vendor specific operating state code</description>
+      <notes></notes>
+      <symbol id="POR">
+        <label>por</label>
+        <description>Power On Reset</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="READY">
+        <label>Ready</label>
+        <description>Device is in standby mode</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="FOLLOWING">
+        <label>Following</label>
+        <description>Device is running in grid following mode</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="FAULT">
+        <label>Fault</label>
+        <description>One or more faults exist</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="FORMING">
+        <label>Forming</label>
+        <description>Device is running in grid forming mode</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="RECONNECT_DELAY">
+        <label>Reconnect Delay</label>
+        <description>Grid available, but Device is waiting for reconnect delay to expire</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="AREA_EPS_LOST">
+        <label>Area EPS Loss</label>
+        <description>Disconnected from grid due to abnormal grid condition(s)</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="CHARGE">
+        <label>Charging DC</label>
+        <description>Charging DC link.  AC side operating as a passive rectifier</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="RIDETHRU">
+        <label>Ride Through</label>
+        <description>High/Low Voltage or Frequency ride-through condition active</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="CESSATION">
+        <label>Momentary Cessation</label>
+        <description>Momentary power cessation active due to high/low grid frequency or voltage</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="TRANS">
+        <label>Transitioning</label>
+        <description>Transitioning between forming/following modes</description>
+        <notes></notes>
+      </symbol>
+    </point>
+    <point id="Evt1">
+      <label>Event1</label>
+      <description>Bitmask value. Event fields</description>
+      <notes></notes>
+      <symbol id="GROUND_FAULT">
+        <label>Ground fault</label>
+        <description></description>
+        <notes></notes>
+      </symbol>
+      <symbol id="DC_OVER_VOLT">
+        <label>DC over voltage</label>
+        <description></description>
+        <notes></notes>
+      </symbol>
+      <symbol id="AC_DISCONNECT">
+        <label>AC disconnect open</label>
+        <description></description>
+        <notes></notes>
+      </symbol>
+      <symbol id="DC_DISCONNECT">
+        <label>DC disconnect open</label>
+        <description></description>
+        <notes></notes>
+      </symbol>
+      <symbol id="GRID_DISCONNECT">
+        <label>Grid shutdown</label>
+        <description></description>
+        <notes></notes>
+      </symbol>
+      <symbol id="CABINET_OPEN">
+        <label>Cabinet open</label>
+        <description></description>
+        <notes></notes>
+      </symbol>
+      <symbol id="MANUAL_SHUTDOWN">
+        <label>Manual shutdown</label>
+        <description></description>
+        <notes></notes>
+      </symbol>
+      <symbol id="OVER_TEMP">
+        <label>Over temperature</label>
+        <description></description>
+        <notes></notes>
+      </symbol>
+      <symbol id="OVER_FREQUENCY">
+        <label>Frequency above limit</label>
+        <description></description>
+        <notes></notes>
+      </symbol>
+      <symbol id="UNDER_FREQUENCY">
+        <label>Frequency under limit</label>
+        <description></description>
+        <notes></notes>
+      </symbol>
+      <symbol id="AC_OVER_VOLT">
+        <label>AC Voltage above limit</label>
+        <description></description>
+        <notes></notes>
+      </symbol>
+      <symbol id="AC_UNDER_VOLT">
+        <label>AC Voltage under limit</label>
+        <description></description>
+        <notes></notes>
+      </symbol>
+      <symbol id="BLOWN_STRING_FUSE">
+        <label>Blown String fuse on input</label>
+        <description></description>
+        <notes></notes>
+      </symbol>
+      <symbol id="UNDER_TEMP">
+        <label>Under temperature</label>
+        <description></description>
+        <notes></notes>
+      </symbol>
+      <symbol id="MEMORY_LOSS">
+        <label>Generic Memory or Communication error (internal)</label>
+        <description></description>
+        <notes></notes>
+      </symbol>
+      <symbol id="HW_TEST_FAILURE">
+        <label>Hardware test failure</label>
+        <description></description>
+        <notes></notes>
+      </symbol>
+    </point>
+    <point id="Evt2">
+      <label>Event Bitfield 2</label>
+      <description>Reserved for future use</description>
+      <notes></notes>
+    </point>
+    <point id="EvtVnd1">
+      <label>Vendor Event Bitfield 1</label>
+      <description>Vendor defined events</description>
+      <notes></notes>
+      <symbol id="HARDWARE_ENABLE">
+        <label>Hardware enable status</label>
+        <description>Status of the hardware enable.</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="AC_PWR_AVAIL">
+        <label>AC Power Available</label>
+        <description>Indicates that AC power is connected and that voltage and frequency are within nominal ranges.</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="DC_PWR_AVAIL">
+        <label>DC Power Available</label>
+        <description>Indicates that DC bus voltage is within operating range.</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="PWR_CRCT_EN">
+        <label>Power Circuit Enabled</label>
+        <description>Indicates whether the switching devices are active.</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="MX1">
+        <label>MX1 relay status</label>
+        <description>MX1 relay status</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="MX2">
+        <label>MX2 relay status</label>
+        <description>MX2 relay status</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="K1">
+        <label>Precharge status</label>
+        <description>K1 precharge relay status.</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="K2">
+        <label>K2 Relay status</label>
+        <description>K2 DC Run relay status.</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="CTL_MSG_VALID">
+        <label>Control commands valid</label>
+        <description>Indicates the validity of the control bits. Message must be received within the serial timeout and parameter data within range to be considered valid.</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="PWR_CMD_VALID">
+        <label>Power command Valid</label>
+        <description>Indicates the validity of the real and reactive power commands. </description>
+        <notes></notes>
+      </symbol>
+      <symbol id="CUR_CMD_VALID">
+        <label>Current command Valid</label>
+        <description>Indicates the validity of the real and reactive current commands</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="PH_ROTAT_STAT">
+        <label>Phase rotation status</label>
+        <description>Phase rotation order.  When L1 phase angle leads L2 phase angle, rotation is considered positive.</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="LV_DETECTED">
+        <label>Line voltage detected</label>
+        <description>Flag indicating if voltage is detected on L1, L2 or L3.</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="RSVD">
+        <label>Unused</label>
+        <description>Unused</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="REM_AC_AVAIL">
+        <label>Remote AC Power Available</label>
+        <description>Indicates that remote AC power is connected and that voltage and frequency are within nominal ranges.</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="REM_PH_ROTAT_STAT">
+        <label>Remote phase rotation status</label>
+        <description>Remote phase rotation order.  When L1 phase angle leads L2 phase angle, rotation is considered positive.</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="REM_LV_DETECTED">
+        <label>Remote Line Voltage Detected</label>
+        <description>Flag indicating if voltage is detected on remote L1, L2 or L3.</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="DI1_STAT">
+        <label>DI1 Status</label>
+        <description>Status of digital input 1</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="DI2_STAT">
+        <label>DI2 Status</label>
+        <description>Status of digital input 2</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="DI3_STAT">
+        <label>DI3 Status</label>
+        <description>Status of digital input 3</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="DI4_STAT">
+        <label>DI4 Status</label>
+        <description>Status of digital input 4</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="DO1_STAT">
+        <label>DO1 Status</label>
+        <description>Status of digital output 1</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="DO2_STAT">
+        <label>DO2 Status</label>
+        <description>Status of digital output 2</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="DO3_STAT">
+        <label>DO3 Status</label>
+        <description>Status of digital output 3</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="DO4_STAT">
+        <label>DO4 Status</label>
+        <description>Status of digital output 4</description>
+        <notes></notes>
+      </symbol>
+      <symbol id="DC_CMD_VALID">
+        <label>DC link reference commands Valid</label>
+        <description>Indicates the validity of the DC Bus reference commands.</description>
+        <notes></notes>
+      </symbol>
+    </point>
+    <point id="EvtVnd2">
+      <label>Vendor Event Bitfield 2</label>
+      <description>Vendor defined events</description>
+      <notes>Not implemented</notes>
+    </point>
+    <point id="EvtVnd3">
+      <label>Vendor Event Bitfield 3</label>
+      <description>Vendor defined events</description>
+      <notes>Not implemented</notes>
+    </point>
+    <point id="EvtVnd4">
+      <label>Vendor Event Bitfield 4</label>
+      <description>Vendor defined events</description>
+      <notes>Not implemented</notes>
+    </point>
+  </strings>
+</sunSpecModels>

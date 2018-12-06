@@ -29,6 +29,7 @@ setuptools.setup(
         'click',
         'graham',
         'pycparser',
+        'pysunspec',
         'pyqt5',
     ],
     extras_require={

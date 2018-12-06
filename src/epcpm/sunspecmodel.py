@@ -17,13 +17,14 @@ import epyqlib.pm.parametermodel
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class DataPoint(epyqlib.treenode.TreeNode):
-    factor = attr.ib(
-        default=0,
-        converter=int,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.Integer(),
-        ),
-    ) # referencing another data point uuid
+    factor_uuid = epyqlib.attrsmodel.attr_uuid(
+        default=None,
+        allow_none=True,
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=factor_uuid,
+        human_name='Scale Factor UUID',
+    )
     units = attr.ib(
         default=None,
         convert=epyqlib.attrsmodel.to_str_or_none,
@@ -241,7 +242,7 @@ def merge(name, *types):
 columns = epyqlib.attrsmodel.columns(
     merge('id', Model),
     merge('length', Model),
-    merge('factor', DataPoint),
+    merge('factor_uuid', DataPoint),
     merge('units', DataPoint),
     merge('parameter_uuid', DataPoint),
     merge('type', DataPoint),

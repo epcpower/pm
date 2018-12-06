@@ -112,6 +112,7 @@
     <addaction name="separator"/>
     <addaction name="action_import_sym"/>
     <addaction name="action_export_sym"/>
+    <addaction name="action_import_smdx"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -189,6 +190,11 @@
   <action name="action_open_value_set">
    <property name="text">
     <string>&amp;Open...</string>
+   </property>
+  </action>
+  <action name="action_import_smdx">
+   <property name="text">
+    <string>Import SMDX...</string>
    </property>
   </action>
  </widget>
