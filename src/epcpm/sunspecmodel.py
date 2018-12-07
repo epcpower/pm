@@ -19,11 +19,9 @@ import epyqlib.pm.parametermodel
 class DataPoint(epyqlib.treenode.TreeNode):
     factor_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,
+        human_name='Scale Factor',
         allow_none=True,
-    )
-    epyqlib.attrsmodel.attrib(
-        attribute=factor_uuid,
-        human_name='Scale Factor UUID',
+        data_display=epyqlib.attrsmodel.name_from_uuid,
     )
     units = attr.ib(
         default=None,
@@ -43,7 +41,7 @@ class DataPoint(epyqlib.treenode.TreeNode):
     type = attr.ib( #TODO enumeration reference/list_selection_root something something ... words
         default='uint16',
         metadata=graham.create_metadata(
-            field=marshmallow.fields.Dict(),
+            field=marshmallow.fields.String(),
         ),
     )
     enumeration_uuid = epyqlib.attrsmodel.attr_uuid(
@@ -76,13 +74,13 @@ class DataPoint(epyqlib.treenode.TreeNode):
     label = attr.ib(
         default='New label',
         metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
+            field=marshmallow.fields.String(allow_none=True),
         ),
     )  # long name, short description, somewhere between name and description
     description = attr.ib(
         default='New description',
         metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
+            field=marshmallow.fields.String(allow_none=True),
         ),
     )
     notes = attr.ib(
@@ -240,7 +238,8 @@ def merge(name, *types):
 
 
 columns = epyqlib.attrsmodel.columns(
-    merge('id', Model),
+    merge('name', DataPoint) + merge('id', Model),
+    merge('label', DataPoint),
     merge('length', Model),
     merge('factor_uuid', DataPoint),
     merge('units', DataPoint),
@@ -248,8 +247,6 @@ columns = epyqlib.attrsmodel.columns(
     merge('type', DataPoint),
     merge('enumeration_uuid', DataPoint, Enumeration, BitField),
     merge('offset', DataPoint),
-    merge('name', DataPoint),
-    merge('label', DataPoint),
     merge('description', DataPoint),
     merge('notes', DataPoint),
     merge('uuid', *types.types.values()),
