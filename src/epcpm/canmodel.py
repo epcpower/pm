@@ -803,6 +803,7 @@ columns = epyqlib.attrsmodel.columns(
 )
 
 
+# TODO: CAMPid 075454679961754906124539691347967
 @attr.s
 class ReferencedUuidNotifier(PyQt5.QtCore.QObject):
     changed = PyQt5.QtCore.pyqtSignal('PyQt_PyObject')

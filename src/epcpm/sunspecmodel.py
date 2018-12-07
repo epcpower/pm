@@ -254,3 +254,42 @@ columns = epyqlib.attrsmodel.columns(
     merge('notes', DataPoint),
     merge('uuid', *types.types.values()),
 )
+
+
+# TODO: CAMPid 075454679961754906124539691347967
+@attr.s
+class ReferencedUuidNotifier:
+    changed = epyqlib.utils.qt.Signal('PyQt_PyObject')
+
+    view = attr.ib(default=None)
+    selection_model = attr.ib(default=None)
+
+    def __attrs_post_init__(self):
+        if self.view is not None:
+            self.set_view(self.view)
+
+    def set_view(self, view):
+        self.disconnect_view()
+
+        self.view = view
+        self.selection_model = self.view.selectionModel()
+        self.selection_model.currentChanged.connect(
+            self.current_changed,
+        )
+
+    def disconnect_view(self):
+        if self.selection_model is not None:
+            self.selection_model.currentChanged.disconnect(
+                self.current_changed,
+            )
+        self.view = None
+        self.selection_model = None
+
+    def current_changed(self, current, previous):
+        index = epyqlib.utils.qt.resolve_index_to_model(
+            index=current,
+        )
+        model = index.data(epyqlib.utils.qt.UserRoles.attrs_model)
+        node = model.node_from_index(index)
+        if isinstance(node, DataPoint):
+            self.changed.emit(node.parameter_uuid)

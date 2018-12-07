@@ -116,8 +116,12 @@ class Window:
 
         self.view_models = {}
 
-        self.uuid_notifier = epcpm.canmodel.ReferencedUuidNotifier()
-        self.uuid_notifier.changed.connect(self.can_uuid_changed)
+        self.uuid_notifiers = {
+            'can': epcpm.canmodel.ReferencedUuidNotifier(),
+            'sunspec': epcpm.sunspecmodel.ReferencedUuidNotifier(),
+        }
+        self.uuid_notifiers['can'].changed.connect(self.can_uuid_changed)
+        self.uuid_notifiers['sunspec'].changed.connect(self.can_uuid_changed)
 
         self.project = None
         self.value_set = None
@@ -261,7 +265,8 @@ class Window:
             types=epcpm.sunspecmodel.types,
         )
 
-        self.uuid_notifier.disconnect_view()
+        for notifier in self.uuid_notifiers.values():
+            notifier.disconnect_view()
 
         i = zip(model_views.items(), self.project.models.values())
         for (name, model_view), model in i:
@@ -303,7 +308,8 @@ class Window:
 
             view.customContextMenuRequested.connect(m)
 
-        self.uuid_notifier.set_view(self.ui.can_view)
+        self.uuid_notifiers['can'].set_view(self.ui.can_view)
+        self.uuid_notifiers['sunspec'].set_view(self.ui.sunspec_view)
 
         return
 
