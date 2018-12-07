@@ -33,10 +33,8 @@ class DataPoint(epyqlib.treenode.TreeNode):
     parameter_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,
         allow_none=True,
-    )
-    epyqlib.attrsmodel.attrib(
-        attribute=parameter_uuid,
-        human_name='Parameter UUID',
+        human_name='Parameter',
+        data_display=epyqlib.attrsmodel.name_from_uuid,
     )
     type = attr.ib( #TODO enumeration reference/list_selection_root something something ... words
         default='uint16',
@@ -111,7 +109,12 @@ class DataPoint(epyqlib.treenode.TreeNode):
         super().__init__()
 
     def can_drop_on(self, node):
-        return False
+        return isinstance(node, epyqlib.pm.parametermodel.Parameter)
+
+    def child_from(self, node):
+        self.parameter_uuid = node.uuid
+
+        return None
 
     def can_delete(self, node=None):
         if node is None:
