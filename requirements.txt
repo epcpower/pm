@@ -5,6 +5,8 @@ pyqt5==5.11.2
 requests==2.20.0
 tox==2.8.2
 
+openpyxl==2.5.12
+
 codecov==2.0.5
 pytest==3.8.2
 pytest-cov==2.5.1
