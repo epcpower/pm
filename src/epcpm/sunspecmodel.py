@@ -60,6 +60,13 @@ class DataPoint(epyqlib.treenode.TreeNode):
             # around especially in custom models where we have no sunspec
             # model to be validating against
             # for now, yes, this is vaguely nondescript of address vs block offset
+    block_offset = attr.ib(
+        default=0,
+        converter=int,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(),
+        ),
+    )
 
     # size is purely calculated from the type
 
@@ -120,6 +127,11 @@ class DataPoint(epyqlib.treenode.TreeNode):
         if node is None:
             return self.tree_parent.can_delete(node=self)
 
+    @property
+    def size(self):
+        # TODO: something based on self.type
+        return None
+
 
 @graham.schemify(tag='sunspec_enumeration', register=True)
 @epyqlib.attrsmodel.ify()
@@ -162,6 +174,20 @@ class BitField:
             return self.tree_parent.can_delete(node=self)
 
 
+def model_header_data_points():
+    return [
+        DataPoint(
+            name='ID',
+            offset=0,
+        ),
+        DataPoint(
+            name='L',
+            offset=1,
+            description='Model Length',
+        ),
+    ]
+
+
 @graham.schemify(tag='sunspec_model', register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
@@ -193,7 +219,7 @@ class Model(epyqlib.treenode.TreeNode):
 
     # self.point_data = []
     children = attr.ib(
-        default=attr.Factory(list),
+        factory=model_header_data_points,
         metadata=graham.create_metadata(
             field=graham.fields.MixedList(fields=(
                 marshmallow.fields.Nested(graham.schema(DataPoint)),
@@ -250,6 +276,7 @@ columns = epyqlib.attrsmodel.columns(
     merge('type', DataPoint),
     merge('enumeration_uuid', DataPoint, Enumeration, BitField),
     merge('offset', DataPoint),
+    merge('block_offset', DataPoint),
     merge('description', DataPoint),
     merge('notes', DataPoint),
     merge('uuid', *types.types.values()),

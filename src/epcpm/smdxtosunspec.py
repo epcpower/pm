@@ -18,7 +18,7 @@ def epc_point_from_pysunspec_point(point, scale_factors=None):
         # parameter_uuid=,
         type=point.point_type.type,
         # enumeration_uuid=,
-        offset=point.point_type.offset,
+        block_offset=point.point_type.offset,
         name=point.point_type.id,
         label=point.point_type.label,
         description=point.point_type.description,
@@ -71,11 +71,23 @@ def import_model(model_id, paths=()):
 
         points.append(epc_point)
 
-    return epcpm.sunspecmodel.Model(
+    our_model = epcpm.sunspecmodel.Model(
         id=model.id,
         length=model.len,
-        children=sorted(
-            points + list(scale_factors.values()),
-            key=lambda point: point.offset,
-        ),
     )
+
+    id_point = our_model.children[0]
+    id_point.id = model.model_type.id
+    id_point.description = model.model_type.description
+    id_point.label = model.model_type.label
+    id_point.notes = model.model_type.notes
+
+    imported_points = sorted(
+        points + list(scale_factors.values()),
+        key=lambda point: point.offset,
+    )
+
+    for point in imported_points:
+        our_model.append_child(point)
+
+    return our_model

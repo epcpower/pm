@@ -13,3 +13,10 @@ TestAttrsModel = epyqlib.attrsmodel.build_tests(
     root_type=epcpm.sunspecmodel.Root,
     columns=epcpm.sunspecmodel.columns,
 )
+
+
+def test_model_has_header():
+    model = epcpm.sunspecmodel.Model()
+
+    assert model.children[0].name == 'ID'
+    assert model.children[1].name == 'L'

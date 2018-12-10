@@ -20,3 +20,5 @@ def test_x():
     workbook = builder.gen()
 
     assert workbook.sheetnames == ['1', '17', '103', '65534']
+
+    workbook.save('test_sunspectoxlsx.xlsx')
