@@ -835,6 +835,9 @@ class ReferencedUuidNotifier(PyQt5.QtCore.QObject):
         self.selection_model = None
 
     def current_changed(self, current, previous):
+        if not current.isValid():
+            return
+
         index = epyqlib.utils.qt.resolve_index_to_model(
             index=current,
         )

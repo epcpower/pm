@@ -18,5 +18,15 @@ TestAttrsModel = epyqlib.attrsmodel.build_tests(
 def test_model_has_header():
     model = epcpm.sunspecmodel.Model()
 
-    assert model.children[0].name == 'ID'
-    assert model.children[1].name == 'L'
+    header_block = model.children[0]
+
+    assert isinstance(header_block, epcpm.sunspecmodel.HeaderBlock)
+
+    assert header_block.children[0].name == 'ID'
+    assert header_block.children[1].name == 'L'
+
+    assert header_block.offset == 0
+
+    fixed_block = model.children[1]
+
+    assert fixed_block.offset == 2

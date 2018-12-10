@@ -1,9 +1,8 @@
-import collections
+import string
 
 import attr
 import openpyxl
 
-import epyqlib.pm.parametermodel
 import epyqlib.utils.general
 
 import epcpm.sunspecmodel
@@ -67,11 +66,33 @@ class Model:
         self.worksheet.title = str(self.wrapped.id)
         self.worksheet.append(list(sheet_fields.keys()))
 
+        for child in self.wrapped.children:
+            builder = builders.wrap(
+                wrapped=child,
+                parameter_uuid_finder=self.parameter_uuid_finder,
+            )
+
+            for row in builder.gen():
+                self.worksheet.append(row)
+
+            self.worksheet.append([])
+
+
+@builders(epcpm.sunspecmodel.HeaderBlock)
+@builders(epcpm.sunspecmodel.FixedBlock)
+@attr.s
+class Block:
+    wrapped = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
+
+    def gen(self):
         scale_factor_from_uuid = {
             point.uuid: point
             for point in self.wrapped.children
             if point.type == 'sunssf'
         }
+
+        rows = []
 
         for child in self.wrapped.children:
             builder = builders.wrap(
@@ -79,7 +100,9 @@ class Model:
                 scale_factor_from_uuid=scale_factor_from_uuid,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
-            self.worksheet.append(builder.gen())
+            rows.append(builder.gen())
+
+        return rows
 
 
 @builders(epcpm.sunspecmodel.DataPoint)

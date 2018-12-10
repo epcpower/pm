@@ -458,7 +458,7 @@ class Window:
         update = menu.addAction('Update')
         update.setEnabled(hasattr(node, 'update'))
 
-        delete = menu.addAction('Delete')
+        delete = menu.addAction('&Delete')
         delete.setEnabled(node.can_delete())
 
         menu.addSeparator()

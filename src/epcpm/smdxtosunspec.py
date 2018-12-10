@@ -76,7 +76,7 @@ def import_model(model_id, paths=()):
         length=model.len,
     )
 
-    id_point = our_model.children[0]
+    id_point = our_model.children[0].children[0]
     id_point.id = model.model_type.id
     id_point.description = model.model_type.description
     id_point.label = model.model_type.label
@@ -84,10 +84,10 @@ def import_model(model_id, paths=()):
 
     imported_points = sorted(
         points + list(scale_factors.values()),
-        key=lambda point: point.offset,
+        key=lambda point: point.block_offset,
     )
 
     for point in imported_points:
-        our_model.append_child(point)
+        our_model.children[1].append_child(point)
 
     return our_model

@@ -4,6 +4,7 @@ import marshmallow
 
 import epyqlib.attrsmodel
 import epyqlib.pm.parametermodel
+from PyQt5 import QtCore
 
 # sunspec enumerations will be stored in parametermodel.Enumeration and be
 # mappable into the sunspec interface
@@ -49,17 +50,29 @@ class DataPoint(epyqlib.treenode.TreeNode):
         data_display=epyqlib.attrsmodel.name_from_uuid,
         list_selection_root='enumerations',
     )  # probably to parametermodel.Enumeration (applicable point)
+
     offset = attr.ib(
         default=0,
         converter=int,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.Integer(),
-        ),
     ) # this is somewhat redundant with the position in the list of data
             # points but helpful for keeping things from incidentally floating
             # around especially in custom models where we have no sunspec
             # model to be validating against
             # for now, yes, this is vaguely nondescript of address vs block offset
+    @QtCore.pyqtProperty('PyQt_PyObject')
+    def pyqtify_offset(self):
+        block = self.tree_parent
+
+        if block is None:
+            return None
+
+        return block.offset + self.block_offset
+
+    # TODO: shouldn't this be read only?
+    @pyqtify_offset.setter
+    def pyqtify_offset(self, value):
+        pass
+
     block_offset = attr.ib(
         default=0,
         converter=int,
@@ -174,18 +187,97 @@ class BitField:
             return self.tree_parent.can_delete(node=self)
 
 
-def model_header_data_points():
+def header_data_points():
     return [
         DataPoint(
             name='ID',
-            offset=0,
+            block_offset=0,
         ),
         DataPoint(
             name='L',
-            offset=1,
+            block_offset=1,
+            label=None,
             description='Model Length',
         ),
     ]
+
+
+@graham.schemify(tag='sunspec_header_block', register=True)
+@epyqlib.attrsmodel.ify()
+@epyqlib.utils.qt.pyqtify()
+@attr.s(hash=False)
+class HeaderBlock(epyqlib.treenode.TreeNode):
+    name = attr.ib(
+        default='Header',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    offset = attr.ib(
+        default=0,
+        converter=int,
+    )
+    children = attr.ib(
+        factory=header_data_points,
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(fields=(
+                marshmallow.fields.Nested(graham.schema(DataPoint)),
+            )),
+        ),
+    )
+
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    def can_drop_on(self, node):
+        return False
+
+    def can_delete(self, node):
+        return False
+
+
+@graham.schemify(tag='sunspec_fixed_block', register=True)
+@epyqlib.attrsmodel.ify()
+@epyqlib.utils.qt.pyqtify()
+@attr.s(hash=False)
+class FixedBlock(epyqlib.treenode.TreeNode):
+    name = attr.ib(
+        default='Fixed Block',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    offset = attr.ib(
+        default=2,
+        converter=int,
+    )
+    children = attr.ib(
+        factory=list,
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(fields=(
+                marshmallow.fields.Nested(graham.schema(DataPoint)),
+            )),
+        ),
+    )
+
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    def can_drop_on(self, node):
+        return isinstance(
+            node,
+            (
+                epyqlib.pm.parametermodel.Parameter,
+                DataPoint,
+            ),
+        )
+
+    def can_delete(self, node):
+        return False
 
 
 @graham.schemify(tag='sunspec_model', register=True)
@@ -219,10 +311,11 @@ class Model(epyqlib.treenode.TreeNode):
 
     # self.point_data = []
     children = attr.ib(
-        factory=model_header_data_points,
+        factory=lambda: [HeaderBlock(), FixedBlock()],
         metadata=graham.create_metadata(
             field=graham.fields.MixedList(fields=(
-                marshmallow.fields.Nested(graham.schema(DataPoint)),
+                marshmallow.fields.Nested(graham.schema(HeaderBlock)),
+                marshmallow.fields.Nested(graham.schema(FixedBlock)),
                 marshmallow.fields.Nested(graham.schema(Enumeration)),
                 marshmallow.fields.Nested(graham.schema(BitField)),
             )),
@@ -235,13 +328,7 @@ class Model(epyqlib.treenode.TreeNode):
         super().__init__()
 
     def can_drop_on(self, node):
-        return isinstance(
-            node,
-            (
-                epyqlib.pm.parametermodel.Parameter,
-                DataPoint,
-            ),
-        )
+        return False
 
     def can_delete(self, node=None):
         if node is None:
@@ -257,7 +344,15 @@ Root = epyqlib.attrsmodel.Root(
 
 
 types = epyqlib.attrsmodel.Types(
-    types=(Root, Model, DataPoint, Enumeration, BitField),
+    types=(
+        Root,
+        Model,
+        DataPoint,
+        Enumeration,
+        BitField,
+        HeaderBlock,
+        FixedBlock,
+    ),
 )
 
 
@@ -267,7 +362,7 @@ def merge(name, *types):
 
 
 columns = epyqlib.attrsmodel.columns(
-    merge('name', DataPoint) + merge('id', Model),
+    merge('name', HeaderBlock, FixedBlock, DataPoint) + merge('id', Model),
     merge('label', DataPoint),
     merge('length', Model),
     merge('factor_uuid', DataPoint),
@@ -275,7 +370,7 @@ columns = epyqlib.attrsmodel.columns(
     merge('parameter_uuid', DataPoint),
     merge('type', DataPoint),
     merge('enumeration_uuid', DataPoint, Enumeration, BitField),
-    merge('offset', DataPoint),
+    merge('offset', DataPoint, HeaderBlock, FixedBlock),
     merge('block_offset', DataPoint),
     merge('description', DataPoint),
     merge('notes', DataPoint),
@@ -313,6 +408,9 @@ class ReferencedUuidNotifier:
         self.selection_model = None
 
     def current_changed(self, current, previous):
+        if not current.isValid():
+            return
+
         index = epyqlib.utils.qt.resolve_index_to_model(
             index=current,
         )
