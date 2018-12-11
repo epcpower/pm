@@ -28,6 +28,7 @@ def epc_point_from_pysunspec_point(point, parameter_model, scale_factors=None):
         label=point.point_type.label,
         description=point.point_type.description,
         notes=point.point_type.notes,
+        size=point.point_type.len,
         # uuid=,
     )
 
@@ -83,6 +84,11 @@ def import_model(model_id, parameter_model, paths=()):
     our_model = epcpm.sunspecmodel.Model(
         id=model.id,
         length=model.len,
+    )
+
+    types = parameter_model.list_selection_roots['sunspec types']
+    our_model.children[0].add_data_points(
+        uint16_uuid=types.child_by_name('uint16').uuid,
     )
 
     id_point = our_model.children[0].children[0]

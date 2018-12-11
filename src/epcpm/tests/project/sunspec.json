@@ -16,13 +16,14 @@
                             "factor_uuid": null,
                             "units": null,
                             "parameter_uuid": null,
-                            "type_uuid": null,
+                            "type_uuid": "4f856a7e-20f4-43e2-86b1-cc7ee772f919",
                             "enumeration_uuid": null,
                             "block_offset": 0,
                             "name": "ID",
                             "label": "Common",
                             "description": "All SunSpec compliant devices must include this as the first model",
                             "notes": null,
+                            "size": 1,
                             "uuid": "4af531d6-8243-44c2-adc7-518141ef48f7"
                         },
                         {
@@ -30,13 +31,14 @@
                             "factor_uuid": null,
                             "units": null,
                             "parameter_uuid": null,
-                            "type_uuid": null,
+                            "type_uuid": "4f856a7e-20f4-43e2-86b1-cc7ee772f919",
                             "enumeration_uuid": null,
                             "block_offset": 1,
                             "name": "L",
                             "label": null,
                             "description": "Model Length",
                             "notes": null,
+                            "size": 1,
                             "uuid": "7bee56f7-7b5b-48af-834c-beb9bf9d3033"
                         }
                     ],
@@ -58,6 +60,7 @@
                             "label": "Manufacturer",
                             "description": "Well known value registered with SunSpec for compliance",
                             "notes": null,
+                            "size": 16,
                             "uuid": "7835ac1b-7e45-4f94-b8c4-5feed0cd8bf1"
                         },
                         {
@@ -72,6 +75,7 @@
                             "label": "Model",
                             "description": "Manufacturer specific value (32 chars)",
                             "notes": null,
+                            "size": 16,
                             "uuid": "cd229221-2786-4e50-84a4-aeee739c2469"
                         },
                         {
@@ -86,6 +90,7 @@
                             "label": "Options",
                             "description": "Manufacturer specific value (16 chars)",
                             "notes": null,
+                            "size": 8,
                             "uuid": "a6e20203-464c-4273-a1dc-82e781e88813"
                         },
                         {
@@ -100,6 +105,7 @@
                             "label": "Version",
                             "description": "Manufacturer specific value (16 chars)",
                             "notes": null,
+                            "size": 8,
                             "uuid": "a7f79976-f2c2-4055-b65e-aabac74349f9"
                         },
                         {
@@ -114,6 +120,7 @@
                             "label": "Serial Number",
                             "description": "Manufacturer specific value (32 chars)",
                             "notes": null,
+                            "size": 16,
                             "uuid": "4e0fd928-f5cd-43d1-9324-f19607e2a6ff"
                         },
                         {
@@ -128,6 +135,7 @@
                             "label": "Device Address",
                             "description": "Modbus device address",
                             "notes": null,
+                            "size": 1,
                             "uuid": "c39b8993-b860-4258-ad32-3831941d4dcb"
                         }
                     ],
@@ -150,13 +158,14 @@
                             "factor_uuid": null,
                             "units": null,
                             "parameter_uuid": null,
-                            "type_uuid": null,
+                            "type_uuid": "4f856a7e-20f4-43e2-86b1-cc7ee772f919",
                             "enumeration_uuid": null,
                             "block_offset": 0,
                             "name": "ID",
                             "label": "Serial Interface",
                             "description": "Include this model for serial interface configuration support",
                             "notes": null,
+                            "size": 1,
                             "uuid": "bd320083-8715-4eff-8e54-cb62b8193f7a"
                         },
                         {
@@ -164,13 +173,14 @@
                             "factor_uuid": null,
                             "units": null,
                             "parameter_uuid": null,
-                            "type_uuid": null,
+                            "type_uuid": "4f856a7e-20f4-43e2-86b1-cc7ee772f919",
                             "enumeration_uuid": null,
                             "block_offset": 1,
                             "name": "L",
                             "label": null,
                             "description": "Model Length",
                             "notes": null,
+                            "size": 1,
                             "uuid": "fb64d978-692a-41ea-af80-1f99e0e7a40f"
                         }
                     ],
@@ -192,6 +202,7 @@
                             "label": "Name",
                             "description": "Interface name (8 chars)",
                             "notes": null,
+                            "size": 4,
                             "uuid": "8f108062-5822-48d6-9c45-5be148d3f165"
                         },
                         {
@@ -206,6 +217,7 @@
                             "label": "Rate",
                             "description": "Interface baud rate in bits per second",
                             "notes": null,
+                            "size": 2,
                             "uuid": "84a22239-2d5f-488a-89e2-3ae9e64b15c4"
                         },
                         {
@@ -220,6 +232,7 @@
                             "label": "Bits",
                             "description": "Number of data bits per character",
                             "notes": null,
+                            "size": 1,
                             "uuid": "66b033a6-8e50-48d1-b313-0f3891362c41"
                         },
                         {
@@ -234,6 +247,7 @@
                             "label": "Parity",
                             "description": "Bitmask value.  Parity setting",
                             "notes": null,
+                            "size": 1,
                             "uuid": "4dfa2967-f422-4300-9046-3b8f5eb46098"
                         },
                         {
@@ -248,6 +262,7 @@
                             "label": "Duplex",
                             "description": "Enumerated value.  Duplex mode",
                             "notes": "Fixed at \u2018Half.\u2019",
+                            "size": 1,
                             "uuid": "d0016426-b57d-4cd0-a28b-be82007e7733"
                         },
                         {
@@ -262,6 +277,7 @@
                             "label": "Flow Control",
                             "description": "Flow Control Method",
                             "notes": "Fixed at \u2018No flow control.\u2019",
+                            "size": 1,
                             "uuid": "48f5a794-e043-437e-ba10-a798ee61441e"
                         },
                         {
@@ -276,6 +292,7 @@
                             "label": "Interface Type",
                             "description": "Enumerated value.  Interface type",
                             "notes": "Fixed at \u2018RS485\u2019",
+                            "size": 1,
                             "uuid": "0a36c2e4-9de4-4386-8752-b4e843a8ef38"
                         },
                         {
@@ -290,6 +307,7 @@
                             "label": "Protocol",
                             "description": "Enumerated value. Serial protocol selection",
                             "notes": "Fixed at \u2018Modbus\u2019",
+                            "size": 1,
                             "uuid": "eccca0a3-2842-4e2a-991c-cc78c2580919"
                         }
                     ],
@@ -312,13 +330,14 @@
                             "factor_uuid": null,
                             "units": null,
                             "parameter_uuid": null,
-                            "type_uuid": null,
+                            "type_uuid": "4f856a7e-20f4-43e2-86b1-cc7ee772f919",
                             "enumeration_uuid": null,
                             "block_offset": 0,
                             "name": "ID",
                             "label": "Inverter (Three Phase)",
                             "description": "Include this model for three phase inverter monitoring",
                             "notes": null,
+                            "size": 1,
                             "uuid": "fa00b8f4-e0d7-470a-b626-dc2e62586b66"
                         },
                         {
@@ -326,13 +345,14 @@
                             "factor_uuid": null,
                             "units": null,
                             "parameter_uuid": null,
-                            "type_uuid": null,
+                            "type_uuid": "4f856a7e-20f4-43e2-86b1-cc7ee772f919",
                             "enumeration_uuid": null,
                             "block_offset": 1,
                             "name": "L",
                             "label": null,
                             "description": "Model Length",
                             "notes": null,
+                            "size": 1,
                             "uuid": "dc21411c-fb56-4cdf-9928-3d1378cb0c87"
                         }
                     ],
@@ -354,6 +374,7 @@
                             "label": "Amps",
                             "description": "AC Current",
                             "notes": "Sum of active phases",
+                            "size": 1,
                             "uuid": "6ff5a672-4824-4472-9d36-3bdec2ef84e6"
                         },
                         {
@@ -368,6 +389,7 @@
                             "label": "Amps PhaseA",
                             "description": "Phase A Current",
                             "notes": "Connected Phase",
+                            "size": 1,
                             "uuid": "c33d205b-8597-466f-a499-260d312f8bb2"
                         },
                         {
@@ -382,6 +404,7 @@
                             "label": "Amps PhaseB",
                             "description": "Phase B Current",
                             "notes": "Connected Phase",
+                            "size": 1,
                             "uuid": "85b74e05-5dc6-4d66-bde6-f09749181d71"
                         },
                         {
@@ -396,6 +419,7 @@
                             "label": "Amps PhaseC",
                             "description": "Phase C Current",
                             "notes": "Connected Phase",
+                            "size": 1,
                             "uuid": "987a141d-0363-4d23-9214-397656a13728"
                         },
                         {
@@ -410,6 +434,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "da0bfabf-3a9a-4941-b371-0a488cede72b"
                         },
                         {
@@ -424,6 +449,7 @@
                             "label": "Phase Voltage AB",
                             "description": "Phase Voltage AB",
                             "notes": null,
+                            "size": 1,
                             "uuid": "d8cc8ca7-a72f-4261-a2d9-4a51abf32212"
                         },
                         {
@@ -438,6 +464,7 @@
                             "label": "Phase Voltage BC",
                             "description": "Phase Voltage BC",
                             "notes": null,
+                            "size": 1,
                             "uuid": "b728b2aa-19d6-48a5-8c51-eb905f71d514"
                         },
                         {
@@ -452,6 +479,7 @@
                             "label": "Phase Voltage CA",
                             "description": "Phase Voltage CA",
                             "notes": null,
+                            "size": 1,
                             "uuid": "0c7181ba-19b6-4c94-be29-c18b7cfe77cd"
                         },
                         {
@@ -466,6 +494,7 @@
                             "label": "Phase Voltage AN",
                             "description": "Phase Voltage AN",
                             "notes": null,
+                            "size": 1,
                             "uuid": "eb1474e5-6713-4004-95e4-863ec8d6ae5b"
                         },
                         {
@@ -480,6 +509,7 @@
                             "label": "Phase Voltage BN",
                             "description": "Phase Voltage BN",
                             "notes": null,
+                            "size": 1,
                             "uuid": "0d1d468e-cf27-45ea-9107-945bb8e77619"
                         },
                         {
@@ -494,6 +524,7 @@
                             "label": "Phase Voltage CN",
                             "description": "Phase Voltage CN",
                             "notes": null,
+                            "size": 1,
                             "uuid": "508ae9bd-bee8-4038-95fa-a938f30a1e98"
                         },
                         {
@@ -508,6 +539,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "45e206c4-6330-47a3-ba1d-4a5749f7f887"
                         },
                         {
@@ -522,6 +554,7 @@
                             "label": "Watts",
                             "description": "AC Power",
                             "notes": null,
+                            "size": 1,
                             "uuid": "b54382d9-c0cc-4885-958e-bef96d8d1621"
                         },
                         {
@@ -536,6 +569,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "824c2b1c-347d-4a98-a995-c17bb82d8f0c"
                         },
                         {
@@ -550,6 +584,7 @@
                             "label": "Hz",
                             "description": "Line Frequency",
                             "notes": null,
+                            "size": 1,
                             "uuid": "184eacc3-00cf-424e-97c4-0342bc8becf9"
                         },
                         {
@@ -564,6 +599,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "518c31d0-d940-45f9-86f9-ab84effa8342"
                         },
                         {
@@ -578,6 +614,7 @@
                             "label": "VA",
                             "description": "AC Apparent Power",
                             "notes": null,
+                            "size": 1,
                             "uuid": "7645845d-abf1-4799-9728-5996114ea834"
                         },
                         {
@@ -592,6 +629,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "7e1e1cd2-74ec-468b-9f70-e5dc948b46af"
                         },
                         {
@@ -606,6 +644,7 @@
                             "label": "VAr",
                             "description": "AC Reactive Power",
                             "notes": null,
+                            "size": 1,
                             "uuid": "d29629e8-074c-4c7b-a2a9-69daf9ff8ff6"
                         },
                         {
@@ -620,6 +659,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "4c15b303-d70f-434f-ab2f-318e1b11f34f"
                         },
                         {
@@ -634,6 +674,7 @@
                             "label": "PF",
                             "description": "AC Power Factor",
                             "notes": null,
+                            "size": 1,
                             "uuid": "f0edf643-e38d-426a-ad03-c495d7e6d200"
                         },
                         {
@@ -648,6 +689,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "d31343a2-92e2-41d0-8842-a31c9c09b362"
                         },
                         {
@@ -662,6 +704,7 @@
                             "label": "WattHours",
                             "description": "AC Energy",
                             "notes": null,
+                            "size": 2,
                             "uuid": "9501a074-3888-46a8-952d-cb06868d767d"
                         },
                         {
@@ -676,6 +719,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "c4acaf7b-6d04-4cb3-8104-5d5034ffb3d2"
                         },
                         {
@@ -690,6 +734,7 @@
                             "label": "DC Amps",
                             "description": "DC Current",
                             "notes": null,
+                            "size": 1,
                             "uuid": "2fd48ab0-018e-4720-a179-682a5bdd11f6"
                         },
                         {
@@ -704,6 +749,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "7fc5ff7c-557b-4bad-af86-e8d74c9d704c"
                         },
                         {
@@ -718,6 +764,7 @@
                             "label": "DC Voltage",
                             "description": "DC Voltage",
                             "notes": null,
+                            "size": 1,
                             "uuid": "609c38dd-eb01-4f41-ab3b-49a9691455f8"
                         },
                         {
@@ -732,6 +779,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "d860ce52-804e-4068-b74b-ef5edbe7e7a7"
                         },
                         {
@@ -746,6 +794,7 @@
                             "label": "DC Watts",
                             "description": "DC Power",
                             "notes": null,
+                            "size": 1,
                             "uuid": "93e9dfcf-ea34-4118-bda8-c25fd6c8ae97"
                         },
                         {
@@ -760,6 +809,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "3d8a9060-be51-4422-b3e2-1e229d322455"
                         },
                         {
@@ -774,6 +824,7 @@
                             "label": "Cabinet Temperature",
                             "description": "Cabinet Temperature",
                             "notes": "Module internal ambient temperature.",
+                            "size": 1,
                             "uuid": "fad3f8d6-3129-429a-ae1d-8e8d8e434009"
                         },
                         {
@@ -788,6 +839,7 @@
                             "label": "Heat Sink Temperature",
                             "description": "Heat Sink Temperature",
                             "notes": null,
+                            "size": 1,
                             "uuid": "0224363a-5f09-4d4c-a755-1f0d6c606cfe"
                         },
                         {
@@ -802,6 +854,7 @@
                             "label": "Transformer Temperature",
                             "description": "Transformer Temperature",
                             "notes": "Not implemented",
+                            "size": 1,
                             "uuid": "6c7f8901-6cc9-4f71-a9ac-ec812024bd7c"
                         },
                         {
@@ -816,6 +869,7 @@
                             "label": "Other Temperature",
                             "description": "Other Temperature",
                             "notes": "Not implemented",
+                            "size": 1,
                             "uuid": "62e74c22-51a7-4a93-a082-6856d7da4fe7"
                         },
                         {
@@ -830,6 +884,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "497d265f-8342-4c7a-9c40-6455d6e3f973"
                         },
                         {
@@ -844,6 +899,7 @@
                             "label": "Operating State",
                             "description": "Not implemented.  Use StVnd",
                             "notes": null,
+                            "size": 1,
                             "uuid": "35646334-d59a-4da2-867d-26ae87774ab4"
                         },
                         {
@@ -858,6 +914,7 @@
                             "label": "Vendor Operating State",
                             "description": "Vendor specific operating state code",
                             "notes": null,
+                            "size": 1,
                             "uuid": "8bb125e0-9f37-4f1a-9987-4e5d12abf2f1"
                         },
                         {
@@ -872,6 +929,7 @@
                             "label": "Event1",
                             "description": "Bitmask value. Event fields",
                             "notes": null,
+                            "size": 2,
                             "uuid": "cd6e30f1-2c53-4232-b144-d093fc1a12f2"
                         },
                         {
@@ -886,6 +944,7 @@
                             "label": "Event Bitfield 2",
                             "description": "Reserved for future use",
                             "notes": null,
+                            "size": 2,
                             "uuid": "0d4410e1-ce2a-46f5-b703-33bc41410560"
                         },
                         {
@@ -900,6 +959,7 @@
                             "label": "Vendor Event Bitfield 1",
                             "description": "Vendor defined events",
                             "notes": null,
+                            "size": 2,
                             "uuid": "d434239d-4be1-4c9a-940a-6c791fd24d0e"
                         },
                         {
@@ -914,6 +974,7 @@
                             "label": "Vendor Event Bitfield 2",
                             "description": "Vendor defined events",
                             "notes": "Not implemented",
+                            "size": 2,
                             "uuid": "12dc3fcf-891c-4ce7-81ba-882ddf1c9e0e"
                         },
                         {
@@ -928,6 +989,7 @@
                             "label": "Vendor Event Bitfield 3",
                             "description": "Vendor defined events",
                             "notes": "Not implemented",
+                            "size": 2,
                             "uuid": "cda8773d-a5ed-466c-9046-420cd4450fa5"
                         },
                         {
@@ -942,6 +1004,7 @@
                             "label": "Vendor Event Bitfield 4",
                             "description": "Vendor defined events",
                             "notes": "Not implemented",
+                            "size": 2,
                             "uuid": "780bff48-c946-4e3a-ad9c-5caede40c573"
                         }
                     ],
@@ -964,13 +1027,14 @@
                             "factor_uuid": null,
                             "units": null,
                             "parameter_uuid": null,
-                            "type_uuid": null,
+                            "type_uuid": "4f856a7e-20f4-43e2-86b1-cc7ee772f919",
                             "enumeration_uuid": null,
                             "block_offset": 0,
                             "name": "ID",
                             "label": "EPC_Control",
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "35f1316a-25b7-47be-9cfe-f061a7575914"
                         },
                         {
@@ -978,13 +1042,14 @@
                             "factor_uuid": null,
                             "units": null,
                             "parameter_uuid": null,
-                            "type_uuid": null,
+                            "type_uuid": "4f856a7e-20f4-43e2-86b1-cc7ee772f919",
                             "enumeration_uuid": null,
                             "block_offset": 1,
                             "name": "L",
                             "label": null,
                             "description": "Model Length",
                             "notes": null,
+                            "size": 1,
                             "uuid": "7dc6d50d-dd37-4a48-ab1f-2e5e84dff2b1"
                         }
                     ],
@@ -1006,6 +1071,7 @@
                             "label": "Control Bits",
                             "description": "Operational command flags",
                             "notes": "Message required at a rate of at least once per second in all states.",
+                            "size": 2,
                             "uuid": "366d7025-142b-40d1-9834-b8222549393f"
                         },
                         {
@@ -1020,6 +1086,7 @@
                             "label": "Real Power Command",
                             "description": "Commanded real power (W) while in grid following mode - positive real power is defined as power being put into the ac network.",
                             "notes": null,
+                            "size": 2,
                             "uuid": "5eb4b2dc-2ea7-40b1-9f10-6b06617eac20"
                         },
                         {
@@ -1034,6 +1101,7 @@
                             "label": "Reactive Power Command",
                             "description": "Commanded reactive power (VA) while in grid following mode - positive reactive power is defined as the converter having a leading power factor.",
                             "notes": null,
+                            "size": 2,
                             "uuid": "a30225f5-29c6-4821-9a2d-278ca2ff379b"
                         },
                         {
@@ -1048,6 +1116,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "3ef7bbb7-5807-4951-8878-931419463341"
                         },
                         {
@@ -1062,6 +1131,7 @@
                             "label": "Voltage Command",
                             "description": "Desired output voltage while in grid forming mode.",
                             "notes": null,
+                            "size": 1,
                             "uuid": "e885169d-5dfa-4a1b-ac19-7c86ff764322"
                         },
                         {
@@ -1076,6 +1146,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "65fc88f2-093f-4d9c-a2e8-5becddb000eb"
                         },
                         {
@@ -1090,6 +1161,7 @@
                             "label": "Frequency Command",
                             "description": "Desired output frequency while in grid forming mode.",
                             "notes": null,
+                            "size": 1,
                             "uuid": "0d4d0f58-a0fb-4084-b4e4-b2693d390787"
                         },
                         {
@@ -1104,6 +1176,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "8b0d09f4-78e8-46b8-a024-ad7aefde5c0e"
                         },
                         {
@@ -1118,6 +1191,7 @@
                             "label": "Control Source",
                             "description": "Master control source for the inverter",
                             "notes": null,
+                            "size": 1,
                             "uuid": "51828311-5e15-4eee-a156-7b2d6d0104c8"
                         },
                         {
@@ -1132,6 +1206,7 @@
                             "label": "MPPT Current",
                             "description": "Measured MPPT current (Hydra Solar inverter only)",
                             "notes": null,
+                            "size": 1,
                             "uuid": "080a2ad2-5c3d-4f67-ad71-520d4ff452e6"
                         },
                         {
@@ -1146,6 +1221,7 @@
                             "label": "Volt. Ref Current",
                             "description": "Measured Voltage-controlled current (Hydra inverter only)",
                             "notes": null,
+                            "size": 1,
                             "uuid": "7348626d-c0a6-4a10-b7ea-3e5080eb2e55"
                         },
                         {
@@ -1160,6 +1236,7 @@
                             "label": "Solar Voltage",
                             "description": "Measured solar input voltage (Hydra Solar inverter only)",
                             "notes": null,
+                            "size": 1,
                             "uuid": "6ad21c19-76f8-4714-9f75-a5fb111f3fd6"
                         },
                         {
@@ -1174,6 +1251,7 @@
                             "label": "Battery Voltage",
                             "description": "Measured battery input voltage (Hydra inverter only)",
                             "notes": null,
+                            "size": 1,
                             "uuid": "a9b97995-c59e-4d05-a596-656566cbaaa1"
                         },
                         {
@@ -1188,6 +1266,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "76ecd33a-1d94-465b-bb62-f322612d1bc6"
                         },
                         {
@@ -1202,6 +1281,7 @@
                             "label": "Special operations",
                             "description": "Special operation command flags",
                             "notes": null,
+                            "size": 2,
                             "uuid": "cd4aa30e-d3d0-4a86-a607-97df803d4c61"
                         },
                         {
@@ -1216,6 +1296,7 @@
                             "label": "System Fault Code",
                             "description": "Fault code (if non-0, indicates that 1 or more system faults is active)",
                             "notes": null,
+                            "size": 1,
                             "uuid": "1ad974b3-7d6b-4567-9379-6316e56dcee5"
                         },
                         {
@@ -1230,6 +1311,7 @@
                             "label": "Fault Flags",
                             "description": "Fault status",
                             "notes": null,
+                            "size": 2,
                             "uuid": "a5b6dceb-d928-4b08-8cc7-c3821e30b515"
                         },
                         {
@@ -1244,6 +1326,7 @@
                             "label": "Warning Flags",
                             "description": "Warning status",
                             "notes": null,
+                            "size": 2,
                             "uuid": "3fdbaa2a-c289-4aa5-87fb-b68cd9de1c29"
                         },
                         {
@@ -1258,6 +1341,7 @@
                             "label": "Real Current Command",
                             "description": "Commanded real current (A) while in grid following mode - positive real power is defined as power being put into the ac network.",
                             "notes": null,
+                            "size": 1,
                             "uuid": "dda7d661-b8e6-471c-9ffe-cc4bbf050abf"
                         },
                         {
@@ -1272,6 +1356,7 @@
                             "label": "Reactive Current Command",
                             "description": "Commanded reactive current (A) while in grid following mode - positive reactive power is defined as the converter having a leading power factor.",
                             "notes": null,
+                            "size": 1,
                             "uuid": "5ada715f-a8fa-4a47-acef-65e9964113fb"
                         },
                         {
@@ -1286,6 +1371,7 @@
                             "label": "Measured Real Current",
                             "description": "Measured real current",
                             "notes": null,
+                            "size": 1,
                             "uuid": "375b4bdb-d084-4e3c-821d-337162517053"
                         },
                         {
@@ -1300,6 +1386,7 @@
                             "label": "Measured Reactive Current",
                             "description": "Measured reactive current",
                             "notes": null,
+                            "size": 1,
                             "uuid": "666e033c-65cd-4958-a99f-b839d5b029e4"
                         },
                         {
@@ -1314,6 +1401,7 @@
                             "label": "Local Grid VAC",
                             "description": "AC Voltage of local grid",
                             "notes": null,
+                            "size": 1,
                             "uuid": "044f273b-5e91-4c10-a2a9-96bca6511cc3"
                         },
                         {
@@ -1328,6 +1416,7 @@
                             "label": "Remote Phase Voltage AN",
                             "description": "Remote Phase Voltage AN",
                             "notes": null,
+                            "size": 1,
                             "uuid": "a2caec38-ace3-4af5-93a3-9d90b9cf6cb8"
                         },
                         {
@@ -1342,6 +1431,7 @@
                             "label": "Remote Phase Voltage BN",
                             "description": "Remote Phase Voltage BN",
                             "notes": null,
+                            "size": 1,
                             "uuid": "f6bb9a9f-c814-49f5-89ca-593a80eee049"
                         },
                         {
@@ -1356,6 +1446,7 @@
                             "label": "Remote Phase Voltage CN",
                             "description": "Remote Phase Voltage CN",
                             "notes": null,
+                            "size": 1,
                             "uuid": "6a963ec9-8d10-4c5a-94e1-032bb480227b"
                         },
                         {
@@ -1370,6 +1461,7 @@
                             "label": "Remote Grid VAC",
                             "description": "AC Voltage of remote grid",
                             "notes": null,
+                            "size": 1,
                             "uuid": "a534a4f4-2911-4a4b-be3e-a780b00081c7"
                         },
                         {
@@ -1384,6 +1476,7 @@
                             "label": "Hz",
                             "description": "Remote grid Line Frequency",
                             "notes": null,
+                            "size": 1,
                             "uuid": "d83cf6e8-bde2-4105-8b5a-c93bf9822f85"
                         },
                         {
@@ -1398,6 +1491,7 @@
                             "label": null,
                             "description": null,
                             "notes": null,
+                            "size": 1,
                             "uuid": "bea9c576-3af3-4c16-8cae-c6453dd2fd13"
                         },
                         {
@@ -1412,6 +1506,7 @@
                             "label": "Internal Temp",
                             "description": "Internal ambient temperature",
                             "notes": null,
+                            "size": 1,
                             "uuid": "1cd8c22e-3977-4356-803f-147a0a0a6cd1"
                         },
                         {
@@ -1426,6 +1521,7 @@
                             "label": "Inlet Temp",
                             "description": "Coolant inlet temperature",
                             "notes": null,
+                            "size": 1,
                             "uuid": "c46c9f2b-b289-4193-a2f3-eccb8a5024a3"
                         },
                         {
@@ -1440,6 +1536,7 @@
                             "label": "Remote Phase Voltage CA",
                             "description": "Remote Phase Voltage CA",
                             "notes": null,
+                            "size": 1,
                             "uuid": "7c0c9778-1da1-409b-93e6-a0d22ca5f1e0"
                         },
                         {
@@ -1454,6 +1551,7 @@
                             "label": "Remote Phase Voltage AB",
                             "description": "Remote Phase Voltage AB",
                             "notes": null,
+                            "size": 1,
                             "uuid": "be321755-01a2-484a-b295-fcd1a8a7f54b"
                         },
                         {
@@ -1468,6 +1566,7 @@
                             "label": "Remote Phase Voltage BC",
                             "description": "Remote Phase Voltage BC",
                             "notes": null,
+                            "size": 1,
                             "uuid": "1352294f-f7cb-486f-9379-f6ceb6ef49cf"
                         },
                         {
@@ -1482,6 +1581,7 @@
                             "label": "DC Current Limit",
                             "description": "DC Link Current Limit",
                             "notes": null,
+                            "size": 1,
                             "uuid": "af33beb6-8f64-4c1f-8067-8569dc0ee470"
                         },
                         {
@@ -1496,6 +1596,7 @@
                             "label": "DC Voltage Limit",
                             "description": "DC Link Voltage Limit",
                             "notes": null,
+                            "size": 1,
                             "uuid": "2c7916d7-2811-4871-826f-c48d8e07541a"
                         },
                         {
@@ -1510,6 +1611,7 @@
                             "label": "Line Current Limit",
                             "description": "Line Current Limit",
                             "notes": null,
+                            "size": 1,
                             "uuid": "3ba5f4d1-5d33-4c47-b8a5-611ceaf3b3cc"
                         },
                         {
@@ -1524,6 +1626,7 @@
                             "label": "Input Current Reference",
                             "description": "Input current reference (Hydra inverter only)",
                             "notes": null,
+                            "size": 1,
                             "uuid": "99196e46-1c85-434f-95ce-6b97638b6349"
                         }
                     ],

@@ -18,7 +18,7 @@ sheet_fields = {
     "Applicable Point": None,
     "Address Offset": data_point_fields.offset,
     "Block Offset": data_point_fields.block_offset,
-    "Size": None, #data_point_fields.size,
+    "Size": data_point_fields.size,
     "Name": data_point_fields.name,
     "Label": data_point_fields.label,
     "Value": None,
@@ -66,16 +66,32 @@ class Model:
         self.worksheet.title = str(self.wrapped.id)
         self.worksheet.append(list(sheet_fields.keys()))
 
-        for child in self.wrapped.children:
+        length = 0
+
+        rows = []
+
+        for i, child in enumerate(self.wrapped.children):
+            block_length = child.check_offsets_and_length()
+            if i > 0:
+                length += block_length
+
             builder = builders.wrap(
                 wrapped=child,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
 
             for row in builder.gen():
-                self.worksheet.append(row)
+                rows.append(row)
 
-            self.worksheet.append([])
+            rows.append([])
+
+        for i, row in enumerate(rows):
+            if i == 0:
+                row[list(sheet_fields).index('Value')] = self.wrapped.id
+            elif i == 1:
+                row[list(sheet_fields).index('Value')] = length
+
+            self.worksheet.append(row)
 
 
 @builders(epcpm.sunspecmodel.HeaderBlock)

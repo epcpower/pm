@@ -7,6 +7,10 @@ import epyqlib.pm.parametermodel
 from PyQt5 import QtCore
 
 
+class MismatchedSizeAndTypeError(Exception):
+    pass
+
+
 def build_sunspec_types_enumeration():
     enumeration = epyqlib.pm.parametermodel.Enumeration(
         name='SunSpecTypes',
@@ -141,8 +145,6 @@ class DataPoint(epyqlib.treenode.TreeNode):
         ),
     )
 
-    # size is purely calculated from the type
-
     name = attr.ib(
         default='New data point',
         metadata=graham.create_metadata(
@@ -166,6 +168,13 @@ class DataPoint(epyqlib.treenode.TreeNode):
         convert=epyqlib.attrsmodel.to_str_or_none,
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(allow_none=True),
+        ),
+    )
+    size = attr.ib(
+        default=0,
+        converter=int,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(),
         ),
     )
 
@@ -199,11 +208,6 @@ class DataPoint(epyqlib.treenode.TreeNode):
     def can_delete(self, node=None):
         if node is None:
             return self.tree_parent.can_delete(node=self)
-
-    @property
-    def size(self):
-        # TODO: something based on self.type
-        return None
 
 
 @graham.schemify(tag='sunspec_enumeration', register=True)
@@ -247,19 +251,22 @@ class BitField:
             return self.tree_parent.can_delete(node=self)
 
 
-def header_data_points():
-    return [
-        DataPoint(
-            name='ID',
-            block_offset=0,
-        ),
-        DataPoint(
-            name='L',
-            block_offset=1,
-            label=None,
-            description='Model Length',
-        ),
-    ]
+def check_block_offsets_and_length(self):
+    length = 0
+
+    root = self.find_root()
+
+    for point in self.children:
+        type_ = root.model.node_from_uuid(point.type_uuid)
+        if type_.name != 'string' and point.size != type_.value:
+            raise MismatchedSizeAndTypeError(
+                f'Expected {type_.value} for {type_.name}'
+                f', is {point.size} for {point.name}'
+            )
+
+        length += point.size
+
+    return length
 
 
 @graham.schemify(tag='sunspec_header_block', register=True)
@@ -278,7 +285,7 @@ class HeaderBlock(epyqlib.treenode.TreeNode):
         converter=int,
     )
     children = attr.ib(
-        factory=header_data_points,
+        factory=list,
         metadata=graham.create_metadata(
             field=graham.fields.MixedList(fields=(
                 marshmallow.fields.Nested(graham.schema(DataPoint)),
@@ -296,6 +303,29 @@ class HeaderBlock(epyqlib.treenode.TreeNode):
 
     def can_delete(self, node):
         return False
+
+    check_offsets_and_length = check_block_offsets_and_length
+
+    def add_data_points(self, uint16_uuid):
+        points = [
+            DataPoint(
+                name='ID',
+                block_offset=0,
+                size=1,
+                type_uuid=uint16_uuid,
+            ),
+            DataPoint(
+                name='L',
+                block_offset=1,
+                size=1,
+                label=None,
+                description='Model Length',
+                type_uuid=uint16_uuid,
+            ),
+        ]
+
+        for point in points:
+            self.append_child(point)
 
 
 @graham.schemify(tag='sunspec_fixed_block', register=True)
@@ -338,6 +368,8 @@ class FixedBlock(epyqlib.treenode.TreeNode):
 
     def can_delete(self, node):
         return False
+
+    check_offsets_and_length = check_block_offsets_and_length
 
 
 @graham.schemify(tag='sunspec_model', register=True)
@@ -394,6 +426,15 @@ class Model(epyqlib.treenode.TreeNode):
         if node is None:
             return self.tree_parent.can_delete(node=self)
 
+    def check_offsets_and_length(self):
+        length = 0
+
+        for block in self.children:
+            length += block.check_offsets_and_length()
+
+        return length
+
+
 #class Repeating...?
 
 
@@ -424,7 +465,7 @@ def merge(name, *types):
 columns = epyqlib.attrsmodel.columns(
     merge('name', HeaderBlock, FixedBlock, DataPoint) + merge('id', Model),
     merge('label', DataPoint),
-    merge('length', Model),
+    merge('length', Model) + merge('size', DataPoint),
     merge('factor_uuid', DataPoint),
     merge('units', DataPoint),
     merge('parameter_uuid', DataPoint),
