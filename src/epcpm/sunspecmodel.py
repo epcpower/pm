@@ -37,11 +37,12 @@ class DataPoint(epyqlib.treenode.TreeNode):
         human_name='Parameter',
         data_display=epyqlib.attrsmodel.name_from_uuid,
     )
-    type = attr.ib( #TODO enumeration reference/list_selection_root something something ... words
-        default='uint16',
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
-        ),
+    type_uuid = epyqlib.attrsmodel.attr_uuid(
+        default=None,
+        allow_none=True,
+        human_name='Type',
+        data_display=epyqlib.attrsmodel.name_from_uuid,
+        list_selection_root='sunspec types',
     )
     enumeration_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,
@@ -368,7 +369,7 @@ columns = epyqlib.attrsmodel.columns(
     merge('factor_uuid', DataPoint),
     merge('units', DataPoint),
     merge('parameter_uuid', DataPoint),
-    merge('type', DataPoint),
+    merge('type_uuid', DataPoint),
     merge('enumeration_uuid', DataPoint, Enumeration, BitField),
     merge('offset', DataPoint, HeaderBlock, FixedBlock),
     merge('block_offset', DataPoint),

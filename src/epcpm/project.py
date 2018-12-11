@@ -131,6 +131,18 @@ def _post_load(project):
        )
     models.parameters.list_selection_roots['visibility'] = visibility_root
 
+    if enumerations_root is None:
+        sunspec_types_root = None
+    else:
+        sunspec_types_root, = (
+            child
+            for child in enumerations_root.children
+            if child.name == 'SunSpecTypes'
+       )
+    models.parameters.list_selection_roots['sunspec types'] = (
+        sunspec_types_root
+    )
+
     models.parameters.update_nodes()
     models.can.update_nodes()
 

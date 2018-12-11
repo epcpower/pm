@@ -93,6 +93,73 @@
                         }
                     ],
                     "uuid": "c73f5b76-3e28-468b-8116-fee370d6b0b8"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecTypes",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "int16",
+                            "value": 1,
+                            "uuid": "2cf75e5a-ffc8-422a-bbc6-573d4206a7e1"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "uint16",
+                            "value": 1,
+                            "uuid": "4f856a7e-20f4-43e2-86b1-cc7ee772f919"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "int32",
+                            "value": 2,
+                            "uuid": "4fec39a5-b702-4dbf-8ad1-95f5e01201b6"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "uint32",
+                            "value": 2,
+                            "uuid": "eb8cdc87-05e2-4593-994e-ab3363236168"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "sunssf",
+                            "value": 1,
+                            "uuid": "02e70616-4986-4f3e-8ac4-98ac153e66f9"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "enum16",
+                            "value": 1,
+                            "uuid": "209aebc8-652f-47bf-9952-4c112ced2781"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "bitfield32",
+                            "value": 2,
+                            "uuid": "fc0ad957-2785-4762-b2fc-4db2cf785ca2"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "string",
+                            "value": null,
+                            "uuid": "5460c860-4aad-476a-908c-83a364b781c9"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "acc16",
+                            "value": 1,
+                            "uuid": "05830309-c61c-41d4-8c66-88ed25187575"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "acc32",
+                            "value": 2,
+                            "uuid": "f9d30fa6-33b2-48a2-8b64-72a4f47c0bd4"
+                        }
+                    ],
+                    "uuid": "00b90651-3e3b-4e28-a8c0-7339ae092200"
                 }
             ],
             "uuid": "94345b59-5ba3-44e4-b78d-6f80569d9d73"

@@ -6,17 +6,22 @@ import sunspec.core.device
 import epcpm.sunspecmodel
 
 
-def epc_point_from_pysunspec_point(point, scale_factors=None):
+def epc_point_from_pysunspec_point(point, parameter_model, scale_factors=None):
     if scale_factors is not None and point.point_type.sf is not None:
         scale_factor_uuid = scale_factors[point.point_type.sf].uuid
     else:
         scale_factor_uuid = None
 
+    sunspec_type_uuid = point.point_type.type
+    if sunspec_type_uuid is not None:
+        root = parameter_model.list_selection_roots['sunspec types']
+        sunspec_type_uuid = root.child_by_name(sunspec_type_uuid).uuid
+
     return epcpm.sunspecmodel.DataPoint(
         factor_uuid=scale_factor_uuid,
         units=point.point_type.units,
         # parameter_uuid=,
-        type=point.point_type.type,
+        type_uuid=sunspec_type_uuid,
         # enumeration_uuid=,
         block_offset=point.point_type.offset,
         name=point.point_type.id,
@@ -27,9 +32,9 @@ def epc_point_from_pysunspec_point(point, scale_factors=None):
     )
 
 
-def import_models(*model_ids, paths):
+def import_models(*model_ids, parameter_model, paths):
     return [
-        import_model(id, paths=paths)
+        import_model(model_id=id, parameter_model=parameter_model, paths=paths)
         for id in model_ids
     ]
 
@@ -48,7 +53,7 @@ def fresh_smdx_path(*paths):
         sunspec.core.device.file_pathlist = original_pathlist
 
 
-def import_model(model_id, paths=()):
+def import_model(model_id, parameter_model, paths=()):
     model = sunspec.core.device.Model(mid=model_id)
     if len(paths) == 0:
         model.load()
@@ -60,12 +65,16 @@ def import_model(model_id, paths=()):
     scale_factors = {}
 
     for name, point in model.points_sf.items():
-        epc_point = epc_point_from_pysunspec_point(point)
+        epc_point = epc_point_from_pysunspec_point(
+            point=point,
+            parameter_model=parameter_model,
+        )
         scale_factors[name] = epc_point
 
     for point in model.points_list:
         epc_point = epc_point_from_pysunspec_point(
             point=point,
+            parameter_model=parameter_model,
             scale_factors=scale_factors,
         )
 

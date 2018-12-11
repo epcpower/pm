@@ -22,7 +22,7 @@ sheet_fields = {
     "Name": data_point_fields.name,
     "Label": data_point_fields.label,
     "Value": None,
-    "Type": data_point_fields.type,
+    "Type": data_point_fields.type_uuid,
     "Units": data_point_fields.units,
     "SF": data_point_fields.factor_uuid,
     "R/W": None,
@@ -86,11 +86,18 @@ class Block:
     parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
-        scale_factor_from_uuid = {
-            point.uuid: point
-            for point in self.wrapped.children
-            if point.type == 'sunssf'
-        }
+        scale_factor_from_uuid = {}
+        for point in self.wrapped.children:
+            if point.type_uuid is None:
+                continue
+
+            type_node = self.parameter_uuid_finder(point.type_uuid)
+
+            if type_node is None:
+                continue
+
+            if type_node.name == 'sunssf':
+                scale_factor_from_uuid[point.uuid] = point
 
         rows = []
 
@@ -131,5 +138,8 @@ class Point:
 
         if field == data_point_fields.factor_uuid:
             return self.scale_factor_from_uuid[value].name
+
+        if field == data_point_fields.type_uuid:
+            return self.parameter_uuid_finder(value).name
 
         return value

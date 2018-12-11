@@ -231,6 +231,7 @@ class Window:
 
             model = epcpm.smdxtosunspec.import_model(
                 model_id=id,
+                parameter_model=self.view_models['parameters'].model,
                 paths=[smdx_path.parent],
             )
 
