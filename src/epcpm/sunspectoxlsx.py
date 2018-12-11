@@ -49,6 +49,7 @@ class Root:
             builders.wrap(
                 wrapped=model,
                 worksheet=worksheet,
+                padding_type=self.parameter_model.list_selection_roots['sunspec types'].child_by_name('pad'),
                 parameter_uuid_finder=self.parameter_uuid_finder,
             ).gen()
 
@@ -60,23 +61,31 @@ class Root:
 class Model:
     wrapped = attr.ib()
     worksheet = attr.ib()
+    padding_type = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
         self.worksheet.title = str(self.wrapped.id)
         self.worksheet.append(list(sheet_fields.keys()))
 
-        length = 0
+        self.wrapped.children[0].check_offsets_and_length()
+
+        length = sum(
+            child.check_offsets_and_length()
+            for child in self.wrapped.children[1:]
+        )
+
+        add_padding = (length % 2) == 1
+        if add_padding:
+            length += 1
 
         rows = []
 
         for i, child in enumerate(self.wrapped.children):
-            block_length = child.check_offsets_and_length()
-            if i > 0:
-                length += block_length
-
             builder = builders.wrap(
                 wrapped=child,
+                add_padding=add_padding and i == 1,
+                padding_type=self.padding_type,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
 
@@ -99,6 +108,8 @@ class Model:
 @attr.s
 class Block:
     wrapped = attr.ib()
+    add_padding = attr.ib()
+    padding_type = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
@@ -117,7 +128,27 @@ class Block:
 
         rows = []
 
-        for child in self.wrapped.children:
+        points = list(self.wrapped.children)
+
+        if self.add_padding:
+            point = epcpm.sunspecmodel.DataPoint(
+                type_uuid=self.padding_type.uuid,
+                block_offset=(
+                    self.wrapped.children[-1].block_offset
+                    + self.wrapped.children[-1].size
+                ),
+                size=self.padding_type.value,
+                name='Pad',
+                label='',
+                description='Force even alignment',
+            )
+            # TODO: ack!  just to get the address offset calculated but
+            #       not calling append_child() because i don't want to shove
+            #       this into the model.  :[
+            point.tree_parent = self.wrapped
+            points.append(point)
+
+        for child in points:
             builder = builders.wrap(
                 wrapped=child,
                 scale_factor_from_uuid=scale_factor_from_uuid,

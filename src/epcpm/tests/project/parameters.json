@@ -157,6 +157,12 @@
                             "name": "acc32",
                             "value": 2,
                             "uuid": "f9d30fa6-33b2-48a2-8b64-72a4f47c0bd4"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "pad",
+                            "value": 1,
+                            "uuid": "f8090bab-cf12-476c-b96a-1c8bb9848bb5"
                         }
                     ],
                     "uuid": "00b90651-3e3b-4e28-a8c0-7339ae092200"
