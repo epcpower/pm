@@ -3,8 +3,11 @@ import pathlib
 import click
 import graham
 
+import epyqlib.attrsmodel
+import epyqlib.pm.parametermodel
 import epyqlib.pm.valuesetmodel
 
+import epcpm.canmodel
 import epcpm.project
 import epcpm.symtoproject
 
@@ -26,6 +29,7 @@ def relative_path(target, reference):
 @click.option('--sunspec', type=click.File('w'), required=True)
 @click.option('--epyq-value-set', type=click.File('w'))
 @click.option('--add-tables/--no-add-tables', default=False)
+@click.option('--add-sunspec-types/--no-add-sunspec-types', default=False)
 def cli(
         sym,
         hierarchy,
@@ -35,6 +39,7 @@ def cli(
         sunspec,
         epyq_value_set,
         add_tables,
+        add_sunspec_types,
 ):
     parameters_root, can_root, sunspec_root = epcpm.symtoproject.load_can_file(
         can_file=sym,
@@ -46,12 +51,12 @@ def cli(
     project_path.mkdir(parents=True, exist_ok=True)
 
     project_model = epcpm.project.Project(
-        paths = epcpm.project.Models(
+        paths=epcpm.project.Models(
             parameters=relative_path(parameters.name, project_path),
             can=relative_path(can.name, project_path),
             sunspec=relative_path(sunspec.name, project_path),
         ),
-        models = epcpm.project.Models(
+        models=epcpm.project.Models(
             parameters=epyqlib.attrsmodel.Model(
                 root=parameters_root,
                 columns=epyqlib.pm.parametermodel.columns,
@@ -66,6 +71,13 @@ def cli(
             ),
         ),
     )
+
+    if add_sunspec_types:
+        parameter_root = project_model.models.parameters.root
+        enumerations = parameter_root.child_by_name('Enumerations')
+        enumerations.append_child(
+            epcpm.sunspecmodel.build_sunspec_types_enumeration(),
+        )
 
     epcpm.project._post_load(project_model)
 

@@ -37,6 +37,7 @@ def test_import():
             '--parameters', round_trip / 'parameters.json',
             '--sunspec', round_trip / 'sunspec.json',
             '--add-tables',
+            '--add-sunspec-types',
         ],
         catch_exceptions=False,
     )

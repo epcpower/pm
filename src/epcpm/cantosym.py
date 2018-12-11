@@ -40,9 +40,26 @@ class Root:
         matrix.addSignalDefines("DisplayDecimalPlaces", 'INT 0 65535')
         matrix.addSignalDefines("LongName", 'STR')
 
+        for child in self.wrapped.children:
+            frame = builders.wrap(
+                wrapped=child,
+                access_levels=self.access_levels,
+                parameter_uuid_finder=self.parameter_uuid_finder,
+            ).gen()
+            matrix.addFrame(frame)
+
         enumerations = self.collect_enumerations()
+        used_enumerations = {
+            signal.enumeration
+            for frame in matrix.frames
+            for signal in frame.signals
+            if signal.enumeration is not None
+        }
 
         for enumeration in enumerations:
+            if enumeration.name not in used_enumerations:
+                continue
+
             enumerators = collections.OrderedDict(
                 (e.value, dehumanize_name(e.name))
                 for e in enumeration.children
@@ -52,14 +69,6 @@ class Root:
                 name=dehumanize_name(enumeration.name),
                 valueTable=enumerators,
             )
-
-        for child in self.wrapped.children:
-            frame = builders.wrap(
-                wrapped=child,
-                access_levels=self.access_levels,
-                parameter_uuid_finder=self.parameter_uuid_finder,
-            ).gen()
-            matrix.addFrame(frame)
 
         codec = 'utf-8'
 

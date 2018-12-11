@@ -6,11 +6,70 @@ import epyqlib.attrsmodel
 import epyqlib.pm.parametermodel
 from PyQt5 import QtCore
 
-# sunspec enumerations will be stored in parametermodel.Enumeration and be
-# mappable into the sunspec interface
 
+def build_sunspec_types_enumeration():
+    enumeration = epyqlib.pm.parametermodel.Enumeration(
+        name='SunSpecTypes',
+        uuid='00b90651-3e3b-4e28-a8c0-7339ae092200',
+    )
+    
+    enumerators = [
+        epyqlib.pm.parametermodel.Enumerator(
+            name="int16",
+            value=1,
+            uuid="2cf75e5a-ffc8-422a-bbc6-573d4206a7e1"
+        ),
+        epyqlib.pm.parametermodel.Enumerator(
+            name="uint16",
+            value=1,
+            uuid="4f856a7e-20f4-43e2-86b1-cc7ee772f919"
+        ),
+        epyqlib.pm.parametermodel.Enumerator(
+            name="int32",
+            value=2,
+            uuid="4fec39a5-b702-4dbf-8ad1-95f5e01201b6"
+        ),
+        epyqlib.pm.parametermodel.Enumerator(
+            name="uint32",
+            value=2,
+            uuid="eb8cdc87-05e2-4593-994e-ab3363236168"
+        ),
+        epyqlib.pm.parametermodel.Enumerator(
+            name="sunssf",
+            value=1,
+            uuid="02e70616-4986-4f3e-8ac4-98ac153e66f9"
+        ),
+        epyqlib.pm.parametermodel.Enumerator(
+            name="enum16",
+            value=1,
+            uuid="209aebc8-652f-47bf-9952-4c112ced2781"
+        ),
+        epyqlib.pm.parametermodel.Enumerator(
+            name="bitfield32",
+            value=2,
+            uuid="fc0ad957-2785-4762-b2fc-4db2cf785ca2"
+        ),
+        epyqlib.pm.parametermodel.Enumerator(
+            name="string",
+            value=0,
+            uuid="5460c860-4aad-476a-908c-83a364b781c9"
+        ),
+        epyqlib.pm.parametermodel.Enumerator(
+            name="acc16",
+            value=1,
+            uuid="05830309-c61c-41d4-8c66-88ed25187575"
+        ),
+        epyqlib.pm.parametermodel.Enumerator(
+            name="acc32",
+            value=2,
+            uuid="f9d30fa6-33b2-48a2-8b64-72a4f47c0bd4"
+        ),
+    ]
 
-# need a parametermodel.Enumeration of sunspec types
+    for enumerator in enumerators:
+        enumeration.append_child(enumerator)
+
+    return enumeration
 
 
 @graham.schemify(tag='data_point', register=True)
