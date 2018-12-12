@@ -1,6 +1,9 @@
+import collections
 import contextlib
 import os
 
+import attr
+import epyqlib.pm.parametermodel
 import sunspec.core.device
 
 import epcpm.sunspecmodel
@@ -54,6 +57,32 @@ def fresh_smdx_path(*paths):
         sunspec.core.device.file_pathlist = original_pathlist
 
 
+def none_to_empty_string(value):
+    if value is None:
+        return ''
+
+    return value
+
+
+@attr.s(frozen=True)
+class Symbol:
+    value = attr.ib(converter=int)
+    id = attr.ib()
+    label = attr.ib()
+    description = attr.ib(converter=none_to_empty_string)
+    notes = attr.ib(converter=none_to_empty_string)
+
+    @classmethod
+    def from_sunspec(cls, symbol):
+        return cls(
+            description=symbol.description,
+            id=symbol.id,
+            label=symbol.label,
+            notes=symbol.notes,
+            value=symbol.value,
+        )
+
+
 def import_model(model_id, parameter_model, paths=()):
     model = sunspec.core.device.Model(mid=model_id)
     if len(paths) == 0:
@@ -62,7 +91,7 @@ def import_model(model_id, parameter_model, paths=()):
         with fresh_smdx_path(*paths):
             model.load()
 
-    points = []
+    imported_points = []
     scale_factors = {}
 
     for name, point in model.points_sf.items():
@@ -72,6 +101,8 @@ def import_model(model_id, parameter_model, paths=()):
         )
         scale_factors[name] = epc_point
 
+    enumerations = collections.defaultdict(list)
+
     for point in model.points_list:
         epc_point = epc_point_from_pysunspec_point(
             point=point,
@@ -79,7 +110,33 @@ def import_model(model_id, parameter_model, paths=()):
             scale_factors=scale_factors,
         )
 
-        points.append(epc_point)
+        imported_points.append(epc_point)
+
+        if point.point_type.type.startswith('enum'):
+            enumeration = tuple(sorted(
+                Symbol.from_sunspec(symbol=symbol)
+                for symbol in point.point_type.symbols
+            ))
+            enumerations[enumeration].append(epc_point)
+
+    enumerations_root = parameter_model.list_selection_roots['enumerations']
+    for enumeration, points in enumerations.items():
+        # TODO: just using the first point?  hmm
+        epc_enumeration = epyqlib.pm.parametermodel.Enumeration(
+            name='SunSpec{}'.format(points[0].label),
+        )
+
+        for symbol in enumeration:
+            enumerator = epyqlib.pm.parametermodel.Enumerator(
+                name=symbol.label,
+                value=symbol.value,
+            )
+            epc_enumeration.append_child(enumerator)
+
+        for point in points:
+            point.enumeration_uuid = epc_enumeration.uuid
+
+        enumerations_root.append_child(epc_enumeration)
 
     our_model = epcpm.sunspecmodel.Model(
         id=model.id,
@@ -98,7 +155,7 @@ def import_model(model_id, parameter_model, paths=()):
     id_point.notes = model.model_type.notes
 
     imported_points = sorted(
-        points + list(scale_factors.values()),
+        imported_points + list(scale_factors.values()),
         key=lambda point: point.block_offset,
     )
 

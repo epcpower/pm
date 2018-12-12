@@ -166,6 +166,538 @@
                         }
                     ],
                     "uuid": "00b90651-3e3b-4e28-a8c0-7339ae092200"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecParity",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "none",
+                            "value": 0,
+                            "uuid": "cb0b9193-d0cf-4644-a82c-412b62c5099a"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "odd",
+                            "value": 1,
+                            "uuid": "7c3221f2-9fa0-43df-929e-7a2a144e4832"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "even",
+                            "value": 2,
+                            "uuid": "405ee9d3-5bc0-48e8-b55e-aec105cb6db7"
+                        }
+                    ],
+                    "uuid": "2999bde4-7c60-4a79-aee8-8558c0c7ed1f"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecDuplex",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "full",
+                            "value": 0,
+                            "uuid": "090a4a1a-07ca-4c1f-ac4e-65d55e57b124"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "half",
+                            "value": 1,
+                            "uuid": "14c4cba9-075c-4ae3-97a9-659051230719"
+                        }
+                    ],
+                    "uuid": "568e914b-328f-4c9d-9080-31b66ae3b23a"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecFlow Control",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "none",
+                            "value": 0,
+                            "uuid": "e6f60adf-c34c-4ab7-b98e-23193c241344"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "hardware",
+                            "value": 1,
+                            "uuid": "8127f0be-769c-4e19-8843-73a755641072"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "software",
+                            "value": 2,
+                            "uuid": "52d63137-bdab-4e7f-9c3b-2b9ebed20fce"
+                        }
+                    ],
+                    "uuid": "63ae4ab0-affe-493d-a29e-6dc4752876d9"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecInterface Type",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "unknown",
+                            "value": 0,
+                            "uuid": "bb3c26a4-7a91-454d-8102-ee9277254aca"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "RS232",
+                            "value": 1,
+                            "uuid": "b6284806-e846-431f-a07b-8832f62ffb73"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "RS485",
+                            "value": 2,
+                            "uuid": "aaa7d677-96f5-4f1d-a0bb-bb7bc1832646"
+                        }
+                    ],
+                    "uuid": "01a632a3-cf35-4d32-923c-17e0db132f96"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecProtocol",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "unknown",
+                            "value": 0,
+                            "uuid": "5104ff9e-6700-4b58-9f9a-81ce3f1ce680"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Modbus",
+                            "value": 1,
+                            "uuid": "59a1632b-24b2-4e16-9585-2664556ade44"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "vendor specific",
+                            "value": 2,
+                            "uuid": "be8e757d-38c7-4735-92aa-10779ed92250"
+                        }
+                    ],
+                    "uuid": "a199f340-f098-479e-9116-0d09578b5b99"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecOperating State",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "Off",
+                            "value": 1,
+                            "uuid": "2677f45d-32f7-4531-8f7c-d49ca831ffda"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Sleeping",
+                            "value": 2,
+                            "uuid": "cc9f45d0-24c0-4e35-b33f-8a31b601f203"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Fault",
+                            "value": 3,
+                            "uuid": "e5bf1d1f-1bec-4a7b-98f6-34c2184c2def"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Starting",
+                            "value": 3,
+                            "uuid": "6d7fabad-1c6e-42af-8914-26022ed8df92"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "MPPT",
+                            "value": 4,
+                            "uuid": "7b57ef71-9c36-4976-ba49-65c225ec88ac"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Throttled",
+                            "value": 5,
+                            "uuid": "09a26fc7-3a5a-4654-bf44-53f5febc1e64"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Shutting down",
+                            "value": 6,
+                            "uuid": "5e69b815-a0e3-4cac-88d3-2a1f225e0a15"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Standby",
+                            "value": 8,
+                            "uuid": "cbc0ad54-c8d8-4b38-bd69-cb3faa055a03"
+                        }
+                    ],
+                    "uuid": "2c363e8f-9e42-4696-97f8-a97270fca45e"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecVendor Operating State",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "por",
+                            "value": 0,
+                            "uuid": "71f20734-b022-42ba-b094-319998359cd0"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Ready",
+                            "value": 1,
+                            "uuid": "70003331-9957-495e-90c3-1348cf877578"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Following",
+                            "value": 2,
+                            "uuid": "0dc0421b-3bec-44bf-b0be-b3ed12e921c8"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Fault",
+                            "value": 3,
+                            "uuid": "3670139e-2719-4ea1-adc4-a635eee8a198"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Forming",
+                            "value": 4,
+                            "uuid": "e7bed3a7-097d-4275-834e-bd406cc92040"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Reconnect Delay",
+                            "value": 5,
+                            "uuid": "e32ff525-f339-4fe2-82db-c3e3f1166c59"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Area EPS Loss",
+                            "value": 7,
+                            "uuid": "dd37e8a4-2f7d-4ed7-b9fe-6465acb41fb4"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Charging DC",
+                            "value": 8,
+                            "uuid": "400eda8e-9bb9-4d8d-abb1-16cf22bc71c8"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Ride Through",
+                            "value": 9,
+                            "uuid": "8f167b8d-6588-4612-b8ed-4a81437722cb"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Momentary Cessation",
+                            "value": 10,
+                            "uuid": "c06847c0-4ee6-403f-918e-6c6a7f0e3e6c"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Transitioning",
+                            "value": 11,
+                            "uuid": "d0f1baa0-16c5-47b3-8501-6e0bc87db9dc"
+                        }
+                    ],
+                    "uuid": "095f1cfa-67bf-4f5d-a26e-c026f67f039a"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecControl Source",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "CAN control",
+                            "value": 0,
+                            "uuid": "8a8d9705-5176-4e22-b41b-d2bb70259895"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Modbus control",
+                            "value": 1,
+                            "uuid": "ea48f9c5-1c14-499c-8094-aad8364ea160"
+                        }
+                    ],
+                    "uuid": "3ef27adb-be3a-4235-8aaf-930d137be9cb"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecParity",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "none",
+                            "value": 0,
+                            "uuid": "7bd92db8-0475-461e-ad5e-ad22115f8381"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "odd",
+                            "value": 1,
+                            "uuid": "ac1ac1bd-d4fb-4023-b68a-317e6696cb45"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "even",
+                            "value": 2,
+                            "uuid": "4822cfb2-9a8c-4901-979a-38458682e0fd"
+                        }
+                    ],
+                    "uuid": "f18b64ab-ec60-4483-9e34-5f3f4d34c705"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecDuplex",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "full",
+                            "value": 0,
+                            "uuid": "5a07f37e-46f9-406e-8e01-72260d564568"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "half",
+                            "value": 1,
+                            "uuid": "51d49a34-7f53-43e4-a2da-ca791416df38"
+                        }
+                    ],
+                    "uuid": "2bf6dae8-e3a7-4fe2-9a88-2c8c15fc5c4e"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecFlow Control",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "none",
+                            "value": 0,
+                            "uuid": "bd472244-b6db-4941-829a-8d491329dd6b"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "hardware",
+                            "value": 1,
+                            "uuid": "c670a90c-5f8d-485a-bcc8-9f11452ad26e"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "software",
+                            "value": 2,
+                            "uuid": "58f115ff-c424-4a53-a312-9ea4c913042d"
+                        }
+                    ],
+                    "uuid": "cf7c4836-2086-483d-a6f6-32b4c794920b"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecInterface Type",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "unknown",
+                            "value": 0,
+                            "uuid": "3929ca05-86d8-47a8-88e9-91c8a7f38b36"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "RS232",
+                            "value": 1,
+                            "uuid": "a49f0e1c-23c6-4ea7-98f5-c18123b7a19a"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "RS485",
+                            "value": 2,
+                            "uuid": "53a6d1ac-0209-42b7-a139-98734a4b372c"
+                        }
+                    ],
+                    "uuid": "a8023222-55a8-4a12-8fd2-ecc868ef9d51"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecProtocol",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "unknown",
+                            "value": 0,
+                            "uuid": "e8d8b247-629c-4ad0-b670-354ef3ad3bda"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Modbus",
+                            "value": 1,
+                            "uuid": "87cb3013-e358-4835-b695-ffbe7b911f7a"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "vendor specific",
+                            "value": 2,
+                            "uuid": "62620a3a-9eb7-40fa-a76c-2046cc722a27"
+                        }
+                    ],
+                    "uuid": "dc096b42-8414-4405-805b-e8eb1e7c4746"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecOperating State",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "Off",
+                            "value": 1,
+                            "uuid": "49db44c6-5a60-48be-a38f-f51e9395c5bf"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Sleeping",
+                            "value": 2,
+                            "uuid": "3824340d-8fbf-48a5-984e-c2cfcecabe4b"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Fault",
+                            "value": 3,
+                            "uuid": "543a90b6-33ba-48d6-b6a7-b04eaf871d15"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Starting",
+                            "value": 3,
+                            "uuid": "673ee574-49d7-4c93-a530-e3681d40c547"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "MPPT",
+                            "value": 4,
+                            "uuid": "7f5aa612-ed08-476b-b798-66aa473050f8"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Throttled",
+                            "value": 5,
+                            "uuid": "6cda8216-e683-4658-9a8a-c3163fdd7508"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Shutting down",
+                            "value": 6,
+                            "uuid": "5f208276-8ab3-4c02-a16e-dbe12c9eb216"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Standby",
+                            "value": 8,
+                            "uuid": "d147d986-914e-4621-8489-92b09592550f"
+                        }
+                    ],
+                    "uuid": "d148448a-6530-4709-bb64-d185732d4428"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecVendor Operating State",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "por",
+                            "value": 0,
+                            "uuid": "3a7d9cb1-1b3c-4883-966e-34acff2366de"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Ready",
+                            "value": 1,
+                            "uuid": "52234c80-d8ce-49cb-8596-7011a10f2c48"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Following",
+                            "value": 2,
+                            "uuid": "578e4df0-479c-40bb-abd8-471feda86a0c"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Fault",
+                            "value": 3,
+                            "uuid": "1644bf37-fd19-4929-b522-a8c0d77cc822"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Forming",
+                            "value": 4,
+                            "uuid": "ca0d693c-6393-4d1b-8566-2e32f8a8f418"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Reconnect Delay",
+                            "value": 5,
+                            "uuid": "fd0e5026-0035-43a0-94fa-2f970d9fa31e"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Area EPS Loss",
+                            "value": 7,
+                            "uuid": "62b159ff-5642-4db4-ac6a-d7e7b39f6151"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Charging DC",
+                            "value": 8,
+                            "uuid": "0ea23a6d-107c-43a1-aec9-763ddfe4268e"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Ride Through",
+                            "value": 9,
+                            "uuid": "405fc2ee-6e57-4d50-a524-3526b199c145"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Momentary Cessation",
+                            "value": 10,
+                            "uuid": "ee987266-e235-4043-aed7-3370382714e3"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Transitioning",
+                            "value": 11,
+                            "uuid": "79bad358-bdd2-4f73-847d-11501e814271"
+                        }
+                    ],
+                    "uuid": "8109b8b1-b34b-465a-b429-827603d6b368"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "SunSpecControl Source",
+                    "children": [
+                        {
+                            "_type": "enumerator",
+                            "name": "CAN control",
+                            "value": 0,
+                            "uuid": "b6dd2d0c-3b65-4dbe-af80-11dc28afe272"
+                        },
+                        {
+                            "_type": "enumerator",
+                            "name": "Modbus control",
+                            "value": 1,
+                            "uuid": "dd869c9d-b571-4812-9683-f5d33fe39ad7"
+                        }
+                    ],
+                    "uuid": "1f3ef074-25e9-45e1-b4f1-3dedf026b450"
                 }
             ],
             "uuid": "94345b59-5ba3-44e4-b78d-6f80569d9d73"

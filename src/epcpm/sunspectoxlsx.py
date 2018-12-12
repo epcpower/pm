@@ -1,4 +1,4 @@
-import string
+import itertools
 
 import attr
 import openpyxl
@@ -12,24 +12,65 @@ builders = epyqlib.utils.general.TypeMap()
 
 
 data_point_fields = attr.fields(epcpm.sunspecmodel.DataPoint)
+epc_enumerator_fields = attr.fields(epyqlib.pm.parametermodel.Enumerator)
 
-sheet_fields = {
-    "Field Type": None,
-    "Applicable Point": None,
-    "Address Offset": data_point_fields.offset,
-    "Block Offset": data_point_fields.block_offset,
-    "Size": data_point_fields.size,
-    "Name": data_point_fields.name,
-    "Label": data_point_fields.label,
-    "Value": None,
-    "Type": data_point_fields.type_uuid,
-    "Units": data_point_fields.units,
-    "SF": data_point_fields.factor_uuid,
-    "R/W": None,
-    "Mandatory M/O": None,
-    "Description": data_point_fields.description,
-    "Notes": data_point_fields.notes,
-}
+
+@attr.s
+class Fields:
+    field_type = attr.ib(default=None)
+    applicable_point = attr.ib(default=None)
+    address_offset = attr.ib(default=None)
+    block_offset = attr.ib(default=None)
+    size = attr.ib(default=None)
+    name = attr.ib(default=None)
+    label = attr.ib(default=None)
+    value = attr.ib(default=None)
+    type = attr.ib(default=None)
+    units = attr.ib(default=None)
+    scale_factor = attr.ib(default=None)
+    read_write = attr.ib(default=None)
+    mandatory = attr.ib(default=None)
+    description = attr.ib(default=None)
+    notes = attr.ib(default=None)
+
+
+field_names = Fields(
+    field_type='Field Type',
+    applicable_point='Applicable Point',
+    address_offset='Address Offset',
+    block_offset='Block Offset',
+    size='Size',
+    name='Name',
+    label='Label',
+    value='Value',
+    type='Type',
+    units='Units',
+    scale_factor='SF',
+    read_write='R/W',
+    mandatory='Mandatory M/O',
+    description='Description',
+    notes='Notes',
+)
+
+
+point_fields = Fields(
+    address_offset=data_point_fields.offset,
+    block_offset=data_point_fields.block_offset,
+    size=data_point_fields.size,
+    name=data_point_fields.name,
+    label=data_point_fields.label,
+    type=data_point_fields.type_uuid,
+    units=data_point_fields.units,
+    scale_factor=data_point_fields.factor_uuid,
+    description=data_point_fields.description,
+    notes=data_point_fields.notes,
+)
+
+
+enumerator_fields = Fields(
+    label=epc_enumerator_fields.name,
+    value=epc_enumerator_fields.value,
+)
 
 
 @builders(epcpm.sunspecmodel.Root)
@@ -66,7 +107,7 @@ class Model:
 
     def gen(self):
         self.worksheet.title = str(self.wrapped.id)
-        self.worksheet.append(list(sheet_fields.keys()))
+        self.worksheet.append(attr.astuple(field_names))
 
         self.wrapped.children[0].check_offsets_and_length()
 
@@ -81,26 +122,92 @@ class Model:
 
         rows = []
 
-        for i, child in enumerate(self.wrapped.children):
+        model_types = ['Header', 'Fixed Block']
+
+        for (i, child), model_type in itertools.zip_longest(enumerate(self.wrapped.children), model_types):
             builder = builders.wrap(
                 wrapped=child,
                 add_padding=add_padding and i == 1,
                 padding_type=self.padding_type,
+                model_type=model_type,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
 
             for row in builder.gen():
                 rows.append(row)
 
-            rows.append([])
+            rows.append(Fields())
 
         for i, row in enumerate(rows):
             if i == 0:
-                row[list(sheet_fields).index('Value')] = self.wrapped.id
+                row.value = self.wrapped.id
             elif i == 1:
-                row[list(sheet_fields).index('Value')] = length
+                row.value = length
 
-            self.worksheet.append(row)
+            self.worksheet.append(attr.astuple(row))
+
+        enumeration_points = [
+            (point, point.enumeration_uuid)
+            for point in itertools.chain.from_iterable(
+                block.children
+                for block in self.wrapped.children
+            )
+            if point.enumeration_uuid is not None
+        ]
+
+        for point, enumeration_uuid in enumeration_points:
+            enumeration = self.parameter_uuid_finder(enumeration_uuid)
+            builder = builders.wrap(
+                wrapped=enumeration,
+                point=point,
+            )
+
+            for row in builder.gen():
+                self.worksheet.append(attr.astuple(row))
+
+            self.worksheet.append(attr.astuple(Fields()))
+
+
+@builders(epyqlib.pm.parametermodel.Enumeration)
+@attr.s
+class Enumeration:
+    wrapped = attr.ib()
+    point = attr.ib()
+
+    def gen(self):
+        rows = []
+
+        for enumerator in self.wrapped.children:
+            builder = builders.wrap(
+                wrapped=enumerator,
+                point=self.point,
+            )
+            rows.append(builder.gen())
+
+        return rows
+
+
+@builders(epyqlib.pm.parametermodel.Enumerator)
+@attr.s
+class Enumerator:
+    wrapped = attr.ib()
+    point = attr.ib()
+
+    # TODO: CAMPid 07397546759269756456100183066795496952476951653
+    def gen(self):
+        row = Fields()
+
+        for name, field in attr.asdict(enumerator_fields).items():
+            if field is None:
+                continue
+
+            setattr(row, name, getattr(self.wrapped, field.name))
+
+        # TODO: which one actually?
+        row.field_type = 'enum16'
+        row.applicable_point = self.point.name
+
+        return row
 
 
 @builders(epcpm.sunspecmodel.HeaderBlock)
@@ -110,6 +217,7 @@ class Block:
     wrapped = attr.ib()
     add_padding = attr.ib()
     padding_type = attr.ib()
+    model_type = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
@@ -151,6 +259,7 @@ class Block:
         for child in points:
             builder = builders.wrap(
                 wrapped=child,
+                model_type=self.model_type,
                 scale_factor_from_uuid=scale_factor_from_uuid,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
@@ -164,29 +273,26 @@ class Block:
 class Point:
     wrapped = attr.ib()
     scale_factor_from_uuid = attr.ib()
+    model_type = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
+    # TODO: CAMPid 07397546759269756456100183066795496952476951653
     def gen(self):
-        values = [
-            self.value_from_field(field)
-            for field in sheet_fields.values()
-        ]
+        row = Fields()
 
-        return values
+        for name, field in attr.asdict(point_fields).items():
+            if field is None:
+                continue
 
-    def value_from_field(self, field):
-        if field is None:
-            return None
+            setattr(row, name, getattr(self.wrapped, field.name))
 
-        value = getattr(self.wrapped, field.name)
+        if row.scale_factor is not None:
+            row.scale_factor = (
+                self.scale_factor_from_uuid[row.scale_factor].name
+            )
+        if row.type is not None:
+            row.type = self.parameter_uuid_finder(row.type).name
 
-        if value is None:
-            return None
+        row.field_type = self.model_type
 
-        if field == data_point_fields.factor_uuid:
-            return self.scale_factor_from_uuid[value].name
-
-        if field == data_point_fields.type_uuid:
-            return self.parameter_uuid_finder(value).name
-
-        return value
+        return row
