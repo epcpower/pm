@@ -127,8 +127,11 @@ def import_model(model_id, parameter_model, paths=()):
         )
 
         for symbol in enumeration:
-            enumerator = epyqlib.pm.parametermodel.Enumerator(
-                name=symbol.label,
+            enumerator = epyqlib.pm.parametermodel.SunSpecEnumerator(
+                name=symbol.id,
+                label=symbol.label,
+                description=symbol.description,
+                notes=symbol.notes,
                 value=symbol.value,
             )
             epc_enumeration.append_child(enumerator)

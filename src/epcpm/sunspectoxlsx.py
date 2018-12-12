@@ -12,7 +12,9 @@ builders = epyqlib.utils.general.TypeMap()
 
 
 data_point_fields = attr.fields(epcpm.sunspecmodel.DataPoint)
-epc_enumerator_fields = attr.fields(epyqlib.pm.parametermodel.Enumerator)
+epc_enumerator_fields = attr.fields(
+    epyqlib.pm.parametermodel.SunSpecEnumerator,
+)
 
 
 @attr.s
@@ -68,7 +70,10 @@ point_fields = Fields(
 
 
 enumerator_fields = Fields(
-    label=epc_enumerator_fields.name,
+    name=epc_enumerator_fields.name,
+    label=epc_enumerator_fields.label,
+    description=epc_enumerator_fields.description,
+    notes=epc_enumerator_fields.notes,
     value=epc_enumerator_fields.value,
 )
 
@@ -187,7 +192,7 @@ class Enumeration:
         return rows
 
 
-@builders(epyqlib.pm.parametermodel.Enumerator)
+@builders(epyqlib.pm.parametermodel.SunSpecEnumerator)
 @attr.s
 class Enumerator:
     wrapped = attr.ib()
