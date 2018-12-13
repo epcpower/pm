@@ -103,9 +103,28 @@ def import_model(model_id, parameter_model, paths=()):
     imported_points = []
     scale_factors = {}
 
+    group = epyqlib.pm.parametermodel.Group(
+        name='SunSpec Model {}'.format(model.id),
+    )
+    parameter_model.root.append_child(group)
+
+    our_model = epcpm.sunspecmodel.Model(
+        id=model.id,
+        length=model.len,
+    )
+
+    types = parameter_model.list_selection_roots['sunspec types']
+    parameters = our_model.children[0].add_data_points(
+        model_id=model.model_type.label,
+        uint16_uuid=types.child_by_name('uint16').uuid,
+    )
+
+    for parameter in parameters:
+        group.append_child(parameter)
+
     for name, point in model.points_sf.items():
         parameter = epc_parameter_from_pysunspec_point(point=point)
-        parameter_model.root.append_child(parameter)
+        group.append_child(parameter)
         epc_point = epc_point_from_pysunspec_point(
             point=point,
             parameter_uuid=parameter.uuid,
@@ -117,7 +136,7 @@ def import_model(model_id, parameter_model, paths=()):
 
     for point in model.points_list:
         parameter = epc_parameter_from_pysunspec_point(point=point)
-        parameter_model.root.append_child(parameter)
+        group.append_child(parameter)
         epc_point = epc_point_from_pysunspec_point(
             point=point,
             parameter_model=parameter_model,
@@ -158,20 +177,6 @@ def import_model(model_id, parameter_model, paths=()):
             parameter.enumeration_uuid = epc_enumeration.uuid
 
         enumerations_root.append_child(epc_enumeration)
-
-    our_model = epcpm.sunspecmodel.Model(
-        id=model.id,
-        length=model.len,
-    )
-
-    types = parameter_model.list_selection_roots['sunspec types']
-    parameters = our_model.children[0].add_data_points(
-        model_id=model.model_type.label,
-        uint16_uuid=types.child_by_name('uint16').uuid,
-    )
-
-    for parameter in parameters:
-        parameter_model.root.append_child(parameter)
 
     id_point = our_model.children[0].children[0]
     id_point.id = model.model_type.id
