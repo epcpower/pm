@@ -189,47 +189,6 @@ class DataPoint(epyqlib.treenode.TreeNode):
             return self.tree_parent.can_delete(node=self)
 
 
-@graham.schemify(tag='sunspec_enumeration', register=True)
-@epyqlib.attrsmodel.ify()
-@epyqlib.utils.qt.pyqtify()
-@attr.s(hash=False)
-class Enumeration:
-    enumeration_uuid = epyqlib.attrsmodel.attr_uuid() # references to parametermodel.Enumeration
-
-    uuid = epyqlib.attrsmodel.attr_uuid()
-
-    def __attrs_post_init__(self):
-        super().__init__()
-
-    def can_drop_on(self, node):
-        #isintance(node, DictPair)?
-        return False
-
-    def can_delete(self, node=None):
-        if node is None:
-            return self.tree_parent.can_delete(node=self)
-
-
-@graham.schemify(tag='sunspec_bit_field', register=True)
-@epyqlib.attrsmodel.ify()
-@epyqlib.utils.qt.pyqtify()
-@attr.s(hash=False)
-class BitField:
-    enumeration_uuid = epyqlib.attrsmodel.attr_uuid() #maybe this should be a bitfield_uuid?  IDK
-    #how we plan to use it, but I can see how an enum could be used to define a bitfield
-    uuid = epyqlib.attrsmodel.attr_uuid()
-    def __attrs_post_init__(self):
-        super().__init__()
-
-    def can_drop_on(self, node):
-        #isintance(node, DictPair)?
-        return False
-
-    def can_delete(self, node=None):
-        if node is None:
-            return self.tree_parent.can_delete(node=self)
-
-
 def check_block_offsets_and_length(self):
     length = 0
 
@@ -400,8 +359,6 @@ class Model(epyqlib.treenode.TreeNode):
             field=graham.fields.MixedList(fields=(
                 marshmallow.fields.Nested(graham.schema(HeaderBlock)),
                 marshmallow.fields.Nested(graham.schema(FixedBlock)),
-                marshmallow.fields.Nested(graham.schema(Enumeration)),
-                marshmallow.fields.Nested(graham.schema(BitField)),
             )),
         ),
     )
@@ -441,8 +398,6 @@ types = epyqlib.attrsmodel.Types(
         Root,
         Model,
         DataPoint,
-        Enumeration,
-        BitField,
         HeaderBlock,
         FixedBlock,
     ),
@@ -460,7 +415,6 @@ columns = epyqlib.attrsmodel.columns(
     merge('factor_uuid', DataPoint),
     merge('parameter_uuid', DataPoint),
     merge('type_uuid', DataPoint),
-    merge('enumeration_uuid', Enumeration, BitField),
     merge('offset', DataPoint, HeaderBlock, FixedBlock),
     merge('block_offset', DataPoint),
     merge('uuid', *types.types.values()),
