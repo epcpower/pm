@@ -22,7 +22,7 @@ TestAttrsModel = epyqlib.attrsmodel.build_tests(
 
 
 def test_model_has_header():
-    project = epcpm.project.loadp(here / 'project' / 'project.pmp')
+    project = epcpm.project.loadp(here/'project_with_sunspec'/'project.pmp')
     types = project.models.parameters.list_selection_roots['sunspec types']
 
     model = epcpm.sunspecmodel.Model()

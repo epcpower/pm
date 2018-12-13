@@ -25,7 +25,7 @@ def fresh_pathlist():
 
 
 def test_load():
-    project = epcpm.project.loadp(here / 'project' / 'project.pmp')
+    project = epcpm.project.loadp(here/'project_with_sunspec'/'project.pmp')
     requested_models = [1, 17, 103, 65534]
 
     models = epcpm.smdxtosunspec.import_models(

@@ -134,11 +134,15 @@ def _post_load(project):
     if enumerations_root is None:
         sunspec_types_root = None
     else:
-        sunspec_types_root, = (
+        sunspec_types_root = [
             child
             for child in enumerations_root.children
             if child.name == 'SunSpecTypes'
-       )
+        ]
+        if len(sunspec_types_root) == 1:
+            sunspec_types_root, = sunspec_types_root
+        else:
+            sunspec_types_root = None
     models.parameters.list_selection_roots['sunspec types'] = (
         sunspec_types_root
     )
