@@ -90,6 +90,7 @@ def _post_load(project):
                 path=project.paths.sunspec,
                 root_type=epcpm.sunspecmodel.Root,
                 columns=epcpm.sunspecmodel.columns,
+                drop_sources=(models.parameters,),
             )
 
     models.parameters.droppable_from.add(models.parameters)
@@ -281,7 +282,7 @@ class Project:
                     f.write('\n')
 
 
-def load_model(project, path, root_type, columns):
+def load_model(project, path, root_type, columns, drop_sources=()):
     resolved_path = path
     if project.filename is not None:
         resolved_path = project.filename.parents[0] / resolved_path
@@ -292,4 +293,8 @@ def load_model(project, path, root_type, columns):
     root_schema = graham.schema(root_type)
     root = root_schema.loads(raw).data
 
-    return epyqlib.attrsmodel.Model(root=root, columns=columns)
+    return epyqlib.attrsmodel.Model(
+        root=root,
+        columns=columns,
+        drop_sources=drop_sources,
+    )

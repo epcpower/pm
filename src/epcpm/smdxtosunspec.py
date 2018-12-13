@@ -9,7 +9,7 @@ import sunspec.core.device
 import epcpm.sunspecmodel
 
 
-def epc_point_from_pysunspec_point(point, parameter_model, scale_factors=None):
+def epc_point_from_pysunspec_point(point, parameter_model, parameter_uuid, scale_factors=None):
     if scale_factors is not None and point.point_type.sf is not None:
         scale_factor_uuid = scale_factors[point.point_type.sf].uuid
     else:
@@ -23,17 +23,24 @@ def epc_point_from_pysunspec_point(point, parameter_model, scale_factors=None):
     return epcpm.sunspecmodel.DataPoint(
         factor_uuid=scale_factor_uuid,
         units=point.point_type.units,
-        # parameter_uuid=,
+        parameter_uuid=parameter_uuid,
         type_uuid=sunspec_type_uuid,
         # enumeration_uuid=,
         block_offset=point.point_type.offset,
-        name=point.point_type.id,
-        label=point.point_type.label,
         description=point.point_type.description,
         notes=point.point_type.notes,
         size=point.point_type.len,
         # uuid=,
     )
+
+
+def epc_parameter_from_pysunspec_point(point):
+    parameter = epyqlib.pm.parametermodel.Parameter(
+        name=point.point_type.label,
+        abbreviation=point.point_type.id,
+    )
+
+    return parameter
 
 
 def import_models(*model_ids, parameter_model, paths):
@@ -97,8 +104,11 @@ def import_model(model_id, parameter_model, paths=()):
     scale_factors = {}
 
     for name, point in model.points_sf.items():
+        parameter = epc_parameter_from_pysunspec_point(point=point)
+        parameter_model.root.append_child(parameter)
         epc_point = epc_point_from_pysunspec_point(
             point=point,
+            parameter_uuid=parameter.uuid,
             parameter_model=parameter_model,
         )
         scale_factors[name] = epc_point
@@ -106,9 +116,12 @@ def import_model(model_id, parameter_model, paths=()):
     enumerations = collections.defaultdict(list)
 
     for point in model.points_list:
+        parameter = epc_parameter_from_pysunspec_point(point=point)
+        parameter_model.root.append_child(parameter)
         epc_point = epc_point_from_pysunspec_point(
             point=point,
             parameter_model=parameter_model,
+            parameter_uuid=parameter.uuid,
             scale_factors=scale_factors,
         )
 
@@ -125,7 +138,9 @@ def import_model(model_id, parameter_model, paths=()):
     for enumeration, points in enumerations.items():
         # TODO: just using the first point?  hmm
         epc_enumeration = epyqlib.pm.parametermodel.Enumeration(
-            name='SunSpec{}'.format(points[0].label),
+            name='SunSpec{}'.format(
+                parameter_model.node_from_uuid(points[0].parameter_uuid).name,
+            ),
         )
 
         for symbol in enumeration:
@@ -150,14 +165,17 @@ def import_model(model_id, parameter_model, paths=()):
     )
 
     types = parameter_model.list_selection_roots['sunspec types']
-    our_model.children[0].add_data_points(
+    parameters = our_model.children[0].add_data_points(
+        model_id=model.model_type.label,
         uint16_uuid=types.child_by_name('uint16').uuid,
     )
+
+    for parameter in parameters:
+        parameter_model.root.append_child(parameter)
 
     id_point = our_model.children[0].children[0]
     id_point.id = model.model_type.id
     id_point.description = model.model_type.description
-    id_point.label = model.model_type.label
     id_point.notes = model.model_type.notes
 
     imported_points = sorted(

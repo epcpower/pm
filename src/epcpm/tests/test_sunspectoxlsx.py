@@ -2,6 +2,7 @@ import csv
 import pathlib
 
 import epcpm.project
+import epcpm.smdxtosunspec
 import epcpm.sunspectoxlsx
 
 
@@ -34,7 +35,7 @@ def test_x():
         model.root.append_child(sunspec_model)
 
     project.filename = here/'project_with_sunspec'/'project.pmp'
-    project.paths['sunspec'] = project.filename.with_name('sunspec.json')
+    project.paths['sunspec'] = 'sunspec.json'
     project.save()
 
     builder = epcpm.sunspectoxlsx.builders.wrap(

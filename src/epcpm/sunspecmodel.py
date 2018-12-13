@@ -81,6 +81,19 @@ def build_sunspec_types_enumeration():
     return enumeration
 
 
+# TODO: CAMPid 8695426542167924656654271657917491654
+def name_from_uuid(node, value, model):
+    if value is None:
+        return None
+
+    try:
+        target_node = model.node_from_uuid(value)
+    except NotFoundError:
+        return str(value)
+
+    return model.node_from_uuid(target_node.parameter_uuid).abbreviation
+
+
 @graham.schemify(tag='data_point', register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
@@ -90,7 +103,7 @@ class DataPoint(epyqlib.treenode.TreeNode):
         default=None,
         human_name='Scale Factor',
         allow_none=True,
-        data_display=epyqlib.attrsmodel.name_from_uuid,
+        data_display=name_from_uuid,
     )
     units = attr.ib(
         default=None,
@@ -150,18 +163,6 @@ class DataPoint(epyqlib.treenode.TreeNode):
         ),
     )
 
-    name = attr.ib(
-        default='New data point',
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
-        ),
-    )
-    label = attr.ib(
-        default='New label',
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(allow_none=True),
-        ),
-    )  # long name, short description, somewhere between name and description
     description = attr.ib(
         default='New description',
         metadata=graham.create_metadata(
@@ -311,26 +312,37 @@ class HeaderBlock(epyqlib.treenode.TreeNode):
 
     check_offsets_and_length = check_block_offsets_and_length
 
-    def add_data_points(self, uint16_uuid):
+    def add_data_points(self, uint16_uuid, model_id):
+        parameters = [
+            epyqlib.pm.parametermodel.Parameter(
+                name=model_id,
+                abbreviation='ID',
+            ),
+            epyqlib.pm.parametermodel.Parameter(
+                name='',
+                abbreviation='L',
+            ),
+        ]
         points = [
             DataPoint(
-                name='ID',
                 block_offset=0,
                 size=1,
                 type_uuid=uint16_uuid,
+                parameter_uuid=parameters[0].uuid,
             ),
             DataPoint(
-                name='L',
                 block_offset=1,
                 size=1,
-                label=None,
                 description='Model Length',
                 type_uuid=uint16_uuid,
+                parameter_uuid=parameters[1].uuid,
             ),
         ]
 
         for point in points:
             self.append_child(point)
+
+        return parameters
 
 
 @graham.schemify(tag='sunspec_fixed_block', register=True)
@@ -468,8 +480,7 @@ def merge(name, *types):
 
 
 columns = epyqlib.attrsmodel.columns(
-    merge('name', HeaderBlock, FixedBlock, DataPoint) + merge('id', Model),
-    merge('label', DataPoint),
+    merge('name', HeaderBlock, FixedBlock) + merge('id', Model),
     merge('length', Model) + merge('size', DataPoint),
     merge('factor_uuid', DataPoint),
     merge('units', DataPoint),

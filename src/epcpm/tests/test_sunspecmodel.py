@@ -26,16 +26,21 @@ def test_model_has_header():
     types = project.models.parameters.list_selection_roots['sunspec types']
 
     model = epcpm.sunspecmodel.Model()
-    model.children[0].add_data_points(
+    parameters = model.children[0].add_data_points(
         uint16_uuid=types.child_by_name('uint16').uuid,
+        model_id=1,
     )
 
     header_block = model.children[0]
 
     assert isinstance(header_block, epcpm.sunspecmodel.HeaderBlock)
 
-    assert header_block.children[0].name == 'ID'
-    assert header_block.children[1].name == 'L'
+    assert len(header_block.children) == len(parameters)
+    for point, parameter in zip(header_block.children, parameters):
+        assert point.parameter_uuid == parameter.uuid
+
+    assert parameters[0].abbreviation == 'ID'
+    assert parameters[1].abbreviation == 'L'
 
     assert header_block.offset == 0
 

@@ -59,8 +59,6 @@ point_fields = Fields(
     address_offset=data_point_fields.offset,
     block_offset=data_point_fields.block_offset,
     size=data_point_fields.size,
-    name=data_point_fields.name,
-    label=data_point_fields.label,
     type=data_point_fields.type_uuid,
     units=data_point_fields.units,
     scale_factor=data_point_fields.factor_uuid,
@@ -166,9 +164,13 @@ class Model:
             builder = builders.wrap(
                 wrapped=enumeration,
                 point=point,
+                parameter_uuid_finder=self.parameter_uuid_finder,
             )
 
-            for row in builder.gen():
+            rows = builder.gen()
+            print()
+
+            for row in rows:
                 self.worksheet.append(attr.astuple(row))
 
             self.worksheet.append(attr.astuple(Fields()))
@@ -179,6 +181,7 @@ class Model:
 class Enumeration:
     wrapped = attr.ib()
     point = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
         rows = []
@@ -187,6 +190,7 @@ class Enumeration:
             builder = builders.wrap(
                 wrapped=enumerator,
                 point=self.point,
+                parameter_uuid_finder=self.parameter_uuid_finder,
             )
             rows.append(builder.gen())
 
@@ -198,6 +202,7 @@ class Enumeration:
 class Enumerator:
     wrapped = attr.ib()
     point = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
 
     # TODO: CAMPid 07397546759269756456100183066795496952476951653
     def gen(self):
@@ -209,7 +214,9 @@ class Enumerator:
 
             setattr(row, name, getattr(self.wrapped, field.name))
 
-        row.applicable_point = self.point.name
+        row.applicable_point = (
+            self.parameter_uuid_finder(self.point.parameter_uuid).abbreviation
+        )
 
         return row
 
@@ -250,8 +257,6 @@ class Block:
                     + self.wrapped.children[-1].size
                 ),
                 size=self.padding_type.value,
-                name='Pad',
-                label='',
                 description='Force even alignment',
             )
             # TODO: ack!  just to get the address offset calculated but
@@ -292,11 +297,21 @@ class Point:
 
         if row.scale_factor is not None:
             row.scale_factor = (
-                self.scale_factor_from_uuid[row.scale_factor].name
+                self.parameter_uuid_finder(
+                    self.scale_factor_from_uuid[row.scale_factor].parameter_uuid).abbreviation
             )
         if row.type is not None:
             row.type = self.parameter_uuid_finder(row.type).name
 
+        if self.wrapped.parameter_uuid is not None:
+            parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+
+            row.label = parameter.name
+            row.name = parameter.abbreviation
+
         row.field_type = self.model_type
+
+        if self.parameter_uuid_finder(self.wrapped.type_uuid).name == 'pad':
+            row.name = 'Pad'
 
         return row
