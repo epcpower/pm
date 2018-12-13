@@ -105,13 +105,6 @@ class DataPoint(epyqlib.treenode.TreeNode):
         allow_none=True,
         data_display=name_from_uuid,
     )
-    units = attr.ib(
-        default=None,
-        convert=epyqlib.attrsmodel.to_str_or_none,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(allow_none=True),
-        ),
-    )
     parameter_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,
         allow_none=True,
@@ -476,7 +469,6 @@ columns = epyqlib.attrsmodel.columns(
     merge('name', HeaderBlock, FixedBlock) + merge('id', Model),
     merge('length', Model) + merge('size', DataPoint),
     merge('factor_uuid', DataPoint),
-    merge('units', DataPoint),
     merge('parameter_uuid', DataPoint),
     merge('type_uuid', DataPoint),
     merge('enumeration_uuid', DataPoint, Enumeration, BitField),

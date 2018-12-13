@@ -22,7 +22,6 @@ def epc_point_from_pysunspec_point(point, parameter_model, parameter_uuid, scale
 
     return epcpm.sunspecmodel.DataPoint(
         factor_uuid=scale_factor_uuid,
-        units=point.point_type.units,
         parameter_uuid=parameter_uuid,
         type_uuid=sunspec_type_uuid,
         # enumeration_uuid=,
@@ -38,6 +37,7 @@ def epc_parameter_from_pysunspec_point(point):
         name=point.point_type.label,
         abbreviation=point.point_type.id,
         notes=point.point_type.notes,
+        units=point.point_type.units,
     )
 
     return parameter
