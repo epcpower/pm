@@ -69,17 +69,19 @@ class Symbol:
     value = attr.ib(converter=int)
     id = attr.ib()
     label = attr.ib()
+    type = attr.ib()
     description = attr.ib(converter=none_to_empty_string)
     notes = attr.ib(converter=none_to_empty_string)
 
     @classmethod
-    def from_sunspec(cls, symbol):
+    def from_sunspec(cls, symbol, type_):
         return cls(
             description=symbol.description,
             id=symbol.id,
             label=symbol.label,
             notes=symbol.notes,
             value=symbol.value,
+            type=type_,
         )
 
 
@@ -112,9 +114,9 @@ def import_model(model_id, parameter_model, paths=()):
 
         imported_points.append(epc_point)
 
-        if point.point_type.type.startswith('enum'):
+        if point.point_type.type.startswith(('enum', 'bitfield')):
             enumeration = tuple(sorted(
-                Symbol.from_sunspec(symbol=symbol)
+                Symbol.from_sunspec(symbol=symbol, type_=point.point_type.type)
                 for symbol in point.point_type.symbols
             ))
             enumerations[enumeration].append(epc_point)
@@ -133,6 +135,7 @@ def import_model(model_id, parameter_model, paths=()):
                 description=symbol.description,
                 notes=symbol.notes,
                 value=symbol.value,
+                type=symbol.type,
             )
             epc_enumeration.append_child(enumerator)
 

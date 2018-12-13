@@ -75,6 +75,7 @@ enumerator_fields = Fields(
     description=epc_enumerator_fields.description,
     notes=epc_enumerator_fields.notes,
     value=epc_enumerator_fields.value,
+    field_type=epc_enumerator_fields.type,
 )
 
 
@@ -208,8 +209,6 @@ class Enumerator:
 
             setattr(row, name, getattr(self.wrapped, field.name))
 
-        # TODO: which one actually?
-        row.field_type = 'enum16'
         row.applicable_point = self.point.name
 
         return row
