@@ -147,30 +147,26 @@ class Model:
 
             self.worksheet.append(attr.astuple(row))
 
-        enumeration_points = [
-            (point, point.enumeration_uuid)
-            for point in itertools.chain.from_iterable(
-                block.children
-                for block in self.wrapped.children
-            )
-            if point.enumeration_uuid is not None
-        ]
+        for block in self.wrapped.children:
+            for point in block.children:
+                parameter = self.parameter_uuid_finder(point.parameter_uuid)
+                enumeration_uuid = parameter.enumeration_uuid
+                if enumeration_uuid is None:
+                    continue
 
-        for point, enumeration_uuid in enumeration_points:
-            enumeration = self.parameter_uuid_finder(enumeration_uuid)
-            builder = builders.wrap(
-                wrapped=enumeration,
-                point=point,
-                parameter_uuid_finder=self.parameter_uuid_finder,
-            )
+                enumeration = self.parameter_uuid_finder(enumeration_uuid)
+                builder = builders.wrap(
+                    wrapped=enumeration,
+                    point=point,
+                    parameter_uuid_finder=self.parameter_uuid_finder,
+                )
 
-            rows = builder.gen()
-            print()
+                rows = builder.gen()
 
-            for row in rows:
-                self.worksheet.append(attr.astuple(row))
+                for row in rows:
+                    self.worksheet.append(attr.astuple(row))
 
-            self.worksheet.append(attr.astuple(Fields()))
+                self.worksheet.append(attr.astuple(Fields()))
 
 
 @builders(epyqlib.pm.parametermodel.Enumeration)

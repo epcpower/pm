@@ -118,13 +118,6 @@ class DataPoint(epyqlib.treenode.TreeNode):
         data_display=epyqlib.attrsmodel.name_from_uuid,
         list_selection_root='sunspec types',
     )
-    enumeration_uuid = epyqlib.attrsmodel.attr_uuid(
-        default=None,
-        allow_none=True,
-        human_name='Enumeration',
-        data_display=epyqlib.attrsmodel.name_from_uuid,
-        list_selection_root='enumerations',
-    )  # probably to parametermodel.Enumeration (applicable point)
 
     offset = attr.ib(
         default=0,
@@ -465,7 +458,7 @@ columns = epyqlib.attrsmodel.columns(
     merge('factor_uuid', DataPoint),
     merge('parameter_uuid', DataPoint),
     merge('type_uuid', DataPoint),
-    merge('enumeration_uuid', DataPoint, Enumeration, BitField),
+    merge('enumeration_uuid', Enumeration, BitField),
     merge('offset', DataPoint, HeaderBlock, FixedBlock),
     merge('block_offset', DataPoint),
     merge('uuid', *types.types.values()),

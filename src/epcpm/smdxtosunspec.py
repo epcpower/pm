@@ -136,11 +136,10 @@ def import_model(model_id, parameter_model, paths=()):
 
     enumerations_root = parameter_model.list_selection_roots['enumerations']
     for enumeration, points in enumerations.items():
+        parameter = parameter_model.node_from_uuid(points[0].parameter_uuid)
         # TODO: just using the first point?  hmm
         epc_enumeration = epyqlib.pm.parametermodel.Enumeration(
-            name='SunSpec{}'.format(
-                parameter_model.node_from_uuid(points[0].parameter_uuid).name,
-            ),
+            name='SunSpec{}'.format(parameter.name),
         )
 
         for symbol in enumeration:
@@ -155,7 +154,8 @@ def import_model(model_id, parameter_model, paths=()):
             epc_enumeration.append_child(enumerator)
 
         for point in points:
-            point.enumeration_uuid = epc_enumeration.uuid
+            parameter = parameter_model.node_from_uuid(point.parameter_uuid)
+            parameter.enumeration_uuid = epc_enumeration.uuid
 
         enumerations_root.append_child(epc_enumeration)
 
