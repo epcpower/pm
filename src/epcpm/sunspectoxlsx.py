@@ -34,6 +34,9 @@ class Fields:
     mandatory = attr.ib(default=None)
     description = attr.ib(default=None)
     notes = attr.ib(default=None)
+    modbus_address = attr.ib(default=None)
+    get = attr.ib(default=None)
+    set = attr.ib(default=None)
 
 
 field_names = Fields(
@@ -52,6 +55,9 @@ field_names = Fields(
     mandatory='Mandatory M/O',
     description='Description',
     notes='Notes',
+    modbus_address='Modbus Address',
+    get='get',
+    set='set',
 )
 
 
@@ -84,6 +90,10 @@ class Root:
     def gen(self):
         workbook = openpyxl.Workbook()
         workbook.remove(workbook.active)
+
+        workbook.create_sheet('License Agreement')
+        workbook.create_sheet('Summary')
+        workbook.create_sheet('Index')
 
         for model in self.wrapped.children:
             worksheet = workbook.create_sheet()
