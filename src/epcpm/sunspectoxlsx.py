@@ -61,7 +61,6 @@ point_fields = Fields(
     size=data_point_fields.size,
     type=data_point_fields.type_uuid,
     scale_factor=data_point_fields.factor_uuid,
-    description=data_point_fields.description,
 )
 
 
@@ -255,7 +254,6 @@ class Block:
                     + self.wrapped.children[-1].size
                 ),
                 size=self.padding_type.value,
-                description='Force even alignment',
             )
             # TODO: ack!  just to get the address offset calculated but
             #       not calling append_child() because i don't want to shove
@@ -308,10 +306,12 @@ class Point:
             row.name = parameter.abbreviation
             row.notes = parameter.notes
             row.units = parameter.units
+            row.description = parameter.comment
 
         row.field_type = self.model_type
 
         if self.parameter_uuid_finder(self.wrapped.type_uuid).name == 'pad':
             row.name = 'Pad'
+            row.description = 'Force even alignment'
 
         return row

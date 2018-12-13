@@ -156,12 +156,6 @@ class DataPoint(epyqlib.treenode.TreeNode):
         ),
     )
 
-    description = attr.ib(
-        default='New description',
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(allow_none=True),
-        ),
-    )
     size = attr.ib(
         default=0,
         converter=int,
@@ -307,6 +301,7 @@ class HeaderBlock(epyqlib.treenode.TreeNode):
             epyqlib.pm.parametermodel.Parameter(
                 name='',
                 abbreviation='L',
+                comment='Model Length',
             ),
         ]
         points = [
@@ -319,7 +314,6 @@ class HeaderBlock(epyqlib.treenode.TreeNode):
             DataPoint(
                 block_offset=1,
                 size=1,
-                description='Model Length',
                 type_uuid=uint16_uuid,
                 parameter_uuid=parameters[1].uuid,
             ),
@@ -474,7 +468,6 @@ columns = epyqlib.attrsmodel.columns(
     merge('enumeration_uuid', DataPoint, Enumeration, BitField),
     merge('offset', DataPoint, HeaderBlock, FixedBlock),
     merge('block_offset', DataPoint),
-    merge('description', DataPoint),
     merge('uuid', *types.types.values()),
 )
 

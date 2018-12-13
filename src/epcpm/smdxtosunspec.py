@@ -26,7 +26,6 @@ def epc_point_from_pysunspec_point(point, parameter_model, parameter_uuid, scale
         type_uuid=sunspec_type_uuid,
         # enumeration_uuid=,
         block_offset=point.point_type.offset,
-        description=point.point_type.description,
         size=point.point_type.len,
         # uuid=,
     )
@@ -38,6 +37,7 @@ def epc_parameter_from_pysunspec_point(point):
         abbreviation=point.point_type.id,
         notes=point.point_type.notes,
         units=point.point_type.units,
+        comment=point.point_type.description,
     )
 
     return parameter
@@ -175,8 +175,9 @@ def import_model(model_id, parameter_model, paths=()):
 
     id_point = our_model.children[0].children[0]
     id_point.id = model.model_type.id
-    id_point.description = model.model_type.description
     id_point.notes = model.model_type.notes
+
+    parameters[0].comment = model.model_type.description
 
     imported_points = sorted(
         imported_points + list(scale_factors.values()),
