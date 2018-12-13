@@ -169,13 +169,6 @@ class DataPoint(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.String(allow_none=True),
         ),
     )
-    notes = attr.ib(
-        default=None,
-        convert=epyqlib.attrsmodel.to_str_or_none,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(allow_none=True),
-        ),
-    )
     size = attr.ib(
         default=0,
         converter=int,
@@ -490,7 +483,6 @@ columns = epyqlib.attrsmodel.columns(
     merge('offset', DataPoint, HeaderBlock, FixedBlock),
     merge('block_offset', DataPoint),
     merge('description', DataPoint),
-    merge('notes', DataPoint),
     merge('uuid', *types.types.values()),
 )
 

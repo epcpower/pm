@@ -28,7 +28,6 @@ def epc_point_from_pysunspec_point(point, parameter_model, parameter_uuid, scale
         # enumeration_uuid=,
         block_offset=point.point_type.offset,
         description=point.point_type.description,
-        notes=point.point_type.notes,
         size=point.point_type.len,
         # uuid=,
     )
@@ -38,6 +37,7 @@ def epc_parameter_from_pysunspec_point(point):
     parameter = epyqlib.pm.parametermodel.Parameter(
         name=point.point_type.label,
         abbreviation=point.point_type.id,
+        notes=point.point_type.notes,
     )
 
     return parameter

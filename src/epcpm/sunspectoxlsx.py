@@ -63,7 +63,6 @@ point_fields = Fields(
     units=data_point_fields.units,
     scale_factor=data_point_fields.factor_uuid,
     description=data_point_fields.description,
-    notes=data_point_fields.notes,
 )
 
 
@@ -308,6 +307,7 @@ class Point:
 
             row.label = parameter.name
             row.name = parameter.abbreviation
+            row.notes = parameter.notes
 
         row.field_type = self.model_type
 
