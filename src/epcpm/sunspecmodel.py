@@ -290,11 +290,13 @@ class HeaderBlock(epyqlib.treenode.TreeNode):
             epyqlib.pm.parametermodel.Parameter(
                 name=model_id,
                 abbreviation='ID',
+                read_only=True,
             ),
             epyqlib.pm.parametermodel.Parameter(
                 name='',
                 abbreviation='L',
                 comment='Model Length',
+                read_only=True,
             ),
         ]
         points = [

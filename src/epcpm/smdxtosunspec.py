@@ -38,6 +38,7 @@ def epc_parameter_from_pysunspec_point(point):
         notes=point.point_type.notes,
         units=point.point_type.units,
         comment=point.point_type.description,
+        read_only='w' not in point.point_type.access,
     )
 
     return parameter

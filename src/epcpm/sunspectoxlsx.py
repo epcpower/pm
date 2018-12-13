@@ -303,11 +303,13 @@ class Point:
             row.notes = parameter.notes
             row.units = parameter.units
             row.description = parameter.comment
+            row.read_write = 'R' if parameter.read_only else 'RW'
 
         row.field_type = self.model_type
 
         if self.parameter_uuid_finder(self.wrapped.type_uuid).name == 'pad':
             row.name = 'Pad'
             row.description = 'Force even alignment'
+            row.read_write = 'R'
 
         return row
