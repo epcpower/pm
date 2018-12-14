@@ -27,6 +27,7 @@ def epc_point_from_pysunspec_point(point, parameter_model, parameter_uuid, scale
         # enumeration_uuid=,
         block_offset=point.point_type.offset,
         size=point.point_type.len,
+        mandatory=point.point_type.mandatory == 'true',
         # uuid=,
     )
 

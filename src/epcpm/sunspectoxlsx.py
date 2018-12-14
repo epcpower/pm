@@ -67,6 +67,8 @@ point_fields = Fields(
     size=data_point_fields.size,
     type=data_point_fields.type_uuid,
     scale_factor=data_point_fields.factor_uuid,
+    get=data_point_fields.get,
+    set=data_point_fields.set,
 )
 
 
@@ -305,6 +307,8 @@ class Point:
         if row.type is not None:
             row.type = self.parameter_uuid_finder(row.type).name
 
+        row.mandatory = 'M' if self.wrapped.mandatory else 'O'
+
         if self.wrapped.parameter_uuid is not None:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
@@ -321,5 +325,6 @@ class Point:
             row.name = 'Pad'
             row.description = 'Force even alignment'
             row.read_write = 'R'
+            row.mandatory = 'O'
 
         return row

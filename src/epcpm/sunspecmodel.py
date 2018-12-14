@@ -157,13 +157,33 @@ class DataPoint(epyqlib.treenode.TreeNode):
         ),
     )
 
+    get = attr.ib(
+        default=None,
+        converter=epyqlib.attrsmodel.to_str_or_none,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(allow_none=True),
+        ),
+    )
+    set = attr.ib(
+        default=None,
+        converter=epyqlib.attrsmodel.to_str_or_none,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(allow_none=True),
+        ),
+    )
+
+    mandatory = attr.ib(
+        default=True,
+        converter=epyqlib.attrsmodel.two_state_checkbox,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Boolean(),
+        ),
+    )
+
     uuid = epyqlib.attrsmodel.attr_uuid()
     # value  doesn't make sense here, this is interface definition, not a
     #       value set
 
-
-    # mandatory is a thing where we will just check existence when validating
-    # againt the sunspec def
 
     # ? point_id = attr.ib()
     # ? index = index
@@ -264,12 +284,14 @@ class HeaderBlock(epyqlib.treenode.TreeNode):
                 size=1,
                 type_uuid=uint16_uuid,
                 parameter_uuid=parameters[0].uuid,
+                mandatory=True,
             ),
             DataPoint(
                 block_offset=1,
                 size=1,
                 type_uuid=uint16_uuid,
                 parameter_uuid=parameters[1].uuid,
+                mandatory=True,
             ),
         ]
 
@@ -415,8 +437,11 @@ columns = epyqlib.attrsmodel.columns(
     merge('factor_uuid', DataPoint),
     merge('parameter_uuid', DataPoint),
     merge('type_uuid', DataPoint),
+    merge('mandatory', DataPoint),
     merge('offset', DataPoint, HeaderBlock, FixedBlock),
     merge('block_offset', DataPoint),
+    merge('get', DataPoint),
+    merge('set', DataPoint),
     merge('uuid', *types.types.values()),
 )
 
