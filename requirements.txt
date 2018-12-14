@@ -23,7 +23,7 @@ git+https://github.com/ebroecker/canmatrix@8f63047c18dcb65f7904d298cbf603d2e6325
 git+https://github.com/altendky/graham@89f3b3e6aad3b98bafa83f28fbbc11bb92df6ad8#egg=graham
 git+https://github.com/altendky/pycparser@b19d2b7cb78bccc89ef187c1c4eb5db0fdd3bbf9#egg=pycparser
 
-git+https://github.com/altendky/pysunspec@100d9cade8ce2aa4a67b78d85b310e15dd01b9f5#egg=pysunspec
+git+https://github.com/altendky/pysunspec@5bd186d9de71d654fecc44b6c21d7b5badfcfc28#egg=pysunspec
 
 -e sub/epyqlib
 
