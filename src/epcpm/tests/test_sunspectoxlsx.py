@@ -59,6 +59,7 @@ def test_x():
 
     project.filename = here/'project_with_sunspec'/'project.pmp'
     project.paths['sunspec'] = 'sunspec.json'
+    project.filename.parent.mkdir(parents=True, exist_ok=True)
     project.save()
 
     builder = epcpm.sunspectoxlsx.builders.wrap(
