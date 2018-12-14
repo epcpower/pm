@@ -22,7 +22,14 @@ TestAttrsModel = epyqlib.attrsmodel.build_tests(
 
 
 def test_model_has_header():
-    project = epcpm.project.loadp(here/'project_with_sunspec'/'project.pmp')
+    project = epcpm.project.loadp(here/'project'/'project.pmp')
+
+    parameter_model = project.models.parameters
+    enumerations = parameter_model.list_selection_roots['enumerations']
+    sunspec_types = epcpm.sunspecmodel.build_sunspec_types_enumeration()
+    enumerations.append_child(sunspec_types)
+    parameter_model.list_selection_roots['sunspec types'] = sunspec_types
+
     types = project.models.parameters.list_selection_roots['sunspec types']
 
     model = epcpm.sunspecmodel.Model()
