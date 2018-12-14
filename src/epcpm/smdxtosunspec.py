@@ -4,6 +4,7 @@ import os
 
 import attr
 import epyqlib.pm.parametermodel
+import openpyxl
 import sunspec.core.device
 
 import epcpm.sunspecmodel
@@ -195,3 +196,46 @@ def import_model(model_id, parameter_model, paths=()):
         our_model.children[1].append_child(point)
 
     return our_model
+
+
+@attr.s(frozen=True)
+class GetSetKey:
+    model = attr.ib()
+    name = attr.ib()
+    get_set = attr.ib()
+
+
+def import_get_set(path):
+    workbook = openpyxl.load_workbook(path)
+
+    collected = {}
+
+    for sheet in workbook.worksheets:
+        try:
+            model = int(sheet.title)
+        except ValueError:
+            continue
+
+        iter_rows = iter(sheet.rows)
+
+        column_indexes = {
+            cell.value: i
+            for i, cell in enumerate(next(iter_rows))
+        }
+
+        for row in iter_rows:
+            for get_set in ('get', 'set'):
+                value = row[column_indexes[get_set]].value
+
+                if value in (None, ''):
+                    continue
+
+                name = row[column_indexes['Name']].value
+                key = GetSetKey(
+                    model=model,
+                    name=name,
+                    get_set=get_set,
+                )
+                collected[key] = value
+
+    return collected
