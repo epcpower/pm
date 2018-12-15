@@ -101,55 +101,7 @@ def _post_load(project):
     models.sunspec.droppable_from.add(models.parameters)
     models.sunspec.droppable_from.add(models.sunspec)
 
-    enumerations_root = [
-        child
-        for child in models.parameters.root.children
-        if child.name == 'Enumerations'
-    ]
-    if len(enumerations_root) == 0:
-        enumerations_root = None
-    else:
-        enumerations_root, = enumerations_root
-    models.parameters.list_selection_roots['enumerations'] = enumerations_root
-
-    if enumerations_root is None:
-        access_level_root = None
-    else:
-        access_level_root, = (
-            child
-            for child in enumerations_root.children
-            if child.name == 'AccessLevel'
-        )
-    models.parameters.list_selection_roots['access level'] = access_level_root
-    
-    if enumerations_root is None:
-        visibility_root = None
-    else:
-        visibility_root, = (
-            child
-            for child in enumerations_root.children
-            if child.name == 'CmmControlsVariant'
-       )
-    models.parameters.list_selection_roots['visibility'] = visibility_root
-
-    if enumerations_root is None:
-        sunspec_types_root = None
-    else:
-        sunspec_types_root = [
-            child
-            for child in enumerations_root.children
-            if child.name == 'SunSpecTypes'
-        ]
-        if len(sunspec_types_root) == 1:
-            sunspec_types_root, = sunspec_types_root
-        else:
-            sunspec_types_root = None
-    models.parameters.list_selection_roots['sunspec types'] = (
-        sunspec_types_root
-    )
-
-    models.parameters.update_nodes()
-    models.can.update_nodes()
+    models.update_enumeration_roots()
 
 
 @graham.schemify(tag='models')
@@ -201,6 +153,59 @@ class Models:
             return
 
         setattr(self, attr.fields(type(self))[item].name, value)
+
+    def update_enumeration_roots(self):
+        enumerations_root = [
+            child
+            for child in self.parameters.root.children
+            if child.name == 'Enumerations'
+        ]
+        if len(enumerations_root) == 0:
+            enumerations_root = None
+        else:
+            enumerations_root, = enumerations_root
+        self.parameters.list_selection_roots[
+            'enumerations'] = enumerations_root
+
+        if enumerations_root is None:
+            access_level_root = None
+        else:
+            access_level_root, = (
+                child
+                for child in enumerations_root.children
+                if child.name == 'AccessLevel'
+            )
+        self.parameters.list_selection_roots[
+            'access level'] = access_level_root
+
+        if enumerations_root is None:
+            visibility_root = None
+        else:
+            visibility_root, = (
+                child
+                for child in enumerations_root.children
+                if child.name == 'CmmControlsVariant'
+            )
+        self.parameters.list_selection_roots['visibility'] = visibility_root
+
+        if enumerations_root is None:
+            sunspec_types_root = None
+        else:
+            sunspec_types_root = [
+                child
+                for child in enumerations_root.children
+                if child.name == 'SunSpecTypes'
+            ]
+            if len(sunspec_types_root) == 1:
+                sunspec_types_root, = sunspec_types_root
+            else:
+                sunspec_types_root = None
+        self.parameters.list_selection_roots['sunspec types'] = (
+            sunspec_types_root
+        )
+
+        self.parameters.update_nodes()
+        self.can.update_nodes()
 
 
 @graham.schemify(tag='project')

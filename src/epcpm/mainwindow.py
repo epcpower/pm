@@ -19,13 +19,14 @@ import epyqlib.pm.parametermodel
 import epyqlib.pm.valuesetmodel
 import epyqlib.utils.qt
 
-import epcpm.parameterstoc
-import epcpm.project
 import epcpm.canmodel
 import epcpm.cantosym
+import epcpm.importdialog
+import epcpm.parameterstoc
+import epcpm.project
 import epcpm.smdxtosunspec
-import epcpm.symtoproject
 import epcpm.sunspecmodel
+import epcpm.symtoproject
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
@@ -82,6 +83,7 @@ class Window:
         self.ui.action_import_sym.triggered.connect(self.import_sym)
         self.ui.action_export_sym.triggered.connect(self.generate_symbol_file)
         self.ui.action_import_smdx.triggered.connect(self.import_smdx)
+        self.ui.action_full_import.triggered.connect(self.full_import)
 
         self.ui.action_about.triggered.connect(self.about_dialog)
 
@@ -236,6 +238,96 @@ class Window:
             )
 
             self.view_models['sunspec'].model.root.append_child(model)
+
+    def full_import(self):
+        dialog = epcpm.importdialog.Dialog()
+        if dialog.exec() != QtWidgets.QDialog.DialogCode.Accepted:
+            return
+
+        paths = dialog.paths_result
+
+        with open(paths.can, 'rb') as sym, open(paths.hierarchy) as hierarchy:
+            parameters_root, can_root, sunspec_root = (
+                epcpm.symtoproject.load_can_file(
+                    can_file=sym,
+                    file_type=str(pathlib.Path(sym.name).suffix[1:]),
+                    parameter_hierarchy_file=hierarchy,
+                )
+            )
+
+        project = epcpm.project.Project()
+
+        project.models.parameters = epyqlib.attrsmodel.Model(
+            root=parameters_root,
+            columns=epyqlib.pm.parametermodel.columns,
+        )
+        project.models.can = epyqlib.attrsmodel.Model(
+            root=can_root,
+            columns=epcpm.canmodel.columns,
+        )
+        project.models.sunspec = epyqlib.attrsmodel.Model(
+            root=sunspec_root,
+            columns=epcpm.sunspecmodel.columns,
+        )
+
+        epcpm.project._post_load(project)
+
+        # TODO: backmatching
+        epcpm.symtoproject.go_add_tables(
+            parameters_root=project.models.parameters.root,
+            can_root=project.models.can.root,
+        )
+
+        sunspec_types = epcpm.sunspecmodel.build_sunspec_types_enumeration()
+        enumerations = (
+            project.models.parameters.list_selection_roots['enumerations']
+        )
+        enumerations.append_child(sunspec_types)
+
+        project.models.update_enumeration_roots()
+
+        sunspec_models = []
+        prefix = 'smdx_'
+        suffix = '.xml'
+        for smdx_path in paths.smdx:
+            models = epcpm.smdxtosunspec.import_models(
+                int(smdx_path.name[len(prefix):-len(suffix)]),
+                parameter_model=project.models.parameters,
+                paths=[smdx_path.parent],
+            )
+            sunspec_models.extend(models)
+
+        for sunspec_model in sunspec_models:
+            project.models.sunspec.root.append_child(sunspec_model)
+
+        points = (
+            (model, block, point)
+            for model in project.models.sunspec.root.children
+            for block in model.children
+            for point in block.children
+        )
+
+        get_set = epcpm.smdxtosunspec.import_get_set(paths.spreadsheet)
+
+        for model, block, point in points:
+            parameter = project.models.sunspec.node_from_uuid(
+                point.parameter_uuid,
+            )
+            for direction in ('get', 'set'):
+                key = epcpm.smdxtosunspec.GetSetKey(
+                    model=model.id,
+                    name=parameter.abbreviation,
+                    get_set=direction,
+                )
+                accessor = get_set.get(key)
+                if accessor is not None:
+                    setattr(point, direction, accessor)
+
+        project.paths['parameters'] = 'parameters.json'
+        project.paths['can'] = 'can.json'
+        project.paths['sunspec'] = 'sunspec.json'
+
+        self.open_project(project=project)
 
     def open_project(self, filename=None, project=None):
         if project is not None:

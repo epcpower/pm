@@ -4,6 +4,7 @@ import pathlib
 import attr
 import epyqlib.utils.qt
 import PyQt5.uic
+from PyQt5 import QtWidgets
 
 
 Ui, UiBase = PyQt5.uic.loadUiType(
@@ -14,12 +15,27 @@ Ui, UiBase = PyQt5.uic.loadUiType(
 all_files_filter = ('All Files', ['*'])
 
 
+def path_or_none(s):
+    if s is None or len(s) == 0:
+        return None
+
+    return pathlib.Path(s)
+
+
+def paths_or_none(x):
+    return [
+        pathlib.Path(path)
+        for path in x
+        if len(x) > 0
+    ]
+
+
 @attr.s
 class ImportPaths:
-    can = attr.ib()
-    hierarchy = attr.ib()
-    spreadsheet = attr.ib()
-    smdx = attr.ib()
+    can = attr.ib(converter=path_or_none)
+    hierarchy = attr.ib(converter=path_or_none)
+    spreadsheet = attr.ib(converter=path_or_none)
+    smdx = attr.ib(converter=paths_or_none)
 
 
 @attr.s
@@ -41,6 +57,7 @@ class Dialog(UiBase):
         self.ui.pick_spreadsheet.clicked.connect(self.pick_spreadsheet)
         self.ui.pick_smdx.clicked.connect(self.pick_smdx)
         self.ui.remove_smdx.clicked.connect(self.remove_smdx)
+        self.ui.from_directory.clicked.connect(self.from_directory)
 
     def accept(self):
         self.paths_result = ImportPaths(
@@ -50,6 +67,33 @@ class Dialog(UiBase):
             smdx=self.smdx_paths(),
         )
         super().accept()
+
+    def from_directory(self):
+        path = QtWidgets.QFileDialog.getExistingDirectory(parent=self)
+
+        if len(path) == 0:
+            return
+
+        path = pathlib.Path(path)
+        interface = path/'interface'
+        embedded = path/'embedded-library'
+        sunspec = embedded/'system'/'sunspec'
+
+        self.ui.can.setText(os.fspath(interface/'EPC_DG_ID247_FACTORY.sym'))
+        self.ui.hierarchy.setText(
+            os.fspath(interface/'EPC_DG_ID247_FACTORY.parameters.json'),
+        )
+        self.ui.spreadsheet.setText(
+            os.fspath(embedded/'MODBUS_SunSpec-EPC.xlsx'),
+        )
+
+        self.clear_smdx_list()
+        for path in sorted(sunspec.glob('smdx_*.xml')):
+            self.ui.smdx_list.addItem(os.fspath(path))
+
+    def clear_smdx_list(self):
+        for i in range(self.ui.smdx_list.count()):
+            self.ui.smdx_list.takeAt(i)
 
     def smdx_paths(self):
         return [

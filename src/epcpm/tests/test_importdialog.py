@@ -11,9 +11,9 @@ def test_blank(qtbot):
         dialog.accept()
 
     assert dialog.paths_result == epcpm.importdialog.ImportPaths(
-        can='',
-        hierarchy='',
-        spreadsheet='',
+        can=None,
+        hierarchy=None,
+        spreadsheet=None,
         smdx=[],
     )
 

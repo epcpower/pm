@@ -113,6 +113,7 @@
     <addaction name="action_import_sym"/>
     <addaction name="action_export_sym"/>
     <addaction name="action_import_smdx"/>
+    <addaction name="action_full_import"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -194,7 +195,12 @@
   </action>
   <action name="action_import_smdx">
    <property name="text">
-    <string>Import SMDX...</string>
+    <string>Import &amp;SMDX...</string>
+   </property>
+  </action>
+  <action name="action_full_import">
+   <property name="text">
+    <string>Full import...</string>
    </property>
   </action>
  </widget>
