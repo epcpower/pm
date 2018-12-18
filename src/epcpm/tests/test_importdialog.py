@@ -1,8 +1,8 @@
-import epcpm.importdialog
+import epcpm.importexportdialog
 
 
 def test_blank(qtbot):
-    dialog = epcpm.importdialog.Dialog()
+    dialog = epcpm.importexportdialog.Dialog()
 
     with qtbot.waitSignal(dialog.accepted):
         with qtbot.waitExposed(dialog):
@@ -10,7 +10,7 @@ def test_blank(qtbot):
 
         dialog.accept()
 
-    assert dialog.paths_result == epcpm.importdialog.ImportPaths(
+    assert dialog.paths_result == epcpm.importexportdialog.ImportPaths(
         can=None,
         hierarchy=None,
         spreadsheet=None,
@@ -19,7 +19,7 @@ def test_blank(qtbot):
 
 
 def test_cancel(qtbot):
-    dialog = epcpm.importdialog.Dialog()
+    dialog = epcpm.importexportdialog.Dialog()
 
     with qtbot.waitSignal(dialog.rejected):
         with qtbot.waitExposed(dialog):

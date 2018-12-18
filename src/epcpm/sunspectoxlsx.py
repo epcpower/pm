@@ -82,6 +82,18 @@ enumerator_fields = Fields(
 )
 
 
+def export(path, sunspec_model, parameters_model):
+    builder = epcpm.sunspectoxlsx.builders.wrap(
+        wrapped=sunspec_model.root,
+        parameter_uuid_finder=sunspec_model.node_from_uuid,
+        parameter_model=parameters_model,
+    )
+
+    workbook = builder.gen()
+
+    workbook.save(path)
+
+
 @builders(epcpm.sunspecmodel.Root)
 @attr.s
 class Root:

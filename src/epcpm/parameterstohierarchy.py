@@ -13,6 +13,16 @@ builders = epyqlib.utils.general.TypeMap()
 dehumanize_name = epcpm.cantosym.dehumanize_name
 
 
+def export(path, can_model, parameters_model):
+    builder = epcpm.parameterstohierarchy.builders.wrap(
+        wrapped=parameters_model.root,
+        can_root=can_model.root,
+    )
+
+    with open(path, 'w') as file:
+        file.write(builder.gen(indent=4))
+
+
 @builders(epyqlib.pm.parametermodel.Root)
 @attr.s
 class Root:
@@ -26,11 +36,50 @@ class Root:
             if node.name == 'Parameters'
         )
 
+        def can_node_wanted(node):
+            if getattr(node, 'parameter_uuid', None) is None:
+                return False
+
+            parameter_query_parent = node.tree_parent.tree_parent
+
+            is_a_can_table = isinstance(
+                node.tree_parent.tree_parent,
+                epcpm.canmodel.CanTable,
+            )
+            if is_a_can_table:
+                parameter_query_parent = parameter_query_parent.tree_parent
+
+            is_a_query = (
+                getattr(parameter_query_parent, 'name', '')
+                == 'ParameterQuery'
+            )
+            if not is_a_query:
+                return False
+
+            return True
+
+        can_nodes_with_parameter_uuid = self.can_root.nodes_by_filter(
+            filter=can_node_wanted,
+        )
+
+        parameter_uuid_to_can_node = {
+            node.parameter_uuid: node
+            for node in can_nodes_with_parameter_uuid
+        }
+
+        lengths_equal = (
+            len(can_nodes_with_parameter_uuid)
+            == len(parameter_uuid_to_can_node)
+        )
+        if not lengths_equal:
+            raise Exception()
+
         d = {
             'children': [
                 builders.wrap(
                     wrapped=child,
                     can_root=self.can_root,
+                    parameter_uuid_to_can_node=parameter_uuid_to_can_node,
                 ).gen()
                 for child in parameters.children
                 if isinstance(
@@ -55,6 +104,7 @@ class Root:
 class Group:
     wrapped = attr.ib()
     can_root = attr.ib()
+    parameter_uuid_to_can_node = attr.ib()
 
     def gen(self):
         return {
@@ -63,6 +113,7 @@ class Group:
                 builders.wrap(
                     wrapped=child,
                     can_root=self.can_root,
+                    parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
                 ).gen()
                 for child in self.wrapped.children
             ],
@@ -74,12 +125,10 @@ class Group:
 class Parameter:
     wrapped = attr.ib()
     can_root = attr.ib()
+    parameter_uuid_to_can_node = attr.ib()
 
     def gen(self):
-        signal = self.can_root.nodes_by_attribute(
-            attribute_value=self.wrapped.uuid,
-            attribute_name='parameter_uuid',
-        ).pop()
+        signal = self.parameter_uuid_to_can_node[self.wrapped.uuid]
 
         message = signal.tree_parent
 
@@ -94,6 +143,7 @@ class Parameter:
 class Table:
     wrapped = attr.ib()
     can_root = attr.ib()
+    parameter_uuid_to_can_node = attr.ib()
 
     def gen(self):
         group, = (
@@ -106,6 +156,7 @@ class Table:
             'children': builders.wrap(
                 wrapped=group,
                 can_root=self.can_root,
+                parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
             ).gen()['children'],
         }
 
@@ -115,6 +166,7 @@ class Table:
 class TableGroupElement:
     wrapped = attr.ib()
     can_root = attr.ib()
+    parameter_uuid_to_can_node = attr.ib()
 
     def gen(self):
         return {
@@ -123,6 +175,7 @@ class TableGroupElement:
                 builders.wrap(
                     wrapped=child,
                     can_root=self.can_root,
+                    parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
                 ).gen()
                 for child in self.wrapped.children
             ],
@@ -134,6 +187,16 @@ class TableGroupElement:
 class TableArrayElement:
     wrapped = attr.ib()
     can_root = attr.ib()
+    parameter_uuid_to_can_node = attr.ib()
 
     def gen(self):
-        return self.wrapped.name
+        signal = self.parameter_uuid_to_can_node[self.wrapped.uuid]
+
+        message = signal.tree_parent
+
+        can_table = message.tree_parent
+
+        return [
+            dehumanize_name(can_table.name + message.name),
+            dehumanize_name(signal.name),
+        ]

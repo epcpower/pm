@@ -20,6 +20,20 @@ def dehumanize_name(name):
 #     return epyqlib.utils.general.spaced_to_upper_camel(name)
 
 
+def export(path, can_model, parameters_model):
+    finder = can_model.node_from_uuid
+    access_levels = parameters_model.list_selection_roots['access level']
+    builder = epcpm.cantosym.builders.wrap(
+        wrapped=can_model.root,
+        access_levels=access_levels,
+        parameter_uuid_finder=finder,
+        parameter_model=parameters_model,
+    )
+
+    with open(path, 'w') as file:
+        file.write(builder.gen())
+
+
 @builders(epcpm.canmodel.Root)
 @attr.s
 class Root:

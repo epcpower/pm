@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>708</width>
-    <height>364</height>
+    <height>366</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -120,7 +120,7 @@
     </layout>
    </item>
    <item row="5" column="0">
-    <widget class="QLabel" name="label_4">
+    <widget class="QLabel" name="smdx_label">
      <property name="text">
       <string>SunSpec SMDX:</string>
      </property>

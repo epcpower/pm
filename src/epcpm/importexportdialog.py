@@ -16,6 +16,9 @@ all_files_filter = ('All Files', ['*'])
 
 
 def path_or_none(s):
+    if isinstance(s, pathlib.Path):
+        return s
+
     if s is None or len(s) == 0:
         return None
 
@@ -30,6 +33,22 @@ def paths_or_none(x):
     ]
 
 
+def import_dialog():
+    return Dialog()
+
+
+def export_dialog():
+    dialog = Dialog(for_save=True)
+
+    dialog.ui.smdx_label.hide()
+    dialog.ui.smdx_list.hide()
+    dialog.ui.pick_smdx.hide()
+    dialog.ui.remove_smdx.hide()
+    dialog.setMaximumHeight(0)
+
+    return dialog
+
+
 @attr.s
 class ImportPaths:
     can = attr.ib(converter=path_or_none)
@@ -38,10 +57,25 @@ class ImportPaths:
     smdx = attr.ib(converter=paths_or_none)
 
 
+def paths_from_directory(directory):
+    path = pathlib.Path(directory)
+    interface = path / 'interface'
+    embedded = path / 'embedded-library'
+    sunspec = embedded / 'system' / 'sunspec'
+
+    return ImportPaths(
+        can=interface / 'EPC_DG_ID247_FACTORY.sym',
+        hierarchy=interface / 'EPC_DG_ID247_FACTORY.parameters.json',
+        spreadsheet=embedded / 'MODBUS_SunSpec-EPC.xlsx',
+        smdx=sorted(sunspec.glob('smdx_*.xml')),
+    )
+
+
 @attr.s
 class Dialog(UiBase):
     ui = attr.ib(factory=Ui)
     paths_result = attr.ib(default=None)
+    for_save = attr.ib(default=False)
     _parent = attr.ib(default=None)
 
     def __attrs_post_init__(self):
@@ -60,36 +94,35 @@ class Dialog(UiBase):
         self.ui.from_directory.clicked.connect(self.from_directory)
 
     def accept(self):
+        if self.for_save:
+            smdx = []
+        else:
+            smdx = self.smdx_paths()
+
         self.paths_result = ImportPaths(
             can=self.ui.can.text(),
             hierarchy=self.ui.hierarchy.text(),
             spreadsheet=self.ui.spreadsheet.text(),
-            smdx=self.smdx_paths(),
+            smdx=smdx,
         )
         super().accept()
 
     def from_directory(self):
-        path = QtWidgets.QFileDialog.getExistingDirectory(parent=self)
+        directory = QtWidgets.QFileDialog.getExistingDirectory(parent=self)
 
-        if len(path) == 0:
+        if len(directory) == 0:
             return
 
-        path = pathlib.Path(path)
-        interface = path/'interface'
-        embedded = path/'embedded-library'
-        sunspec = embedded/'system'/'sunspec'
+        paths = paths_from_directory(directory=directory)
 
-        self.ui.can.setText(os.fspath(interface/'EPC_DG_ID247_FACTORY.sym'))
-        self.ui.hierarchy.setText(
-            os.fspath(interface/'EPC_DG_ID247_FACTORY.parameters.json'),
-        )
-        self.ui.spreadsheet.setText(
-            os.fspath(embedded/'MODBUS_SunSpec-EPC.xlsx'),
-        )
+        self.ui.can.setText(os.fspath(paths.can))
+        self.ui.hierarchy.setText(os.fspath(paths.hierarchy))
+        self.ui.spreadsheet.setText(os.fspath(paths.spreadsheet))
 
         self.clear_smdx_list()
-        for path in sorted(sunspec.glob('smdx_*.xml')):
-            self.ui.smdx_list.addItem(os.fspath(path))
+        if not self.for_save:
+            for path in paths.smdx:
+                self.ui.smdx_list.addItem(os.fspath(path))
 
     def clear_smdx_list(self):
         for i in range(self.ui.smdx_list.count()):
@@ -167,6 +200,7 @@ class Dialog(UiBase):
         path = epyqlib.utils.qt.file_dialog(
             filters=filters,
             parent=self,
+            save=self.for_save,
             path_factory=pathlib.Path,
             multiple=multiple,
         )

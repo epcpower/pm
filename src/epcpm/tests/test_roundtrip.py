@@ -11,6 +11,8 @@ import epyqlib.tests.common
 
 import epcpm.cli.importsym
 import epcpm.cli.exportsym
+import epcpm.importexport
+import epcpm.importexportdialog
 
 
 round_trip = pathlib.Path(__file__).parents[3] / 'roundtrip'
@@ -22,6 +24,17 @@ exported_can = (
 exported_hierarchy = (
         round_trip / 'hierarchy.parameters.json'
 ).with_suffix(example_device.hierarchy.suffix)
+
+
+# def test_full_round_trip():
+#     directory = pathlib.Path().home()/'grid-tied'
+#     paths = epcpm.importexportdialog.paths_from_directory(directory)
+#
+#     project = epcpm.importexport.full_import(paths=paths)
+#     epcpm.importexport.full_export(project=project, paths=paths)
+#
+#     project = epcpm.importexport.full_import(paths=paths)
+#     epcpm.importexport.full_export(project=project, paths=paths)
 
 
 def test_import():

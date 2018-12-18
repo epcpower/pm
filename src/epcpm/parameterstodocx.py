@@ -90,7 +90,7 @@ class Root:
         start = time.monotonic()
 
         for child in self.wrapped.children:
-            if child.name == 'Other':
+            if child.name.endswith('Other'):
                 continue
 
             try:
