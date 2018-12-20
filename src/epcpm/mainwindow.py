@@ -19,10 +19,16 @@ import epyqlib.pm.parametermodel
 import epyqlib.pm.valuesetmodel
 import epyqlib.utils.qt
 
-import epcpm.parameterstoc
-import epcpm.project
 import epcpm.canmodel
 import epcpm.cantosym
+import epcpm.importexport
+import epcpm.importexportdialog
+import epcpm.parameterstoc
+import epcpm.parameterstohierarchy
+import epcpm.project
+import epcpm.smdxtosunspec
+import epcpm.sunspecmodel
+import epcpm.sunspectoxlsx
 import epcpm.symtoproject
 
 # See file COPYING in this source tree
@@ -79,6 +85,9 @@ class Window:
 
         self.ui.action_import_sym.triggered.connect(self.import_sym)
         self.ui.action_export_sym.triggered.connect(self.generate_symbol_file)
+        self.ui.action_import_smdx.triggered.connect(self.import_smdx)
+        self.ui.action_full_import.triggered.connect(self.full_import)
+        self.ui.action_full_export.triggered.connect(self.full_export)
 
         self.ui.action_about.triggered.connect(self.about_dialog)
 
@@ -106,10 +115,19 @@ class Window:
             ('All Files', ['*'])
         ]
 
+        self.smdx_filters = [
+            ('SunSpec SMDX', ['xml']),
+            ('All Files', ['*'])
+        ]
+
         self.view_models = {}
 
-        self.uuid_notifier = epcpm.canmodel.ReferencedUuidNotifier()
-        self.uuid_notifier.changed.connect(self.can_uuid_changed)
+        self.uuid_notifiers = {
+            'can': epcpm.canmodel.ReferencedUuidNotifier(),
+            'sunspec': epcpm.sunspecmodel.ReferencedUuidNotifier(),
+        }
+        self.uuid_notifiers['can'].changed.connect(self.can_uuid_changed)
+        self.uuid_notifiers['sunspec'].changed.connect(self.can_uuid_changed)
 
         self.project = None
         self.value_set = None
@@ -171,10 +189,12 @@ class Window:
             return
 
         with open(sym_path, 'rb') as sym, open(hierarchy_path) as hierarchy:
-            parameters_root, can_root = epcpm.symtoproject.load_can_file(
-                can_file=sym,
-                file_type=str(pathlib.Path(sym.name).suffix[1:]),
-                parameter_hierarchy_file=hierarchy,
+            parameters_root, can_root, sunspec_root = (
+                epcpm.symtoproject.load_can_file(
+                    can_file=sym,
+                    file_type=str(pathlib.Path(sym.name).suffix[1:]),
+                    parameter_hierarchy_file=hierarchy,
+                )
             )
 
         project = epcpm.project.Project()
@@ -187,6 +207,10 @@ class Window:
             root=can_root,
             columns=epcpm.canmodel.columns,
         )
+        project.models.sunspec = epyqlib.attrsmodel.Model(
+            root=sunspec_root,
+            columns=epcpm.sunspecmodel.columns,
+        )
 
         epcpm.project._post_load(project)
 
@@ -197,6 +221,57 @@ class Window:
         )
 
         self.open_project(project=project)
+
+    def import_smdx(self):
+        selected = epyqlib.utils.qt.file_dialog(
+            filters=self.smdx_filters,
+            parent=self.ui,
+            path_factory=pathlib.Path,
+            multiple=True,
+        )
+
+        for smdx_path in selected:
+            id = int(
+                smdx_path.name.partition('smdx_')[2].rpartition('.xml')[0],
+            )
+
+            model = epcpm.smdxtosunspec.import_model(
+                model_id=id,
+                parameter_model=self.view_models['parameters'].model,
+                paths=[smdx_path.parent],
+            )
+
+            self.view_models['sunspec'].model.root.append_child(model)
+
+    def full_import(self):
+        dialog = epcpm.importexportdialog.import_dialog()
+        if dialog.exec() != QtWidgets.QDialog.DialogCode.Accepted:
+            return
+
+        project = epcpm.importexport.full_import(paths=dialog.paths_result)
+
+        self.open_project(project=project)
+
+        QtWidgets.QMessageBox.information(
+            self.ui,
+            'Import Complete',
+            'Import complete.',
+        )
+
+    def full_export(self):
+        dialog = epcpm.importexportdialog.export_dialog()
+        if dialog.exec() != QtWidgets.QDialog.DialogCode.Accepted:
+            return
+
+        paths = dialog.paths_result
+
+        epcpm.importexport.full_export(project=self.project, paths=paths)
+
+        QtWidgets.QMessageBox.information(
+            self.ui,
+            'Export Complete',
+            'Export complete.',
+        )
 
     def open_project(self, filename=None, project=None):
         if project is not None:
@@ -222,7 +297,13 @@ class Window:
             types=epcpm.canmodel.types,
         )
 
-        self.uuid_notifier.disconnect_view()
+        model_views.sunspec = ModelView(
+            view=self.ui.sunspec_view,
+            types=epcpm.sunspecmodel.types,
+        )
+
+        for notifier in self.uuid_notifiers.values():
+            notifier.disconnect_view()
 
         i = zip(model_views.items(), self.project.models.values())
         for (name, model_view), model in i:
@@ -264,7 +345,8 @@ class Window:
 
             view.customContextMenuRequested.connect(m)
 
-        self.uuid_notifier.set_view(self.ui.can_view)
+        self.uuid_notifiers['can'].set_view(self.ui.can_view)
+        self.uuid_notifiers['sunspec'].set_view(self.ui.sunspec_view)
 
         return
 
@@ -413,7 +495,7 @@ class Window:
         update = menu.addAction('Update')
         update.setEnabled(hasattr(node, 'update'))
 
-        delete = menu.addAction('Delete')
+        delete = menu.addAction('&Delete')
         delete.setEnabled(node.can_delete())
 
         menu.addSeparator()
@@ -486,14 +568,9 @@ class Window:
 
     def generate_symbol_file(self):
         finder = self.view_models['can'].model.node_from_uuid
-        access_levels, = self.project.models.parameters.root.nodes_by_filter(
-            filter=(
-                lambda node: isinstance(
-                    node,
-                    epyqlib.pm.parametermodel.AccessLevels
-                )
-            ),
-        )
+        access_levels = self.project.models.parameters.list_selection_roots[
+            'access level'
+        ]
         builder = epcpm.cantosym.builders.wrap(
             wrapped=self.view_models['can'].model.root,
             access_levels=access_levels,

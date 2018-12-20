@@ -803,6 +803,7 @@ columns = epyqlib.attrsmodel.columns(
 )
 
 
+# TODO: CAMPid 075454679961754906124539691347967
 @attr.s
 class ReferencedUuidNotifier(PyQt5.QtCore.QObject):
     changed = PyQt5.QtCore.pyqtSignal('PyQt_PyObject')
@@ -834,6 +835,9 @@ class ReferencedUuidNotifier(PyQt5.QtCore.QObject):
         self.selection_model = None
 
     def current_changed(self, current, previous):
+        if not current.isValid():
+            return
+
         index = epyqlib.utils.qt.resolve_index_to_model(
             index=current,
         )

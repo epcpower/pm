@@ -43,6 +43,20 @@
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="tab_2">
+        <attribute name="title">
+         <string>SunSpec</string>
+        </attribute>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QTreeView" name="sunspec_view">
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
        <widget class="QWidget" name="tab">
         <attribute name="title">
          <string>Value Set</string>
@@ -98,6 +112,9 @@
     <addaction name="separator"/>
     <addaction name="action_import_sym"/>
     <addaction name="action_export_sym"/>
+    <addaction name="action_import_smdx"/>
+    <addaction name="action_full_import"/>
+    <addaction name="action_full_export"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -175,6 +192,21 @@
   <action name="action_open_value_set">
    <property name="text">
     <string>&amp;Open...</string>
+   </property>
+  </action>
+  <action name="action_import_smdx">
+   <property name="text">
+    <string>Import &amp;SMDX...</string>
+   </property>
+  </action>
+  <action name="action_full_import">
+   <property name="text">
+    <string>Full import...</string>
+   </property>
+  </action>
+  <action name="action_full_export">
+   <property name="text">
+    <string>Full Export...</string>
    </property>
   </action>
  </widget>

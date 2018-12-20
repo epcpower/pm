@@ -78,44 +78,30 @@ def _post_load(project):
                 columns=epcpm.canmodel.columns,
             )
 
+    if models.sunspec is None:
+        if project.paths.sunspec is None:
+            models.sunspec = epyqlib.attrsmodel.Model(
+                root=epcpm.sunspecmodel.Root(),
+                columns=epcpm.sunspecmodel.columns,
+            )
+        else:
+            models.sunspec = load_model(
+                project=project,
+                path=project.paths.sunspec,
+                root_type=epcpm.sunspecmodel.Root,
+                columns=epcpm.sunspecmodel.columns,
+                drop_sources=(models.parameters,),
+            )
+
     models.parameters.droppable_from.add(models.parameters)
 
     models.can.droppable_from.add(models.parameters)
     models.can.droppable_from.add(models.can)
 
-    enumerations_root = [
-        child
-        for child in models.parameters.root.children
-        if child.name == 'Enumerations'
-    ]
-    if len(enumerations_root) == 0:
-        enumerations_root = None
-    else:
-        enumerations_root, = enumerations_root
-    models.parameters.list_selection_roots['enumerations'] = enumerations_root
+    models.sunspec.droppable_from.add(models.parameters)
+    models.sunspec.droppable_from.add(models.sunspec)
 
-    if enumerations_root is None:
-        access_level_root = None
-    else:
-        access_level_root, = (
-            child
-            for child in enumerations_root.children
-            if child.name == 'AccessLevel'
-        )
-    models.parameters.list_selection_roots['access level'] = access_level_root
-    
-    if enumerations_root is None:
-        visibility_root = None
-    else:
-        visibility_root, = (
-            child
-            for child in enumerations_root.children
-            if child.name == 'CmmControlsVariant'
-       )
-    models.parameters.list_selection_roots['visibility'] = visibility_root
-
-    models.parameters.update_nodes()
-    models.can.update_nodes()
+    models.update_enumeration_roots()
 
 
 @graham.schemify(tag='models')
@@ -133,6 +119,12 @@ class Models:
             field=marshmallow.fields.String()
         ),
     )
+    sunspec = attr.ib(
+        default=None,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String()
+        ),
+    )
 
     @classmethod
     def __iter__(cls):
@@ -141,6 +133,7 @@ class Models:
     def set_all(self, value):
         self.parameters = value
         self.can = value
+        self.sunspec = value
 
     def items(self):
         return attr.asdict(self, recurse=False).items()
@@ -160,6 +153,59 @@ class Models:
             return
 
         setattr(self, attr.fields(type(self))[item].name, value)
+
+    def update_enumeration_roots(self):
+        enumerations_root = [
+            child
+            for child in self.parameters.root.children
+            if child.name == 'Enumerations'
+        ]
+        if len(enumerations_root) == 0:
+            enumerations_root = None
+        else:
+            enumerations_root, = enumerations_root
+        self.parameters.list_selection_roots[
+            'enumerations'] = enumerations_root
+
+        if enumerations_root is None:
+            access_level_root = None
+        else:
+            access_level_root, = (
+                child
+                for child in enumerations_root.children
+                if child.name == 'AccessLevel'
+            )
+        self.parameters.list_selection_roots[
+            'access level'] = access_level_root
+
+        if enumerations_root is None:
+            visibility_root = None
+        else:
+            visibility_root, = (
+                child
+                for child in enumerations_root.children
+                if child.name == 'CmmControlsVariant'
+            )
+        self.parameters.list_selection_roots['visibility'] = visibility_root
+
+        if enumerations_root is None:
+            sunspec_types_root = None
+        else:
+            sunspec_types_root = [
+                child
+                for child in enumerations_root.children
+                if child.name == 'SunSpecTypes'
+            ]
+            if len(sunspec_types_root) == 1:
+                sunspec_types_root, = sunspec_types_root
+            else:
+                sunspec_types_root = None
+        self.parameters.list_selection_roots['sunspec types'] = (
+            sunspec_types_root
+        )
+
+        self.parameters.update_nodes()
+        self.can.update_nodes()
 
 
 @graham.schemify(tag='project')
@@ -241,7 +287,7 @@ class Project:
                     f.write('\n')
 
 
-def load_model(project, path, root_type, columns):
+def load_model(project, path, root_type, columns, drop_sources=()):
     resolved_path = path
     if project.filename is not None:
         resolved_path = project.filename.parents[0] / resolved_path
@@ -252,4 +298,8 @@ def load_model(project, path, root_type, columns):
     root_schema = graham.schema(root_type)
     root = root_schema.loads(raw).data
 
-    return epyqlib.attrsmodel.Model(root=root, columns=columns)
+    return epyqlib.attrsmodel.Model(
+        root=root,
+        columns=columns,
+        drop_sources=drop_sources,
+    )

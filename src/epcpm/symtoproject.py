@@ -14,6 +14,7 @@ import epyqlib.pm.parametermodel
 import epyqlib.utils.general
 
 import epcpm.canmodel
+import epcpm.sunspecmodel
 
 
 def humanize_name(name):
@@ -39,7 +40,7 @@ def get_other_name(hierarchy):
     ]
 
     if not other_names:
-        other_name = 'Other'
+        other_name = '9. Other'
     else:
         other_name, = other_names
 
@@ -86,7 +87,7 @@ def load_can_file(
     )
     parameters_root.append_child(process_to_inverter)
 
-    other = epyqlib.pm.parametermodel.Group(name='Other')
+    other = epyqlib.pm.parametermodel.Group(name='9. Other')
     parameters_root.append_child(other)
 
     read_nvs = epyqlib.pm.parametermodel.Group(name='ReadNV')
@@ -105,10 +106,17 @@ def load_can_file(
                 if subchildren is None:
                     continue
 
-                group = epyqlib.pm.parametermodel.Group(
-                    name=child['name'],
-                )
-                parent.append_child(group)
+                existing = {
+                    group.name: group
+                    for group in parent.children
+                }
+
+                group = existing.get(child['name'])
+                if group is None:
+                    group = epyqlib.pm.parametermodel.Group(
+                        name=child['name'],
+                    )
+                    parent.append_child(group)
 
                 traverse_hierarchy(
                     children=subchildren,
@@ -268,7 +276,9 @@ def load_can_file(
         parent=parameters,
     )
 
-    return parameters_root, can_root
+    sunspec_root = epcpm.sunspecmodel.Root()
+
+    return parameters_root, can_root, sunspec_root
 
 
 def build_message(

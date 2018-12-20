@@ -28,7 +28,9 @@ setuptools.setup(
         'canmatrix',
         'click',
         'graham',
+        'openpyxl',
         'pycparser',
+        'pysunspec',
         'pyqt5',
     ],
     extras_require={
