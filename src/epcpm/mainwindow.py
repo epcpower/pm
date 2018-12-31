@@ -88,6 +88,9 @@ class Window:
         self.ui.action_import_smdx.triggered.connect(self.import_smdx)
         self.ui.action_full_import.triggered.connect(self.full_import)
         self.ui.action_full_export.triggered.connect(self.full_export)
+        self.ui.action_full_export_first_time.triggered.connect(
+            self.full_export_first_time,
+        )
 
         self.ui.action_about.triggered.connect(self.about_dialog)
 
@@ -259,13 +262,23 @@ class Window:
         )
 
     def full_export(self):
+        return self._full_export(first_time=False)
+
+    def full_export_first_time(self):
+        return self._full_export(first_time=True)
+
+    def _full_export(self, first_time):
         dialog = epcpm.importexportdialog.export_dialog()
         if dialog.exec() != QtWidgets.QDialog.DialogCode.Accepted:
             return
 
         paths = dialog.paths_result
 
-        epcpm.importexport.full_export(project=self.project, paths=paths)
+        epcpm.importexport.full_export(
+            project=self.project,
+            paths=paths,
+            first_time=first_time,
+        )
 
         QtWidgets.QMessageBox.information(
             self.ui,

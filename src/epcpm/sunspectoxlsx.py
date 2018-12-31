@@ -67,8 +67,6 @@ point_fields = Fields(
     size=data_point_fields.size,
     type=data_point_fields.type_uuid,
     scale_factor=data_point_fields.factor_uuid,
-    get=data_point_fields.get,
-    set=data_point_fields.set,
 )
 
 
@@ -91,6 +89,7 @@ def export(path, sunspec_model, parameters_model):
 
     workbook = builder.gen()
 
+    path.parent.mkdir(parents=True, exist_ok=True)
     workbook.save(path)
 
 
@@ -331,6 +330,11 @@ class Point:
             row.description = parameter.comment
             row.read_write = 'R' if parameter.read_only else 'RW'
 
+            row.get = getter_call(point=self.wrapped, parameter=parameter)
+            row.get += ';'
+            row.set = setter_call(point=self.wrapped, parameter=parameter)
+            row.set += ';'
+
         row.field_type = self.model_type
 
         if self.parameter_uuid_finder(self.wrapped.type_uuid).name == 'pad':
@@ -340,3 +344,24 @@ class Point:
             row.mandatory = 'O'
 
         return row
+
+
+def getter_setter_name(get_set, point, parameter):
+    return '{get_set}SunspecModel{model_id}_{abbreviation}'.format(
+        get_set=get_set,
+        model_id=point.tree_parent.tree_parent.id,
+        abbreviation=parameter.abbreviation,
+    )
+
+
+def getter_call(point, parameter):
+    return getter_setter_call(get_set='get', point=point, parameter=parameter)
+
+
+def setter_call(point, parameter):
+    return getter_setter_call(get_set='set', point=point, parameter=parameter)
+
+
+def getter_setter_call(get_set, point, parameter):
+    name = getter_setter_name(get_set=get_set, point=point, parameter=parameter)
+    return f'{name}()'

@@ -15,6 +15,7 @@ def test_blank(qtbot):
         hierarchy=None,
         spreadsheet=None,
         smdx=[],
+        sunspec_c=None,
     )
 
 

@@ -1,8 +1,12 @@
 import pathlib
 
+import epcpm.cantosym
+import epcpm.parameterstohierarchy
 import epcpm.project
 import epcpm.smdxtosunspec
 import epcpm.sunspecmodel
+import epcpm.sunspectomanualc
+import epcpm.sunspectomanualh
 import epcpm.sunspectoxlsx
 import epcpm.symtoproject
 import epyqlib.attrsmodel
@@ -93,7 +97,7 @@ def full_import(paths):
     return project
 
 
-def full_export(project, paths):
+def full_export(project, paths, first_time=False):
     epcpm.cantosym.export(
         path=paths.can,
         can_model=project.models.can,
@@ -111,3 +115,14 @@ def full_export(project, paths):
         sunspec_model=project.models.sunspec,
         parameters_model=project.models.parameters,
     )
+
+    if first_time:
+        epcpm.sunspectomanualc.export(
+            path=paths.sunspec_c,
+            sunspec_model=project.models.sunspec,
+        )
+
+        epcpm.sunspectomanualh.export(
+            path=paths.sunspec_c,
+            sunspec_model=project.models.sunspec,
+        )

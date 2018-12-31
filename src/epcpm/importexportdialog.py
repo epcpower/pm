@@ -34,7 +34,13 @@ def paths_or_none(x):
 
 
 def import_dialog():
-    return Dialog()
+    dialog = Dialog()
+
+    dialog.ui.sunspec_c_label.hide()
+    dialog.ui.sunspec_c.hide()
+    dialog.ui.pick_sunspec_c.hide()
+
+    return dialog
 
 
 def export_dialog():
@@ -55,6 +61,7 @@ class ImportPaths:
     hierarchy = attr.ib(converter=path_or_none)
     spreadsheet = attr.ib(converter=path_or_none)
     smdx = attr.ib(converter=paths_or_none)
+    sunspec_c = attr.ib(converter=path_or_none)
 
 
 def paths_from_directory(directory):
@@ -68,6 +75,7 @@ def paths_from_directory(directory):
         hierarchy=interface / 'EPC_DG_ID247_FACTORY.parameters.json',
         spreadsheet=embedded / 'MODBUS_SunSpec-EPC.xlsx',
         smdx=sorted(sunspec.glob('smdx_*.xml')),
+        sunspec_c=sunspec,
     )
 
 
@@ -89,6 +97,7 @@ class Dialog(UiBase):
         self.ui.pick_can.clicked.connect(self.pick_can)
         self.ui.pick_hierarchy.clicked.connect(self.pick_hierarchy)
         self.ui.pick_spreadsheet.clicked.connect(self.pick_spreadsheet)
+        self.ui.pick_sunspec_c.clicked.connect(self.pick_sunspec_c)
         self.ui.pick_smdx.clicked.connect(self.pick_smdx)
         self.ui.remove_smdx.clicked.connect(self.remove_smdx)
         self.ui.from_directory.clicked.connect(self.from_directory)
@@ -104,6 +113,7 @@ class Dialog(UiBase):
             hierarchy=self.ui.hierarchy.text(),
             spreadsheet=self.ui.spreadsheet.text(),
             smdx=smdx,
+            sunspec_c=self.ui.sunspec_c.text(),
         )
         super().accept()
 
@@ -118,6 +128,7 @@ class Dialog(UiBase):
         self.ui.can.setText(os.fspath(paths.can))
         self.ui.hierarchy.setText(os.fspath(paths.hierarchy))
         self.ui.spreadsheet.setText(os.fspath(paths.spreadsheet))
+        self.ui.sunspec_c.setText(os.fspath(paths.sunspec_c))
 
         self.clear_smdx_list()
         if not self.for_save:
@@ -175,6 +186,14 @@ class Dialog(UiBase):
             filters=filters,
             multiple=False,
         )
+
+    def pick_sunspec_c(self):
+        directory = QtWidgets.QFileDialog.getExistingDirectory(parent=self)
+
+        if len(directory) == 0:
+            return
+
+        self.ui.sunspec_c.setText(directory)
 
     def pick_smdx(self):
         filters = (

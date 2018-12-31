@@ -19,8 +19,8 @@ def export(path, can_model, parameters_model):
         can_root=can_model.root,
     )
 
-    with open(path, 'w') as file:
-        file.write(builder.gen(indent=4))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(builder.gen(indent=4))
 
 
 @builders(epyqlib.pm.parametermodel.Root)
