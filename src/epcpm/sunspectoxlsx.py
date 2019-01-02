@@ -5,6 +5,7 @@ import openpyxl
 
 import epyqlib.utils.general
 
+import epcpm.c
 import epcpm.sunspecmodel
 
 
@@ -330,10 +331,87 @@ class Point:
             row.description = parameter.comment
             row.read_write = 'R' if parameter.read_only else 'RW'
 
-            row.get = getter_call(point=self.wrapped, parameter=parameter)
-            row.get += ';'
-            row.set = setter_call(point=self.wrapped, parameter=parameter)
-            row.set += ';'
+            meta = '[Meta_Value]'
+
+            getter = [
+                getter_call(point=self.wrapped, parameter=parameter) + ';',
+            ]
+            setter = []
+
+            if parameter.nv_format is not None:
+                internal_variable = parameter.nv_format.format(meta)
+
+                sunspec_model_variable = (
+                    'sunspecInterface.model{}'.format(
+                        self.wrapped.tree_parent.tree_parent.id,
+                    )
+                )
+
+                sunspec_variable = (
+                    f'{sunspec_model_variable}.{parameter.abbreviation}'
+                )
+
+                converters = {
+                    'uint32': {
+                        'get': 'sunspecUint32ToSSU32',
+                        'set': 'sunspecSSU32ToUint32',
+                    },
+                    'int32': {
+                        # TODO: add this to embedded?
+                        # 'get': 'sunspecInt32ToSSS32',
+                        'set': 'sunspecSSS32ToInt32',
+                    },
+                }.get(row.type)
+
+                if converters is not None:
+                    get_converter = converters['get']
+                    set_converter = converters['set']
+                    getter.extend([
+                        f'{get_converter}(',
+                        [
+                            f'&{sunspec_variable},',
+                            f'{internal_variable}',
+                        ],
+                        ');',
+                    ])
+                    setter.extend([
+                        f'{internal_variable} = {set_converter}(',
+                        [
+                            f'&{sunspec_variable}',
+                        ],
+                        ');',
+                    ])
+                else:
+                    getter.append(adjust_assignment(
+                        left_hand_side=sunspec_variable,
+                        right_hand_side=internal_variable,
+                        sunspec_model_variable=sunspec_model_variable,
+                        scale_factor=row.scale_factor,
+                        parameter=parameter,
+                        factor_operator='*',
+                    ))
+
+                    setter.append(adjust_assignment(
+                        left_hand_side=internal_variable,
+                        right_hand_side=sunspec_variable,
+                        sunspec_model_variable=sunspec_model_variable,
+                        scale_factor=row.scale_factor,
+                        parameter=parameter,
+                        factor_operator='/',
+                    ))
+
+                # minimum_variable = parameter.nv_format.format('[Meta_Min]')
+                # maximum_variable = parameter.nv_format.format('[Meta_Max]')
+
+            row.get = epcpm.c.format_nested_lists(getter)
+
+            setter.append(
+                setter_call(point=self.wrapped, parameter=parameter) + ';',
+            )
+            if not parameter.read_only:
+                row.set = epcpm.c.format_nested_lists(setter)
+            else:
+                row.set = None
 
         row.field_type = self.model_type
 
@@ -344,6 +422,33 @@ class Point:
             row.mandatory = 'O'
 
         return row
+
+
+def adjust_assignment(
+        left_hand_side,
+        right_hand_side,
+        sunspec_model_variable,
+        scale_factor,
+        parameter,
+        factor_operator,
+):
+    if scale_factor is not None:
+        scale_factor_variable = f'{sunspec_model_variable}.{scale_factor}'
+        # TODO: what about positive scalings?
+        # factor = f'(P99_IPOW(-{scale_factor_variable}, 10))'
+        # TODO: we really don't want doubles here, do we?
+        factor = f'(pow(10, -{scale_factor_variable}))'
+
+        right_hand_side = (
+            f'({right_hand_side} {factor_operator} {factor})'
+        )
+
+    if parameter.nv_cast:
+        right_hand_side = f'((__typeof__({left_hand_side})) {right_hand_side})'
+
+    result = f'{left_hand_side} = {right_hand_side};'
+
+    return result
 
 
 def getter_setter_name(get_set, point, parameter):

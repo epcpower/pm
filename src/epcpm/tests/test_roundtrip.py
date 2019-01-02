@@ -26,15 +26,20 @@ exported_hierarchy = (
 ).with_suffix(example_device.hierarchy.suffix)
 
 
-# def test_full_round_trip():
-#     directory = pathlib.Path().home()/'grid-tied'
-#     paths = epcpm.importexportdialog.paths_from_directory(directory)
-#
-#     project = epcpm.importexport.full_import(paths=paths)
-#     epcpm.importexport.full_export(project=project, paths=paths)
-#
-#     project = epcpm.importexport.full_import(paths=paths)
-#     epcpm.importexport.full_export(project=project, paths=paths)
+def _full_round_trip():
+    # directory = pathlib.Path('full_import')
+    # paths = epcpm.importexportdialog.paths_from_directory(directory)
+    # project = epcpm.importexport.full_import(paths=paths)
+    import epcpm.project
+    project = epcpm.project.loadp(pathlib.Path('full_import')/'project.pmp')
+
+    directory = pathlib.Path(os.sep)/'epc'/'g'/'36'/'grid-tied'
+    paths = epcpm.importexportdialog.paths_from_directory(directory)
+
+    epcpm.importexport.full_export(project=project, paths=paths)
+
+    # project = epcpm.importexport.full_import(paths=paths)
+    # epcpm.importexport.full_export(project=project, paths=paths)
 
 
 def test_import():
