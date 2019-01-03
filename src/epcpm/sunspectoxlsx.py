@@ -437,10 +437,12 @@ def adjust_assignment(
         # TODO: what about positive scalings?
         # factor = f'(P99_IPOW(-{scale_factor_variable}, 10))'
         # TODO: we really don't want doubles here, do we?
-        factor = f'(pow(10, -{scale_factor_variable}))'
+        # factor = f'(pow(10, -{scale_factor_variable}))'
+
+        opposite = '-' if factor_operator == '*' else ''
 
         right_hand_side = (
-            f'({right_hand_side} {factor_operator} {factor})'
+            f'(sunspecScale({right_hand_side}, {opposite}{scale_factor_variable})'
         )
 
     if parameter.nv_cast:
