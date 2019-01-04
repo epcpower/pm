@@ -36,7 +36,7 @@ def _full_round_trip():
     directory = pathlib.Path(os.sep)/'epc'/'g'/'36'/'grid-tied'
     paths = epcpm.importexportdialog.paths_from_directory(directory)
 
-    epcpm.importexport.full_export(project=project, paths=paths)
+    epcpm.importexport.full_export(project=project, paths=paths, first_time=True)
 
     # project = epcpm.importexport.full_import(paths=paths)
     # epcpm.importexport.full_export(project=project, paths=paths)

@@ -322,6 +322,7 @@ def build_message(
         signal = signal_from_matrix(
             matrix_signal=matrix_signal,
             factory=epcpm.canmodel.Signal,
+            enumeration_name_to_uuid=enumeration_name_to_uuid,
             parameter_uuid=parameter.uuid,
         )
         message.append_child(signal)
@@ -342,12 +343,22 @@ def message_from_matrix(frame, factory, **extras):
     )
 
 
-def signal_from_matrix(matrix_signal, factory, **extras):
+def signal_from_matrix(
+        matrix_signal,
+        factory,
+        enumeration_name_to_uuid,
+        **extras,
+):
     extras.setdefault('name', humanize_name(matrix_signal.name))
     extras.setdefault('bits', matrix_signal.size)
     extras.setdefault('factor', matrix_signal.factor)
     extras.setdefault('signed', matrix_signal.is_signed)
     extras.setdefault('start_bit', matrix_signal.getStartbit())
+
+    extras.setdefault(
+        'enumeration_uuid',
+        enumeration_name_to_uuid.get(matrix_signal.enumeration),
+    )
 
     return factory(
         **extras
@@ -374,6 +385,7 @@ def build_multiplexed_message(
     mux_signal = signal_from_matrix(
         factory=epcpm.canmodel.Signal,
         matrix_signal=matrix_mux_signal,
+        enumeration_name_to_uuid=enumeration_name_to_uuid,
         signed=False,
     )
     message.append_child(mux_signal)
@@ -463,6 +475,7 @@ def build_multiplexed_message(
             signal = signal_from_matrix(
                 matrix_signal=matrix_signal,
                 factory=epcpm.canmodel.Signal,
+                enumeration_name_to_uuid=enumeration_name_to_uuid,
                 parameter_uuid=parameter.uuid,
             )
 
@@ -669,7 +682,6 @@ def go_add_tables(parameters_root, can_root):
         parameters=(
             epyqlib.pm.parametermodel.Parameter(
                 name='YScale',
-                enumeration_uuid=volt_var_y_scale.uuid,
                 maximum=3,
             ),
             epyqlib.pm.parametermodel.Parameter(
@@ -815,6 +827,7 @@ def go_add_tables(parameters_root, can_root):
                 'YScale': {
                     'bits': 2,
                     'signed': False,
+                    'enumeration_uuid': volt_var_y_scale.uuid,
                 },
                 'RampRateIncrement': {
                     'bits': 16,
@@ -1125,11 +1138,6 @@ def parameter_from_signal(
     decimal_places = attributes.get('DisplayDecimalPlaces')
     if decimal_places is not None:
         extras['decimal_places'] = decimal_places
-
-    if matrix_signal.enumeration is not None:
-        extras['enumeration_uuid'] = enumeration_name_to_uuid[
-            matrix_signal.enumeration
-        ]
 
     if mux_name is not None:
         extras['original_multiplexer_name'] = mux_name

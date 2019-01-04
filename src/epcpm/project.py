@@ -8,6 +8,7 @@ import epyqlib.pm.parametermodel
 import epyqlib.utils.qt
 
 import epcpm.canmodel
+import epcpm.sunspecmodel
 
 
 class ProjectSaveCanceled(Exception):

@@ -232,9 +232,9 @@ class Signal:
             if parameter.units is not None:
                 extras['unit'] = parameter.units
 
-            if parameter.enumeration_uuid is not None:
+            if self.wrapped.enumeration_uuid is not None:
                 enumeration = self.parameter_uuid_finder(
-                    parameter.enumeration_uuid,
+                    self.wrapped.enumeration_uuid,
                 )
 
                 extras['enumeration'] = dehumanize_name(enumeration.name)

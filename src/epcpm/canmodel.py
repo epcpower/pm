@@ -103,6 +103,19 @@ class Signal(epyqlib.treenode.TreeNode):
         human_name='Parameter UUID',
     )
 
+    enumeration_uuid = epyqlib.attrsmodel.attr_uuid(
+        default=None,
+        allow_none=True,
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=enumeration_uuid,
+        human_name='Enumeration',
+        data_display=epyqlib.attrsmodel.name_from_uuid,
+        delegate=epyqlib.attrsmodel.SingleSelectByRootDelegateCache(
+            list_selection_root='enumerations',
+        )
+    )
+
     path = attr.ib(
         factory=tuple,
     )
@@ -750,6 +763,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                             bits=reference_signal.bits,
                             factor=reference_signal.factor,
                             signed=reference_signal.signed,
+                            enumeration_uuid=reference_signal.enumeration_uuid,
                             parameter_uuid=array_element.uuid,
                             path=signal_path,
                         )
@@ -784,6 +798,8 @@ columns = epyqlib.attrsmodel.columns(
         + merge('bits', Signal)
     ),
     merge('extended', Message, MultiplexedMessage),
+
+    merge('enumeration_uuid', Signal),
 
     merge('cycle_time', Message, Multiplexer),
 

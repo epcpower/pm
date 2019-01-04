@@ -235,14 +235,13 @@ def test_enumerations():
     on_off.append_child(off)
     on_off.append_child(on)
 
-    parameter = epyqlib.pm.parametermodel.Parameter(
-        enumeration_uuid=on_off.uuid,
-    )
+    parameter = epyqlib.pm.parametermodel.Parameter()
     parameter_root.append_child(parameter)
 
     message = epcpm.canmodel.Message()
     can_root.append_child(message)
     signal = epcpm.canmodel.Signal(
+        enumeration_uuid=on_off.uuid,
         parameter_uuid=parameter.uuid,
     )
     message.append_child(signal)
@@ -313,7 +312,6 @@ def test_access_level():
 
     access_level_parameter = epyqlib.pm.parametermodel.Parameter(
         name='Access Parameter',
-        enumeration_uuid=access_levels.uuid,
         uuid='908f42e7-7632-47bc-a8c7-eb1eca4e277c',
     )
     parameter_root.append_child(access_level_parameter)
@@ -332,6 +330,7 @@ def test_access_level():
     access_level_signal = epcpm.canmodel.Signal(
         name='AccessSignal',
         parameter_uuid=access_level_parameter.uuid,
+        enumeration_uuid=access_levels.uuid,
         uuid='4f62704f-6548-4f80-b7b7-702f214a394b',
     )
     message.append_child(access_level_signal)

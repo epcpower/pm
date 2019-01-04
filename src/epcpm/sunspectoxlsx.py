@@ -173,8 +173,7 @@ class Model:
 
         for block in self.wrapped.children:
             for point in block.children:
-                parameter = self.parameter_uuid_finder(point.parameter_uuid)
-                enumeration_uuid = parameter.enumeration_uuid
+                enumeration_uuid = point.enumeration_uuid
                 if enumeration_uuid is None:
                     continue
 

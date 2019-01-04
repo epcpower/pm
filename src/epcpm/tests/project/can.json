@@ -20,6 +20,7 @@
                     "factor": "1",
                     "start_bit": 0,
                     "parameter_uuid": null,
+                    "enumeration_uuid": null,
                     "path": [],
                     "uuid": "3284d381-f1c9-4708-82d3-7392c3f6e4bd"
                 },
@@ -38,6 +39,7 @@
                             "factor": "1",
                             "start_bit": 0,
                             "parameter_uuid": "d6e895c6-9d8e-4f8a-b605-2c618d12ec43",
+                            "enumeration_uuid": null,
                             "path": [],
                             "uuid": "2968bf76-fe27-4234-957c-b6acecfc357e"
                         },
@@ -49,6 +51,7 @@
                             "factor": "1",
                             "start_bit": 0,
                             "parameter_uuid": "7e914db1-467f-46a1-9562-f9141029cf9e",
+                            "enumeration_uuid": null,
                             "path": [],
                             "uuid": "3cd5cb7b-aec2-4ff2-92f0-c09650043413"
                         },
@@ -68,6 +71,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "565123ca-035c-475d-bd71-e2e0e1ab3ad3",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "0e127fd2-71d0-4cd8-abe0-ebdf6f0c1746",
@@ -84,6 +88,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "ca8e06f7-1ac6-41b0-baf7-710d20fb62d3",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "0e127fd2-71d0-4cd8-abe0-ebdf6f0c1746",
@@ -120,6 +125,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "8375387f-a542-496e-b9fa-4a5e2037402f",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "0e127fd2-71d0-4cd8-abe0-ebdf6f0c1746",
@@ -136,6 +142,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "4d67999e-87b3-47dd-9fb4-268dca1ff8dc",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "0e127fd2-71d0-4cd8-abe0-ebdf6f0c1746",
@@ -152,6 +159,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "c3367a79-8c08-4ded-86c3-90e96a193414",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "0e127fd2-71d0-4cd8-abe0-ebdf6f0c1746",
@@ -189,6 +197,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "331e3eff-4d24-4ef6-8cdd-338a35f86e14",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "0e127fd2-71d0-4cd8-abe0-ebdf6f0c1746",
@@ -205,6 +214,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "0232d27b-c3a4-427e-98ee-5981f0c0e1c9",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "0e127fd2-71d0-4cd8-abe0-ebdf6f0c1746",
@@ -241,6 +251,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "565123ca-035c-475d-bd71-e2e0e1ab3ad3",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "b19aa305-f665-4c80-bbff-37d26967c6cb",
@@ -257,6 +268,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "ca8e06f7-1ac6-41b0-baf7-710d20fb62d3",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "b19aa305-f665-4c80-bbff-37d26967c6cb",
@@ -293,6 +305,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "8375387f-a542-496e-b9fa-4a5e2037402f",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "b19aa305-f665-4c80-bbff-37d26967c6cb",
@@ -309,6 +322,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "4d67999e-87b3-47dd-9fb4-268dca1ff8dc",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "b19aa305-f665-4c80-bbff-37d26967c6cb",
@@ -325,6 +339,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "c3367a79-8c08-4ded-86c3-90e96a193414",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "b19aa305-f665-4c80-bbff-37d26967c6cb",
@@ -362,6 +377,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "331e3eff-4d24-4ef6-8cdd-338a35f86e14",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "b19aa305-f665-4c80-bbff-37d26967c6cb",
@@ -378,6 +394,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "0232d27b-c3a4-427e-98ee-5981f0c0e1c9",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "b19aa305-f665-4c80-bbff-37d26967c6cb",
@@ -414,6 +431,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "565123ca-035c-475d-bd71-e2e0e1ab3ad3",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "33ff2301-b01a-44b2-b858-2f5c18dd4655",
@@ -430,6 +448,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "ca8e06f7-1ac6-41b0-baf7-710d20fb62d3",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "33ff2301-b01a-44b2-b858-2f5c18dd4655",
@@ -466,6 +485,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "8375387f-a542-496e-b9fa-4a5e2037402f",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "33ff2301-b01a-44b2-b858-2f5c18dd4655",
@@ -482,6 +502,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "4d67999e-87b3-47dd-9fb4-268dca1ff8dc",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "33ff2301-b01a-44b2-b858-2f5c18dd4655",
@@ -498,6 +519,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "c3367a79-8c08-4ded-86c3-90e96a193414",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "33ff2301-b01a-44b2-b858-2f5c18dd4655",
@@ -535,6 +557,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "331e3eff-4d24-4ef6-8cdd-338a35f86e14",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "33ff2301-b01a-44b2-b858-2f5c18dd4655",
@@ -551,6 +574,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "0232d27b-c3a4-427e-98ee-5981f0c0e1c9",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "33ff2301-b01a-44b2-b858-2f5c18dd4655",
@@ -587,6 +611,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "565123ca-035c-475d-bd71-e2e0e1ab3ad3",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "8cd725bd-6673-4382-9e40-1bb0175b08af",
@@ -603,6 +628,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "ca8e06f7-1ac6-41b0-baf7-710d20fb62d3",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "8cd725bd-6673-4382-9e40-1bb0175b08af",
@@ -639,6 +665,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "8375387f-a542-496e-b9fa-4a5e2037402f",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "8cd725bd-6673-4382-9e40-1bb0175b08af",
@@ -655,6 +682,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "4d67999e-87b3-47dd-9fb4-268dca1ff8dc",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "8cd725bd-6673-4382-9e40-1bb0175b08af",
@@ -671,6 +699,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "c3367a79-8c08-4ded-86c3-90e96a193414",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "8cd725bd-6673-4382-9e40-1bb0175b08af",
@@ -708,6 +737,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "331e3eff-4d24-4ef6-8cdd-338a35f86e14",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "8cd725bd-6673-4382-9e40-1bb0175b08af",
@@ -724,6 +754,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "0232d27b-c3a4-427e-98ee-5981f0c0e1c9",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "485328aa-0ae6-4270-80b9-cd01d33da916",
                                         "8cd725bd-6673-4382-9e40-1bb0175b08af",
@@ -760,6 +791,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "565123ca-035c-475d-bd71-e2e0e1ab3ad3",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "0e127fd2-71d0-4cd8-abe0-ebdf6f0c1746",
@@ -776,6 +808,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "ca8e06f7-1ac6-41b0-baf7-710d20fb62d3",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "0e127fd2-71d0-4cd8-abe0-ebdf6f0c1746",
@@ -812,6 +845,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "8375387f-a542-496e-b9fa-4a5e2037402f",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "0e127fd2-71d0-4cd8-abe0-ebdf6f0c1746",
@@ -828,6 +862,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "4d67999e-87b3-47dd-9fb4-268dca1ff8dc",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "0e127fd2-71d0-4cd8-abe0-ebdf6f0c1746",
@@ -844,6 +879,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "c3367a79-8c08-4ded-86c3-90e96a193414",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "0e127fd2-71d0-4cd8-abe0-ebdf6f0c1746",
@@ -881,6 +917,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "331e3eff-4d24-4ef6-8cdd-338a35f86e14",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "0e127fd2-71d0-4cd8-abe0-ebdf6f0c1746",
@@ -897,6 +934,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "0232d27b-c3a4-427e-98ee-5981f0c0e1c9",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "0e127fd2-71d0-4cd8-abe0-ebdf6f0c1746",
@@ -933,6 +971,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "565123ca-035c-475d-bd71-e2e0e1ab3ad3",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "b19aa305-f665-4c80-bbff-37d26967c6cb",
@@ -949,6 +988,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "ca8e06f7-1ac6-41b0-baf7-710d20fb62d3",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "b19aa305-f665-4c80-bbff-37d26967c6cb",
@@ -985,6 +1025,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "8375387f-a542-496e-b9fa-4a5e2037402f",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "b19aa305-f665-4c80-bbff-37d26967c6cb",
@@ -1001,6 +1042,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "4d67999e-87b3-47dd-9fb4-268dca1ff8dc",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "b19aa305-f665-4c80-bbff-37d26967c6cb",
@@ -1017,6 +1059,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "c3367a79-8c08-4ded-86c3-90e96a193414",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "b19aa305-f665-4c80-bbff-37d26967c6cb",
@@ -1054,6 +1097,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "331e3eff-4d24-4ef6-8cdd-338a35f86e14",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "b19aa305-f665-4c80-bbff-37d26967c6cb",
@@ -1070,6 +1114,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "0232d27b-c3a4-427e-98ee-5981f0c0e1c9",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "b19aa305-f665-4c80-bbff-37d26967c6cb",
@@ -1106,6 +1151,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "565123ca-035c-475d-bd71-e2e0e1ab3ad3",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "33ff2301-b01a-44b2-b858-2f5c18dd4655",
@@ -1122,6 +1168,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "ca8e06f7-1ac6-41b0-baf7-710d20fb62d3",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "33ff2301-b01a-44b2-b858-2f5c18dd4655",
@@ -1158,6 +1205,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "8375387f-a542-496e-b9fa-4a5e2037402f",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "33ff2301-b01a-44b2-b858-2f5c18dd4655",
@@ -1174,6 +1222,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "4d67999e-87b3-47dd-9fb4-268dca1ff8dc",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "33ff2301-b01a-44b2-b858-2f5c18dd4655",
@@ -1190,6 +1239,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "c3367a79-8c08-4ded-86c3-90e96a193414",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "33ff2301-b01a-44b2-b858-2f5c18dd4655",
@@ -1227,6 +1277,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "331e3eff-4d24-4ef6-8cdd-338a35f86e14",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "33ff2301-b01a-44b2-b858-2f5c18dd4655",
@@ -1243,6 +1294,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "0232d27b-c3a4-427e-98ee-5981f0c0e1c9",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "33ff2301-b01a-44b2-b858-2f5c18dd4655",
@@ -1279,6 +1331,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "565123ca-035c-475d-bd71-e2e0e1ab3ad3",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "8cd725bd-6673-4382-9e40-1bb0175b08af",
@@ -1295,6 +1348,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "ca8e06f7-1ac6-41b0-baf7-710d20fb62d3",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "8cd725bd-6673-4382-9e40-1bb0175b08af",
@@ -1331,6 +1385,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "8375387f-a542-496e-b9fa-4a5e2037402f",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "8cd725bd-6673-4382-9e40-1bb0175b08af",
@@ -1347,6 +1402,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "4d67999e-87b3-47dd-9fb4-268dca1ff8dc",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "8cd725bd-6673-4382-9e40-1bb0175b08af",
@@ -1363,6 +1419,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "c3367a79-8c08-4ded-86c3-90e96a193414",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "8cd725bd-6673-4382-9e40-1bb0175b08af",
@@ -1400,6 +1457,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "331e3eff-4d24-4ef6-8cdd-338a35f86e14",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "8cd725bd-6673-4382-9e40-1bb0175b08af",
@@ -1416,6 +1474,7 @@
                                     "factor": "1",
                                     "start_bit": 0,
                                     "parameter_uuid": "0232d27b-c3a4-427e-98ee-5981f0c0e1c9",
+                                    "enumeration_uuid": null,
                                     "path": [
                                         "5674f3ae-f0d8-4467-a23f-7f1e0f55b870",
                                         "8cd725bd-6673-4382-9e40-1bb0175b08af",

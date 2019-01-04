@@ -164,6 +164,8 @@ def import_model(model_id, parameter_model, paths=()):
             name='SunSpec{}'.format(parameter.name),
         )
 
+        points[0].enumeration_uuid = epc_enumeration.uuid
+
         for symbol in enumeration:
             enumerator = epyqlib.pm.parametermodel.SunSpecEnumerator(
                 name=symbol.id,
@@ -174,10 +176,6 @@ def import_model(model_id, parameter_model, paths=()):
                 type=symbol.type,
             )
             epc_enumeration.append_child(enumerator)
-
-        for point in points:
-            parameter = parameter_model.node_from_uuid(point.parameter_uuid)
-            parameter.enumeration_uuid = epc_enumeration.uuid
 
         enumerations_root.append_child(epc_enumeration)
 

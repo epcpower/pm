@@ -157,6 +157,19 @@ class DataPoint(epyqlib.treenode.TreeNode):
         ),
     )
 
+    enumeration_uuid = epyqlib.attrsmodel.attr_uuid(
+        default=None,
+        allow_none=True,
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=enumeration_uuid,
+        human_name='Enumeration',
+        data_display=epyqlib.attrsmodel.name_from_uuid,
+        delegate=epyqlib.attrsmodel.SingleSelectByRootDelegateCache(
+            list_selection_root='enumerations',
+        )
+    )
+
     get = attr.ib(
         default=None,
         converter=epyqlib.attrsmodel.to_str_or_none,
@@ -436,6 +449,7 @@ columns = epyqlib.attrsmodel.columns(
     merge('length', Model) + merge('size', DataPoint),
     merge('factor_uuid', DataPoint),
     merge('parameter_uuid', DataPoint),
+    merge('enumeration_uuid', DataPoint),
     merge('type_uuid', DataPoint),
     merge('mandatory', DataPoint),
     merge('offset', DataPoint, HeaderBlock, FixedBlock),
