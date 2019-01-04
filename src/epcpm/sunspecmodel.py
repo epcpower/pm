@@ -177,12 +177,20 @@ class DataPoint(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.String(allow_none=True),
         ),
     )
+    epyqlib.attrsmodel.attrib(
+        attribute=get,
+        no_column=True,
+    )
     set = attr.ib(
         default=None,
         converter=epyqlib.attrsmodel.to_str_or_none,
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(allow_none=True),
         ),
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=set,
+        no_column=True,
     )
 
     mandatory = attr.ib(
@@ -454,8 +462,6 @@ columns = epyqlib.attrsmodel.columns(
     merge('mandatory', DataPoint),
     merge('offset', DataPoint, HeaderBlock, FixedBlock),
     merge('block_offset', DataPoint),
-    merge('get', DataPoint),
-    merge('set', DataPoint),
     merge('uuid', *types.types.values()),
 )
 
