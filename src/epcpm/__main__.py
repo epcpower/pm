@@ -1,28 +1,22 @@
-import argparse
 import logging
 import os.path
-import pathlib
 import sys
 
+import click
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import epyqlib.utils.qt
 import epcpm.mainwindow
+
+import epcpm.cli.utils
+
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
-def parse_args(args):
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--verbose', '-v', action='count', default=0)
-    parser.add_argument('--file', '-f', type=argparse.FileType('r'))
-
-    return parser.parse_args(args)
-
-
-def main(*args, logger):
+def main(project, verbosity, logger):
     app = QtWidgets.QApplication(sys.argv)
 
     epyqlib.utils.qt.exception_message_box_register_versions(
@@ -42,16 +36,14 @@ def main(*args, logger):
     app.setOrganizationName('EPC Power Corp.')
     app.setApplicationName('EPC Parameter Management')
 
-    args = parse_args(args=args)
-
-    if args.verbose >= 1:
+    if verbosity >= 1:
         logger.setLevel(logging.DEBUG)
 
-        if args.verbose >= 2:
+        if verbosity >= 2:
             # twisted.internet.defer.setDebugging(True)
             pass
 
-            if args.verbose >= 3:
+            if verbosity >= 3:
                 logging.getLogger().setLevel(logging.DEBUG)
 
     window = epcpm.mainwindow.Window(
@@ -62,18 +54,27 @@ def main(*args, logger):
 
     epyqlib.utils.qt.exception_message_box_register_parent(parent=window.ui)
 
-    if args.file is not None:
-        args.file.close()
-        filename = os.path.abspath(args.file.name)
+    if project is not None:
+        filename = os.path.abspath(project)
         window.open_project(filename=filename)
-        args.file.close()
 
     window.ui.show()
 
     return app.exec()
 
 
-def _entry_point():
+@click.command()
+@epcpm.cli.utils.project_option()
+@click.option(
+    '-v',
+    '--verbose',
+    'verbosity',
+    count=True,
+    help='Increase verbosity of output (up to three times)',
+)
+def _entry_point(project, verbosity):
+    """Parameter Manager GUI"""
+
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -88,7 +89,7 @@ def _entry_point():
 
     sys.excepthook = epyqlib.utils.general.exception_logger
 
-    return main(*sys.argv[1:], logger=logger)
+    return main(project=project, verbosity=verbosity, logger=logger)
 
 
 # for PyInstaller

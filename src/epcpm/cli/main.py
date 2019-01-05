@@ -4,23 +4,42 @@ import subprocess
 
 import click
 
+import epcpm.__main__
+import epcpm.cli.utils
 import epcpm.importexport
 import epcpm.importexportdialog
 
 
 @click.group()
 def main():
-    pass
+    """Parameter manager"""
+
+
+main.add_command(epcpm.__main__._entry_point, name='gui')
 
 
 @main.command()
-@click.option(
-    '--project-path',
-    'project_path',
-    type=click.Path(exists=True, file_okay=False, resolve_path=True),
-    required=True,
-)
+@epcpm.cli.utils.project_option()
+@epcpm.cli.utils.project_path_option(required=True)
+def export(project, project_path):
+    """Export PM data to embedded project directory"""
+    project = epcpm.project.loadp(project)
+    paths = epcpm.importexportdialog.paths_from_directory(project_path)
+
+    epcpm.importexport.full_export(
+        project=project,
+        paths=paths,
+        first_time=True,
+    )
+
+    click.echo()
+    click.echo('done')
+
+
+@main.command()
+@epcpm.cli.utils.project_path_option(required=True)
 def transition(project_path):
+    """Don't use this unless you know"""
     project_path = pathlib.Path(project_path)
 
     click.echo('Working in: {}'.format(project_path))
@@ -85,7 +104,7 @@ def transition(project_path):
         paths=paths,
     )
 
-    pm_directory = project_path/'blue'
+    pm_directory = project_path/'interface'/'pm'
     pm_directory.mkdir(exist_ok=True)
     project.filename = pm_directory/'project.pmp'
     project.save()
