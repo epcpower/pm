@@ -19,7 +19,7 @@ main.add_command(epcpm.__main__._entry_point, name='gui')
 
 
 @main.command()
-@epcpm.cli.utils.project_option()
+@epcpm.cli.utils.project_option(required=True)
 @epcpm.cli.utils.project_path_option(required=True)
 def export(project, project_path):
     """Export PM data to embedded project directory"""

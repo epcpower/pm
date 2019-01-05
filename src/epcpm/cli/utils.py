@@ -1,10 +1,11 @@
 import click
 
 
-def project_option():
+def project_option(required=False):
     return click.option(
         '--project',
         type=click.Path(exists=True, dir_okay=False),
+        required=required,
         help='.pmp file to load',
     )
 
