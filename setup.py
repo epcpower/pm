@@ -1,7 +1,6 @@
 import setuptools
 
 
-
 setuptools.setup(
     name='epcpm',
     use_scm_version={'version_scheme': 'post-release'},
@@ -12,6 +11,7 @@ setuptools.setup(
     ],
     packages=setuptools.find_packages('src'),
     package_dir={'': 'src'},
+    include_package_data=True,
     entry_points={
         'gui_scripts': [
             'epcpm = epcpm.__main__:_entry_point',
