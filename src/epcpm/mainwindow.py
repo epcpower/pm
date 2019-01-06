@@ -157,10 +157,13 @@ class Window:
         view_model.selection = view_model.view.selectionModel()
 
         with contextlib.suppress(TypeError):
-            view_model.selection.selectionChanged.disconnect()
+            view_model.selection.selectionChanged.disconnect(
+                self.selection_changed,
+            )
 
         view_model.selection.selectionChanged.connect(
-            self.selection_changed)
+            self.selection_changed,
+        )
 
     def open_project_from_dialog(self):
         filename = epyqlib.utils.qt.file_dialog(
