@@ -325,8 +325,6 @@ class Window:
         for (name, model_view), model in i:
             view = model_view.view
 
-            view.setSelectionBehavior(view.SelectRows)
-            view.setSelectionMode(view.SingleSelection)
             view.setDropIndicatorShown(True)
             view.setDragEnabled(True)
             view.setAcceptDrops(True)
