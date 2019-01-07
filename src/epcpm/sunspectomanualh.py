@@ -48,7 +48,14 @@ class Root:
             )
             lines = builder.gen()
             path = self.path/f'sunspecInterface{member.id:05}.h'
-            path.write_text(epcpm.c.format_nested_lists(lines).strip() + '\n')
+            inc_guard = f'SUNSPEC_INTERFACE{member.id:05}_H'
+            guard_start = f'#ifndef {inc_guard}\n#define {inc_guard}\n\n'
+            guard_end = f'\n\n#endif //{inc_guard}\n'
+            path.write_text(
+                guard_start + 
+                epcpm.c.format_nested_lists(lines).strip() +
+                guard_end
+            )
 
 
 @builders(epcpm.sunspecmodel.Model)
