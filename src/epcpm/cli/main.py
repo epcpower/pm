@@ -5,6 +5,7 @@ import subprocess
 import click
 
 import epcpm.__main__
+import epcpm.cli.exportdocx
 import epcpm.cli.utils
 import epcpm.importexport
 import epcpm.importexportdialog
@@ -18,10 +19,19 @@ def main():
 main.add_command(epcpm.__main__._entry_point, name='gui')
 
 
-@main.command()
+@main.group()
+def export():
+    """Export PM data to other formats"""
+    pass
+
+
+export.add_command(epcpm.cli.exportdocx.cli, name='docx')
+
+
+@export.command()
 @epcpm.cli.utils.project_option(required=True)
 @epcpm.cli.utils.project_path_option(required=True)
-def export(project, project_path):
+def build(project, project_path):
     """Export PM data to embedded project directory"""
     project = epcpm.project.loadp(project)
     paths = epcpm.importexportdialog.paths_from_directory(project_path)

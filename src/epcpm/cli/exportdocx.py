@@ -22,7 +22,7 @@ def cli(project_file, docx_file, template, access_level):
         ),
     )
 
-    access_level = access_levels.default()
+    access_level = access_levels.by_name(access_level)
 
     docx_builder = epcpm.parameterstodocx.builders.wrap(
         wrapped=project.models.parameters.root,
