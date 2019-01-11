@@ -10,10 +10,9 @@ def project_option(required=False):
     )
 
 
-def project_path_option(required):
+def target_path_option(required):
     return click.option(
-        '--project-path',
-        'project_path',
+        '--target-path',
         type=click.Path(exists=True, file_okay=False, resolve_path=True),
         required=required,
         help="Path to the embedded project to operate on",

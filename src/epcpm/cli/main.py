@@ -30,11 +30,11 @@ export.add_command(epcpm.cli.exportdocx.cli, name='docx')
 
 @export.command()
 @epcpm.cli.utils.project_option(required=True)
-@epcpm.cli.utils.project_path_option(required=True)
-def build(project, project_path):
+@epcpm.cli.utils.target_path_option(required=True)
+def build(project, target_path):
     """Export PM data to embedded project directory"""
     project = epcpm.project.loadp(project)
-    paths = epcpm.importexportdialog.paths_from_directory(project_path)
+    paths = epcpm.importexportdialog.paths_from_directory(target_path)
 
     epcpm.importexport.full_export(
         project=project,
@@ -47,12 +47,12 @@ def build(project, project_path):
 
 
 @main.command()
-@epcpm.cli.utils.project_path_option(required=True)
-def transition(project_path):
+@epcpm.cli.utils.target_path_option(required=True)
+def transition(target_path):
     """Don't use this unless you know"""
-    project_path = pathlib.Path(project_path)
+    target_path = pathlib.Path(target_path)
 
-    click.echo('Working in: {}'.format(project_path))
+    click.echo('Working in: {}'.format(target_path))
     value = click.prompt(
         'This will wipe out changes in the above project path, continue? ',
         prompt_suffix='',
@@ -62,7 +62,7 @@ def transition(project_path):
         click.echo('Sorry, that response is not acceptable to continue.')
         return
 
-    library_path = project_path/'embedded-library'
+    library_path = target_path / 'embedded-library'
 
     original_spreadsheet = library_path/'MODBUS_SunSpec-EPC.xls'
     new_spreadsheet = original_spreadsheet.with_suffix('.xlsx')
@@ -90,31 +90,31 @@ def transition(project_path):
         cwd=library_path,
     )
 
-    subprocess.run(['git', 'reset', '.'], check=True, cwd=project_path)
-    subprocess.run(['git', 'checkout', '--', '.'], check=True, cwd=project_path)
+    subprocess.run(['git', 'reset', '.'], check=True, cwd=target_path)
+    subprocess.run(['git', 'checkout', '--', '.'], check=True, cwd=target_path)
     subprocess.run(
         ['git', 'clean', '-fdx', '--exclude', 'venv'],
         check=True,
-        cwd=project_path,
+        cwd=target_path,
     )
     subprocess.run(
-        ['python', os.fspath(project_path / 'create_venv.py'), 'ensure'],
+        ['python', os.fspath(target_path / 'create_venv.py'), 'ensure'],
         check=True,
-        cwd=project_path,
+        cwd=target_path,
     )
     subprocess.run(
-        [os.fspath(project_path / 'gridtied'), 'build', '--target', 'Release'],
+        [os.fspath(target_path / 'gridtied'), 'build', '--target', 'Release'],
         check=False,
-        cwd=project_path,
+        cwd=target_path,
     )
 
-    paths = epcpm.importexportdialog.paths_from_directory(project_path)
+    paths = epcpm.importexportdialog.paths_from_directory(target_path)
 
     project = epcpm.importexport.full_import(
         paths=paths,
     )
 
-    pm_directory = project_path/'interface'/'pm'
+    pm_directory = target_path / 'interface' / 'pm'
     pm_directory.mkdir(exist_ok=True)
     project.filename = pm_directory/'project.pmp'
     project.save()
@@ -122,7 +122,7 @@ def transition(project_path):
     subprocess.run(
         ['git', 'add', os.fspath(pm_directory)],
         check=True,
-        cwd=project_path,
+        cwd=target_path,
     )
 
     epcpm.importexport.full_export(
