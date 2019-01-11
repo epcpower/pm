@@ -153,16 +153,20 @@ def load_can_file(
         else:
             enumeration = epyqlib.pm.parametermodel.Enumeration(name=name)
             enumerator_type = epyqlib.pm.parametermodel.Enumerator
-            
-        if name == 'CmmControlsVariant':
-            variants = enumeration
 
         enumerations.append_child(enumeration)
         enumeration_name_to_uuid[name] = enumeration.uuid
 
-        for value, name in values.items():
-            enumerator = enumerator_type(name=name, value=value)
+        for value, gname in values.items():
+            enumerator = enumerator_type(name=gname, value=value)
             enumeration.append_child(enumerator)
+
+        if name == 'CmmControlsVariant':
+            variants = [
+                variant 
+                for variant in enumeration.children 
+                if variant.name != 'None'
+            ]
 
     parameter_from_path = {}
 
@@ -980,12 +984,6 @@ def strip_access_level(string, access_levels):
 
 
 def strip_variant_parameter_tag(string, variants):
-    variants = [
-        variant 
-        for variant in variants.children 
-        if variant.name != 'None'
-    ]
-    
     selected_variants = []
     
     for variant in variants:
@@ -1093,8 +1091,7 @@ def parameter_from_signal(
         #only variants in both lists:
         vis_list = list(set(frame_variants).intersection(variant_cfgs))
         # TODO: 0985098454587998709809879180745
-        #       this only allows one variant selection
-        extras['visibility'] = vis_list[0].uuid
+        extras['visibility'] = vis_list
         
         comment, nv_meta = strip_nv(string=comment)
 
