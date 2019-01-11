@@ -29,10 +29,12 @@ setuptools.setup(
         'canmatrix',
         'click',
         'graham',
+        'lxml'
         'openpyxl',
         'pycparser',
         'pysunspec',
         'pyqt5',
+        'xmldiff',
     ],
     extras_require={
         'test': [
