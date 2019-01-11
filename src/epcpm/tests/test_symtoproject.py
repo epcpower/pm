@@ -27,6 +27,12 @@ def variant_cfgs():
         variants.append_child(e)
         val=val+1
 
+    variants = [
+        variant 
+        for variant in variants.children 
+        if variant.name != 'None'
+    ]
+
     return variants
 
 
