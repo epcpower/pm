@@ -29,7 +29,7 @@ setuptools.setup(
         'canmatrix',
         'click',
         'graham',
-        'lxml'
+        'lxml',
         'openpyxl',
         'pycparser',
         'pysunspec',
