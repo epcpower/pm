@@ -201,14 +201,16 @@ class Signal:
                     and parameter.visibility is not None
             )
             if handle_configuration:
-                configuration = self.parameter_uuid_finder(
+                configurations = self.parameter_uuid_finder(
                     parameter.visibility
                 )
-                if configuration is not None:
-                    extras['comment'] = '{} <{}>'.format(
-                        extras.get('comment', ''),
-                        configuration.name,
-                    ).strip()
+                if configurations is not None:
+                    for cfg in configurations:
+                        if cfg is not None:
+                            extras['comment'] = '{} <{}>'.format(
+                                extras.get('comment', ''),
+                                cfg.name,
+                            ).strip()
 
             if parameter.nv_format is not None:
                 segments = ['nv']
