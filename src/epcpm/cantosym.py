@@ -10,6 +10,7 @@ import epyqlib.pm.parametermodel
 import epyqlib.utils.general
 
 import epcpm.canmodel
+import epcpm.symtoproject
 
 builders = epyqlib.utils.general.TypeMap()
 
@@ -204,6 +205,9 @@ class Signal:
                 configurations = self.parameter_uuid_finder(
                     parameter.visibility
                 )
+                imported_variants = epcpm.symtoproject.imported_variants
+                if all(v in configurations  for v in imported_variants):
+                    configurations = None #don't spam sym with variants
                 if configurations is not None:
                     for cfg in configurations:
                         if cfg is not None:

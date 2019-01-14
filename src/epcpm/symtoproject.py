@@ -17,6 +17,8 @@ import epcpm.canmodel
 import epcpm.sunspecmodel
 
 
+imported_variants = []
+
 def humanize_name(name):
     return name
 #     name = name.replace('_', ' - ')
@@ -167,6 +169,8 @@ def load_can_file(
                 for variant in enumeration.children 
                 if variant.name != 'None'
             ]
+            global imported_variants
+            imported_variants = variants
 
     parameter_from_path = {}
 
