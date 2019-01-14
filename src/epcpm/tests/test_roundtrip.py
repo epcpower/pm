@@ -229,10 +229,7 @@ def assert_signals_equal(
                 mux=exported_mux,
             )
 
-            # TODO: 0985098454587998709809879180745
-            #       disabled until we deal with actually handling multiple
-            #       items
-            # assert exported_config == original_config, (config, exported.comment, original.comment, original.name)
+            assert exported_config == original_config, (config, exported.comment, original.comment, original.name)
 
     assert_varied_dict_equal(original.values, exported.values)
 

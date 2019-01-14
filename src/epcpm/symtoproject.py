@@ -1094,7 +1094,6 @@ def parameter_from_signal(
 
         #only variants in both lists:
         vis_list = list(set(frame_variants).intersection(variant_cfgs))
-        # TODO: 0985098454587998709809879180745
         extras['visibility'] = vis_list
         
         comment, nv_meta = strip_nv(string=comment)
