@@ -165,7 +165,7 @@ class DataPoint(epyqlib.treenode.TreeNode):
         attribute=enumeration_uuid,
         human_name='Enumeration',
         data_display=epyqlib.attrsmodel.name_from_uuid,
-        delegate=epyqlib.attrsmodel.SingleSelectByRootDelegateCache(
+        delegate=epyqlib.attrsmodel.RootDelegateCache(
             list_selection_root='enumerations',
         )
     )
