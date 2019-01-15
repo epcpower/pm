@@ -202,9 +202,9 @@ class Signal:
                     and parameter.visibility is not None
             )
             if handle_configuration:
-                configurations = self.parameter_uuid_finder(
-                    parameter.visibility
-                )
+                configurations = [
+                    self.parameter_uuid_finder(u) for u in parameter.visibility
+                ]
                 imported_variants = epcpm.symtoproject.imported_variants
                 if all(v in configurations  for v in imported_variants):
                     configurations = None #don't spam sym with variants
