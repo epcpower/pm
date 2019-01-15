@@ -1,0 +1,79 @@
+{
+    "_type": "root",
+    "name": "SunSpec",
+    "children": [
+        {
+            "_type": "table",
+            "name": "First Table",
+            "parameter_table_uuid": "3cbae19b-6259-46bd-8b2e-0a9857800b8d",
+            "children": [
+                {
+                    "_type": "table_model_reference",
+                    "uuid": "63a04580-6109-49fd-bacc-1cfcd7f25747",
+                    "name": "EO-0 - ET-0",
+                    "children": [],
+                    "id": 0,
+                    "original": null
+                },
+                {
+                    "_type": "table_model_reference",
+                    "uuid": "6eb4a883-064b-4840-945b-4b8f422b5c4f",
+                    "name": "EO-0 - ET-1",
+                    "children": [],
+                    "id": 0,
+                    "original": null
+                },
+                {
+                    "_type": "table_model_reference",
+                    "uuid": "07b158e8-b03d-476a-9e80-e1debcebd49b",
+                    "name": "EO-0 - ET-2",
+                    "children": [],
+                    "id": 0,
+                    "original": null
+                },
+                {
+                    "_type": "table_model_reference",
+                    "uuid": "d1d57190-4f70-4cc5-aed8-5ad7b283f69b",
+                    "name": "EO-0 - ET-3",
+                    "children": [],
+                    "id": 0,
+                    "original": null
+                },
+                {
+                    "_type": "table_model_reference",
+                    "uuid": "a4e92b41-f6e5-46cb-a509-92726800b753",
+                    "name": "EO-1 - ET-0",
+                    "children": [],
+                    "id": 0,
+                    "original": null
+                },
+                {
+                    "_type": "table_model_reference",
+                    "uuid": "4267b1a2-2b45-46b2-9552-b782fa663e08",
+                    "name": "EO-1 - ET-1",
+                    "children": [],
+                    "id": 0,
+                    "original": null
+                },
+                {
+                    "_type": "table_model_reference",
+                    "uuid": "ef99a42c-6e47-42d8-92ed-bbdfbb6c68a2",
+                    "name": "EO-1 - ET-2",
+                    "children": [],
+                    "id": 0,
+                    "original": null
+                },
+                {
+                    "_type": "table_model_reference",
+                    "uuid": "ae7505ca-68ed-453f-97fa-30c9a9de1238",
+                    "name": "EO-1 - ET-3",
+                    "children": [],
+                    "id": 0,
+                    "original": null
+                }
+            ],
+            "uuid": "de619cdc-22d2-4f48-a6f7-000ae3c473d4"
+        }
+    ],
+    "uuid": "349a25b3-77cc-43d9-b0b3-28f5a62165ea"
+}

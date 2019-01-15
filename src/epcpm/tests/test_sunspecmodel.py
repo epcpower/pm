@@ -1,7 +1,9 @@
+import collections
 import pathlib
 
 import epyqlib.tests.test_attrsmodel
 
+import epcpm.project
 import epcpm.sunspecmodel
 
 
@@ -54,3 +56,42 @@ def test_model_has_header():
     fixed_block = model.children[1]
 
     assert fixed_block.offset == 2
+
+
+# TODO: CAMPid 094329054780541680163054608431067542971349
+def count_types(sequence):
+    counts = collections.defaultdict(int)
+
+    for element in sequence:
+        counts[type(element)] += 1
+
+    return counts
+
+
+def test_table_update_unlinked():
+    expected_counts = {
+        epcpm.sunspecmodel.TableModelReference: 8,
+    }
+
+    project = epcpm.project.loadp(here/'project'/'project.pmp')
+    sunspec_table, = project.models.sunspec.root.nodes_by_attribute(
+        attribute_value='First Table',
+        attribute_name='name',
+    )
+    parameter_table = project.models.parameters.node_from_uuid(
+        sunspec_table.parameter_table_uuid,
+    )
+    parameter_table.update()
+
+    assert count_types(sunspec_table.children) == expected_counts
+
+    sunspec_table.update()
+    assert count_types(sunspec_table.children) == expected_counts
+
+    print()
+    print(epyqlib.utils.qt.indented_text_from_model(project.models.sunspec.model))
+
+    sunspec_table.parameter_table_uuid = None
+    sunspec_table.update()
+
+    assert count_types(sunspec_table.children) == {}

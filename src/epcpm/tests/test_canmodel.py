@@ -12,6 +12,7 @@ import epyqlib.tests.pm.test_parametermodel
 import epyqlib.tests.test_attrsmodel
 
 import epcpm.canmodel
+import epcpm.project
 
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2017, EPC Power Corp.'
@@ -135,12 +136,12 @@ class SampleModel:
         self.model.update_nodes()
 
 
+# TODO: CAMPid 094329054780541680163054608431067542971349
 def count_types(sequence):
     counts = collections.defaultdict(int)
 
     for element in sequence:
         counts[type(element)] += 1
-
 
     return counts
 

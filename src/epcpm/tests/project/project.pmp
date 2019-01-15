@@ -3,6 +3,7 @@
     "paths": {
         "_type": "models",
         "parameters": "parameters.json",
-        "can": "can.json"
+        "can": "can.json",
+        "sunspec": "sunspec.json"
     }
 }

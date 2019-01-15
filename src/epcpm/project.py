@@ -207,6 +207,7 @@ class Models:
 
         self.parameters.update_nodes()
         self.can.update_nodes()
+        self.sunspec.update_nodes()
 
 
 @graham.schemify(tag='project')

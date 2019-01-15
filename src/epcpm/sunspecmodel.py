@@ -7,6 +7,10 @@ import epyqlib.pm.parametermodel
 from PyQt5 import QtCore
 
 
+class ConsistencyError(Exception):
+    pass
+
+
 class MismatchedSizeAndTypeError(Exception):
     pass
 
@@ -366,6 +370,148 @@ class FixedBlock(epyqlib.treenode.TreeNode):
     check_offsets_and_length = check_block_offsets_and_length
 
 
+@graham.schemify(tag='table_model_reference', register=True)
+@epyqlib.attrsmodel.ify()
+@epyqlib.utils.qt.pyqtify()
+@epyqlib.utils.qt.pyqtify_passthrough_properties(
+    original='original',
+    field_names=(
+        'id',
+    ),
+)
+@attr.s(hash=False)
+class TableModelReference(epyqlib.treenode.TreeNode):
+    uuid = epyqlib.attrsmodel.attr_uuid()
+    name = attr.ib(
+        default='Table Reference',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+
+    # TODO: do i really realy need this?
+    children = attr.ib(
+        factory=list,
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(fields=(
+                # marshmallow.fields.Nested(graham.schema(HeaderBlock)),
+                # marshmallow.fields.Nested(graham.schema(FixedBlock)),
+            )),
+        ),
+    )
+
+    id = attr.ib(
+        default=0,
+        converter=int,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(),
+        ),
+    )
+    original = attr.ib(
+        default=None,
+        metadata=graham.create_metadata(
+            field=epyqlib.attrsmodel.Reference(allow_none=True),
+        ),
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=original,
+        no_column=True,
+    )
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    @classmethod
+    def all_addable_types(cls):
+        return epyqlib.attrsmodel.create_addable_types(())
+
+    @staticmethod
+    def addable_types():
+        return {}
+
+    def can_drop_on(self, node):
+        return False
+
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+
+@graham.schemify(tag='table', register=True)
+@epyqlib.attrsmodel.ify()
+@epyqlib.utils.qt.pyqtify()
+@attr.s(hash=False)
+class Table(epyqlib.treenode.TreeNode):
+    name = attr.ib(
+        default='New Table',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+
+    parameter_table_uuid = epyqlib.attrsmodel.attr_uuid(
+        default=None,
+        allow_none=True,
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=parameter_table_uuid,
+        human_name='Table UUID',
+    )
+
+    children = attr.ib(
+        default=attr.Factory(list),
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(fields=(
+                marshmallow.fields.Nested(graham.schema(TableModelReference)),
+                # marshmallow.fields.Nested(graham.schema(Multiplexer)),
+                # marshmallow.fields.Nested(graham.schema(Signal)),
+            )),
+        ),
+    )
+
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    @classmethod
+    def all_addable_types(cls):
+        return epyqlib.attrsmodel.create_addable_types(())
+
+    @staticmethod
+    def addable_types():
+        return {}
+
+    @staticmethod
+    def can_drop_on(node):
+        return isinstance(node, epyqlib.pm.parametermodel.Table)
+
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+        return True
+
+    def update(self, table=None):
+        nodes = self.recursively_remove_children()
+
+        if self.parameter_table_uuid is None:
+            return
+
+        root = self.find_root()
+        model = root.model
+
+        if table is None:
+            table = model.node_from_uuid(self.parameter_table_uuid)
+        elif table.uuid != self.table_uuid:
+            raise ConsistencyError()
+
+        for combination in table.combinations:
+            self.append_child(TableModelReference(
+                name=' - '.join(item.name for item in combination),
+            ))
+
+
 @graham.schemify(tag='sunspec_model', register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
@@ -432,7 +578,7 @@ class Model(epyqlib.treenode.TreeNode):
 
 Root = epyqlib.attrsmodel.Root(
     default_name='SunSpec',
-    valid_types=(Model, DataPoint),
+    valid_types=(Model, DataPoint, Table, TableModelReference),
 )
 
 
@@ -443,6 +589,8 @@ types = epyqlib.attrsmodel.Types(
         DataPoint,
         HeaderBlock,
         FixedBlock,
+        Table,
+        TableModelReference,
     ),
 )
 
@@ -453,12 +601,17 @@ def merge(name, *types):
 
 
 columns = epyqlib.attrsmodel.columns(
-    merge('name', HeaderBlock, FixedBlock) + merge('id', Model),
+    (
+        merge('name', HeaderBlock, FixedBlock, Table, TableModelReference)
+        + merge('id', Model)
+    ),
     merge('length', Model) + merge('size', DataPoint),
+    merge('id', TableModelReference),
     merge('factor_uuid', DataPoint),
     merge('parameter_uuid', DataPoint),
     merge('enumeration_uuid', DataPoint),
     merge('type_uuid', DataPoint),
+    merge('parameter_table_uuid', Table),
     merge('mandatory', DataPoint),
     merge('offset', DataPoint, HeaderBlock, FixedBlock),
     merge('block_offset', DataPoint),
