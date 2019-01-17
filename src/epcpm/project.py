@@ -300,6 +300,30 @@ def load_model(project, path, root_type, columns, drop_sources=()):
     root_schema = graham.schema(root_type)
     root = root_schema.loads(raw).data
 
+    def collect(node, payload):
+        payload[node.uuid] = node
+
+    uuid_to_node = {}
+    root.traverse(call_this=collect, payload=uuid_to_node, internal_nodes=True)
+
+    def update(node, payload):
+        for field in attr.fields(type(node)):
+            if (
+                field.metadata.get(graham.core.metadata_key) is None
+                or not isinstance(
+                    field.metadata.get(graham.core.metadata_key).field,
+                    epyqlib.attrsmodel.Reference,
+                )
+            ):
+                continue
+
+            value = getattr(node, field.name)
+            original = payload.get(value)
+            if original is not None:
+                setattr(node, field.name, original)
+
+    root.traverse(call_this=update, payload=uuid_to_node, internal_nodes=True)
+
     return epyqlib.attrsmodel.Model(
         root=root,
         columns=columns,

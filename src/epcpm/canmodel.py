@@ -158,6 +158,9 @@ class Signal(epyqlib.treenode.TreeNode):
 
         return minimum, maximum
 
+    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    child_from = epyqlib.attrsmodel.default_child_from
+
 
 @graham.schemify(tag='message')
 @epyqlib.attrsmodel.ify()
@@ -254,6 +257,8 @@ class Message(epyqlib.treenode.TreeNode):
             return self.tree_parent.can_delete(node=self)
 
         return True
+
+    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
 
 
 @graham.schemify(tag='multiplexer')
@@ -356,6 +361,8 @@ class Multiplexer(epyqlib.treenode.TreeNode):
             return self.tree_parent.can_delete(node=self)
 
         return True
+
+    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
 
 
 @graham.schemify(tag='multiplexed_message')
@@ -466,6 +473,8 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
             types += (Multiplexer, CanTable)
 
         return epyqlib.attrsmodel.create_addable_types(types)
+
+    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
 
 
 @graham.schemify(tag='table', register=True)
@@ -771,6 +780,9 @@ class CanTable(epyqlib.treenode.TreeNode):
                     start_bit += new_signal.bits
 
                 self.append_child(multiplexer)
+
+    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    child_from = epyqlib.attrsmodel.default_child_from
 
 
 Root = epyqlib.attrsmodel.Root(

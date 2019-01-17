@@ -308,6 +308,19 @@ class Block:
         return rows
 
 
+@builders(epcpm.sunspecmodel.TableRepeatingBlock)
+@attr.s
+class Block:
+    wrapped = attr.ib()
+    add_padding = attr.ib()
+    padding_type = attr.ib()
+    model_type = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
+
+    def gen(self):
+        return []
+
+
 @builders(epcpm.sunspecmodel.DataPoint)
 @attr.s
 class Point:
