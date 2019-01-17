@@ -70,7 +70,7 @@ def count_types(sequence):
 
 def test_table_update_unlinked():
     expected_counts = {
-        epcpm.sunspecmodel.TableModelReference: 8,
+        epcpm.sunspecmodel.TableRepeatingBlock: 8,
     }
 
     project = epcpm.project.loadp(here/'project'/'project.pmp')

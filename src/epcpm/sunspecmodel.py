@@ -387,7 +387,7 @@ class FixedBlock(epyqlib.treenode.TreeNode):
     ),
 )
 @attr.s(hash=False)
-class TableRepeatingBlock(epyqlib.treenode.TreeNode):
+class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
     name = attr.ib(
         default='Table Repeating Block',
         metadata=graham.create_metadata(
@@ -454,7 +454,7 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
-class TableModelReference(epyqlib.treenode.TreeNode):
+class TableRepeatingBlock(epyqlib.treenode.TreeNode):
     uuid = epyqlib.attrsmodel.attr_uuid()
     name = attr.ib(
         default='Table Reference',
@@ -463,7 +463,6 @@ class TableModelReference(epyqlib.treenode.TreeNode):
         ),
     )
 
-    # TODO: do i really realy need this?
     children = attr.ib(
         factory=list,
         metadata=graham.create_metadata(
@@ -521,7 +520,7 @@ class Table(epyqlib.treenode.TreeNode):
         default=attr.Factory(list),
         metadata=graham.create_metadata(
             field=graham.fields.MixedList(fields=(
-                marshmallow.fields.Nested(graham.schema(TableModelReference)),
+                marshmallow.fields.Nested(graham.schema(TableRepeatingBlock)),
                 # marshmallow.fields.Nested(graham.schema(Multiplexer)),
                 # marshmallow.fields.Nested(graham.schema(Signal)),
             )),
@@ -566,7 +565,7 @@ class Table(epyqlib.treenode.TreeNode):
             raise ConsistencyError()
 
         for combination in table.combinations:
-            self.append_child(TableModelReference(
+            self.append_child(TableRepeatingBlock(
                 name=' - '.join(item.name for item in combination),
             ))
 
@@ -610,7 +609,7 @@ class Model(epyqlib.treenode.TreeNode):
             field=graham.fields.MixedList(fields=(
                 marshmallow.fields.Nested(graham.schema(HeaderBlock)),
                 marshmallow.fields.Nested(graham.schema(FixedBlock)),
-                marshmallow.fields.Nested(graham.schema(TableRepeatingBlock)),
+                marshmallow.fields.Nested(graham.schema(TableRepeatingBlockReference)),
             )),
         ),
     )
@@ -624,13 +623,13 @@ class Model(epyqlib.treenode.TreeNode):
         return False
 
     def child_from(self, node):
-        return TableRepeatingBlock(original=node)
+        return TableRepeatingBlockReference(original=node)
 
     def can_drop_on(self, node):
         return (
-            isinstance(node, TableModelReference)
+            isinstance(node, TableRepeatingBlock)
             and not any(
-                isinstance(child, TableRepeatingBlock)
+                isinstance(child, TableRepeatingBlockReference)
                 for child in self.children
             )
         )
@@ -665,8 +664,8 @@ types = epyqlib.attrsmodel.Types(
         HeaderBlock,
         FixedBlock,
         Table,
-        TableModelReference,
         TableRepeatingBlock,
+        TableRepeatingBlockReference,
     ),
 )
 
@@ -683,8 +682,8 @@ columns = epyqlib.attrsmodel.columns(
             HeaderBlock,
             FixedBlock,
             Table,
-            TableModelReference,
             TableRepeatingBlock,
+            TableRepeatingBlockReference,
         )
         + merge('id', Model)
     ),
@@ -695,7 +694,7 @@ columns = epyqlib.attrsmodel.columns(
     merge('type_uuid', DataPoint),
     merge('parameter_table_uuid', Table),
     merge('mandatory', DataPoint),
-    merge('offset', DataPoint, HeaderBlock, FixedBlock, TableRepeatingBlock),
+    merge('offset', DataPoint, HeaderBlock, FixedBlock, TableRepeatingBlockReference),
     merge('block_offset', DataPoint),
     merge('uuid', *types.types.values()),
 )

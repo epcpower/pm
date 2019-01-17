@@ -308,7 +308,7 @@ class Block:
         return rows
 
 
-@builders(epcpm.sunspecmodel.TableRepeatingBlock)
+@builders(epcpm.sunspecmodel.TableRepeatingBlockReference)
 @attr.s
 class Block:
     wrapped = attr.ib()
