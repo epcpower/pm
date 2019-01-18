@@ -1,3 +1,5 @@
+import itertools
+
 import attr
 import graham
 import marshmallow
@@ -133,12 +135,12 @@ class DataPoint(epyqlib.treenode.TreeNode):
             # for now, yes, this is vaguely nondescript of address vs block offset
     @QtCore.pyqtProperty('PyQt_PyObject')
     def pyqtify_offset(self):
-        block = self.tree_parent
+        block_offset = getattr(self.tree_parent, 'block_offset', None)
 
-        if block is None:
+        if block_offset is None:
             return None
 
-        return block.offset + self.block_offset
+        return block_offset + self.block_offset
 
     # TODO: shouldn't this be read only?
     @pyqtify_offset.setter
@@ -450,6 +452,70 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
     child_from = epyqlib.attrsmodel.default_child_from
 
 
+@graham.schemify(tag='sunspec_table_repeating_block', register=True)
+@epyqlib.attrsmodel.ify()
+@epyqlib.utils.qt.pyqtify()
+@epyqlib.utils.qt.pyqtify_passthrough_properties(
+    original='original',
+    field_names=(
+        'name',
+    ),
+)
+@attr.s(hash=False)
+class TableDataPointReference(epyqlib.treenode.TreeNode):
+    name = attr.ib(
+        default='Table Repeating Block',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    offset = attr.ib(
+        default=2,
+        converter=int,
+    )
+    children = attr.ib(
+        factory=list,
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(fields=(
+            )),
+        ),
+    )
+
+    original = attr.ib(
+        default=None,
+        metadata=graham.create_metadata(
+            field=epyqlib.attrsmodel.Reference(allow_none=True),
+        ),
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=original,
+        no_column=True,
+    )
+
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    @classmethod
+    def all_addable_types(cls):
+        return epyqlib.attrsmodel.create_addable_types(())
+
+    @staticmethod
+    def addable_types():
+        return {}
+
+    def can_drop_on(self, node):
+        return False
+
+    def can_delete(self, node=None):
+        return False
+
+    check_offsets_and_length = check_block_offsets_and_length
+    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    child_from = epyqlib.attrsmodel.default_child_from
+
+
 @graham.schemify(tag='table_model_reference', register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
@@ -467,10 +533,26 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
         factory=list,
         metadata=graham.create_metadata(
             field=graham.fields.MixedList(fields=(
-                # marshmallow.fields.Nested(graham.schema(HeaderBlock)),
-                # marshmallow.fields.Nested(graham.schema(FixedBlock)),
+                marshmallow.fields.Nested(graham.schema(DataPoint)),
             )),
         ),
+    )
+
+    offset = attr.ib(
+        default=2,
+        converter=int,
+    )
+
+    path = attr.ib(
+        factory=tuple,
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=path,
+        no_column=True,
+    )
+    graham.attrib(
+        attribute=path,
+        field=graham.fields.Tuple(marshmallow.fields.UUID()),
     )
 
     def __attrs_post_init__(self):
@@ -490,6 +572,8 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
     def can_delete(self, node=None):
         if node is None:
             return self.tree_parent.can_delete(node=self)
+
+        return False
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
@@ -521,8 +605,7 @@ class Table(epyqlib.treenode.TreeNode):
         metadata=graham.create_metadata(
             field=graham.fields.MixedList(fields=(
                 marshmallow.fields.Nested(graham.schema(TableRepeatingBlock)),
-                # marshmallow.fields.Nested(graham.schema(Multiplexer)),
-                # marshmallow.fields.Nested(graham.schema(Signal)),
+                marshmallow.fields.Nested(graham.schema(DataPoint)),
             )),
         ),
     )
@@ -550,8 +633,16 @@ class Table(epyqlib.treenode.TreeNode):
 
         return True
 
+    def child_from(self, node):
+        self.parameter_table_uuid = node.uuid
+        return None
+
     def update(self, table=None):
-        nodes = self.recursively_remove_children()
+        old_nodes = self.recursively_remove_children()
+        old_nodes_by_path = {
+            getattr(node, 'path', getattr(node, 'parameter_uuid', node.uuid)): node
+            for node in old_nodes
+        }
 
         if self.parameter_table_uuid is None:
             return
@@ -564,13 +655,53 @@ class Table(epyqlib.treenode.TreeNode):
         elif table.uuid != self.table_uuid:
             raise ConsistencyError()
 
+        master_array_data_points_by_uuid = {}
+
+        for array in table.arrays:
+            array_element = array.children[0]
+            node = old_nodes_by_path.get(array_element.uuid)
+            if node is None:
+                node = DataPoint(
+                    parameter_uuid=array_element.uuid,
+                )
+            self.append_child(node)
+            master_array_data_points_by_uuid[array_element.uuid] = node
+
         for combination in table.combinations:
-            self.append_child(TableRepeatingBlock(
-                name=' - '.join(item.name for item in combination),
-            ))
+            base_path = tuple(node.uuid for node in combination)
+
+            block_node = old_nodes_by_path.get(base_path)
+
+            if block_node is None:
+                block_node = TableRepeatingBlock(
+                    name=' - '.join(item.name for item in combination),
+                    path=base_path,
+                )
+
+            self.append_child(block_node)
+
+            in_tree, = table.group.nodes_by_attribute(
+                attribute_value=tuple(node.uuid for node in combination),
+                attribute_name='path',
+            )
+            # continue
+
+            array_elements = itertools.chain.from_iterable(
+                zip(*(array.children for array in in_tree.children)),
+            )
+            for element in array_elements:
+                point_node = old_nodes_by_path.get(element.path)
+                reference_data_point = master_array_data_points_by_uuid[
+                    element.tree_parent.children[0].original.uuid
+                ]
+                if point_node is None:
+                    point_node = DataPoint(
+                        parameter_uuid=element.uuid,
+                    )
+                point_node.type_uuid = reference_data_point.type_uuid
+                block_node.append_child(point_node)
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
-    child_from = epyqlib.attrsmodel.default_child_from
 
 
 @graham.schemify(tag='sunspec_model', register=True)
@@ -686,15 +817,22 @@ columns = epyqlib.attrsmodel.columns(
             TableRepeatingBlockReference,
         )
         + merge('id', Model)
+        + merge('parameter_uuid', DataPoint)
     ),
     merge('length', Model) + merge('size', DataPoint),
     merge('factor_uuid', DataPoint),
-    merge('parameter_uuid', DataPoint),
     merge('enumeration_uuid', DataPoint),
     merge('type_uuid', DataPoint),
     merge('parameter_table_uuid', Table),
     merge('mandatory', DataPoint),
-    merge('offset', DataPoint, HeaderBlock, FixedBlock, TableRepeatingBlockReference),
+    merge(
+        'offset',
+        DataPoint,
+        HeaderBlock,
+        FixedBlock,
+        TableRepeatingBlockReference,
+        TableRepeatingBlock,
+    ),
     merge('block_offset', DataPoint),
     merge('uuid', *types.types.values()),
 )
