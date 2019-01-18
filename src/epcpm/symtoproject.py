@@ -17,6 +17,8 @@ import epcpm.canmodel
 import epcpm.sunspecmodel
 
 
+imported_variants = []
+
 def humanize_name(name):
     return name
 #     name = name.replace('_', ' - ')
@@ -167,6 +169,8 @@ def load_can_file(
                 for variant in enumeration.children 
                 if variant.name != 'None'
             ]
+            global imported_variants
+            imported_variants = variants
 
     parameter_from_path = {}
 
@@ -1090,7 +1094,6 @@ def parameter_from_signal(
 
         #only variants in both lists:
         vis_list = list(set(frame_variants).intersection(variant_cfgs))
-        # TODO: 0985098454587998709809879180745
         extras['visibility'] = vis_list
         
         comment, nv_meta = strip_nv(string=comment)
