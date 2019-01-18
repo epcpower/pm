@@ -204,6 +204,9 @@ class Models:
         self.parameters.list_selection_roots['sunspec types'] = (
             sunspec_types_root
         )
+        self.sunspec.list_selection_roots['sunspec types'] = (
+            sunspec_types_root
+        )
 
         self.parameters.update_nodes()
         self.can.update_nodes()
