@@ -495,6 +495,14 @@ class Window:
 
         menu = QtWidgets.QMenu(parent=view)
 
+        node_type = type(node)
+        type_label = menu.addAction(
+            '{}.{}'.format(node_type.__module__, node_type.__name__),
+        )
+        type_label.setDisabled(True)
+
+        menu.addSeparator()
+
         add_submenu = menu.addMenu('Add')
 
         addable_types = node.addable_types()
@@ -504,10 +512,10 @@ class Window:
         }
         add_submenu.setDisabled(len(actions) == 0)
 
-        menu.addSeparator()
-
         update = menu.addAction('Update')
         update.setEnabled(hasattr(node, 'update'))
+
+        menu.addSeparator()
 
         delete = menu.addAction('&Delete')
         delete.setEnabled(node.can_delete())
