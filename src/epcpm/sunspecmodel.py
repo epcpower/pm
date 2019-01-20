@@ -453,10 +453,13 @@ def merge(name, *types):
 
 
 columns = epyqlib.attrsmodel.columns(
-    merge('name', HeaderBlock, FixedBlock) + merge('id', Model),
+    (
+        merge('name', HeaderBlock, FixedBlock)
+        + merge('id', Model)
+        + merge('parameter_uuid', DataPoint)
+    ),
     merge('length', Model) + merge('size', DataPoint),
     merge('factor_uuid', DataPoint),
-    merge('parameter_uuid', DataPoint),
     merge('enumeration_uuid', DataPoint),
     merge('type_uuid', DataPoint),
     merge('mandatory', DataPoint),
