@@ -532,7 +532,7 @@ def group_definition(name, parameters):
     return group
 
 
-def table_definition(parent, name, enumerations, arrays):
+def table_definition(parent, name, enumerations, arrays, groups=()):
     table = epyqlib.pm.parametermodel.Table(name=name)
     parent.append_child(table)
 
@@ -543,6 +543,9 @@ def table_definition(parent, name, enumerations, arrays):
         )
 
         table.append_child(reference)
+
+    for group in groups:
+        table.append_child(group)
 
     for array in arrays:
         table.append_child(array)
@@ -728,22 +731,26 @@ def go_add_tables(parameters_root, can_root):
         ),
     )
 
-    settings = array_definition(
+    settings = group_definition(
         name='Settings',
-        length=2,
-        parameter=epyqlib.pm.parametermodel.Parameter(
-            units='%/minute',
+        parameters=(
+            epyqlib.pm.parametermodel.Parameter(
+                name='RampRateIncrement',
+                units='%/minute',
+            ),
+            epyqlib.pm.parametermodel.Parameter(
+                name='RampRateDecrement',
+                units='%/minute',
+            ),
         ),
     )
-    settings.children[0].name = 'RampRateIncrement'
-    settings.children[1].name = 'RampRateDecrement'
 
     hertz_watts_table = table_definition(
         parent=tables_group,
         name='HzWatts',
         enumerations=(curves,),
+        groups=(settings,),
         arrays=(
-            settings,
             array_definition(
                 name='hertz',
                 length=curve_points,
@@ -763,22 +770,26 @@ def go_add_tables(parameters_root, can_root):
         ),
     )
 
-    settings = array_definition(
+    settings = group_definition(
         name='Settings',
-        length=2,
-        parameter=epyqlib.pm.parametermodel.Parameter(
-            units='%/minute',
+        parameters=(
+            epyqlib.pm.parametermodel.Parameter(
+                name='RampRateIncrement',
+                units='%/minute',
+            ),
+            epyqlib.pm.parametermodel.Parameter(
+                name='RampRateDecrement',
+                units='%/minute',
+            ),
         ),
     )
-    settings.children[0].name = 'RampRateIncrement'
-    settings.children[1].name = 'RampRateDecrement'
 
     volt_watts_table = table_definition(
         parent=tables_group,
         name='VoltWatts',
         enumerations=(curves,),
+        groups=(settings,),
         arrays=(
-            settings,
             array_definition(
                 name='percent_nominal_volts',
                 length=curve_points,
@@ -860,7 +871,12 @@ def go_add_tables(parameters_root, can_root):
         hertz_watts_table: CanTableDefinition(
             range=range(0x2b9, 0x2dd),
             signals={
-                'Settings': {
+                'RampRateIncrement': {
+                    'bits': 16,
+                    'signed': False,
+                    'factor': '1',
+                },
+                'RampRateDecrement': {
                     'bits': 16,
                     'signed': False,
                     'factor': '1',
@@ -880,7 +896,12 @@ def go_add_tables(parameters_root, can_root):
         volt_watts_table: CanTableDefinition(
             range=range(0x2dd, 0x300),
             signals={
-                'Settings': {
+                'RampRateIncrement': {
+                    'bits': 16,
+                    'signed': False,
+                    'factor': '1',
+                },
+                'RampRateDecrement': {
                     'bits': 16,
                     'signed': False,
                     'factor': '1',

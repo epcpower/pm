@@ -100,6 +100,19 @@ def name_from_uuid(node, value, model):
     return model.node_from_uuid(target_node.parameter_uuid).abbreviation
 
 
+# TODO: CAMPid 8695426542167924656654271657917491654
+def name_from_uuid_and_parent(node, value, model):
+    if value is None:
+        return None
+
+    try:
+        target_node = model.node_from_uuid(value)
+    except NotFoundError:
+        return str(value)
+
+    return '{} - {}'.format(target_node.tree_parent.name, target_node.name)
+
+
 @graham.schemify(tag='data_point', register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
@@ -115,7 +128,7 @@ class DataPoint(epyqlib.treenode.TreeNode):
         default=None,
         allow_none=True,
         human_name='Parameter',
-        data_display=epyqlib.attrsmodel.name_from_uuid,
+        data_display=name_from_uuid_and_parent,
     )
     type_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,
@@ -668,13 +681,27 @@ class Table(epyqlib.treenode.TreeNode):
             master_array_data_points_by_uuid[array_element.uuid] = node
 
         for combination in table.combinations:
+            not_first_curve = any(
+                (
+                    layer.tree_parent.name == 'Curves'
+                    and layer.name != layer.tree_parent.children[0].name
+                )
+                for layer in combination
+            )
+            if not_first_curve:
+                continue
+
             base_path = tuple(node.uuid for node in combination)
 
             block_node = old_nodes_by_path.get(base_path)
 
             if block_node is None:
                 block_node = TableRepeatingBlock(
-                    name=' - '.join(item.name for item in combination),
+                    name=' - '.join(
+                        item.name
+                        for item in combination
+                        if item.tree_parent.name != 'Curves'
+                    ),
                     path=base_path,
                 )
 
@@ -687,7 +714,11 @@ class Table(epyqlib.treenode.TreeNode):
             # continue
 
             array_elements = itertools.chain.from_iterable(
-                zip(*(array.children for array in in_tree.children)),
+                zip(*(
+                    array.children
+                    for array in in_tree.children
+                    if isinstance(array.original, epyqlib.pm.parametermodel.Array)
+                )),
             )
             for element in array_elements:
                 point_node = old_nodes_by_path.get(element.path)
