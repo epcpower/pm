@@ -34,14 +34,16 @@ def _import():
 @epcpm.cli.utils.target_path_option(required=True)
 def full(project, target_path):
     """Import PM data from embedded project directory"""
+    project = pathlib.Path(project)
+
     paths = epcpm.importexportdialog.paths_from_directory(target_path)
 
     imported_project = epcpm.importexport.full_import(
         paths=paths,
     )
 
+    project.parent.mkdir(exist_ok=True)
     imported_project.filename = project
-    imported_project.mkdir(exist_ok=True)
     imported_project.save()
 
 
