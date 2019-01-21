@@ -286,6 +286,33 @@ def load_can_file(
 
     sunspec_root = epcpm.sunspecmodel.Root()
 
+    def stripped(parameter):
+        prefix = '{} : '.format(parameter.original_multiplexer_name)
+        if parameter.name.startswith(prefix):
+            return parameter.name[len(prefix):]
+
+        return parameter.name
+
+    def strip_frame_name(node, payload):
+        if isinstance(node, epyqlib.pm.parametermodel.Parameter):
+            other_names = {
+                stripped(other)
+                for other in node.tree_parent.children
+                if (
+                    isinstance(other, epyqlib.pm.parametermodel.Parameter)
+                    and other is not node
+                )
+            }
+            stripped_name = stripped(node)
+            if stripped_name not in other_names:
+                node.name = stripped_name
+
+    parameters_root.traverse(
+        call_this=strip_frame_name,
+        payload=None,
+        internal_nodes=True,
+    )
+
     return parameters_root, can_root, sunspec_root
 
 
