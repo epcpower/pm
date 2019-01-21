@@ -23,6 +23,28 @@ def main():
 main.add_command(epcpm.__main__._entry_point, name='gui')
 
 
+@main.group(name='import')
+def _import():
+    """Import PM data from other formats"""
+    pass
+
+
+@_import.command()
+@epcpm.cli.utils.project_option(required=True)
+@epcpm.cli.utils.target_path_option(required=True)
+def full(project, target_path):
+    """Import PM data from embedded project directory"""
+    paths = epcpm.importexportdialog.paths_from_directory(target_path)
+
+    imported_project = epcpm.importexport.full_import(
+        paths=paths,
+    )
+
+    imported_project.filename = project
+    imported_project.mkdir(exist_ok=True)
+    imported_project.save()
+
+
 @main.group()
 def export():
     """Export PM data to other formats"""
