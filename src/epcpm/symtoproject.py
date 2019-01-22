@@ -1,6 +1,7 @@
 import collections
 import decimal
 import functools
+import itertools
 import json
 import pathlib
 import re
@@ -286,6 +287,33 @@ def load_can_file(
 
     sunspec_root = epcpm.sunspecmodel.Root()
 
+    def stripped(parameter):
+        prefix = '{} : '.format(parameter.original_multiplexer_name)
+        if parameter.name.startswith(prefix):
+            return parameter.name[len(prefix):]
+
+        return parameter.name
+
+    def strip_frame_name(node, payload):
+        if isinstance(node, epyqlib.pm.parametermodel.Parameter):
+            other_names = {
+                stripped(other)
+                for other in node.tree_parent.children
+                if (
+                    isinstance(other, epyqlib.pm.parametermodel.Parameter)
+                    and other is not node
+                )
+            }
+            stripped_name = stripped(node)
+            if stripped_name not in other_names:
+                node.name = stripped_name
+
+    parameters_root.traverse(
+        call_this=strip_frame_name,
+        payload=None,
+        internal_nodes=True,
+    )
+
     return parameters_root, can_root, sunspec_root
 
 
@@ -532,8 +560,24 @@ def group_definition(name, parameters):
     return group
 
 
-def table_definition(parent, name, enumerations, arrays, groups=()):
-    table = epyqlib.pm.parametermodel.Table(name=name)
+def table_definition(
+        parent,
+        name,
+        enumerations,
+        embedded_getter,
+        embedded_setter,
+        active_curve_getter,
+        active_curve_setter,
+        arrays,
+        groups=(),
+):
+    table = epyqlib.pm.parametermodel.Table(
+        name=name,
+        embedded_getter=embedded_getter,
+        embedded_setter=embedded_setter,
+        active_curve_getter=active_curve_getter,
+        active_curve_setter=active_curve_setter,
+    )
     parent.append_child(table)
 
     for enumeration in enumerations:
@@ -640,6 +684,10 @@ def go_add_tables(parameters_root, can_root):
             ridethrough_trip,
             curves,
         ),
+        embedded_getter='{interface_signal} = lineMonitorParams->fMonitorTables[{curve_type}].curves[{curve_index}].tbl[{point_index}].{axis};',
+        embedded_setter='gridMonitor_setFrequencyZoneCurve{upper_axis}Point({curve_type}, {curve_index}, {point_index}, {interface_signal});',
+        active_curve_getter='{interface_signal} = lineMonitorParams->fMonitorTables[{curve_type}].activeCurve;',
+        active_curve_setter='gridMonitor_setFrequencyZoneActiveCurve({curve_type}, {interface_signal});',
         arrays=(
             array_definition(
                 name='seconds',
@@ -668,6 +716,10 @@ def go_add_tables(parameters_root, can_root):
             ridethrough_trip,
             curves,
         ),
+        embedded_getter='{interface_signal} = lineMonitorParams->vMonitorTables[{curve_type}].curves[{curve_index}].tbl[{point_index}].{axis};',
+        embedded_setter='gridMonitor_setVoltageZoneCurve{upper_axis}Point({curve_type}, {curve_index}, {point_index}, {interface_signal});',
+        active_curve_getter='{interface_signal} = lineMonitorParams->vMonitorTables[{curve_type}].activeCurve;',
+        active_curve_setter='gridMonitor_setVoltageZoneActiveCurve({curve_type}, {interface_signal});',
         arrays=(
             array_definition(
                 name='seconds',
@@ -694,14 +746,20 @@ def go_add_tables(parameters_root, can_root):
             epyqlib.pm.parametermodel.Parameter(
                 name='YScale',
                 maximum=3,
+                embedded_getter='{interface_signal} = lineMonitorParams->voltVar.yScale[{curve_index}];',
+                embedded_setter='lineMonitorParams->voltVar.yScale[{curve_index}] = (VoltVar_YScale) {interface_signal};',
             ),
             epyqlib.pm.parametermodel.Parameter(
                 name='RampRateIncrement',
                 units='%/minute',
+                embedded_getter='{interface_signal} = lineMonitorParams->voltVar.droopTable.modes[{curve_index}].rampRateInc;',
+                embedded_setter='gridMonitor_setVoltVarCurveRampInc({curve_index}, {interface_signal});',
             ),
             epyqlib.pm.parametermodel.Parameter(
                 name='RampRateDecrement',
                 units='%/minute',
+                embedded_getter='{interface_signal} = lineMonitorParams->voltVar.droopTable.modes[{curve_index}].rampRateDec;',
+                embedded_setter='gridMonitor_setVoltVarCurveRampDec({curve_index}, {interface_signal});',
             ),
         ),
     )
@@ -710,6 +768,10 @@ def go_add_tables(parameters_root, can_root):
         parent=tables_group,
         name='VoltVar',
         enumerations=(curves,),
+        embedded_getter='{interface_signal} = lineMonitorParams->voltVar.droopTable.modes[{curve_index}].tbl[{point_index}].{axis};',
+        embedded_setter='gridMonitor_setVoltVarCurve{upper_axis}Point({curve_index}, {point_index}, {interface_signal});',
+        active_curve_getter='{interface_signal} = lineMonitorParams->voltVar.droopTable.activeMode;',
+        active_curve_setter='gridMonitor_setVoltVarActiveMode({interface_signal});',
         arrays=(
             settings,
             array_definition(
@@ -737,10 +799,14 @@ def go_add_tables(parameters_root, can_root):
             epyqlib.pm.parametermodel.Parameter(
                 name='RampRateIncrement',
                 units='%/minute',
+                embedded_getter='{interface_signal} = lineMonitorParams->hzWatts.modes[{curve_index}].rampRateInc;',
+                embedded_setter='gridMonitor_setHzWattsCurveRampInc({curve_index}, {interface_signal});',
             ),
             epyqlib.pm.parametermodel.Parameter(
                 name='RampRateDecrement',
                 units='%/minute',
+                embedded_getter='{interface_signal} = lineMonitorParams->hzWatts.modes[{curve_index}].rampRateDec;',
+                embedded_setter='gridMonitor_setHzWattsCurveRampDec({curve_index}, {interface_signal});',
             ),
         ),
     )
@@ -749,6 +815,10 @@ def go_add_tables(parameters_root, can_root):
         parent=tables_group,
         name='HzWatts',
         enumerations=(curves,),
+        embedded_getter='{interface_signal} = lineMonitorParams->hzWatts.modes[{curve_index}].tbl[{point_index}].{axis};',
+        embedded_setter='gridMonitor_setHzWattsCurve{upper_axis}Point({curve_index}, {point_index}, {interface_signal});',
+        active_curve_getter='{interface_signal} = lineMonitorParams->hzWatts.activeMode;',
+        active_curve_setter='gridMonitor_setHzWattsActiveMode({interface_signal});',
         groups=(settings,),
         arrays=(
             array_definition(
@@ -776,10 +846,14 @@ def go_add_tables(parameters_root, can_root):
             epyqlib.pm.parametermodel.Parameter(
                 name='RampRateIncrement',
                 units='%/minute',
+                embedded_getter='{interface_signal} = lineMonitorParams->voltWatts.modes[{curve_index}].rampRateInc;',
+                embedded_setter='gridMonitor_setVoltWattsCurveRampInc({curve_index}, {interface_signal});',
             ),
             epyqlib.pm.parametermodel.Parameter(
                 name='RampRateDecrement',
                 units='%/minute',
+                embedded_getter='{interface_signal} = lineMonitorParams->voltWatts.modes[{curve_index}].rampRateDec;',
+                embedded_setter='gridMonitor_setVoltWattsCurveRampDec({curve_index}, {interface_signal});',
             ),
         ),
     )
@@ -788,6 +862,10 @@ def go_add_tables(parameters_root, can_root):
         parent=tables_group,
         name='VoltWatts',
         enumerations=(curves,),
+        embedded_getter='{interface_signal} = lineMonitorParams->voltWatts.modes[{curve_index}].tbl[{point_index}].{axis};',
+        embedded_setter='gridMonitor_setVoltWattsCurve{upper_axis}Point({curve_index}, {point_index}, {interface_signal});',
+        active_curve_getter='{interface_signal} = lineMonitorParams->voltWatts.activeMode;',
+        active_curve_setter='gridMonitor_setVoltWattsActiveMode({interface_signal});',
         groups=(settings,),
         arrays=(
             array_definition(
@@ -953,6 +1031,18 @@ def go_add_tables(parameters_root, can_root):
         'HzWatts',
         'VoltWatts',
     )
+
+    generated_active_curve_names = tuple(
+        table.name + ''.join(enumerator.name for enumerator in combination)
+        for table in tables
+        for combination in table.curve_group_combinations
+    )
+
+    # TODO: backmatching
+    if set(active_curve_names) != set(generated_active_curve_names):
+        raise Exception(
+            '{}, {}'.format(active_curve_names, generated_active_curve_names),
+        )
 
     start_bit = 16
     bits = 4

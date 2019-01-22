@@ -129,6 +129,7 @@ class DataPoint(epyqlib.treenode.TreeNode):
         allow_none=True,
         human_name='Parameter',
         data_display=name_from_uuid_and_parent,
+        editable=False,
     )
     type_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,

@@ -13,6 +13,7 @@ def test_blank(qtbot):
     assert dialog.paths_result == epcpm.importexportdialog.ImportPaths(
         can=None,
         hierarchy=None,
+        tables_c=None,
         spreadsheet=None,
         smdx=[],
         sunspec_c=None,

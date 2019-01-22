@@ -126,14 +126,14 @@ def test_access_level(sym_file, hierarchy_file):
 
     regular_parameter, = parameter_root.nodes_by_attribute(
         attribute_name='name',
-        attribute_value='TestMux : TestParam',
+        attribute_value='TestParam',
     )
 
     assert regular_parameter.access_level_uuid == access_levels.default().uuid
 
     factory_parameter, = parameter_root.nodes_by_attribute(
         attribute_name='name',
-        attribute_value='TestMux : FactoryParam',
+        attribute_value='FactoryParam',
     )
 
     assert (
