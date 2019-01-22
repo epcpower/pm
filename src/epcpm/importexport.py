@@ -1,6 +1,7 @@
 import pathlib
 
 import epcpm.cantosym
+import epcpm.cantotablesc
 import epcpm.parameterstohierarchy
 import epcpm.project
 import epcpm.smdxtosunspec
@@ -114,6 +115,11 @@ def full_export(project, paths, first_time=False):
         path=paths.spreadsheet,
         sunspec_model=project.models.sunspec,
         parameters_model=project.models.parameters,
+    )
+
+    epcpm.cantotablesc.export(
+        path=paths.tables_c,
+        can_model=project.models.can,
     )
 
     if first_time:
