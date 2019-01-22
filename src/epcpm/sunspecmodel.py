@@ -439,14 +439,6 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
-    # def remove_old_on_drop(self, node):
-    #     return False
-    #
-    # def child_from(self, node):
-    #     self.original = node
-    #
-    #     return None
-
     @classmethod
     def all_addable_types(cls):
         return epyqlib.attrsmodel.create_addable_types(())
