@@ -1018,11 +1018,31 @@ def go_add_tables(parameters_root, can_root):
 
             can_table.update()
 
-    active_curve_names = tuple(
+    active_curve_names = (
+        'FrequencyLowRideThrough',
+        'FrequencyHighRideThrough',
+        'FrequencyLowTrip',
+        'FrequencyHighTrip',
+        'VoltageLowRideThrough',
+        'VoltageHighRideThrough',
+        'VoltageLowTrip',
+        'VoltageHighTrip',
+        'VoltVar',
+        'HzWatts',
+        'VoltWatts',
+    )
+
+    generated_active_curve_names = tuple(
         table.name + ''.join(enumerator.name for enumerator in combination)
         for table in tables
         for combination in table.curve_group_combinations
     )
+
+    # TODO: backmatching
+    if set(active_curve_names) != set(generated_active_curve_names):
+        raise Exception(
+            '{}, {}'.format(active_curve_names, generated_active_curve_names),
+        )
 
     start_bit = 16
     bits = 4

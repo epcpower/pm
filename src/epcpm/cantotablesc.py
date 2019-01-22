@@ -164,6 +164,7 @@ class CanTable:
 
 
 def get_curve_type(combination_string):
+    # TODO: backmatching
     return {
         'LowRideThrough': 'IEEE1547_CURVE_TYPE_LRT',
         'HighRideThrough': 'IEEE1547_CURVE_TYPE_HRT',

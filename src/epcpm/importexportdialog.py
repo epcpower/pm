@@ -184,7 +184,7 @@ class Dialog(UiBase):
             multiple=False,
         )
 
-    def pick_hierarchy(self):
+    def pick_tables_c(self):
         filters = (
             ('Tables C', ['c']),
             all_files_filter,
