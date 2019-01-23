@@ -32,7 +32,7 @@ import epcpm.sunspectoxlsx
 import epcpm.symtoproject
 
 # See file COPYING in this source tree
-__copyright__ = 'Copyright 2017, EPC Power Corp.'
+__copyright__ = 'Copyright 2019, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 

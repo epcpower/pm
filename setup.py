@@ -1,9 +1,12 @@
 import setuptools
 
+import versioneer
+
 
 setuptools.setup(
     name='epcpm',
-    use_scm_version={'version_scheme': 'post-release'},
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     author="EPC Power Corp.",
     classifiers=[
         ("License :: OSI Approved :: "
@@ -48,7 +51,4 @@ setuptools.setup(
             'pyinstaller',
         ]
     },
-    setup_requires=[
-        'setuptools_scm',
-    ],
 )
