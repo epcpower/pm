@@ -1,1 +1,3 @@
 graft src
+include versioneer.py
+include src/epcpm/_version.py
