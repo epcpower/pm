@@ -110,6 +110,10 @@ class Root:
         workbook.create_sheet('Index')
 
         for model in self.wrapped.children:
+            if isinstance(model, epcpm.sunspecmodel.Table):
+                # TODO: for now, implement it soon...
+                continue
+
             worksheet = workbook.create_sheet()
 
             builders.wrap(
@@ -190,6 +194,18 @@ class Model:
                     self.worksheet.append(attr.astuple(row))
 
                 self.worksheet.append(attr.astuple(Fields()))
+
+
+@builders(epcpm.sunspecmodel.Table)
+@attr.s
+class Table:
+    wrapped = attr.ib()
+    worksheet = attr.ib()
+    padding_type = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
+
+    def gen(self):
+        return []
 
 
 @builders(epyqlib.pm.parametermodel.Enumeration)
@@ -290,6 +306,19 @@ class Block:
             rows.append(builder.gen())
 
         return rows
+
+
+@builders(epcpm.sunspecmodel.TableRepeatingBlockReference)
+@attr.s
+class Block:
+    wrapped = attr.ib()
+    add_padding = attr.ib()
+    padding_type = attr.ib()
+    model_type = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
+
+    def gen(self):
+        return []
 
 
 @builders(epcpm.sunspecmodel.DataPoint)

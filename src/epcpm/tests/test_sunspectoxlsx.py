@@ -37,6 +37,7 @@ def test_x():
     points = (
         (model, block, point)
         for model in attrs_model.root.children
+        if isinstance(model, epcpm.sunspecmodel.Model)
         for block in model.children
         for point in block.children
     )
