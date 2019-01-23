@@ -189,6 +189,8 @@ def transition(target_path):
     original_spreadsheet = library_path/'MODBUS_SunSpec-EPC.xls'
     new_spreadsheet = original_spreadsheet.with_suffix('.xlsx')
 
+    tables_py = library_path/'python'/'embeddedlibrary'/'tables.py'
+
     subprocess.run(['git', 'reset', '.'], check=True, cwd=library_path)
     subprocess.run(['git', 'checkout', '--', '.'], check=True, cwd=library_path)
     subprocess.run(['git', 'clean', '-fdx'], check=True, cwd=library_path)
@@ -198,6 +200,11 @@ def transition(target_path):
             '--convert-to', 'xlsx',
             '--outdir', os.fspath(library_path),
             os.fspath(original_spreadsheet)],
+        check=True,
+        cwd=library_path,
+    )
+    subprocess.run(
+        ['git', 'rm', os.fspath(tables_py)],
         check=True,
         cwd=library_path,
     )
