@@ -59,7 +59,9 @@ Linux
 =====
 
 - Install Python 3.7
+
   - pyenv_ to get Python versions
+
 - Install git
 - ``git clone https://github.com/altendky/st``
 - ``cd st``
