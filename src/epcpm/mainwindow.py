@@ -325,6 +325,8 @@ class Window:
         for (name, model_view), model in i:
             view = model_view.view
 
+            view.setAutoScroll(True)
+            view.setAutoScrollMargin(32)
             view.setDropIndicatorShown(True)
             view.setDragEnabled(True)
             view.setAcceptDrops(True)
