@@ -184,10 +184,17 @@ def transition(target_path):
         click.echo('Sorry, that response is not acceptable to continue.')
         return
 
+    c_project = target_path/'.cproject'
+
     library_path = target_path / 'embedded-library'
 
     original_spreadsheet = library_path/'MODBUS_SunSpec-EPC.xls'
     new_spreadsheet = original_spreadsheet.with_suffix('.xlsx')
+
+    tables_py = library_path/'python'/'embeddedlibrary'/'tables.py'
+    sunspecparser_py = (
+        library_path/'python'/'embeddedlibrary'/'sunspecparser.py'
+    )
 
     subprocess.run(['git', 'reset', '.'], check=True, cwd=library_path)
     subprocess.run(['git', 'checkout', '--', '.'], check=True, cwd=library_path)
@@ -198,6 +205,11 @@ def transition(target_path):
             '--convert-to', 'xlsx',
             '--outdir', os.fspath(library_path),
             os.fspath(original_spreadsheet)],
+        check=True,
+        cwd=library_path,
+    )
+    subprocess.run(
+        ['git', 'rm', os.fspath(tables_py)],
         check=True,
         cwd=library_path,
     )
@@ -228,6 +240,30 @@ def transition(target_path):
         [os.fspath(target_path / 'gridtied'), 'build', '--target', 'Release'],
         check=False,
         cwd=target_path,
+    )
+    subprocess.run(
+        ['sed', '-i', r's/\.xls/\.xlsx/g', os.fspath(c_project)],
+        check=True,
+        cwd=target_path,
+    )
+    subprocess.run(
+        ['git', 'add', os.fspath(c_project)],
+        check=True,
+        cwd=target_path,
+    )
+
+    content = sunspecparser_py.read_text()
+    with sunspecparser_py.open('w') as f:
+        for line in content.splitlines():
+            f.write(line + '\n')
+            if r"""'#include "faultHandler.h"\n'""" in line:
+                f.write(r"""            c_file.write('#include "sunspecInterface{:>05}.h"\n'.format(model))""" '\n')
+                f.write(r"""            c_file.write('#include "math.h"\n')""" '\n')
+
+    subprocess.run(
+        ['git', 'add', os.fspath(sunspecparser_py)],
+        check=True,
+        cwd=library_path,
     )
 
     paths = epcpm.importexportdialog.paths_from_directory(target_path)
