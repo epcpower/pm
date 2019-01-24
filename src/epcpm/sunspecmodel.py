@@ -99,8 +99,6 @@ def name_from_uuid(node, value, model):
     except NotFoundError:
         return str(value)
 
-    if target_node.parameter_uuid is None:
-        return model.node_from_uuid(target_node.uuid).abbreviation
     return model.node_from_uuid(target_node.parameter_uuid).abbreviation
 
 
@@ -126,18 +124,19 @@ class ScaleFactorDelegate(epyqlib.attrsmodel.EnumerationDelegateMulti):
         attrs_model = item.data(epyqlib.utils.qt.UserRoles.attrs_model)
 
         raw = model.data(model_index, epyqlib.utils.qt.UserRoles.raw)
-        parameters = []
-        for point in self.root.children:
-            type_node = attrs_model.node_from_uuid(point.type_uuid)
-            param_node = attrs_model.node_from_uuid(point.parameter_uuid)
-            if type_node.name == 'sunssf':
-                parameters.append(param_node)
 
-        for p in parameters:
+        points = []
+        for pt in self.root.children:
+            type_node = attrs_model.node_from_uuid(pt.type_uuid)
+            if type_node.name == 'sunssf':
+                points.append(pt)
+
+        for p in points:
             it = QtWidgets.QListWidgetItem(editor)
-            it.setText(p.abbreviation)
+            param = attrs_model.node_from_uuid(p.parameter_uuid )
+            it.setText(param.abbreviation)
             it.uuid = p.uuid
-            if it.uuid == raw:
+            if p.uuid == raw:
                 it.setSelected(True)
 
         editor.setMinimumHeight(editor.sizeHint().height())
