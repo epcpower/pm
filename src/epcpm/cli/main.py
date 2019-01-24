@@ -237,9 +237,9 @@ def transition(target_path):
         cwd=target_path,
     )
     subprocess.run(
-        [os.fspath(target_path / 'gridtied'), 'build', '--target', 'Release'],
-        check=False,
-        cwd=target_path,
+        [target_path/'venv'/'bin'/'sunspecparser', os.fspath(new_spreadsheet)],
+        check=True,
+        cwd=library_path, # it expects to be in _some_ subdirectory and then ..
     )
     subprocess.run(
         ['sed', '-i', r's/\.xls/\.xlsx/g', os.fspath(c_project)],
@@ -267,6 +267,7 @@ def transition(target_path):
     )
 
     paths = epcpm.importexportdialog.paths_from_directory(target_path)
+    print(paths)
 
     project = epcpm.importexport.full_import(
         paths=paths,
