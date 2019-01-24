@@ -192,6 +192,9 @@ def transition(target_path):
     new_spreadsheet = original_spreadsheet.with_suffix('.xlsx')
 
     tables_py = library_path/'python'/'embeddedlibrary'/'tables.py'
+    sunspecparser_py = (
+        library_path/'python'/'embeddedlibrary'/'sunspecparser.py'
+    )
 
     subprocess.run(['git', 'reset', '.'], check=True, cwd=library_path)
     subprocess.run(['git', 'checkout', '--', '.'], check=True, cwd=library_path)
@@ -249,6 +252,19 @@ def transition(target_path):
         cwd=target_path,
     )
 
+    content = sunspecparser_py.read_text()
+    with sunspecparser_py.open('w') as f:
+        for line in content.splitlines():
+            f.write(line + '\n')
+            if r"""'#include "faultHandler.h"\n'""" in line:
+                f.write(r"""            c_file.write('#include "sunspecInterface{:>05}.h"\n'.format(model))""" '\n')
+                f.write(r"""            c_file.write('#include "math.h"\n')""" '\n')
+
+    subprocess.run(
+        ['git', 'add', os.fspath(sunspecparser_py)],
+        check=True,
+        cwd=library_path,
+    )
 
     paths = epcpm.importexportdialog.paths_from_directory(target_path)
 
