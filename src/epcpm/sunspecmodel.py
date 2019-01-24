@@ -131,9 +131,13 @@ class ScaleFactorDelegate(epyqlib.attrsmodel.EnumerationDelegateMulti):
             if type_node.name == 'sunssf':
                 points.append(pt)
 
+        it = QtWidgets.QListWidgetItem(editor)
+        it.setText('')
+        it.uuid = ''
+        it.setSelected(True)
         for p in points:
             it = QtWidgets.QListWidgetItem(editor)
-            param = attrs_model.node_from_uuid(p.parameter_uuid )
+            param = attrs_model.node_from_uuid(p.parameter_uuid)
             it.setText(param.abbreviation)
             it.uuid = p.uuid
             if p.uuid == raw:
