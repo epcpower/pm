@@ -6,7 +6,9 @@ import marshmallow
 
 import epyqlib.attrsmodel
 import epyqlib.pm.parametermodel
+import epyqlib.utils
 from PyQt5 import QtCore
+from PyQt5 import QtWidgets
 
 
 class ConsistencyError(Exception):
@@ -97,6 +99,8 @@ def name_from_uuid(node, value, model):
     except NotFoundError:
         return str(value)
 
+    if target_node.parameter_uuid is None:
+        return model.node_from_uuid(target_node.uuid).abbreviation
     return model.node_from_uuid(target_node.parameter_uuid).abbreviation
 
 
@@ -113,6 +117,40 @@ def name_from_uuid_and_parent(node, value, model):
     return '{} - {}'.format(target_node.tree_parent.name, target_node.name)
 
 
+class ScaleFactorDelegate(epyqlib.attrsmodel.EnumerationDelegateMulti):
+    def setEditorData(self, editor, index):
+        model_index = epyqlib.attrsmodel.to_source_model(index)
+        model = model_index.model()
+
+        item = model.itemFromIndex(model_index)
+        attrs_model = item.data(epyqlib.utils.qt.UserRoles.attrs_model)
+
+        raw = model.data(model_index, epyqlib.utils.qt.UserRoles.raw)
+        parameters = []
+        for point in self.root.children:
+            type_node = attrs_model.node_from_uuid(point.type_uuid)
+            param_node = attrs_model.node_from_uuid(point.parameter_uuid)
+            if type_node.name == 'sunssf':
+                parameters.append(param_node)
+
+        for p in parameters:
+            it = QtWidgets.QListWidgetItem(editor)
+            it.setText(p.abbreviation)
+            it.uuid = p.uuid
+            if it.uuid == raw:
+                it.setSelected(True)
+
+        editor.setMinimumHeight(editor.sizeHint().height())
+        editor.show()
+
+    def setModelData(self, editor, model, index):
+        index = epyqlib.utils.qt.resolve_index_to_model(index)
+        model = index.model()
+
+        selected_item = editor.currentItem()
+        datum = str(selected_item.uuid)
+        model.setData(index, datum)
+
 @graham.schemify(tag='data_point', register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
@@ -123,6 +161,8 @@ class DataPoint(epyqlib.treenode.TreeNode):
         human_name='Scale Factor',
         allow_none=True,
         data_display=name_from_uuid,
+        list_selection_path=('..', 'Fixed Block'),
+        override_delegate=ScaleFactorDelegate,
     )
     parameter_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,
