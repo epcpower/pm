@@ -96,7 +96,7 @@ def name_from_uuid(node, value, model):
 
     try:
         target_node = model.node_from_uuid(value)
-    except NotFoundError:
+    except epyqlib.attrsmodel.NotFoundError:
         return str(value)
 
     return model.node_from_uuid(target_node.parameter_uuid).abbreviation
@@ -109,7 +109,7 @@ def name_from_uuid_and_parent(node, value, model):
 
     try:
         target_node = model.node_from_uuid(value)
-    except NotFoundError:
+    except epyqlib.attrsmodel.NotFoundError:
         return str(value)
 
     return '{} - {}'.format(target_node.tree_parent.name, target_node.name)
