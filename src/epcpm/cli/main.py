@@ -184,6 +184,8 @@ def transition(target_path):
         click.echo('Sorry, that response is not acceptable to continue.')
         return
 
+    c_project = target_path/'.cproject'
+
     library_path = target_path / 'embedded-library'
 
     original_spreadsheet = library_path/'MODBUS_SunSpec-EPC.xls'
@@ -236,6 +238,17 @@ def transition(target_path):
         check=False,
         cwd=target_path,
     )
+    subprocess.run(
+        ['sed', '-i', r's/\.xls/\.xlsx/g', os.fspath(c_project)],
+        check=True,
+        cwd=target_path,
+    )
+    subprocess.run(
+        ['git', 'add', os.fspath(c_project)],
+        check=True,
+        cwd=target_path,
+    )
+
 
     paths = epcpm.importexportdialog.paths_from_directory(target_path)
 
