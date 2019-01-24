@@ -439,8 +439,6 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
-    child_from = child_from
-
     def can_drop_on(self, node):
         return isinstance(
             node,
@@ -474,6 +472,7 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
 
         return epyqlib.attrsmodel.create_addable_types(types)
 
+    child_from = epyqlib.attrsmodel.default_child_from
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
 
 
