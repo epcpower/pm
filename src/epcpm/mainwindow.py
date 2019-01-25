@@ -578,6 +578,7 @@ class Window:
                     index=new_index,
                 )
                 view.setCurrentIndex(view_index)
+                view.edit(view_index)
 
     def generate_code(self, node):
         builder = epcpm.parameterstoc.builders.wrap(node)
