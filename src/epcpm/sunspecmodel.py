@@ -303,9 +303,10 @@ def check_block_offsets_and_length(self):
     for point in self.children:
         type_ = root.model.node_from_uuid(point.type_uuid)
         if type_.name != 'string' and point.size != type_.value:
+            point_name = root.model.node_from_uuid(point.parameter_uuid).name
             raise MismatchedSizeAndTypeError(
                 f'Expected {type_.value} for {type_.name}'
-                f', is {point.size} for {point.name}'
+                f', is {point.size} for {point_name}'
             )
 
         length += point.size
