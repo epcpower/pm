@@ -293,6 +293,7 @@ class DataPoint(epyqlib.treenode.TreeNode):
             return self.tree_parent.can_delete(node=self)
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 def check_block_offsets_and_length(self):
@@ -389,6 +390,7 @@ class HeaderBlock(epyqlib.treenode.TreeNode):
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='sunspec_fixed_block', register=True)
@@ -435,6 +437,7 @@ class FixedBlock(epyqlib.treenode.TreeNode):
     check_offsets_and_length = check_block_offsets_and_length
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='sunspec_table_repeating_block', register=True)
@@ -500,6 +503,7 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
     check_offsets_and_length = check_block_offsets_and_length
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='sunspec_table_repeating_block', register=True)
@@ -627,6 +631,7 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='table', register=True)
@@ -770,6 +775,7 @@ class Table(epyqlib.treenode.TreeNode):
                 block_node.append_child(point_node)
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='sunspec_model', register=True)
@@ -844,6 +850,8 @@ class Model(epyqlib.treenode.TreeNode):
             length += block.check_offsets_and_length()
 
         return length
+
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 #class Repeating...?

@@ -151,6 +151,7 @@ class Signal(epyqlib.treenode.TreeNode):
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='message')
@@ -252,6 +253,7 @@ class Message(epyqlib.treenode.TreeNode):
         return True
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='multiplexer')
@@ -357,6 +359,7 @@ class Multiplexer(epyqlib.treenode.TreeNode):
         return True
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='multiplexed_message')
@@ -475,6 +478,7 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
             return CanTable(table_uuid=node.uuid)
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='multiplexed_message_clone')
@@ -876,6 +880,7 @@ class CanTable(epyqlib.treenode.TreeNode):
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 Root = epyqlib.attrsmodel.Root(
