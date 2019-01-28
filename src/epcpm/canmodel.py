@@ -573,6 +573,8 @@ class MultiplexedMessageClone(epyqlib.treenode.TreeNode):
     def remove_old_on_drop(node):
         return False
 
+    internal_move = epyqlib.attrsmodel.default_internal_move
+
 
 @graham.schemify(tag='table', register=True)
 @epyqlib.attrsmodel.ify()
