@@ -477,6 +477,99 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
 
 
+@graham.schemify(tag='multiplexed_message_clone')
+@epyqlib.attrsmodel.ify()
+@epyqlib.utils.qt.pyqtify()
+@attr.s(hash=False)
+class MultiplexedMessageClone(epyqlib.treenode.TreeNode):
+    name = attr.ib(
+        default='New Multiplexed Message Clone',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+
+    identifier = attr.ib(
+        default=0x1fffffff,
+        convert=based_int,
+        metadata=graham.create_metadata(
+            field=HexadecimalIntegerField(),
+        ),
+    )
+    epyqlib.attrsmodel.attrib(
+        data_display=hex_upper,
+        attribute=identifier,
+    )
+
+    original = attr.ib(
+        default=None,
+        metadata=graham.create_metadata(
+            field=epyqlib.attrsmodel.Reference(allow_none=True),
+        ),
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=original,
+    )
+    sendable = attr.ib(
+        default=True,
+        convert=epyqlib.attrsmodel.two_state_checkbox,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Boolean(),
+        ),
+    )
+    receivable = attr.ib(
+        default=True,
+        convert=epyqlib.attrsmodel.two_state_checkbox,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Boolean(),
+        ),
+    )
+    comment = attr.ib(
+        default=None,
+        convert=epyqlib.attrsmodel.to_str_or_none,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(allow_none=True),
+        ),
+    )
+    children = attr.ib(
+        default=attr.Factory(list),
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(fields=(
+            )),
+        ),
+    )
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    def can_drop_on(self, node):
+        return isinstance(node, MultiplexedMessage)
+
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+        return True
+
+    @classmethod
+    def all_addable_types(cls):
+        return epyqlib.attrsmodel.create_addable_types(())
+
+    @staticmethod
+    def addable_types():
+        return epyqlib.attrsmodel.create_addable_types(())
+
+    def child_from(self, node):
+        self.original = node
+
+        return None
+
+    @staticmethod
+    def remove_old_on_drop(node):
+        return False
+
+
 @graham.schemify(tag='table', register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
@@ -787,11 +880,24 @@ class CanTable(epyqlib.treenode.TreeNode):
 
 Root = epyqlib.attrsmodel.Root(
     default_name='CAN',
-    valid_types=(Message, MultiplexedMessage, CanTable),
+    valid_types=(
+        Message,
+        MultiplexedMessage,
+        MultiplexedMessageClone,
+        CanTable,
+    ),
 )
 
 types = epyqlib.attrsmodel.Types(
-    types=(Root, Message, Signal, MultiplexedMessage, Multiplexer, CanTable),
+    types=(
+        Root,
+        Message,
+        Signal,
+        MultiplexedMessage,
+        MultiplexedMessageClone,
+        Multiplexer,
+        CanTable,
+    ),
 )
 
 
@@ -802,7 +908,13 @@ def merge(name, *types):
 
 columns = epyqlib.attrsmodel.columns(
     merge('name', *types.types.values()),
-    merge('identifier', Message, MultiplexedMessage, Multiplexer),
+    merge(
+        'identifier',
+        Message,
+        MultiplexedMessage,
+        MultiplexedMessageClone,
+        Multiplexer,
+    ),
     merge('multiplexer_range_first', CanTable),
     merge('multiplexer_range_last', CanTable),
     (
@@ -820,10 +932,26 @@ columns = epyqlib.attrsmodel.columns(
     merge('signed', Signal),
     merge('factor', Signal),
 
-    merge('sendable', Message, MultiplexedMessage),
-    merge('receivable', Message, MultiplexedMessage),
+    merge(
+        'sendable', 
+        Message, 
+        MultiplexedMessage, 
+        MultiplexedMessageClone,
+        ),
+    merge(
+        'receivable', 
+        Message, 
+        MultiplexedMessage,
+        MultiplexedMessageClone,
+        ),
     merge('start_bit', Signal),
-    merge('comment', Message, Multiplexer, MultiplexedMessage),
+    merge(
+        'comment', 
+        Message, 
+        Multiplexer, 
+        MultiplexedMessage,
+        MultiplexedMessageClone,
+        ),
 
 
     merge('parameter_uuid', Signal),
