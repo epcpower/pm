@@ -1,5 +1,6 @@
 import os
 import pathlib
+import subprocess
 
 import attr
 import epyqlib.utils.qt
@@ -59,6 +60,35 @@ def export_dialog():
     return dialog
 
 
+def run_generation_scripts(base_path):
+    scripts = os.path.join(base_path, 'venv', 'Scripts')
+    interface = os.path.join(base_path, 'interface')
+    subprocess.run(
+        [
+            os.path.join(scripts, 'generatestripcollect'),
+            os.path.join(interface, 'EPC_DG_ID247_FACTORY.sym'),
+            '-o',
+            os.path.join(interface, 'EPC_DG_ID247.sym'),
+            '--hierarchy',
+            os.path.join(interface, 'EPC_DG_ID247_FACTORY.parameters.json'),
+            '--hierarchy-out',
+            os.path.join(interface, 'EPC_DG_ID247.parameters.json'),
+            '--device-file',
+            os.path.join(interface, 'devices.json'),
+            '--output-directory',
+            os.path.join(interface, 'devices'),
+        ]
+    )
+
+    emb_lib = os.path.join(base_path, 'embedded-library')
+    subprocess.run(
+        [
+            os.path.join(scripts, 'sunspecparser'),
+            os.path.join(emb_lib, 'MODBUS_SunSpec-EPC.xlsx'),
+        ]
+    )
+
+
 @attr.s
 class ImportPaths:
     can = attr.ib(converter=path_or_none)
@@ -91,6 +121,7 @@ class Dialog(UiBase):
     paths_result = attr.ib(default=None)
     for_save = attr.ib(default=False)
     _parent = attr.ib(default=None)
+    directory = attr.ib(default=None)
 
     def __attrs_post_init__(self):
         super().__init__(self._parent)
@@ -126,12 +157,11 @@ class Dialog(UiBase):
         super().accept()
 
     def from_directory(self):
-        directory = QtWidgets.QFileDialog.getExistingDirectory(parent=self)
-
-        if len(directory) == 0:
+        self.directory = QtWidgets.QFileDialog.getExistingDirectory(parent=self)
+        if len(self.directory) == 0:
             return
 
-        paths = paths_from_directory(directory=directory)
+        paths = paths_from_directory(directory=self.directory)
 
         self.ui.can.setText(os.fspath(paths.can))
         self.ui.hierarchy.setText(os.fspath(paths.hierarchy))

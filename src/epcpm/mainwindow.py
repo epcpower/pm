@@ -282,7 +282,7 @@ class Window:
             paths=paths,
             first_time=first_time,
         )
-
+        epcpm.importexportdialog.run_generation_scripts(dialog.directory)
         QtWidgets.QMessageBox.information(
             self.ui,
             'Export Complete',
