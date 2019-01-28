@@ -46,15 +46,6 @@ class HexadecimalIntegerField(marshmallow.fields.Field):
         return int(value, 0)
 
 
-@staticmethod
-def child_from(node):
-    if isinstance(node, epyqlib.pm.parametermodel.Parameter):
-        return Signal(name=node.name, parameter_uuid=node.uuid)
-
-    if isinstance(node, epyqlib.pm.parametermodel.Table):
-        return CanTable(table_uuid=node.uuid)
-
-
 @graham.schemify(tag='signal')
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
@@ -240,7 +231,9 @@ class Message(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
-    child_from = child_from
+    @staticmethod
+    def child_from(node):
+        return Signal(name=node.name, parameter_uuid=node.uuid)
 
     @classmethod
     def all_addable_types(cls):
@@ -338,7 +331,8 @@ class Multiplexer(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
-    child_from = child_from
+    def child_from(self, node):
+        return Signal(name=node.name, parameter_uuid=node.uuid)
 
     @classmethod
     def all_addable_types(cls):
@@ -472,7 +466,14 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
 
         return epyqlib.attrsmodel.create_addable_types(types)
 
-    child_from = epyqlib.attrsmodel.default_child_from
+    @staticmethod
+    def child_from(node):
+        if isinstance(node, epyqlib.pm.parametermodel.Parameter):
+            return Signal(name=node.name, parameter_uuid=node.uuid)
+
+        if isinstance(node, epyqlib.pm.parametermodel.Table):
+            return CanTable(table_uuid=node.uuid)
+
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
 
 
