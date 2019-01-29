@@ -516,6 +516,7 @@ class MultiplexedMessageClone(epyqlib.treenode.TreeNode):
         ),
     )
     epyqlib.attrsmodel.attrib(
+        data_display=lambda node, value, model: node.original.name,
         attribute=original,
     )
     sendable = attr.ib(
