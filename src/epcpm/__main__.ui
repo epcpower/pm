@@ -132,12 +132,8 @@
     <addaction name="menu_Project"/>
     <addaction name="action_new_value_set_2"/>
     <addaction name="separator"/>
-    <addaction name="action_import_sym"/>
-    <addaction name="action_export_sym"/>
     <addaction name="action_import_smdx"/>
-    <addaction name="action_full_import"/>
     <addaction name="action_full_export"/>
-    <addaction name="action_full_export_first_time"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
