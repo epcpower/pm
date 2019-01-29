@@ -1020,6 +1020,7 @@ columns = epyqlib.attrsmodel.columns(
         MultiplexedMessageClone,
         ),
 
+    merge('original', MultiplexedMessageClone),
 
     merge('parameter_uuid', Signal),
     merge('uuid', *types.types.values()),
