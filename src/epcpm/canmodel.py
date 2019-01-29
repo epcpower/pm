@@ -21,6 +21,10 @@ class ConsistencyError(Exception):
     pass
 
 
+class IncompleteTableDefinitionError(Exception):
+    pass
+
+
 def based_int(v):
     if isinstance(v, str):
         return int(v, 0)
@@ -642,7 +646,7 @@ class CanTable(epyqlib.treenode.TreeNode):
 
         return True
 
-    def update(self, table=None):
+    def update(self, table=None, warn=True):
         array_uuid_to_signal = {
             child.parameter_uuid: child
             for child in self.children
@@ -778,6 +782,8 @@ class CanTable(epyqlib.treenode.TreeNode):
 
         mux_value = self.multiplexer_range_first
 
+        warned_signals = set()
+
         for leaf_group in leaf_groups:
             is_group = False
             type_reference = leaf_group[0].original.tree_parent
@@ -787,9 +793,57 @@ class CanTable(epyqlib.treenode.TreeNode):
                 signal = array_uuid_to_signal[leaf_group[0].path[-1]]
                 is_group = True
             else:
-                raise ConsistencyError()
+                if warn:
+                    # TODO: this really needs to be done through a logging
+                    #       mechanism of some sort
+                    from PyQt5 import QtWidgets
+
+                    nodes = []
+                    parent = self
+                    while parent != None:
+                        nodes.append(parent)
+                        parent = parent.tree_parent
+
+                    s = '/'.join(node.name for node in reversed(nodes))
+
+                    epyqlib.utils.qt.dialog(
+                        # parent=_parent,
+                        parent=None,
+                        title='Table Error',
+                        message=(
+                            f'{s} has no arrays or groups, these are required'
+                        ),
+                        icon=QtWidgets.QMessageBox.Warning,
+                    )
+
+                return
 
             if signal.bits == 0:
+                if warn:
+                    # TODO: this really needs to be done through a logging
+                    #       mechanism of some sort
+                    from PyQt5 import QtWidgets
+
+                    if signal not in warned_signals:
+                        nodes = []
+                        parent = signal
+                        while parent != None:
+                            nodes.append(parent)
+                            parent = parent.tree_parent
+
+                        s = '/'.join(node.name for node in reversed(nodes))
+                        epyqlib.utils.qt.dialog(
+                            # parent=_parent,
+                            parent=None,
+                            title='Table Error',
+                            message=(
+                                f'{s} has bit length of {signal.bits}'
+                                f', must be nonzero'
+                            ),
+                            icon=QtWidgets.QMessageBox.Warning,
+                        )
+                        warned_signals.add(signal)
+
                 continue
 
             if not is_group:
@@ -880,8 +934,14 @@ class CanTable(epyqlib.treenode.TreeNode):
 
                 self.append_child(multiplexer)
 
+    def child_from(self, node):
+        if isinstance(node, epyqlib.pm.parametermodel.Table):
+            self.table_uuid = node.uuid
+            return None
+
+        raise Exception('unexpected')
+
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
-    child_from = epyqlib.attrsmodel.default_child_from
     internal_move = epyqlib.attrsmodel.default_internal_move
 
 
