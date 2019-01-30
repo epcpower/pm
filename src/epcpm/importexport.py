@@ -1,10 +1,18 @@
+import itertools
+import math
+import os
 import pathlib
+import subprocess
+
+import attr
+import graham
 
 import epcpm.cantosym
 import epcpm.cantotablesc
 import epcpm.parameterstohierarchy
 import epcpm.project
 import epcpm.smdxtosunspec
+import epcpm.sunspecmodel
 import epcpm.sunspecmodel
 import epcpm.sunspectomanualc
 import epcpm.sunspectomanualh
@@ -98,7 +106,7 @@ def full_import(paths):
     return project
 
 
-def full_export(project, paths, first_time=False):
+def full_export(project, paths, target_directory, first_time=False):
     epcpm.cantosym.export(
         path=paths.can,
         can_model=project.models.can,
@@ -132,3 +140,108 @@ def full_export(project, paths, first_time=False):
             path=paths.sunspec_c,
             sunspec_model=project.models.sunspec,
         )
+
+    run_generation_scripts(target_directory)
+
+
+def run_generation_scripts(base_path):
+    scripts = base_path/'venv'/'Scripts'
+    interface = base_path/'interface'
+
+    subprocess.run(
+        [
+            os.fspath(scripts/'generatestripcollect'),
+            os.fspath(interface/'EPC_DG_ID247_FACTORY.sym'),
+            '-o',
+            os.fspath(interface/'EPC_DG_ID247.sym'),
+            '--hierarchy',
+            os.fspath(interface/'EPC_DG_ID247_FACTORY.parameters.json'),
+            '--hierarchy-out',
+            os.fspath(interface/'EPC_DG_ID247.parameters.json'),
+            '--device-file',
+            os.fspath(interface/'devices.json'),
+            '--output-directory',
+            os.fspath(interface/'devices'),
+        ],
+        check=True,
+    )
+
+    emb_lib = base_path/'embedded-library'
+    subprocess.run(
+        [
+            os.fspath(scripts/'sunspecparser'),
+            os.fspath(emb_lib/'MODBUS_SunSpec-EPC.xlsx'),
+        ],
+        check=True,
+    )
+
+
+def modification_time_or(path, alternative):
+    try:
+        return path.stat().st_mtime
+    except FileNotFoundError:
+        return alternative
+
+
+def get_sunspec_models(path):
+    root_schema = graham.schema(epcpm.sunspecmodel.Root)
+    raw = path.read_bytes()
+    root = root_schema.loads(raw).data
+
+    return tuple(
+        child.id
+        for child in root.children
+        if isinstance(child, epcpm.sunspecmodel.Model)
+    )
+
+
+def is_stale(project, paths):
+    loaded_project = epcpm.project.loadp(project, post_load=False)
+
+    source_paths = (
+        project,
+        *(
+            project.parent / path
+            for path in attr.astuple(loaded_project.paths)
+        ),
+    )
+
+    source_modification_time = max(
+        path.stat().st_mtime
+        for path in source_paths
+    )
+
+    sunspec_models = get_sunspec_models(
+        project.parent / loaded_project.paths.sunspec,
+    )
+
+    smdx = tuple(
+        paths.sunspec_c/f'smdx_{model:05}.xml'
+        for model in sunspec_models
+    )
+
+    sunspec_c_h = tuple(
+        paths.sunspec_c/f'sunspecInterfaceGen{model}.{extension}'
+        for model, extension in itertools.product(sunspec_models, ('c', 'h'))
+    )
+
+    destination_paths = [
+        paths.can,
+        paths.hierarchy,
+        *paths.smdx,
+        paths.spreadsheet,
+        *smdx,
+        *sunspec_c_h,
+        paths.tables_c,
+    ]
+
+    destination_modification_time = min(
+        modification_time_or(path=path, alternative=-math.inf)
+        for path in destination_paths
+    )
+
+    destination_newer_by = (
+            destination_modification_time - source_modification_time
+    )
+
+    return destination_newer_by < 1

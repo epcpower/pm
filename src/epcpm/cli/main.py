@@ -12,6 +12,7 @@ import epcpm.cli.exportdocx
 import epcpm.cli.utils
 import epcpm.importexport
 import epcpm.importexportdialog
+import epcpm.project
 import epcpm.smdx
 
 
@@ -59,13 +60,31 @@ export.add_command(epcpm.cli.exportdocx.cli, name='docx')
 @export.command()
 @epcpm.cli.utils.project_option(required=True)
 @epcpm.cli.utils.target_path_option(required=True)
-def build(project, target_path):
+@click.option('--if-stale/--assume-stale', 'only_if_stale')
+def build(project, target_path, only_if_stale):
     """Export PM data to embedded project directory"""
-    project = epcpm.project.loadp(project)
+    project = pathlib.Path(project)
+    target_path = pathlib.Path(target_path)
+
     paths = epcpm.importexportdialog.paths_from_directory(target_path)
 
+    if only_if_stale:
+        if not epcpm.importexport.is_stale(project=project, paths=paths):
+            click.echo(
+                'Generated files appear to be up to date, skipping export',
+            )
+
+            return
+
+        click.echo(
+            'Generated files appear to be out of date, starting export'
+        )
+
+    loaded_project = epcpm.project.loadp(project)
+
     epcpm.importexport.full_export(
-        project=project,
+        project=loaded_project,
+        target_directory=target_path,
         paths=paths,
         first_time=True,
     )

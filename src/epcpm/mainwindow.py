@@ -308,9 +308,10 @@ class Window:
         epcpm.importexport.full_export(
             project=self.project,
             paths=paths,
+            target_directory=dialog.directory,
             first_time=first_time,
         )
-        epcpm.importexportdialog.run_generation_scripts(dialog.directory)
+
         QtWidgets.QMessageBox.information(
             self.ui,
             'Export Complete',

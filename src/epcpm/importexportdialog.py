@@ -1,6 +1,5 @@
 import os
 import pathlib
-import subprocess
 
 import attr
 import epyqlib.utils.qt
@@ -58,35 +57,6 @@ def export_dialog():
     dialog.setMaximumHeight(0)
 
     return dialog
-
-
-def run_generation_scripts(base_path):
-    scripts = os.path.join(base_path, 'venv', 'Scripts')
-    interface = os.path.join(base_path, 'interface')
-    subprocess.run(
-        [
-            os.path.join(scripts, 'generatestripcollect'),
-            os.path.join(interface, 'EPC_DG_ID247_FACTORY.sym'),
-            '-o',
-            os.path.join(interface, 'EPC_DG_ID247.sym'),
-            '--hierarchy',
-            os.path.join(interface, 'EPC_DG_ID247_FACTORY.parameters.json'),
-            '--hierarchy-out',
-            os.path.join(interface, 'EPC_DG_ID247.parameters.json'),
-            '--device-file',
-            os.path.join(interface, 'devices.json'),
-            '--output-directory',
-            os.path.join(interface, 'devices'),
-        ]
-    )
-
-    emb_lib = os.path.join(base_path, 'embedded-library')
-    subprocess.run(
-        [
-            os.path.join(scripts, 'sunspecparser'),
-            os.path.join(emb_lib, 'MODBUS_SunSpec-EPC.xlsx'),
-        ]
-    )
 
 
 @attr.s
