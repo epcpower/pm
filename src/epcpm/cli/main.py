@@ -272,7 +272,7 @@ def transition(target_path):
     )
 
     content = sunspecparser_py.read_text()
-    with sunspecparser_py.open('w') as f:
+    with sunspecparser_py.open('w', newline='\n') as f:
         for line in content.splitlines():
             f.write(line + '\n')
             if r"""'#include "faultHandler.h"\n'""" in line:

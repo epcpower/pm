@@ -32,7 +32,8 @@ def export(path, can_model, parameters_model):
     )
 
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(builder.gen())
+    with path.open('w', newline='\n') as f:
+        f.write(builder.gen())
 
 
 @builders(epcpm.canmodel.Root)

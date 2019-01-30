@@ -279,7 +279,7 @@ class Project:
 
         self.paths = paths
 
-        with open(self.filename, 'w') as f:
+        with open(self.filename, 'w', newline='\n') as f:
             s = graham.dumps(self, indent=4).data
             f.write(s)
 
@@ -289,7 +289,7 @@ class Project:
         for path, model in zip(paths.values(), self.models.values()):
             s = graham.dumps(model.root, indent=4).data
 
-            with open(project_directory / path, 'w') as f:
+            with open(project_directory / path, 'w', newline='\n') as f:
                 f.write(s)
 
                 if not s.endswith('\n'):

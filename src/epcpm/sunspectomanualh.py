@@ -58,7 +58,8 @@ class Root:
                 f'#endif //{inc_guard}'
             ]
 
-            path.write_text(epcpm.c.format_nested_lists(lines).strip() + '\n')
+            with path.open('w', newline='\n') as f:
+                f.write(epcpm.c.format_nested_lists(lines).strip() + '\n')
 
 
 @builders(epcpm.sunspecmodel.Model)
