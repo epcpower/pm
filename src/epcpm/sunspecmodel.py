@@ -115,7 +115,15 @@ def name_from_uuid_and_parent(node, value, model):
     return '{} - {}'.format(target_node.tree_parent.name, target_node.name)
 
 
-class ScaleFactorDelegate(epyqlib.attrsmodel.EnumerationDelegateMulti):
+class ScaleFactorDelegate(QtWidgets.QStyledItemDelegate):
+    def __init__(self, text_column_name, root, parent):
+        super().__init__(parent)
+
+        self.root = root
+
+    def createEditor(self, parent, option, index):
+        return QtWidgets.QListWidget(parent=parent)
+
     def setEditorData(self, editor, index):
         model_index = epyqlib.attrsmodel.to_source_model(index)
         model = model_index.model()
@@ -133,26 +141,27 @@ class ScaleFactorDelegate(epyqlib.attrsmodel.EnumerationDelegateMulti):
 
         it = QtWidgets.QListWidgetItem(editor)
         it.setText('')
-        it.uuid = ''
+        it.setData(epyqlib.utils.qt.UserRoles.raw, '')
         it.setSelected(True)
         for p in points:
             it = QtWidgets.QListWidgetItem(editor)
             param = attrs_model.node_from_uuid(p.parameter_uuid)
             it.setText(param.abbreviation)
-            it.uuid = p.uuid
+            it.setData(epyqlib.utils.qt.UserRoles.raw, p.uuid)
             if p.uuid == raw:
                 it.setSelected(True)
 
         editor.setMinimumHeight(editor.sizeHint().height())
+        editor.itemClicked.connect(
+            lambda: epyqlib.attrsmodel.hide_popup(editor),
+        )
         editor.show()
 
     def setModelData(self, editor, model, index):
-        index = epyqlib.utils.qt.resolve_index_to_model(index)
-        model = index.model()
-
         selected_item = editor.currentItem()
-        datum = str(selected_item.uuid)
+        datum = str(selected_item.data(epyqlib.utils.qt.UserRoles.raw))
         model.setData(index, datum)
+
 
 @graham.schemify(tag='data_point', register=True)
 @epyqlib.attrsmodel.ify()
