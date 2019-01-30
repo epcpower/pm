@@ -164,7 +164,7 @@ class DataPoint(epyqlib.treenode.TreeNode):
         human_name='Scale Factor',
         allow_none=True,
         data_display=name_from_uuid,
-        list_selection_path=('..', 'Fixed Block'),
+        list_selection_path=('..', '..', 'Fixed Block'),
         override_delegate=ScaleFactorDelegate,
     )
     parameter_uuid = epyqlib.attrsmodel.attr_uuid(
