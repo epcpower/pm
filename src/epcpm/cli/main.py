@@ -86,7 +86,7 @@ def build(project, target_path, only_if_stale):
         project=loaded_project,
         target_directory=target_path,
         paths=paths,
-        first_time=True,
+        first_time=False,
     )
 
     click.echo()
