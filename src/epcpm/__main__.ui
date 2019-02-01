@@ -14,16 +14,25 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
+   <layout class="QGridLayout" name="gridLayout_5">
     <item row="0" column="0">
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QTreeView" name="parameter_view">
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
+      <widget class="QWidget" name="gridLayoutWidget">
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="2" column="0">
+         <widget class="QTreeView" name="parameter_view">
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="SearchBox" name="parameter_search_box" native="true"/>
+        </item>
+       </layout>
       </widget>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
@@ -35,11 +44,18 @@
         </attribute>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QTreeView" name="can_view">
-           <property name="alternatingRowColors">
-            <bool>true</bool>
-           </property>
-          </widget>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <item row="1" column="0">
+            <widget class="QTreeView" name="can_view">
+             <property name="alternatingRowColors">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="SearchBox" name="can_search_box" native="true"/>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -49,11 +65,14 @@
         </attribute>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QTreeView" name="sunspec_view">
-           <property name="alternatingRowColors">
-            <bool>true</bool>
-           </property>
-          </widget>
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="1" column="0">
+            <widget class="QTreeView" name="sunspec_view"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="SearchBox" name="sunspec_search_box" native="true"/>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -63,11 +82,14 @@
         </attribute>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QTreeView" name="value_set_view">
-           <property name="alternatingRowColors">
-            <bool>true</bool>
-           </property>
-          </widget>
+          <layout class="QGridLayout" name="gridLayout_4">
+           <item row="1" column="0">
+            <widget class="QTreeView" name="value_set_view"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="SearchBox" name="value_set_search_box" native="true"/>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -110,12 +132,8 @@
     <addaction name="menu_Project"/>
     <addaction name="action_new_value_set_2"/>
     <addaction name="separator"/>
-    <addaction name="action_import_sym"/>
-    <addaction name="action_export_sym"/>
     <addaction name="action_import_smdx"/>
-    <addaction name="action_full_import"/>
     <addaction name="action_full_export"/>
-    <addaction name="action_full_export_first_time"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -216,6 +234,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SearchBox</class>
+   <extends>QWidget</extends>
+   <header>epyqlib.searchbox</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

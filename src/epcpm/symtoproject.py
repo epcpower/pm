@@ -1009,7 +1009,7 @@ def go_add_tables(parameters_root, can_root):
             can_table.multiplexer_range_first = can_table_definition.range[0]
             can_table.multiplexer_range_second = can_table_definition.range[-1]
             can_group.append_child(can_table)
-            can_table.update()
+            can_table.update(warn=False)
 
             for signal, values in can_table_definition.signals.items():
                 signal = can_table.descendent(signal)

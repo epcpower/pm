@@ -91,6 +91,7 @@ class Dialog(UiBase):
     paths_result = attr.ib(default=None)
     for_save = attr.ib(default=False)
     _parent = attr.ib(default=None)
+    directory = attr.ib(default=None)
 
     def __attrs_post_init__(self):
         super().__init__(self._parent)
@@ -126,12 +127,11 @@ class Dialog(UiBase):
         super().accept()
 
     def from_directory(self):
-        directory = QtWidgets.QFileDialog.getExistingDirectory(parent=self)
-
-        if len(directory) == 0:
+        self.directory = QtWidgets.QFileDialog.getExistingDirectory(parent=self)
+        if len(self.directory) == 0:
             return
 
-        paths = paths_from_directory(directory=directory)
+        paths = paths_from_directory(directory=self.directory)
 
         self.ui.can.setText(os.fspath(paths.can))
         self.ui.hierarchy.setText(os.fspath(paths.hierarchy))

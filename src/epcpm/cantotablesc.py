@@ -74,7 +74,8 @@ class Root:
 
         content = epyqlib.utils.general.format_nested_lists(lines)
 
-        self.path.write_text(content)
+        with self.path.open('w', newline='\n') as f:
+            f.write(content)
         return
 
 

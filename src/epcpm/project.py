@@ -26,26 +26,27 @@ def create_blank():
     return project
 
 
-def loads(s, project_path=None):
+def loads(s, project_path=None, post_load=True):
     project = graham.schema(Project).loads(s).data
 
     if project_path is not None:
         project.filename = pathlib.Path(project_path).absolute()
 
-    _post_load(project)
+    if post_load:
+        _post_load(project)
 
     return project
 
 
-def load(f):
-    project = loads(f.read(), project_path=f.name)
+def load(f, post_load=True):
+    project = loads(f.read(), project_path=f.name, post_load=post_load)
 
     return project
 
 
-def loadp(path):
+def loadp(path, post_load=True):
     with open(path) as f:
-        return load(f)
+        return load(f, post_load=post_load)
 
 
 def _post_load(project):
@@ -204,6 +205,9 @@ class Models:
         self.parameters.list_selection_roots['sunspec types'] = (
             sunspec_types_root
         )
+        self.sunspec.list_selection_roots['sunspec types'] = (
+            sunspec_types_root
+        )
         self.sunspec.list_selection_roots['enumerations'] = (
             enumerations_root
         )
@@ -275,7 +279,7 @@ class Project:
 
         self.paths = paths
 
-        with open(self.filename, 'w') as f:
+        with open(self.filename, 'w', newline='\n') as f:
             s = graham.dumps(self, indent=4).data
             f.write(s)
 
@@ -285,7 +289,7 @@ class Project:
         for path, model in zip(paths.values(), self.models.values()):
             s = graham.dumps(model.root, indent=4).data
 
-            with open(project_directory / path, 'w') as f:
+            with open(project_directory / path, 'w', newline='\n') as f:
                 f.write(s)
 
                 if not s.endswith('\n'):

@@ -32,7 +32,8 @@ def export(path, can_model, parameters_model):
     )
 
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(builder.gen())
+    with path.open('w', newline='\n') as f:
+        f.write(builder.gen())
 
 
 @builders(epcpm.canmodel.Root)
@@ -410,3 +411,39 @@ class MultiplexedMessage:
                 frame.signals.insert(0, matrix_signal)
 
         return frame
+
+
+def tweak_reply_signal(sig):
+    if sig.name.endswith('_command'):
+        sig.name = sig.name.replace('_command', '_status')
+        sig.attributes['LongName'] = sig.name
+    return sig
+
+
+@builders(epcpm.canmodel.MultiplexedMessageClone)
+@attr.s
+class MultiplexedMessageClone:
+    wrapped = attr.ib()
+    access_levels = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
+
+    def gen(self):
+        frame = builders.wrap(
+            wrapped=self.wrapped.original,
+            access_levels=self.access_levels,
+            parameter_uuid_finder=self.parameter_uuid_finder,
+        ).gen()
+ 
+        frame.name = self.wrapped.name
+        frame.id = self.wrapped.identifier
+        frame.comment = self.wrapped.comment
+        frame.attributes={
+            'Receivable': str(self.wrapped.receivable),
+            'Sendable': str(self.wrapped.sendable),
+        }
+        for sig in frame.signals[:]:
+            sig = tweak_reply_signal(sig)
+
+        return frame
+
+

@@ -32,7 +32,7 @@ import epcpm.sunspectoxlsx
 import epcpm.symtoproject
 
 # See file COPYING in this source tree
-__copyright__ = 'Copyright 2017, EPC Power Corp.'
+__copyright__ = 'Copyright 2019, EPC Power Corp.'
 __license__ = 'GPLv2+'
 
 
@@ -137,6 +137,32 @@ class Window:
 
         self.set_title()
 
+        search_boxes = (
+            (
+                self.ui.parameter_view,
+                self.ui.parameter_search_box,
+                epyqlib.pm.parametermodel.columns.index_of('Name'),
+            ),
+            (
+                self.ui.can_view,
+                self.ui.can_search_box,
+                epcpm.canmodel.columns.index_of('Name'),
+            ),
+            (
+                self.ui.sunspec_view,
+                self.ui.sunspec_search_box,
+                epcpm.sunspecmodel.columns.index_of('Name'),
+            ),
+            (
+                self.ui.value_set_view,
+                self.ui.value_set_search_box,
+                epyqlib.pm.valuesetmodel.columns.index_of('Name'),
+            ),
+        )
+
+        for view, search_box, column in search_boxes:
+            search_box.connect_to_view(view=view, column=column)
+
     def set_title(self, detail=None):
         title = 'Parameter Manager v{}'.format(epcpm.__version__)
 
@@ -148,7 +174,9 @@ class Window:
     def set_model(self, name, view_model):
         self.view_models[name] = view_model
 
-        view_model.proxy = QtCore.QSortFilterProxyModel()
+        view_model.proxy = epyqlib.utils.qt.PySortFilterProxyModel(
+            filter_column=None,
+        )
         view_model.proxy.setSortCaseSensitivity(QtCore.Qt.CaseInsensitive)
         view_model.proxy.setSourceModel(view_model.model.model)
         view_model.view.setModel(view_model.proxy)
@@ -280,6 +308,7 @@ class Window:
         epcpm.importexport.full_export(
             project=self.project,
             paths=paths,
+            target_directory=dialog.directory,
             first_time=first_time,
         )
 
@@ -325,6 +354,8 @@ class Window:
         for (name, model_view), model in i:
             view = model_view.view
 
+            view.setAutoScroll(True)
+            view.setAutoScrollMargin(32)
             view.setDropIndicatorShown(True)
             view.setDragEnabled(True)
             view.setAcceptDrops(True)
@@ -576,6 +607,7 @@ class Window:
                     index=new_index,
                 )
                 view.setCurrentIndex(view_index)
+                view.edit(view_index)
 
     def generate_code(self, node):
         builder = epcpm.parameterstoc.builders.wrap(node)

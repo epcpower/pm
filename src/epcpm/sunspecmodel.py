@@ -6,7 +6,9 @@ import marshmallow
 
 import epyqlib.attrsmodel
 import epyqlib.pm.parametermodel
+import epyqlib.utils
 from PyQt5 import QtCore
+from PyQt5 import QtWidgets
 
 
 class ConsistencyError(Exception):
@@ -94,7 +96,7 @@ def name_from_uuid(node, value, model):
 
     try:
         target_node = model.node_from_uuid(value)
-    except NotFoundError:
+    except epyqlib.attrsmodel.NotFoundError:
         return str(value)
 
     return model.node_from_uuid(target_node.parameter_uuid).abbreviation
@@ -107,10 +109,58 @@ def name_from_uuid_and_parent(node, value, model):
 
     try:
         target_node = model.node_from_uuid(value)
-    except NotFoundError:
+    except epyqlib.attrsmodel.NotFoundError:
         return str(value)
 
     return '{} - {}'.format(target_node.tree_parent.name, target_node.name)
+
+
+class ScaleFactorDelegate(QtWidgets.QStyledItemDelegate):
+    def __init__(self, text_column_name, root, parent):
+        super().__init__(parent)
+
+        self.root = root
+
+    def createEditor(self, parent, option, index):
+        return QtWidgets.QListWidget(parent=parent)
+
+    def setEditorData(self, editor, index):
+        model_index = epyqlib.attrsmodel.to_source_model(index)
+        model = model_index.model()
+
+        item = model.itemFromIndex(model_index)
+        attrs_model = item.data(epyqlib.utils.qt.UserRoles.attrs_model)
+
+        raw = model.data(model_index, epyqlib.utils.qt.UserRoles.raw)
+
+        points = []
+        for pt in self.root.children:
+            type_node = attrs_model.node_from_uuid(pt.type_uuid)
+            if type_node.name == 'sunssf':
+                points.append(pt)
+
+        it = QtWidgets.QListWidgetItem(editor)
+        it.setText('')
+        it.setData(epyqlib.utils.qt.UserRoles.raw, '')
+        it.setSelected(True)
+        for p in points:
+            it = QtWidgets.QListWidgetItem(editor)
+            param = attrs_model.node_from_uuid(p.parameter_uuid)
+            it.setText(param.abbreviation)
+            it.setData(epyqlib.utils.qt.UserRoles.raw, p.uuid)
+            if p.uuid == raw:
+                it.setSelected(True)
+
+        editor.setMinimumHeight(editor.sizeHint().height())
+        editor.itemClicked.connect(
+            lambda: epyqlib.attrsmodel.hide_popup(editor),
+        )
+        editor.show()
+
+    def setModelData(self, editor, model, index):
+        selected_item = editor.currentItem()
+        datum = str(selected_item.data(epyqlib.utils.qt.UserRoles.raw))
+        model.setData(index, datum)
 
 
 @graham.schemify(tag='data_point', register=True)
@@ -123,6 +173,8 @@ class DataPoint(epyqlib.treenode.TreeNode):
         human_name='Scale Factor',
         allow_none=True,
         data_display=name_from_uuid,
+        list_selection_path=('..', '..', 'Fixed Block'),
+        override_delegate=ScaleFactorDelegate,
     )
     parameter_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,
@@ -250,6 +302,7 @@ class DataPoint(epyqlib.treenode.TreeNode):
             return self.tree_parent.can_delete(node=self)
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 def check_block_offsets_and_length(self):
@@ -260,9 +313,10 @@ def check_block_offsets_and_length(self):
     for point in self.children:
         type_ = root.model.node_from_uuid(point.type_uuid)
         if type_.name != 'string' and point.size != type_.value:
+            point_name = root.model.node_from_uuid(point.parameter_uuid).name
             raise MismatchedSizeAndTypeError(
                 f'Expected {type_.value} for {type_.name}'
-                f', is {point.size} for {point.name}'
+                f', is {point.size} for {point_name}'
             )
 
         length += point.size
@@ -345,6 +399,7 @@ class HeaderBlock(epyqlib.treenode.TreeNode):
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='sunspec_fixed_block', register=True)
@@ -391,6 +446,7 @@ class FixedBlock(epyqlib.treenode.TreeNode):
     check_offsets_and_length = check_block_offsets_and_length
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='sunspec_table_repeating_block', register=True)
@@ -456,6 +512,7 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
     check_offsets_and_length = check_block_offsets_and_length
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='sunspec_table_repeating_block', register=True)
@@ -583,6 +640,7 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='table', register=True)
@@ -726,6 +784,7 @@ class Table(epyqlib.treenode.TreeNode):
                 block_node.append_child(point_node)
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='sunspec_model', register=True)
@@ -800,6 +859,8 @@ class Model(epyqlib.treenode.TreeNode):
             length += block.check_offsets_and_length()
 
         return length
+
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 #class Repeating...?

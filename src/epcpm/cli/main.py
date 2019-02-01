@@ -12,6 +12,7 @@ import epcpm.cli.exportdocx
 import epcpm.cli.utils
 import epcpm.importexport
 import epcpm.importexportdialog
+import epcpm.project
 import epcpm.smdx
 
 
@@ -59,13 +60,31 @@ export.add_command(epcpm.cli.exportdocx.cli, name='docx')
 @export.command()
 @epcpm.cli.utils.project_option(required=True)
 @epcpm.cli.utils.target_path_option(required=True)
-def build(project, target_path):
+@click.option('--if-stale/--assume-stale', 'only_if_stale')
+def build(project, target_path, only_if_stale):
     """Export PM data to embedded project directory"""
-    project = epcpm.project.loadp(project)
+    project = pathlib.Path(project)
+    target_path = pathlib.Path(target_path)
+
     paths = epcpm.importexportdialog.paths_from_directory(target_path)
 
+    if only_if_stale:
+        if not epcpm.importexport.is_stale(project=project, paths=paths):
+            click.echo(
+                'Generated files appear to be up to date, skipping export',
+            )
+
+            return
+
+        click.echo(
+            'Generated files appear to be out of date, starting export'
+        )
+
+    loaded_project = epcpm.project.loadp(project)
+
     epcpm.importexport.full_export(
-        project=project,
+        project=loaded_project,
+        target_directory=target_path,
         paths=paths,
         first_time=True,
     )
@@ -184,10 +203,17 @@ def transition(target_path):
         click.echo('Sorry, that response is not acceptable to continue.')
         return
 
+    c_project = target_path/'.cproject'
+
     library_path = target_path / 'embedded-library'
 
     original_spreadsheet = library_path/'MODBUS_SunSpec-EPC.xls'
     new_spreadsheet = original_spreadsheet.with_suffix('.xlsx')
+
+    tables_py = library_path/'python'/'embeddedlibrary'/'tables.py'
+    sunspecparser_py = (
+        library_path/'python'/'embeddedlibrary'/'sunspecparser.py'
+    )
 
     subprocess.run(['git', 'reset', '.'], check=True, cwd=library_path)
     subprocess.run(['git', 'checkout', '--', '.'], check=True, cwd=library_path)
@@ -198,6 +224,11 @@ def transition(target_path):
             '--convert-to', 'xlsx',
             '--outdir', os.fspath(library_path),
             os.fspath(original_spreadsheet)],
+        check=True,
+        cwd=library_path,
+    )
+    subprocess.run(
+        ['git', 'rm', os.fspath(tables_py)],
         check=True,
         cwd=library_path,
     )
@@ -225,12 +256,37 @@ def transition(target_path):
         cwd=target_path,
     )
     subprocess.run(
-        [os.fspath(target_path / 'gridtied'), 'build', '--target', 'Release'],
-        check=False,
+        [target_path/'venv'/'bin'/'sunspecparser', os.fspath(new_spreadsheet)],
+        check=True,
+        cwd=library_path, # it expects to be in _some_ subdirectory and then ..
+    )
+    subprocess.run(
+        ['sed', '-i', r's/\.xls/\.xlsx/g', os.fspath(c_project)],
+        check=True,
+        cwd=target_path,
+    )
+    subprocess.run(
+        ['git', 'add', os.fspath(c_project)],
+        check=True,
         cwd=target_path,
     )
 
+    content = sunspecparser_py.read_text()
+    with sunspecparser_py.open('w', newline='\n') as f:
+        for line in content.splitlines():
+            f.write(line + '\n')
+            if r"""'#include "faultHandler.h"\n'""" in line:
+                f.write(r"""            c_file.write('#include "sunspecInterface{:>05}.h"\n'.format(model))""" '\n')
+                f.write(r"""            c_file.write('#include "math.h"\n')""" '\n')
+
+    subprocess.run(
+        ['git', 'add', os.fspath(sunspecparser_py)],
+        check=True,
+        cwd=library_path,
+    )
+
     paths = epcpm.importexportdialog.paths_from_directory(target_path)
+    print(paths)
 
     project = epcpm.importexport.full_import(
         paths=paths,

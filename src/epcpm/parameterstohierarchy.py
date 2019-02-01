@@ -20,7 +20,8 @@ def export(path, can_model, parameters_model):
     )
 
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(builder.gen(indent=4))
+    with path.open('w', newline='\n') as f:
+        f.write(builder.gen(index=4))
 
 
 @builders(epyqlib.pm.parametermodel.Root)

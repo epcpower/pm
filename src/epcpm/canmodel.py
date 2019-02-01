@@ -21,6 +21,10 @@ class ConsistencyError(Exception):
     pass
 
 
+class IncompleteTableDefinitionError(Exception):
+    pass
+
+
 def based_int(v):
     if isinstance(v, str):
         return int(v, 0)
@@ -44,15 +48,6 @@ class HexadecimalIntegerField(marshmallow.fields.Field):
             return None
 
         return int(value, 0)
-
-
-@staticmethod
-def child_from(node):
-    if isinstance(node, epyqlib.pm.parametermodel.Parameter):
-        return Signal(name=node.name, parameter_uuid=node.uuid)
-
-    if isinstance(node, epyqlib.pm.parametermodel.Table):
-        return CanTable(table_uuid=node.uuid)
 
 
 @graham.schemify(tag='signal')
@@ -160,6 +155,7 @@ class Signal(epyqlib.treenode.TreeNode):
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='message')
@@ -240,7 +236,9 @@ class Message(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
-    child_from = child_from
+    @staticmethod
+    def child_from(node):
+        return Signal(name=node.name, parameter_uuid=node.uuid)
 
     @classmethod
     def all_addable_types(cls):
@@ -259,6 +257,7 @@ class Message(epyqlib.treenode.TreeNode):
         return True
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='multiplexer')
@@ -338,7 +337,8 @@ class Multiplexer(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
-    child_from = child_from
+    def child_from(self, node):
+        return Signal(name=node.name, parameter_uuid=node.uuid)
 
     @classmethod
     def all_addable_types(cls):
@@ -363,6 +363,7 @@ class Multiplexer(epyqlib.treenode.TreeNode):
         return True
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='multiplexed_message')
@@ -439,8 +440,6 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
-    child_from = child_from
-
     def can_drop_on(self, node):
         return isinstance(
             node,
@@ -474,7 +473,112 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
 
         return epyqlib.attrsmodel.create_addable_types(types)
 
+    @staticmethod
+    def child_from(node):
+        if isinstance(node, epyqlib.pm.parametermodel.Parameter):
+            return Signal(name=node.name, parameter_uuid=node.uuid)
+
+        if isinstance(node, epyqlib.pm.parametermodel.Table):
+            return CanTable(table_uuid=node.uuid)
+
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    internal_move = epyqlib.attrsmodel.default_internal_move
+
+
+@graham.schemify(tag='multiplexed_message_clone')
+@epyqlib.attrsmodel.ify()
+@epyqlib.utils.qt.pyqtify()
+@attr.s(hash=False)
+class MultiplexedMessageClone(epyqlib.treenode.TreeNode):
+    name = attr.ib(
+        default='New Multiplexed Message Clone',
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+
+    identifier = attr.ib(
+        default=0x1fffffff,
+        convert=based_int,
+        metadata=graham.create_metadata(
+            field=HexadecimalIntegerField(),
+        ),
+    )
+    epyqlib.attrsmodel.attrib(
+        data_display=hex_upper,
+        attribute=identifier,
+    )
+
+    original = attr.ib(
+        default=None,
+        metadata=graham.create_metadata(
+            field=epyqlib.attrsmodel.Reference(allow_none=True),
+        ),
+    )
+    epyqlib.attrsmodel.attrib(
+        data_display=lambda node, value, model: node.original.name,
+        attribute=original,
+    )
+    sendable = attr.ib(
+        default=True,
+        convert=epyqlib.attrsmodel.two_state_checkbox,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Boolean(),
+        ),
+    )
+    receivable = attr.ib(
+        default=True,
+        convert=epyqlib.attrsmodel.two_state_checkbox,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Boolean(),
+        ),
+    )
+    comment = attr.ib(
+        default=None,
+        convert=epyqlib.attrsmodel.to_str_or_none,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(allow_none=True),
+        ),
+    )
+    children = attr.ib(
+        default=attr.Factory(list),
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(fields=(
+            )),
+        ),
+    )
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    def can_drop_on(self, node):
+        return isinstance(node, MultiplexedMessage)
+
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+        return True
+
+    @classmethod
+    def all_addable_types(cls):
+        return epyqlib.attrsmodel.create_addable_types(())
+
+    @staticmethod
+    def addable_types():
+        return epyqlib.attrsmodel.create_addable_types(())
+
+    def child_from(self, node):
+        self.original = node
+
+        return None
+
+    @staticmethod
+    def remove_old_on_drop(node):
+        return False
+
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 @graham.schemify(tag='table', register=True)
@@ -543,7 +647,7 @@ class CanTable(epyqlib.treenode.TreeNode):
 
         return True
 
-    def update(self, table=None):
+    def update(self, table=None, warn=True):
         array_uuid_to_signal = {
             child.parameter_uuid: child
             for child in self.children
@@ -679,6 +783,8 @@ class CanTable(epyqlib.treenode.TreeNode):
 
         mux_value = self.multiplexer_range_first
 
+        warned_signals = set()
+
         for leaf_group in leaf_groups:
             is_group = False
             type_reference = leaf_group[0].original.tree_parent
@@ -688,9 +794,57 @@ class CanTable(epyqlib.treenode.TreeNode):
                 signal = array_uuid_to_signal[leaf_group[0].path[-1]]
                 is_group = True
             else:
-                raise ConsistencyError()
+                if warn:
+                    # TODO: this really needs to be done through a logging
+                    #       mechanism of some sort
+                    from PyQt5 import QtWidgets
+
+                    nodes = []
+                    parent = self
+                    while parent != None:
+                        nodes.append(parent)
+                        parent = parent.tree_parent
+
+                    s = '/'.join(node.name for node in reversed(nodes))
+
+                    epyqlib.utils.qt.dialog(
+                        # parent=_parent,
+                        parent=None,
+                        title='Table Error',
+                        message=(
+                            f'{s} has no arrays or groups, these are required'
+                        ),
+                        icon=QtWidgets.QMessageBox.Warning,
+                    )
+
+                return
 
             if signal.bits == 0:
+                if warn:
+                    # TODO: this really needs to be done through a logging
+                    #       mechanism of some sort
+                    from PyQt5 import QtWidgets
+
+                    if signal not in warned_signals:
+                        nodes = []
+                        parent = signal
+                        while parent != None:
+                            nodes.append(parent)
+                            parent = parent.tree_parent
+
+                        s = '/'.join(node.name for node in reversed(nodes))
+                        epyqlib.utils.qt.dialog(
+                            # parent=_parent,
+                            parent=None,
+                            title='Table Error',
+                            message=(
+                                f'{s} has bit length of {signal.bits}'
+                                f', must be nonzero'
+                            ),
+                            icon=QtWidgets.QMessageBox.Warning,
+                        )
+                        warned_signals.add(signal)
+
                 continue
 
             if not is_group:
@@ -781,17 +935,37 @@ class CanTable(epyqlib.treenode.TreeNode):
 
                 self.append_child(multiplexer)
 
+    def child_from(self, node):
+        if isinstance(node, epyqlib.pm.parametermodel.Table):
+            self.table_uuid = node.uuid
+            return None
+
+        raise Exception('unexpected')
+
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
-    child_from = epyqlib.attrsmodel.default_child_from
+    internal_move = epyqlib.attrsmodel.default_internal_move
 
 
 Root = epyqlib.attrsmodel.Root(
     default_name='CAN',
-    valid_types=(Message, MultiplexedMessage, CanTable),
+    valid_types=(
+        Message,
+        MultiplexedMessage,
+        MultiplexedMessageClone,
+        CanTable,
+    ),
 )
 
 types = epyqlib.attrsmodel.Types(
-    types=(Root, Message, Signal, MultiplexedMessage, Multiplexer, CanTable),
+    types=(
+        Root,
+        Message,
+        Signal,
+        MultiplexedMessage,
+        MultiplexedMessageClone,
+        Multiplexer,
+        CanTable,
+    ),
 )
 
 
@@ -802,7 +976,13 @@ def merge(name, *types):
 
 columns = epyqlib.attrsmodel.columns(
     merge('name', *types.types.values()),
-    merge('identifier', Message, MultiplexedMessage, Multiplexer),
+    merge(
+        'identifier',
+        Message,
+        MultiplexedMessage,
+        MultiplexedMessageClone,
+        Multiplexer,
+    ),
     merge('multiplexer_range_first', CanTable),
     merge('multiplexer_range_last', CanTable),
     (
@@ -820,11 +1000,28 @@ columns = epyqlib.attrsmodel.columns(
     merge('signed', Signal),
     merge('factor', Signal),
 
-    merge('sendable', Message, MultiplexedMessage),
-    merge('receivable', Message, MultiplexedMessage),
+    merge(
+        'sendable', 
+        Message, 
+        MultiplexedMessage, 
+        MultiplexedMessageClone,
+        ),
+    merge(
+        'receivable', 
+        Message, 
+        MultiplexedMessage,
+        MultiplexedMessageClone,
+        ),
     merge('start_bit', Signal),
-    merge('comment', Message, Multiplexer, MultiplexedMessage),
+    merge(
+        'comment', 
+        Message, 
+        Multiplexer, 
+        MultiplexedMessage,
+        MultiplexedMessageClone,
+        ),
 
+    merge('original', MultiplexedMessageClone),
 
     merge('parameter_uuid', Signal),
     merge('uuid', *types.types.values()),
