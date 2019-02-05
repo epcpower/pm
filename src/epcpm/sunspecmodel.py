@@ -755,12 +755,17 @@ class Table(epyqlib.treenode.TreeNode):
             if not_first_curve:
                 continue
 
-            curve_count = len(
-                next(
-                    layer for layer in combination
-                    if layer.tree_parent.name == 'Curves'
-                ).tree_parent.children
-            )
+            curve_enumeration_search = [
+                layer for layer in combination
+                if layer.tree_parent.name == 'Curves'
+            ]
+            if len(curve_enumeration_search) == 0:
+                curve_count = 0
+            elif len(curve_enumeration_search) == 1:
+                curve_enumeration = curve_enumeration_search[0].tree_parent
+                curve_count = len(curve_enumeration.children)
+            else:
+                raise blue
 
             base_path = tuple(node.uuid for node in combination)
 
@@ -932,6 +937,7 @@ columns = epyqlib.attrsmodel.columns(
         + merge('parameter_uuid', DataPoint)
     ),
     merge('length', Model) + merge('size', DataPoint),
+    merge('repeats', TableRepeatingBlock),
     merge('factor_uuid', DataPoint),
     merge('enumeration_uuid', DataPoint),
     merge('type_uuid', DataPoint),
