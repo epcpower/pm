@@ -89,6 +89,15 @@ def build_sunspec_types_enumeration():
     return enumeration
 
 
+def create_size_attribute():
+    return attr.ib(
+        default=0,
+        converter=int,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(),
+        ),
+    )
+
 # TODO: CAMPid 8695426542167924656654271657917491654
 def name_from_uuid(node, value, model):
     if value is None:
@@ -221,13 +230,7 @@ class DataPoint(epyqlib.treenode.TreeNode):
         ),
     )
 
-    size = attr.ib(
-        default=0,
-        converter=int,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.Integer(),
-        ),
-    )
+    size = create_size_attribute()
 
     enumeration_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,
@@ -509,7 +512,9 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
     def can_delete(self, node=None):
         return False
 
-    check_offsets_and_length = check_block_offsets_and_length
+    def check_offsets_and_length(self):
+        return self.original.check_block_offsets_and_length()
+
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
     internal_move = epyqlib.attrsmodel.default_internal_move
@@ -527,7 +532,7 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
 @attr.s(hash=False)
 class TableDataPointReference(epyqlib.treenode.TreeNode):
     name = attr.ib(
-        default='Table Repeating Block',
+        default='Table Data Point Reference',
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(),
         ),
@@ -606,6 +611,11 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
         converter=int,
     )
 
+    repeats = attr.ib(
+        default=0,
+        converter=int,
+    )
+
     path = attr.ib(
         factory=tuple,
     )
@@ -637,6 +647,9 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
             return self.tree_parent.can_delete(node=self)
 
         return False
+
+    def check_block_offsets_and_length(self):
+        return self.repeats * check_block_offsets_and_length(self)
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
@@ -742,6 +755,13 @@ class Table(epyqlib.treenode.TreeNode):
             if not_first_curve:
                 continue
 
+            curve_count = len(
+                next(
+                    layer for layer in combination
+                    if layer.tree_parent.name == 'Curves'
+                ).tree_parent.children
+            )
+
             base_path = tuple(node.uuid for node in combination)
 
             block_node = old_nodes_by_path.get(base_path)
@@ -756,6 +776,8 @@ class Table(epyqlib.treenode.TreeNode):
                     path=base_path,
                 )
 
+            block_node.repeats = curve_count
+
             self.append_child(block_node)
 
             in_tree, = table.group.nodes_by_attribute(
@@ -763,6 +785,8 @@ class Table(epyqlib.treenode.TreeNode):
                 attribute_name='path',
             )
             # continue
+
+            block_offset = 0
 
             array_elements = itertools.chain.from_iterable(
                 zip(*(
@@ -781,7 +805,10 @@ class Table(epyqlib.treenode.TreeNode):
                         parameter_uuid=element.uuid,
                     )
                 point_node.type_uuid = reference_data_point.type_uuid
+                point_node.size = reference_data_point.size
+                point_node.block_offset = block_offset
                 block_node.append_child(point_node)
+                block_offset += point_node.size
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move

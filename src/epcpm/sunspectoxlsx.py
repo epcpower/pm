@@ -151,14 +151,16 @@ class Model:
 
         rows = []
 
-        model_types = ['Header', 'Fixed Block']
+        model_types = ['Header', 'Fixed Block', 'Repeating Block']
 
-        for (i, child), model_type in itertools.zip_longest(enumerate(self.wrapped.children), model_types):
+        zipped = zip(enumerate(self.wrapped.children), model_types)
+        for (i, child), model_type in zipped:
             builder = builders.wrap(
                 wrapped=child,
                 add_padding=add_padding and i == 1,
                 padding_type=self.padding_type,
                 model_type=model_type,
+                model_id=self.wrapped.id,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
 
@@ -253,6 +255,24 @@ class Enumerator:
         return row
 
 
+def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
+    scale_factor_from_uuid = {}
+    for point in points:
+        if point.type_uuid is None:
+            continue
+
+        type_node = parameter_uuid_finder(point.type_uuid)
+
+        if type_node is None:
+            continue
+
+        if type_node.name == 'sunssf':
+            scale_factor_from_uuid[point.uuid] = point
+
+    return scale_factor_from_uuid
+
+
+@builders(epcpm.sunspecmodel.TableRepeatingBlock)
 @builders(epcpm.sunspecmodel.HeaderBlock)
 @builders(epcpm.sunspecmodel.FixedBlock)
 @attr.s
@@ -261,21 +281,16 @@ class Block:
     add_padding = attr.ib()
     padding_type = attr.ib()
     model_type = attr.ib()
+    model_id = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
-        scale_factor_from_uuid = {}
-        for point in self.wrapped.children:
-            if point.type_uuid is None:
-                continue
+        # TODO: CAMPid 07548795421667967542697543743987
 
-            type_node = self.parameter_uuid_finder(point.type_uuid)
-
-            if type_node is None:
-                continue
-
-            if type_node.name == 'sunssf':
-                scale_factor_from_uuid[point.uuid] = point
+        scale_factor_from_uuid = build_uuid_scale_factor_dict(
+            points=self.wrapped.children,
+            parameter_uuid_finder=self.parameter_uuid_finder,
+        )
 
         rows = []
 
@@ -302,6 +317,7 @@ class Block:
                 model_type=self.model_type,
                 scale_factor_from_uuid=scale_factor_from_uuid,
                 parameter_uuid_finder=self.parameter_uuid_finder,
+                model_id=self.model_id,
             )
             rows.append(builder.gen())
 
@@ -310,15 +326,25 @@ class Block:
 
 @builders(epcpm.sunspecmodel.TableRepeatingBlockReference)
 @attr.s
-class Block:
+class TableRepeatingBlockReference:
     wrapped = attr.ib()
     add_padding = attr.ib()
     padding_type = attr.ib()
     model_type = attr.ib()
+    model_id = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
-        return []
+        builder = builders.wrap(
+            wrapped=self.wrapped.original,
+            model_type=self.model_type,
+            parameter_uuid_finder=self.parameter_uuid_finder,
+            add_padding=self.add_padding,
+            padding_type=self.padding_type,
+            model_id=self.model_id,
+        )
+
+        return builder.gen()
 
 
 @builders(epcpm.sunspecmodel.DataPoint)
@@ -327,6 +353,7 @@ class Point:
     wrapped = attr.ib()
     scale_factor_from_uuid = attr.ib()
     model_type = attr.ib()
+    model_id = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     # TODO: CAMPid 07397546759269756456100183066795496952476951653
@@ -362,7 +389,10 @@ class Point:
             meta = '[Meta_Value]'
 
             getter = [
-                getter_call(point=self.wrapped, parameter=parameter) + ';',
+                getter_call(
+                    parameter=parameter,
+                    model_id=self.model_id,
+                ) + ';',
             ]
             setter = []
 
@@ -434,7 +464,10 @@ class Point:
             row.get = epcpm.c.format_nested_lists(getter)
 
             setter.append(
-                setter_call(point=self.wrapped, parameter=parameter) + ';',
+                setter_call(
+                    parameter=parameter,
+                    model_id=self.model_id,
+                ) + ';',
             )
             if not parameter.read_only:
                 row.set = epcpm.c.format_nested_lists(setter)
@@ -481,22 +514,34 @@ def adjust_assignment(
     return result
 
 
-def getter_setter_name(get_set, point, parameter):
+def getter_setter_name(get_set, parameter, model_id):
     return '{get_set}SunspecModel{model_id}_{abbreviation}'.format(
         get_set=get_set,
-        model_id=point.tree_parent.tree_parent.id,
+        model_id=model_id,
         abbreviation=parameter.abbreviation,
     )
 
 
-def getter_call(point, parameter):
-    return getter_setter_call(get_set='get', point=point, parameter=parameter)
+def getter_call(parameter, model_id):
+    return getter_setter_call(
+        get_set='get',
+        parameter=parameter,
+        model_id=model_id,
+    )
 
 
-def setter_call(point, parameter):
-    return getter_setter_call(get_set='set', point=point, parameter=parameter)
+def setter_call(parameter, model_id):
+    return getter_setter_call(
+        get_set='set',
+        parameter=parameter,
+        model_id=model_id,
+    )
 
 
-def getter_setter_call(get_set, point, parameter):
-    name = getter_setter_name(get_set=get_set, point=point, parameter=parameter)
+def getter_setter_call(get_set, parameter, model_id):
+    name = getter_setter_name(
+        get_set=get_set,
+        parameter=parameter,
+        model_id=model_id,
+    )
     return f'{name}()'
