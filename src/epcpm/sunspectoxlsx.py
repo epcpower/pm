@@ -283,6 +283,7 @@ class Block:
     model_type = attr.ib()
     model_id = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
+    is_table = attr.ib(default=False)
 
     def gen(self):
         # TODO: CAMPid 07548795421667967542697543743987
@@ -318,6 +319,7 @@ class Block:
                 scale_factor_from_uuid=scale_factor_from_uuid,
                 parameter_uuid_finder=self.parameter_uuid_finder,
                 model_id=self.model_id,
+                is_table=self.is_table,
             )
             rows.append(builder.gen())
 
@@ -342,6 +344,7 @@ class TableRepeatingBlockReference:
             add_padding=self.add_padding,
             padding_type=self.padding_type,
             model_id=self.model_id,
+            is_table=True,
         )
 
         return builder.gen()
@@ -354,6 +357,7 @@ class Point:
     scale_factor_from_uuid = attr.ib()
     model_type = attr.ib()
     model_id = attr.ib()
+    is_table = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     # TODO: CAMPid 07397546759269756456100183066795496952476951653
@@ -392,6 +396,7 @@ class Point:
                 getter_call(
                     parameter=parameter,
                     model_id=self.model_id,
+                    is_table=self.is_table,
                 ) + ';',
             ]
             setter = []
@@ -409,7 +414,8 @@ class Point:
                     f'{sunspec_model_variable}.{parameter.abbreviation}'
                 )
 
-                converters = {
+                # TODO: CAMPid 075780541068182645821856068542023499
+                converter = {
                     'uint32': {
                         'get': 'sunspecUint32ToSSU32',
                         'set': 'sunspecSSU32ToUint32',
@@ -421,9 +427,9 @@ class Point:
                     },
                 }.get(row.type)
 
-                if converters is not None:
-                    get_converter = converters['get']
-                    set_converter = converters['set']
+                if converter is not None:
+                    get_converter = converter['get']
+                    set_converter = converter['set']
                     getter.extend([
                         f'{get_converter}(',
                         [
@@ -467,6 +473,7 @@ class Point:
                 setter_call(
                     parameter=parameter,
                     model_id=self.model_id,
+                    is_table=self.is_table,
                 ) + ';',
             )
             if not parameter.read_only:
@@ -514,34 +521,47 @@ def adjust_assignment(
     return result
 
 
-def getter_setter_name(get_set, parameter, model_id):
-    return '{get_set}SunspecModel{model_id}_{abbreviation}'.format(
+def getter_setter_name(get_set, parameter, model_id, is_table):
+    if is_table:
+        table_option = '_{table_option}'
+    else:
+        table_option = ''
+
+    format_string = (
+        '{get_set}SunspecModel{model_id}{table_option}_{abbreviation}'
+    )
+
+    return format_string.format(
         get_set=get_set,
         model_id=model_id,
         abbreviation=parameter.abbreviation,
+        table_option=table_option,
     )
 
 
-def getter_call(parameter, model_id):
+def getter_call(parameter, model_id, is_table):
     return getter_setter_call(
         get_set='get',
         parameter=parameter,
         model_id=model_id,
+        is_table=is_table,
     )
 
 
-def setter_call(parameter, model_id):
+def setter_call(parameter, model_id, is_table):
     return getter_setter_call(
         get_set='set',
         parameter=parameter,
         model_id=model_id,
+        is_table=is_table,
     )
 
 
-def getter_setter_call(get_set, parameter, model_id):
+def getter_setter_call(get_set, parameter, model_id, is_table):
     name = getter_setter_name(
         get_set=get_set,
         parameter=parameter,
         model_id=model_id,
+        is_table=is_table,
     )
     return f'{name}()'

@@ -14,6 +14,7 @@ import epcpm.project
 import epcpm.smdxtosunspec
 import epcpm.sunspecmodel
 import epcpm.sunspecmodel
+import epcpm.sunspectotablesc
 import epcpm.sunspectomanualc
 import epcpm.sunspectomanualh
 import epcpm.sunspectoxlsx
@@ -128,6 +129,12 @@ def full_export(project, paths, target_directory, first_time=False):
     epcpm.cantotablesc.export(
         path=paths.tables_c,
         can_model=project.models.can,
+    )
+
+    epcpm.sunspectotablesc.export(
+        c_path=paths.sunspec_tables_c,
+        h_path=paths.sunspec_tables_c.with_suffix('.h'),
+        sunspec_model=project.models.sunspec,
     )
 
     if first_time:
