@@ -193,7 +193,7 @@ class DataPoint:
             # TODO: CAMPid 075780541068182645821856068542023499
             converter = {
                 'uint32': {
-                    'get': 'sunspecUint32ToSSU32',
+                    'get': 'sunspecUint32ToSSU32_returns',
                     'set': 'sunspecSSU32ToUint32',
                 },
                 'int32': {
@@ -208,25 +208,27 @@ class DataPoint:
             if converter is not None:
                 converter = converter[get_set]
                 if get_set == 'get':
-                    pass
-                    # body_lines.extend([
-                    #     f'__typeof__({interface_variable})'
-                    #     *embedded.format(
-                    #         curve_type=self.curve_type,
-                    #         interface_signal='temporary',
-                    #         point_index=parameter.index,
-                    #         axis=axis,
-                    #         upper_axis=axis.upper(),
-                    #         curve_index=self.curve_index,
-                    #     ),
-                    #     f'__typeof__({interface_variable}) temporary;',
-                    #     f'{converter}(',
-                    #     [
-                    #         f'&temporary,',
-                    #         f'{internal_variable}',
-                    #     ],
-                    #     ');',
-                    # ])
+                    formatted = embedded.format(
+                        curve_type=self.curve_type,
+                        interface_signal=interface_variable,
+                        point_index=parameter.index,
+                        axis=axis,
+                        upper_axis=axis.upper(),
+                        curve_index=self.curve_index,
+                    )
+                    left, equals, right = (
+                        element.strip()
+                        for element in formatted.partition('=')
+                    )
+
+                    right = right.rstrip(';')
+
+                    if equals != '=':
+                        raise Exception('do not yet know how to handle this')
+
+                    body_lines.append(
+                        f'{left} = {converter}({right});',
+                    )
                 elif get_set == 'set':
                     body_lines.append(embedded.format(
                         curve_type=self.curve_type,
