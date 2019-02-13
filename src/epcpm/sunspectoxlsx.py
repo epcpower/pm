@@ -178,6 +178,16 @@ class Model:
             self.worksheet.append(attr.astuple(row))
 
         for block in self.wrapped.children:
+            to_be_handled = isinstance(
+                block,
+                (
+                    epcpm.sunspecmodel.HeaderBlock,
+                    epcpm.sunspecmodel.FixedBlock,
+                ),
+            )
+            if not to_be_handled:
+                continue
+
             for point in block.children:
                 enumeration_uuid = point.enumeration_uuid
                 if enumeration_uuid is None:
@@ -282,6 +292,7 @@ class Block:
     padding_type = attr.ib()
     model_type = attr.ib()
     model_id = attr.ib()
+    repeating_block_reference = attr.ib(default=None)
     parameter_uuid_finder = attr.ib(default=None)
     is_table = attr.ib(default=False)
 
@@ -320,6 +331,7 @@ class Block:
                 parameter_uuid_finder=self.parameter_uuid_finder,
                 model_id=self.model_id,
                 is_table=self.is_table,
+                repeating_block_reference=self.repeating_block_reference,
             )
             rows.append(builder.gen())
 
@@ -345,6 +357,7 @@ class TableRepeatingBlockReference:
             padding_type=self.padding_type,
             model_id=self.model_id,
             is_table=True,
+            repeating_block_reference=self.wrapped,
         )
 
         return builder.gen()
@@ -358,6 +371,7 @@ class Point:
     model_type = attr.ib()
     model_id = attr.ib()
     is_table = attr.ib()
+    repeating_block_reference = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     # TODO: CAMPid 07397546759269756456100183066795496952476951653
@@ -370,11 +384,28 @@ class Point:
 
             setattr(row, name, getattr(self.wrapped, field.name))
 
-        if row.scale_factor is not None:
-            row.scale_factor = (
-                self.parameter_uuid_finder(
-                    self.scale_factor_from_uuid[row.scale_factor].parameter_uuid).abbreviation
+        if self.repeating_block_reference is not None:
+            target_uuid = (
+                self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+                .original.uuid
             )
+            references = [
+                child
+                for child in self.repeating_block_reference.children
+                if target_uuid == child.parameter_uuid
+            ]
+            if len(references) > 0:
+                reference, = references
+
+                if reference.factor_uuid is not None:
+                    row.scale_factor = self.parameter_uuid_finder(self.parameter_uuid_finder(reference.factor_uuid).parameter_uuid).abbreviation
+        else:
+            if row.scale_factor is not None:
+                row.scale_factor = (
+                    self.parameter_uuid_finder(
+                        self.scale_factor_from_uuid[row.scale_factor].parameter_uuid).abbreviation
+                )
+
         if row.type is not None:
             row.type = self.parameter_uuid_finder(row.type).name
 

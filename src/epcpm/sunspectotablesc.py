@@ -1,5 +1,6 @@
 import attr
 import epyqlib.utils.general
+import epyqlib.pm.parametermodel
 
 import epcpm.cantotablesc
 import epcpm.sunspecmodel
@@ -173,6 +174,24 @@ class DataPoint:
             self.wrapped.tree_parent.tree_parent.parameter_table_uuid,
         )
 
+        original = parameter.original
+        if isinstance(original.tree_parent, epyqlib.pm.parametermodel.Group):
+            getter_setter = {
+                'get': original.embedded_getter,
+                'set': original.embedded_setter,
+            }
+        elif isinstance(original.tree_parent, epyqlib.pm.parametermodel.Array):
+            getter_setter = {
+                'get': parameter_table.embedded_getter,
+                'set': parameter_table.embedded_setter,
+            }
+
+        if getter_setter['get'] is None:
+            getter_setter['get'] = ''
+
+        if getter_setter['set'] is None:
+            getter_setter['set'] = ''
+
         axis = parameter.tree_parent.axis
         if axis is None:
             axis = '<no axis>'
@@ -185,11 +204,7 @@ class DataPoint:
 
         both_lines = [[], []]
 
-        x = (
-            ('get', parameter_table.embedded_getter),
-            ('set', parameter_table.embedded_setter),
-        )
-        for get_set, embedded in x:
+        for get_set, embedded in getter_setter.items():
             # TODO: CAMPid 075780541068182645821856068542023499
             converter = {
                 'uint32': {
@@ -239,7 +254,7 @@ class DataPoint:
                         curve_index=self.curve_index,
                     ))
             else:
-                body_lines.extend(embedded.format(
+                body_lines.append(embedded.format(
                     curve_type=self.curve_type,
                     interface_signal=interface_variable,
                     point_index=parameter.index,
@@ -266,4 +281,3 @@ class DataPoint:
             )
 
         return both_lines
-        return [f'// {self.curve_index + 1} {parameter.abbreviation}']

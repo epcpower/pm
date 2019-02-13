@@ -751,8 +751,8 @@ class CanTable(epyqlib.treenode.TreeNode):
                 leaves,
                 (
                     (0, ('0', '1', '2', '3')),
-                    (1, ('Settings', 'percent_nominal_volts',
-                         'percent_nominal_var')),
+                    (1, ('Before', 'percent_nominal_volts',
+                         'percent_nominal_var', 'After')),
                 ),
             )
         elif table.name == 'HertzWatts':
@@ -806,16 +806,19 @@ class CanTable(epyqlib.treenode.TreeNode):
                         parent = parent.tree_parent
 
                     s = '/'.join(node.name for node in reversed(nodes))
-
-                    epyqlib.utils.qt.dialog(
-                        # parent=_parent,
-                        parent=None,
-                        title='Table Error',
-                        message=(
-                            f'{s} has no arrays or groups, these are required'
-                        ),
-                        icon=QtWidgets.QMessageBox.Warning,
+                    message = (
+                        f'{s} has no arrays or groups, these are required'
                     )
+                    if PyQt5.QtCore.QCoreApplication.instance() is None:
+                        print(message)
+                    else:
+                        epyqlib.utils.qt.dialog(
+                            # parent=_parent,
+                            parent=None,
+                            title='Table Error',
+                            message=message,
+                            icon=QtWidgets.QMessageBox.Warning,
+                        )
 
                 return
 
@@ -833,16 +836,20 @@ class CanTable(epyqlib.treenode.TreeNode):
                             parent = parent.tree_parent
 
                         s = '/'.join(node.name for node in reversed(nodes))
-                        epyqlib.utils.qt.dialog(
-                            # parent=_parent,
-                            parent=None,
-                            title='Table Error',
-                            message=(
-                                f'{s} has bit length of {signal.bits}'
-                                f', must be nonzero'
-                            ),
-                            icon=QtWidgets.QMessageBox.Warning,
+                        message = (
+                            f'{s} has bit length of {signal.bits}'
+                            f', must be nonzero'
                         )
+                        if PyQt5.QtCore.QCoreApplication.instance() is None:
+                            print(message)
+                        else:
+                            epyqlib.utils.qt.dialog(
+                                # parent=_parent,
+                                parent=None,
+                                title='Table Error',
+                                message=message,
+                                icon=QtWidgets.QMessageBox.Warning,
+                            )
                         warned_signals.add(signal)
 
                 continue
