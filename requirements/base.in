@@ -2,6 +2,7 @@
 
 attrs==18.2.0
 click==7.0
+epyqlib==2019.2.1
 lxml==4.3.0
 pyinstaller==3.4
 pyqt5==5.11.2
@@ -18,3 +19,5 @@ pycparser==2.19
 pyserial==3.4
 
 -e git+https://github.com/altendky/pysunspec@f197baa9c373ff93b13bff22a1ca0368aa89b305#egg=pysunspec
+
+-e sub/epyqlib
