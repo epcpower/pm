@@ -4,7 +4,7 @@
 #
 #    python boots.py lock
 #
--e file:///home/altendky/pm/sub/epyqlib
+-e file:sub/epyqlib#egg=epyqlib
 -e git+https://github.com/altendky/pysunspec@f197baa9c373ff93b13bff22a1ca0368aa89b305#egg=pysunspec
 altgraph==0.16.1          # via macholib, pyinstaller
 arrow==0.13.1

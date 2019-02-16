@@ -4,7 +4,7 @@
 #
 #    python boots.py lock
 #
--e file:///E:/home/pm/sub/epyqlib
+-e file:sub/epyqlib#egg=epyqlib
 -e git+https://github.com/altendky/pysunspec@f197baa9c373ff93b13bff22a1ca0368aa89b305#egg=pysunspec
 -e git+https://github.com/altendky/pytest-twisted@0560511d0954c75cac43a47c685287ba93e01ba7#egg=pytest-twisted
 altgraph==0.16.1          # via macholib, pyinstaller
