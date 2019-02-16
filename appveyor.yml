@@ -1,24 +1,17 @@
 image: Visual Studio 2017
 
-environment:
-  global:
-    PYTHON: "C:\\Python37"
-
 # https://www.appveyor.com/docs/how-to/rdp-to-build-worker/
 init:
   - ps: if (Get-ChildItem Env:ENABLE_RDP -ErrorAction SilentlyContinue) {iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))} else {echo RDP not enabled}
 
 build_script:
-  - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
-  - python -c "import sys; print(sys.version)"
-  - where pip
-  - pip --version
   - git submodule update --init
-  - python create_venv.py ensure
+  - python boots.py create --group test
+  - venv\\Scripts\\python -c "import sys; print(sys.version)"
+  - venv\\Scripts\\pip freeze --all
   - venv\\Scripts\\genbuildinfo "src\\epcpm\\__build.py"
   - venv\\Scripts\\generateversion --distribution epcpm --out "src\\epcpm\\__version.py"
   - ps: Update-AppveyorBuild -Version "v$(venv\\Scripts\\python -c 'import epcpm; print(epcpm.__version__, end=\"\")') b$Env:APPVEYOR_BUILD_NUMBER"
-  - venv\\Scripts\\pip freeze
   - ps: if (Get-ChildItem Env:PHRASE -ErrorAction SilentlyContinue) {$Env:PHRASE | Out-File sub/epyqlib/epyqlib/resources/code -Encoding ascii -NoNewline}
   - venv\\Scripts\\pyinstaller pyinstaller.spec
   - move "dist\epcpm" "EPCPM %APPVEYOR_BUILD_VERSION%"

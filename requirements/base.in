@@ -1,0 +1,20 @@
+--requirement pre.in
+
+attrs==18.2.0
+click==7.0
+lxml==4.3.0
+pyinstaller==3.4
+pyqt5==5.11.2
+requests==2.20.0
+tox==2.8.2
+xmldiff==2.2
+
+openpyxl==2.5.12
+
+
+canmatrix==0.7
+graham==0.1.10
+pycparser==2.19
+pyserial==3.4
+
+-e git+https://github.com/altendky/pysunspec@f197baa9c373ff93b13bff22a1ca0368aa89b305#egg=pysunspec
