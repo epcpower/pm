@@ -385,14 +385,21 @@ class Point:
             setattr(row, name, getattr(self.wrapped, field.name))
 
         if self.repeating_block_reference is not None:
-            target_uuid = (
+            target = (
                 self.parameter_uuid_finder(self.wrapped.parameter_uuid)
-                .original.uuid
+                .original
             )
+            is_array_element = isinstance(
+                target,
+                epyqlib.pm.parametermodel.ArrayParameterElement,
+            )
+            if is_array_element:
+                target = target.tree_parent.children[0]
+
             references = [
                 child
                 for child in self.repeating_block_reference.children
-                if target_uuid == child.parameter_uuid
+                if target.uuid == child.parameter_uuid
             ]
             if len(references) > 0:
                 reference, = references
