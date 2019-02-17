@@ -666,6 +666,8 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
         ),
     )
 
+    abbreviation = epyqlib.pm.parametermodel.create_abbreviation_attribute()
+
     children = attr.ib(
         factory=list,
         metadata=graham.create_metadata(
@@ -1088,6 +1090,7 @@ columns = epyqlib.attrsmodel.columns(
             TableRepeatingBlockReferenceDataPointReference,
         )
     ),
+    merge('abbreviation', TableRepeatingBlock),
     merge('length', Model) + merge('size', DataPoint),
     merge('repeats', TableRepeatingBlock),
     merge(
