@@ -137,9 +137,11 @@ class Dialog(UiBase):
         super().accept()
 
     def from_directory(self):
-        self.directory = QtWidgets.QFileDialog.getExistingDirectory(parent=self)
-        if len(self.directory) == 0:
+        directory = QtWidgets.QFileDialog.getExistingDirectory(parent=self)
+        if len(directory) == 0:
             return
+
+        self.directory = pathlib.Path(directory)
 
         paths = paths_from_directory(directory=self.directory)
 
