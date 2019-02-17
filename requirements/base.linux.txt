@@ -5,6 +5,7 @@
 #    python boots.py lock
 #
 -e file:sub/epyqlib#egg=epyqlib
+-e git+https://github.com/altendky/pycparser@b19d2b7cb78bccc89ef187c1c4eb5db0fdd3bbf9#egg=pycparser
 -e git+https://github.com/Loran425/PyInstaller@4f6e9a22ab7990cf0b8242715997bca6ac1c068a#egg=PyInstaller
 -e git+https://github.com/altendky/pysunspec@f197baa9c373ff93b13bff22a1ca0368aa89b305#egg=pysunspec
 altgraph==0.16.1          # via macholib
@@ -37,7 +38,6 @@ pint==0.9
 pip-tools==3.3.2
 pluggy==0.8.1             # via tox
 py==1.7.0                 # via tox
-pycparser==2.19
 pyelftools==0.25
 pyhamcrest==1.9.0         # via twisted
 pyqt5-sip==4.19.14        # via pyqt5
