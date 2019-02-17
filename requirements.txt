@@ -1,7 +1,8 @@
 attrs==18.2.0
 click==7.0
 lxml==4.3.0
-pyinstaller==3.4
+# https://github.com/pyinstaller/pyinstaller/issues/3942
+git+https://github.com/Loran425/PyInstaller@4f6e9a22ab7990cf0b8242715997bca6ac1c068a#egg=PyInstaller
 pyqt5==5.11.2
 requests==2.20.0
 tox==2.8.2
