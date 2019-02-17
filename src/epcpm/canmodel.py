@@ -751,7 +751,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                 leaves,
                 (
                     (0, ('0', '1', '2', '3')),
-                    (1, ('Before', 'percent_nominal_volts',
+                    (1, ('Before', 'Settings', 'percent_nominal_volts',
                          'percent_nominal_var', 'After')),
                 ),
             )

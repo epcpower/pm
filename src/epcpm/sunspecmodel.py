@@ -1061,6 +1061,7 @@ types = epyqlib.attrsmodel.Types(
         Table,
         TableRepeatingBlock,
         TableRepeatingBlockReference,
+        TableRepeatingBlockReferenceDataPointReference,
     ),
 )
 
