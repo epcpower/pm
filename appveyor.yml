@@ -12,8 +12,7 @@ build_script:
   - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
   - git submodule update --init
   - virtualenv -p C:\\Python37\\python.exe venv
-  - venv\\Scripts\\pip install --upgrade pip-tools setuptools
-  - venv\\Scripts\\pip freeze --all
+  - venv\\Scripts\\pip install pip-tools
   - python boots.py ensure --group test
   - venv\\Scripts\\python -c "import sys; print(sys.version)"
   - venv\\Scripts\\pip freeze --all
