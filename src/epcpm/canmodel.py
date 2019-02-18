@@ -699,6 +699,9 @@ class CanTable(epyqlib.treenode.TreeNode):
                     parameter_uuid=array.uuid,
                 )
                 array_uuid_to_signal[array.uuid] = signal
+            else:
+                signal.name = array.name
+                signal.parameter_uuid = array.uuid
 
             self.append_child(signal)
 
@@ -712,6 +715,9 @@ class CanTable(epyqlib.treenode.TreeNode):
                         parameter_uuid=parameter.uuid,
                     )
                     array_uuid_to_signal[parameter.uuid] = signal
+                else:
+                    signal.name = parameter.name
+                    signal.parameter_uuid = parameter.uuid
 
                 self.append_child(signal)
 
@@ -852,8 +858,6 @@ class CanTable(epyqlib.treenode.TreeNode):
                             )
                         warned_signals.add(signal)
 
-                continue
-
             if not is_group:
                 # TODO: actually calculate space to use
                 per_message = int(48 / signal.bits)
@@ -903,6 +907,12 @@ class CanTable(epyqlib.treenode.TreeNode):
                         path=multiplexer_path,
                         path_children=multiplexer_path_children,
                     )
+                else:
+                    multiplexer.name = path_string
+                    multiplexer.identifier = mux_value
+                    multiplexer.path = multiplexer_path
+                    multiplexer.path_children = multiplexer_path_children
+
                 mux_value += 1
 
                 # TODO: backmatching
@@ -929,7 +939,11 @@ class CanTable(epyqlib.treenode.TreeNode):
                         new_signal = Signal(
                             name=array_element.name,
                             # TODO: backmatching
-                            start_bit=start_bit if array_element.name != 'YScale' else 16,
+                            start_bit=(
+                                start_bit
+                                if array_element.name != 'YScale'
+                                else 16
+                            ),
                             bits=reference_signal.bits,
                             factor=reference_signal.factor,
                             signed=reference_signal.signed,
@@ -937,6 +951,21 @@ class CanTable(epyqlib.treenode.TreeNode):
                             parameter_uuid=array_element.uuid,
                             path=signal_path,
                         )
+                    else:
+                        new_signal.name = array_element.name
+                        # TODO: backmatching
+                        new_signal.start_bit = (
+                            start_bit
+                            if array_element.name != 'YScale'
+                            else 16
+                        )
+                        new_signal.bits = reference_signal.bits
+                        new_signal.factor = reference_signal.factor
+                        new_signal.signed = reference_signal.signed
+                        new_signal.enumeration_uuid = reference_signal.enumeration_uuid
+                        new_signal.parameter_uuid = array_element.uuid
+                        new_signal.path = signal_path
+
                     multiplexer.append_child(new_signal)
                     start_bit += new_signal.bits
 
