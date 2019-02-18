@@ -828,36 +828,6 @@ class CanTable(epyqlib.treenode.TreeNode):
 
                 return
 
-            if signal.bits == 0:
-                if warn:
-                    # TODO: this really needs to be done through a logging
-                    #       mechanism of some sort
-                    from PyQt5 import QtWidgets
-
-                    if signal not in warned_signals:
-                        nodes = []
-                        parent = signal
-                        while parent != None:
-                            nodes.append(parent)
-                            parent = parent.tree_parent
-
-                        s = '/'.join(node.name for node in reversed(nodes))
-                        message = (
-                            f'{s} has bit length of {signal.bits}'
-                            f', must be nonzero'
-                        )
-                        if PyQt5.QtCore.QCoreApplication.instance() is None:
-                            print(message)
-                        else:
-                            epyqlib.utils.qt.dialog(
-                                # parent=_parent,
-                                parent=None,
-                                title='Table Error',
-                                message=message,
-                                icon=QtWidgets.QMessageBox.Warning,
-                            )
-                        warned_signals.add(signal)
-
             if not is_group:
                 # TODO: actually calculate space to use
                 per_message = int(48 / signal.bits)
@@ -915,19 +885,62 @@ class CanTable(epyqlib.treenode.TreeNode):
 
                 mux_value += 1
 
+                stripped_chunk = []
+                for element in chunk:
+                    # TODO: CAMPid 095477901347190347070134
+                    if is_group:
+                        reference_signal = array_uuid_to_signal[element.path[-1]]
+                    else:
+                        reference_signal = signal
+
+                    if reference_signal.bits == 0:
+                        if warn:
+                            # TODO: this really needs to be done through a logging
+                            #       mechanism of some sort
+                            from PyQt5 import QtWidgets
+
+                            if reference_signal not in warned_signals:
+                                nodes = []
+                                parent = reference_signal
+                                while parent != None:
+                                    nodes.append(parent)
+                                    parent = parent.tree_parent
+
+                                s = '/'.join(
+                                    node.name for node in reversed(nodes))
+                                message = (
+                                    f'{s} has bit length of {reference_signal.bits}'
+                                    f', must be nonzero'
+                                )
+                                if PyQt5.QtCore.QCoreApplication.instance() is None:
+                                    print(message)
+                                else:
+                                    epyqlib.utils.qt.dialog(
+                                        # parent=_parent,
+                                        parent=None,
+                                        title='Table Error',
+                                        message=message,
+                                        icon=QtWidgets.QMessageBox.Warning,
+                                    )
+                                warned_signals.add(signal)
+                        continue
+
+                    stripped_chunk.append(element)
+
                 # TODO: backmatching
                 if not is_group:
                     start_bit = 64 - per_message * signal.bits
                     if signal.name == 'Settings':
-                        start_bit = 64 - len(chunk) * signal.bits
+                        start_bit = 64 - len(stripped_chunk) * signal.bits
                 else:
                     total_bits = sum(
                         array_uuid_to_signal[element.path[-1]].bits
-                        for element in chunk
+                        for element in stripped_chunk
                     )
                     start_bit = 64 - total_bits
 
-                for array_element in chunk:
+                for array_element in stripped_chunk:
+                    # TODO: CAMPid 095477901347190347070134
                     if is_group:
                         reference_signal = array_uuid_to_signal[array_element.path[-1]]
                     else:
