@@ -247,13 +247,18 @@ class Signal:
         while not isinstance(original, epyqlib.pm.parametermodel.Parameter):
             original = original.original
 
-        embedded_getter = original.embedded_getter
-        if embedded_getter is None:
+        if isinstance(original.tree_parent, epyqlib.pm.parametermodel.Group):
+            embedded_getter = original.embedded_getter
+            embedded_setter = original.embedded_setter
+        elif isinstance(original.tree_parent, epyqlib.pm.parametermodel.Array):
             embedded_getter = self.embedded_getter
-
-        embedded_setter = original.embedded_setter
-        if embedded_setter is None:
             embedded_setter = self.embedded_setter
+
+        if embedded_getter is None:
+            embedded_getter = ''
+
+        if embedded_setter is None:
+            embedded_setter = ''
 
         axis = table_array_element.tree_parent.axis
         if axis is None:
