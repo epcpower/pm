@@ -639,7 +639,13 @@ class CanTable(epyqlib.treenode.TreeNode):
         return {}
 
     def can_drop_on(self, node):
-        return isinstance(node, epyqlib.pm.parametermodel.Table)
+        return (
+            isinstance(node, epyqlib.pm.parametermodel.Table)
+            or (
+                isinstance(node, Signal)
+                and node.tree_parent is self
+            )
+        )
 
     def can_delete(self, node=None):
         if node is None:
@@ -653,6 +659,12 @@ class CanTable(epyqlib.treenode.TreeNode):
             for child in self.children
             if isinstance(child, Signal)
         }
+
+        existing_signal_order = [
+            node
+            for node in self.children
+            if isinstance(node, Signal)
+        ]
 
         for signal in array_uuid_to_signal.values():
             self.remove_child(child=signal)
@@ -705,8 +717,17 @@ class CanTable(epyqlib.treenode.TreeNode):
 
             self.append_child(signal)
 
+        manually_ordered = [
+            model.node_from_uuid(node.parameter_uuid)
+            for node in existing_signal_order
+            if isinstance(node, Signal)
+        ]
+
         for group in groups:
-            for parameter in group.children:
+            orderer = epyqlib.utils.general.Orderer.build(
+                ordered=manually_ordered,
+            )
+            for parameter in sorted(group.children, key=orderer):
                 signal = array_uuid_to_signal.get(parameter.uuid)
 
                 if signal is None:
@@ -799,6 +820,11 @@ class CanTable(epyqlib.treenode.TreeNode):
             elif isinstance(type_reference, epyqlib.pm.parametermodel.Group):
                 signal = array_uuid_to_signal[leaf_group[0].path[-1]]
                 is_group = True
+                orderer = epyqlib.utils.general.Orderer.build(
+                    ordered=manually_ordered,
+                    key=lambda item: item.original
+                )
+                leaf_group = sorted(leaf_group, key=orderer)
             else:
                 if warn:
                     # TODO: this really needs to be done through a logging
@@ -988,6 +1014,9 @@ class CanTable(epyqlib.treenode.TreeNode):
         if isinstance(node, epyqlib.pm.parametermodel.Table):
             self.table_uuid = node.uuid
             return None
+
+        if isinstance(node, Signal):
+            return node
 
         raise Exception('unexpected')
 
