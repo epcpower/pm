@@ -889,7 +889,7 @@ class Table(epyqlib.treenode.TreeNode):
 
             # TODO: CAMPid 143707880547014313476753071297360068134
             for element in group_elements[0]:
-                point_node = old_nodes_by_path.get(element.path)
+                point_node = old_nodes_by_path.get(element.uuid)
                 reference_data_point = master_array_data_points_by_uuid[
                     element.original.uuid
                 ]
@@ -914,7 +914,7 @@ class Table(epyqlib.treenode.TreeNode):
                 )),
             )
             for element in array_elements:
-                point_node = old_nodes_by_path.get(element.path)
+                point_node = old_nodes_by_path.get(element.uuid)
                 reference_data_point = master_array_data_points_by_uuid[
                     element.tree_parent.children[0].original.uuid
                 ]
@@ -933,7 +933,7 @@ class Table(epyqlib.treenode.TreeNode):
 
             # TODO: CAMPid 143707880547014313476753071297360068134
             for element in group_elements[1]:
-                point_node = old_nodes_by_path.get(element.path)
+                point_node = old_nodes_by_path.get(element.uuid)
                 reference_data_point = master_array_data_points_by_uuid[
                     element.original.uuid
                 ]
