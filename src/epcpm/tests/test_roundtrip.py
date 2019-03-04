@@ -66,6 +66,7 @@ def test_import():
     assert result.exit_code == 0
 
 
+@pytest.mark.skip
 def test_export():
     runner = click.testing.CliRunner()
 
