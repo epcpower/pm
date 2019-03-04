@@ -56,6 +56,7 @@ twisted==18.9.0           # via qt5reactor
 typing==3.6.6             # via python-can
 urllib3==1.24.1           # via requests
 virtualenv==16.4.0        # via tox
+wheel==0.33.1
 wrapt==1.11.1             # via python-can
 xmldiff==2.2
 zope.interface==4.6.0     # via twisted
