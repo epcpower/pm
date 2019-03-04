@@ -6,6 +6,7 @@ import re
 
 import canmatrix
 import click.testing
+import pytest
 
 import epyqlib.tests.common
 
