@@ -393,155 +393,155 @@ def test_table():
     ID=1FFFFFFFh
     Type=Extended
     DLC=0
-    Mux=First TableEO-0/ET-0/Array One/AO-0/0 0,8 5 	// <table>
-    Var=AO-0 unsigned 0,0 /ln:"AO-0"
-    Var=AO-1 unsigned 0,0 /ln:"AO-1"
+    Mux=First TableEO-0ET-0_Array One 0,8 5 	// <table>
+    Var=AO-0 unsigned 16,8 /ln:"AO-0"
+    Var=AO-1 unsigned 24,8 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-0/ET-0/Array Two/AT-0/0 0,8 6 	// <table>
-    Var=AT-0 unsigned 0,0 /ln:"AT-0"
-    Var=AT-1 unsigned 0,0 /ln:"AT-1"
-    Var=AT-2 unsigned 0,0 /ln:"AT-2"
+    Mux=First TableEO-0ET-0_Array Two_A 0,8 6 	// <table>
+    Var=AT-0 unsigned 16,16 /ln:"AT-0"
+    Var=AT-1 unsigned 32,16 /ln:"AT-1"
+    Var=AT-2 unsigned 48,16 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-0/ET-0/Array Two/AT-0/1 0,8 7 	// <table>
-    Var=AT-3 unsigned 0,0 /ln:"AT-3"
-    Var=AT-4 unsigned 0,0 /ln:"AT-4"
+    Mux=First TableEO-0ET-0_Array Two_B 0,8 7 	// <table>
+    Var=AT-3 unsigned 16,16 /ln:"AT-3"
+    Var=AT-4 unsigned 32,16 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-0/ET-1/Array One/AO-0/0 0,8 8 	// <table>
-    Var=AO-0 unsigned 0,0 /ln:"AO-0"
-    Var=AO-1 unsigned 0,0 /ln:"AO-1"
+    Mux=First TableEO-0ET-1_Array One 0,8 8 	// <table>
+    Var=AO-0 unsigned 16,8 /ln:"AO-0"
+    Var=AO-1 unsigned 24,8 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-0/ET-1/Array Two/AT-0/0 0,8 9 	// <table>
-    Var=AT-0 unsigned 0,0 /ln:"AT-0"
-    Var=AT-1 unsigned 0,0 /ln:"AT-1"
-    Var=AT-2 unsigned 0,0 /ln:"AT-2"
+    Mux=First TableEO-0ET-1_Array Two_A 0,8 9 	// <table>
+    Var=AT-0 unsigned 16,16 /ln:"AT-0"
+    Var=AT-1 unsigned 32,16 /ln:"AT-1"
+    Var=AT-2 unsigned 48,16 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-0/ET-1/Array Two/AT-0/1 0,8 0Ah	// <table>
-    Var=AT-3 unsigned 0,0 /ln:"AT-3"
-    Var=AT-4 unsigned 0,0 /ln:"AT-4"
+    Mux=First TableEO-0ET-1_Array Two_B 0,8 0Ah	// <table>
+    Var=AT-3 unsigned 16,16 /ln:"AT-3"
+    Var=AT-4 unsigned 32,16 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-0/ET-2/Array One/AO-0/0 0,8 0Bh	// <table>
-    Var=AO-0 unsigned 0,0 /ln:"AO-0"
-    Var=AO-1 unsigned 0,0 /ln:"AO-1"
+    Mux=First TableEO-0ET-2_Array One 0,8 0Bh	// <table>
+    Var=AO-0 unsigned 16,8 /ln:"AO-0"
+    Var=AO-1 unsigned 24,8 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-0/ET-2/Array Two/AT-0/0 0,8 0Ch	// <table>
-    Var=AT-0 unsigned 0,0 /ln:"AT-0"
-    Var=AT-1 unsigned 0,0 /ln:"AT-1"
-    Var=AT-2 unsigned 0,0 /ln:"AT-2"
+    Mux=First TableEO-0ET-2_Array Two_A 0,8 0Ch	// <table>
+    Var=AT-0 unsigned 16,16 /ln:"AT-0"
+    Var=AT-1 unsigned 32,16 /ln:"AT-1"
+    Var=AT-2 unsigned 48,16 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-0/ET-2/Array Two/AT-0/1 0,8 0Dh	// <table>
-    Var=AT-3 unsigned 0,0 /ln:"AT-3"
-    Var=AT-4 unsigned 0,0 /ln:"AT-4"
+    Mux=First TableEO-0ET-2_Array Two_B 0,8 0Dh	// <table>
+    Var=AT-3 unsigned 16,16 /ln:"AT-3"
+    Var=AT-4 unsigned 32,16 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-0/ET-3/Array One/AO-0/0 0,8 0Eh	// <table>
-    Var=AO-0 unsigned 0,0 /ln:"AO-0"
-    Var=AO-1 unsigned 0,0 /ln:"AO-1"
+    Mux=First TableEO-0ET-3_Array One 0,8 0Eh	// <table>
+    Var=AO-0 unsigned 16,8 /ln:"AO-0"
+    Var=AO-1 unsigned 24,8 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-0/ET-3/Array Two/AT-0/0 0,8 0Fh	// <table>
-    Var=AT-0 unsigned 0,0 /ln:"AT-0"
-    Var=AT-1 unsigned 0,0 /ln:"AT-1"
-    Var=AT-2 unsigned 0,0 /ln:"AT-2"
+    Mux=First TableEO-0ET-3_Array Two_A 0,8 0Fh	// <table>
+    Var=AT-0 unsigned 16,16 /ln:"AT-0"
+    Var=AT-1 unsigned 32,16 /ln:"AT-1"
+    Var=AT-2 unsigned 48,16 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-0/ET-3/Array Two/AT-0/1 0,8 10h	// <table>
-    Var=AT-3 unsigned 0,0 /ln:"AT-3"
-    Var=AT-4 unsigned 0,0 /ln:"AT-4"
+    Mux=First TableEO-0ET-3_Array Two_B 0,8 10h	// <table>
+    Var=AT-3 unsigned 16,16 /ln:"AT-3"
+    Var=AT-4 unsigned 32,16 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-1/ET-0/Array One/AO-0/0 0,8 11h	// <table>
-    Var=AO-0 unsigned 0,0 /ln:"AO-0"
-    Var=AO-1 unsigned 0,0 /ln:"AO-1"
+    Mux=First TableEO-1ET-0_Array One 0,8 11h	// <table>
+    Var=AO-0 unsigned 16,8 /ln:"AO-0"
+    Var=AO-1 unsigned 24,8 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-1/ET-0/Array Two/AT-0/0 0,8 12h	// <table>
-    Var=AT-0 unsigned 0,0 /ln:"AT-0"
-    Var=AT-1 unsigned 0,0 /ln:"AT-1"
-    Var=AT-2 unsigned 0,0 /ln:"AT-2"
+    Mux=First TableEO-1ET-0_Array Two_A 0,8 12h	// <table>
+    Var=AT-0 unsigned 16,16 /ln:"AT-0"
+    Var=AT-1 unsigned 32,16 /ln:"AT-1"
+    Var=AT-2 unsigned 48,16 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-1/ET-0/Array Two/AT-0/1 0,8 13h	// <table>
-    Var=AT-3 unsigned 0,0 /ln:"AT-3"
-    Var=AT-4 unsigned 0,0 /ln:"AT-4"
+    Mux=First TableEO-1ET-0_Array Two_B 0,8 13h	// <table>
+    Var=AT-3 unsigned 16,16 /ln:"AT-3"
+    Var=AT-4 unsigned 32,16 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-1/ET-1/Array One/AO-0/0 0,8 14h	// <table>
-    Var=AO-0 unsigned 0,0 /ln:"AO-0"
-    Var=AO-1 unsigned 0,0 /ln:"AO-1"
+    Mux=First TableEO-1ET-1_Array One 0,8 14h	// <table>
+    Var=AO-0 unsigned 16,8 /ln:"AO-0"
+    Var=AO-1 unsigned 24,8 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-1/ET-1/Array Two/AT-0/0 0,8 15h	// <table>
-    Var=AT-0 unsigned 0,0 /ln:"AT-0"
-    Var=AT-1 unsigned 0,0 /ln:"AT-1"
-    Var=AT-2 unsigned 0,0 /ln:"AT-2"
+    Mux=First TableEO-1ET-1_Array Two_A 0,8 15h	// <table>
+    Var=AT-0 unsigned 16,16 /ln:"AT-0"
+    Var=AT-1 unsigned 32,16 /ln:"AT-1"
+    Var=AT-2 unsigned 48,16 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-1/ET-1/Array Two/AT-0/1 0,8 16h	// <table>
-    Var=AT-3 unsigned 0,0 /ln:"AT-3"
-    Var=AT-4 unsigned 0,0 /ln:"AT-4"
+    Mux=First TableEO-1ET-1_Array Two_B 0,8 16h	// <table>
+    Var=AT-3 unsigned 16,16 /ln:"AT-3"
+    Var=AT-4 unsigned 32,16 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-1/ET-2/Array One/AO-0/0 0,8 17h	// <table>
-    Var=AO-0 unsigned 0,0 /ln:"AO-0"
-    Var=AO-1 unsigned 0,0 /ln:"AO-1"
+    Mux=First TableEO-1ET-2_Array One 0,8 17h	// <table>
+    Var=AO-0 unsigned 16,8 /ln:"AO-0"
+    Var=AO-1 unsigned 24,8 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-1/ET-2/Array Two/AT-0/0 0,8 18h	// <table>
-    Var=AT-0 unsigned 0,0 /ln:"AT-0"
-    Var=AT-1 unsigned 0,0 /ln:"AT-1"
-    Var=AT-2 unsigned 0,0 /ln:"AT-2"
+    Mux=First TableEO-1ET-2_Array Two_A 0,8 18h	// <table>
+    Var=AT-0 unsigned 16,16 /ln:"AT-0"
+    Var=AT-1 unsigned 32,16 /ln:"AT-1"
+    Var=AT-2 unsigned 48,16 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-1/ET-2/Array Two/AT-0/1 0,8 19h	// <table>
-    Var=AT-3 unsigned 0,0 /ln:"AT-3"
-    Var=AT-4 unsigned 0,0 /ln:"AT-4"
+    Mux=First TableEO-1ET-2_Array Two_B 0,8 19h	// <table>
+    Var=AT-3 unsigned 16,16 /ln:"AT-3"
+    Var=AT-4 unsigned 32,16 /ln:"AT-4"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-1/ET-3/Array One/AO-0/0 0,8 1Ah	// <table>
-    Var=AO-0 unsigned 0,0 /ln:"AO-0"
-    Var=AO-1 unsigned 0,0 /ln:"AO-1"
+    Mux=First TableEO-1ET-3_Array One 0,8 1Ah	// <table>
+    Var=AO-0 unsigned 16,8 /ln:"AO-0"
+    Var=AO-1 unsigned 24,8 /ln:"AO-1"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-1/ET-3/Array Two/AT-0/0 0,8 1Bh	// <table>
-    Var=AT-0 unsigned 0,0 /ln:"AT-0"
-    Var=AT-1 unsigned 0,0 /ln:"AT-1"
-    Var=AT-2 unsigned 0,0 /ln:"AT-2"
+    Mux=First TableEO-1ET-3_Array Two_A 0,8 1Bh	// <table>
+    Var=AT-0 unsigned 16,16 /ln:"AT-0"
+    Var=AT-1 unsigned 32,16 /ln:"AT-1"
+    Var=AT-2 unsigned 48,16 /ln:"AT-2"
     
     [Tables]
     DLC=0
-    Mux=First TableEO-1/ET-3/Array Two/AT-0/1 0,8 1Ch	// <table>
-    Var=AT-3 unsigned 0,0 /ln:"AT-3"
-    Var=AT-4 unsigned 0,0 /ln:"AT-4"
+    Mux=First TableEO-1ET-3_Array Two_B 0,8 1Ch	// <table>
+    Var=AT-3 unsigned 16,16 /ln:"AT-3"
+    Var=AT-4 unsigned 32,16 /ln:"AT-4"
     ''')
 
     assert tidy_sym(result) == tidy_sym(expected)

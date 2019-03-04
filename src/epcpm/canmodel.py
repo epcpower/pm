@@ -639,7 +639,13 @@ class CanTable(epyqlib.treenode.TreeNode):
         return {}
 
     def can_drop_on(self, node):
-        return isinstance(node, epyqlib.pm.parametermodel.Table)
+        return (
+            isinstance(node, epyqlib.pm.parametermodel.Table)
+            or (
+                isinstance(node, Signal)
+                and node.tree_parent is self
+            )
+        )
 
     def can_delete(self, node=None):
         if node is None:
@@ -653,6 +659,12 @@ class CanTable(epyqlib.treenode.TreeNode):
             for child in self.children
             if isinstance(child, Signal)
         }
+
+        existing_signal_order = [
+            node
+            for node in self.children
+            if isinstance(node, Signal)
+        ]
 
         for signal in array_uuid_to_signal.values():
             self.remove_child(child=signal)
@@ -699,11 +711,23 @@ class CanTable(epyqlib.treenode.TreeNode):
                     parameter_uuid=array.uuid,
                 )
                 array_uuid_to_signal[array.uuid] = signal
+            else:
+                signal.name = array.name
+                signal.parameter_uuid = array.uuid
 
             self.append_child(signal)
 
+        manually_ordered = [
+            model.node_from_uuid(node.parameter_uuid)
+            for node in existing_signal_order
+            if isinstance(node, Signal)
+        ]
+
         for group in groups:
-            for parameter in group.children:
+            orderer = epyqlib.utils.general.Orderer.build(
+                ordered=manually_ordered,
+            )
+            for parameter in sorted(group.children, key=orderer):
                 signal = array_uuid_to_signal.get(parameter.uuid)
 
                 if signal is None:
@@ -712,6 +736,9 @@ class CanTable(epyqlib.treenode.TreeNode):
                         parameter_uuid=parameter.uuid,
                     )
                     array_uuid_to_signal[parameter.uuid] = signal
+                else:
+                    signal.name = parameter.name
+                    signal.parameter_uuid = parameter.uuid
 
                 self.append_child(signal)
 
@@ -751,8 +778,8 @@ class CanTable(epyqlib.treenode.TreeNode):
                 leaves,
                 (
                     (0, ('0', '1', '2', '3')),
-                    (1, ('Settings', 'percent_nominal_volts',
-                         'percent_nominal_var')),
+                    (1, ('Before', 'Settings', 'percent_nominal_volts',
+                         'percent_nominal_var', 'After')),
                 ),
             )
         elif table.name == 'HertzWatts':
@@ -793,6 +820,11 @@ class CanTable(epyqlib.treenode.TreeNode):
             elif isinstance(type_reference, epyqlib.pm.parametermodel.Group):
                 signal = array_uuid_to_signal[leaf_group[0].path[-1]]
                 is_group = True
+                orderer = epyqlib.utils.general.Orderer.build(
+                    ordered=manually_ordered,
+                    key=lambda item: item.original
+                )
+                leaf_group = sorted(leaf_group, key=orderer)
             else:
                 if warn:
                     # TODO: this really needs to be done through a logging
@@ -806,46 +838,21 @@ class CanTable(epyqlib.treenode.TreeNode):
                         parent = parent.tree_parent
 
                     s = '/'.join(node.name for node in reversed(nodes))
-
-                    epyqlib.utils.qt.dialog(
-                        # parent=_parent,
-                        parent=None,
-                        title='Table Error',
-                        message=(
-                            f'{s} has no arrays or groups, these are required'
-                        ),
-                        icon=QtWidgets.QMessageBox.Warning,
+                    message = (
+                        f'{s} has no arrays or groups, these are required'
                     )
-
-                return
-
-            if signal.bits == 0:
-                if warn:
-                    # TODO: this really needs to be done through a logging
-                    #       mechanism of some sort
-                    from PyQt5 import QtWidgets
-
-                    if signal not in warned_signals:
-                        nodes = []
-                        parent = signal
-                        while parent != None:
-                            nodes.append(parent)
-                            parent = parent.tree_parent
-
-                        s = '/'.join(node.name for node in reversed(nodes))
+                    if PyQt5.QtCore.QCoreApplication.instance() is None:
+                        print(message)
+                    else:
                         epyqlib.utils.qt.dialog(
                             # parent=_parent,
                             parent=None,
                             title='Table Error',
-                            message=(
-                                f'{s} has bit length of {signal.bits}'
-                                f', must be nonzero'
-                            ),
+                            message=message,
                             icon=QtWidgets.QMessageBox.Warning,
                         )
-                        warned_signals.add(signal)
 
-                continue
+                return
 
             if not is_group:
                 # TODO: actually calculate space to use
@@ -896,21 +903,70 @@ class CanTable(epyqlib.treenode.TreeNode):
                         path=multiplexer_path,
                         path_children=multiplexer_path_children,
                     )
+                else:
+                    multiplexer.name = path_string
+                    multiplexer.identifier = mux_value
+                    multiplexer.path = multiplexer_path
+                    multiplexer.path_children = multiplexer_path_children
+
                 mux_value += 1
+
+                stripped_chunk = []
+                for element in chunk:
+                    # TODO: CAMPid 095477901347190347070134
+                    if is_group:
+                        reference_signal = array_uuid_to_signal[element.path[-1]]
+                    else:
+                        reference_signal = signal
+
+                    if reference_signal.bits == 0:
+                        if warn:
+                            # TODO: this really needs to be done through a logging
+                            #       mechanism of some sort
+                            from PyQt5 import QtWidgets
+
+                            if reference_signal not in warned_signals:
+                                nodes = []
+                                parent = reference_signal
+                                while parent != None:
+                                    nodes.append(parent)
+                                    parent = parent.tree_parent
+
+                                s = '/'.join(
+                                    node.name for node in reversed(nodes))
+                                message = (
+                                    f'{s} has bit length of {reference_signal.bits}'
+                                    f', must be nonzero'
+                                )
+                                if PyQt5.QtCore.QCoreApplication.instance() is None:
+                                    print(message)
+                                else:
+                                    epyqlib.utils.qt.dialog(
+                                        # parent=_parent,
+                                        parent=None,
+                                        title='Table Error',
+                                        message=message,
+                                        icon=QtWidgets.QMessageBox.Warning,
+                                    )
+                                warned_signals.add(signal)
+                        continue
+
+                    stripped_chunk.append(element)
 
                 # TODO: backmatching
                 if not is_group:
                     start_bit = 64 - per_message * signal.bits
                     if signal.name == 'Settings':
-                        start_bit = 64 - len(chunk) * signal.bits
+                        start_bit = 64 - len(stripped_chunk) * signal.bits
                 else:
                     total_bits = sum(
                         array_uuid_to_signal[element.path[-1]].bits
-                        for element in chunk
+                        for element in stripped_chunk
                     )
                     start_bit = 64 - total_bits
 
-                for array_element in chunk:
+                for array_element in stripped_chunk:
+                    # TODO: CAMPid 095477901347190347070134
                     if is_group:
                         reference_signal = array_uuid_to_signal[array_element.path[-1]]
                     else:
@@ -922,7 +978,11 @@ class CanTable(epyqlib.treenode.TreeNode):
                         new_signal = Signal(
                             name=array_element.name,
                             # TODO: backmatching
-                            start_bit=start_bit if array_element.name != 'YScale' else 16,
+                            start_bit=(
+                                start_bit
+                                if array_element.name != 'YScale'
+                                else 16
+                            ),
                             bits=reference_signal.bits,
                             factor=reference_signal.factor,
                             signed=reference_signal.signed,
@@ -930,6 +990,21 @@ class CanTable(epyqlib.treenode.TreeNode):
                             parameter_uuid=array_element.uuid,
                             path=signal_path,
                         )
+                    else:
+                        new_signal.name = array_element.name
+                        # TODO: backmatching
+                        new_signal.start_bit = (
+                            start_bit
+                            if array_element.name != 'YScale'
+                            else 16
+                        )
+                        new_signal.bits = reference_signal.bits
+                        new_signal.factor = reference_signal.factor
+                        new_signal.signed = reference_signal.signed
+                        new_signal.enumeration_uuid = reference_signal.enumeration_uuid
+                        new_signal.parameter_uuid = array_element.uuid
+                        new_signal.path = signal_path
+
                     multiplexer.append_child(new_signal)
                     start_bit += new_signal.bits
 
@@ -939,6 +1014,9 @@ class CanTable(epyqlib.treenode.TreeNode):
         if isinstance(node, epyqlib.pm.parametermodel.Table):
             self.table_uuid = node.uuid
             return None
+
+        if isinstance(node, Signal):
+            return node
 
         raise Exception('unexpected')
 
