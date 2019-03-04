@@ -19,7 +19,14 @@ build_script:
 #  - move ..\\*.exe .
   - 7z a "EPCPM %APPVEYOR_BUILD_VERSION%.zip" "EPCPM %APPVEYOR_BUILD_VERSION%"
   - ps: Get-ChildItem .\*.zip | % { Push-AppveyorArtifact $_.FullName }
+  - python boots.py build
+  - ps: Get-ChildItem dist\* | % { Push-AppveyorArtifact $_.FullName }
+
+test_script:
   - venv\\Scripts\\pytest epcpm.tests --pyargs
+
+deploy_script:
+  - python boots.py publish
 
 artifacts:
   - path: "EPCPM %APPVEYOR_BUILD_VERSION%"
