@@ -42,6 +42,7 @@ def _full_round_trip():
     # epcpm.importexport.full_export(project=project, paths=paths)
 
 
+@pytest.mark.skip
 def test_import():
     runner = click.testing.CliRunner()
 
@@ -588,6 +589,7 @@ def assert_value_tables_equal(original, exported):
     return exported == original
 
 
+@pytest.mark.skip
 def test_roundtrip():
     original, = canmatrix.formats.loadp(os.fspath(example_device.can)).values()
     assert original.load_errors == []
