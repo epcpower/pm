@@ -15,6 +15,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
 
 import epyqlib.attrsmodel
+import epyqlib.checkresultmodel
 import epyqlib.pm.parametermodel
 import epyqlib.pm.valuesetmodel
 import epyqlib.utils.qt
@@ -82,6 +83,9 @@ class Window:
         self.ui.action_save_as_value_set.triggered.connect(
             lambda _: self.save_as_value_set(),
         )
+        self.ui.action_check.triggered.connect(
+            lambda _: self.check(),
+        )
 
         self.ui.action_import_sym.triggered.connect(self.import_sym)
         self.ui.action_export_sym.triggered.connect(self.generate_symbol_file)
@@ -128,12 +132,17 @@ class Window:
         self.uuid_notifiers = {
             'can': epcpm.canmodel.ReferencedUuidNotifier(),
             'sunspec': epcpm.sunspecmodel.ReferencedUuidNotifier(),
+            'check_result': epyqlib.checkresultmodel.ReferencedUuidNotifier(),
         }
         self.uuid_notifiers['can'].changed.connect(self.can_uuid_changed)
         self.uuid_notifiers['sunspec'].changed.connect(self.can_uuid_changed)
+        self.uuid_notifiers['check_result'].changed.connect(
+            self.check_result_uuid_changed,
+        )
 
         self.project = None
         self.value_set = None
+        self.check_result = None
 
         self.set_title()
 
@@ -163,6 +172,10 @@ class Window:
         for view, search_box, column in search_boxes:
             search_box.connect_to_view(view=view, column=column)
 
+        self.ui.check_result_view.setEditTriggers(
+            QtWidgets.QAbstractItemView.NoEditTriggers,
+        ),
+
     def set_title(self, detail=None):
         title = 'Parameter Manager v{}'.format(epcpm.__version__)
 
@@ -181,6 +194,10 @@ class Window:
         view_model.proxy.setSourceModel(view_model.model.model)
         view_model.view.setModel(view_model.proxy)
         view_model.view.setItemDelegate(epyqlib.attrsmodel.create_delegate())
+
+        notifier = self.uuid_notifiers.get(name)
+        if notifier is not None:
+            notifier.set_view(view_model.view)
 
         view_model.selection = view_model.view.selectionModel()
 
@@ -392,6 +409,7 @@ class Window:
 
         self.uuid_notifiers['can'].set_view(self.ui.can_view)
         self.uuid_notifiers['sunspec'].set_view(self.ui.sunspec_view)
+        self.uuid_notifiers['check_result'].set_view(self.ui.check_result_view)
 
         return
 
@@ -514,6 +532,63 @@ class Window:
 
         value_set.save(parent=self.ui)
         self.value_set = value_set
+
+    def check(self):
+        root = epyqlib.checkresultmodel.Root()
+
+        for name, model in self.project.models.items():
+            node = epyqlib.checkresultmodel.Node.build(
+                name=name,
+                node=model.root,
+            )
+            model.root.check_and_append(parent=node)
+            root.append_child(node)
+
+        # self.check_view = QtWidgets.QTreeView()
+        # self.check_model = epyqlib.attrsmodel.Model(
+        #     root=root,
+        #     columns=epyqlib.checkresultmodel.columns,
+        # )
+
+        # self.check_view.setModel(self.check_model.model)
+
+        # self.check_view.show()
+
+        drop_source_model_names = [
+            'parameters',
+            'can',
+            'sunspec',
+        ]
+
+        model = epyqlib.attrsmodel.Model(
+            root=root,
+            columns=epyqlib.checkresultmodel.columns,
+            drop_sources=[
+                self.view_models[name].model
+                for name in drop_source_model_names
+            ],
+        )
+        self.set_active_check_result(model)
+
+    def set_active_check_result(self, check_result):
+        self.check_result = check_result
+
+        view = self.ui.check_result_view
+
+        model_view = ModelView(
+            view=view,
+            model=self.check_result,
+            types=epyqlib.checkresultmodel.types,
+        )
+
+        view.setSelectionBehavior(view.SelectRows)
+        view.setSelectionMode(view.SingleSelection)
+        view.setDropIndicatorShown(True)
+        view.setDragEnabled(False)
+        view.setAcceptDrops(False)
+
+        self.set_model(name='check_result', view_model=model_view)
+        view.expandAll()
 
     def context_menu(self, position, view_model):
         view = view_model.view
@@ -646,6 +721,7 @@ class Window:
     def selection_changed(self, selected, deselected):
         pass
 
+    # TODO: CAMPid 0795409054128050124650546086
     def can_uuid_changed(self, uuid):
         view_model = self.view_models['parameters']
         model = view_model.model
@@ -668,6 +744,38 @@ class Window:
             index,
             QtCore.QItemSelectionModel.ClearAndSelect,
         )
+
+    # TODO: CAMPid 0795409054128050124650546086
+    def check_result_uuid_changed(self, uuid):
+        print('here')
+        view_model = self.view_models['check_result']
+        model = view_model.model
+        view = view_model.view
+
+        try:
+            node = model.node_from_uuid(uuid)
+        except epyqlib.attrsmodel.NotFoundError:
+            return
+
+        index = model.index_from_node(node)
+        for view_model in self.view_models.values():
+            if index.model() is not view_model.model.model:
+                continue
+
+            model = view_model.model
+            view = view_model.view
+
+            index = epyqlib.utils.qt.resolve_index_from_model(
+                model=model.model,
+                view=view,
+                index=index,
+            )
+
+            view.setCurrentIndex(index)
+            view.selectionModel().select(
+                index,
+                QtCore.QItemSelectionModel.ClearAndSelect,
+            )
 
     def about_dialog(self):
         message = [

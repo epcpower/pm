@@ -109,16 +109,6 @@ def create_size_attribute():
     )
 
 
-def create_name_attribute(default):
-    return attr.ib(
-        default=default,
-        convert=epyqlib.attrsmodel.to_str_or_none,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(allow_none=True),
-        ),
-    )
-
-
 def create_factor_uuid_attribute():
     return epyqlib.attrsmodel.attr_uuid(
         default=None,
@@ -336,6 +326,7 @@ class DataPoint(epyqlib.treenode.TreeNode):
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
 
 
 def check_block_offsets_and_length(self):
@@ -441,6 +432,7 @@ class HeaderBlock(epyqlib.treenode.TreeNode):
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
     internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
 
 
 @graham.schemify(tag='sunspec_fixed_block', register=True)
@@ -488,6 +480,7 @@ class FixedBlock(epyqlib.treenode.TreeNode):
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
     internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
 
 
 @graham.schemify(
@@ -523,6 +516,7 @@ class TableRepeatingBlockReferenceDataPointReference(epyqlib.treenode.TreeNode):
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
     internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
 
 
 @graham.schemify(tag='sunspec_table_repeating_block', register=True)
@@ -587,6 +581,7 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
     internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
 
 
 @graham.schemify(tag='sunspec_table_repeating_block', register=True)
@@ -725,6 +720,7 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
     internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
 
 
 @graham.schemify(tag='table', register=True)
@@ -950,9 +946,9 @@ class Table(epyqlib.treenode.TreeNode):
                 block_node.append_child(point_node)
                 block_offset += point_node.size
 
-
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
 
 
 @graham.schemify(tag='sunspec_model', register=True)
@@ -1042,6 +1038,7 @@ class Model(epyqlib.treenode.TreeNode):
         return length
 
     internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
 
 
 #class Repeating...?

@@ -94,6 +94,20 @@
         </layout>
        </widget>
       </widget>
+      <widget class="QWidget" name="gridLayoutWidget22">
+       <layout class="QGridLayout" name="gridLayout22">
+        <item row="2" column="0">
+         <widget class="QTreeView" name="check_result_view">
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="SearchBox" name="check_result_search_box" native="true"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -141,7 +155,14 @@
     </property>
     <addaction name="action_about"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>&amp;Tools</string>
+    </property>
+    <addaction name="action_check"/>
+   </widget>
    <addaction name="menu_File"/>
+   <addaction name="menuTools"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -225,12 +246,17 @@
   </action>
   <action name="action_full_export">
    <property name="text">
-    <string>Full Export...</string>
+    <string>&amp;Full Export...</string>
    </property>
   </action>
   <action name="action_full_export_first_time">
    <property name="text">
     <string>Full Export (First Time)...</string>
+   </property>
+  </action>
+  <action name="action_check">
+   <property name="text">
+    <string>&amp;Check</string>
    </property>
   </action>
  </widget>

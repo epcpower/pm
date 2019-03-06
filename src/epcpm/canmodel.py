@@ -153,6 +153,23 @@ class Signal(epyqlib.treenode.TreeNode):
 
         return minimum, maximum
 
+    @epyqlib.attrsmodel.check_children
+    def check(self, result):
+        results = []
+
+        if self.bits < 1:
+            results.append(
+                f'Bit length should be greater than zero: {self.bits}',
+            )
+
+        for r in results:
+            result.append_child(epyqlib.checkresultmodel.Result(
+                node=self,
+                message=r,
+            ))
+
+        return result
+
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
     internal_move = epyqlib.attrsmodel.default_internal_move
@@ -258,6 +275,7 @@ class Message(epyqlib.treenode.TreeNode):
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
 
 
 @graham.schemify(tag='multiplexer')
@@ -364,6 +382,7 @@ class Multiplexer(epyqlib.treenode.TreeNode):
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
 
 
 @graham.schemify(tag='multiplexed_message')
@@ -483,6 +502,7 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
 
 
 @graham.schemify(tag='multiplexed_message_clone')
@@ -579,6 +599,7 @@ class MultiplexedMessageClone(epyqlib.treenode.TreeNode):
         return False
 
     internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
 
 
 @graham.schemify(tag='table', register=True)
@@ -653,7 +674,7 @@ class CanTable(epyqlib.treenode.TreeNode):
 
         return True
 
-    def update(self, table=None, warn=True):
+    def update(self, table=None, warn=False):
         array_uuid_to_signal = {
             child.parameter_uuid: child
             for child in self.children
@@ -1022,6 +1043,7 @@ class CanTable(epyqlib.treenode.TreeNode):
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
 
 
 Root = epyqlib.attrsmodel.Root(
