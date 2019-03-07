@@ -2,7 +2,7 @@
 
 attrs==18.2.0
 click==7.0
-epyqlib==2019.2.2
+epyqlib==2019.3.1
 lxml==4.3.0
 pyqt5==5.11.2
 requests==2.20.0
