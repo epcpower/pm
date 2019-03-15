@@ -216,6 +216,10 @@ class DataPoint:
                     # 'get': 'sunspecInt32ToSSS32',
                     'set': 'sunspecSSS32ToInt32',
                 },
+                'uint64': {
+                    'get': 'sunspecUint64ToSSU64_returns',
+                    'set': 'sunspecSSU64ToUint64',
+                },
             }.get(self.parameter_uuid_finder(self.wrapped.type_uuid).name)
 
             body_lines = []
