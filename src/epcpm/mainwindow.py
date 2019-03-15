@@ -747,7 +747,6 @@ class Window:
 
     # TODO: CAMPid 0795409054128050124650546086
     def check_result_uuid_changed(self, uuid):
-        print('here')
         view_model = self.view_models['check_result']
         model = view_model.model
         view = view_model.view
