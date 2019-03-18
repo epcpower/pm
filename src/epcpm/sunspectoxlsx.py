@@ -545,10 +545,10 @@ def adjust_assignment(
         # TODO: we really don't want doubles here, do we?
         # factor = f'(pow(10, -{scale_factor_variable}))'
 
-        opposite = '-' if factor_operator == '*' else ''
+        opposite = '' if factor_operator == '*' else '-'
 
         right_hand_side = (
-            f'(sunspecScale({right_hand_side}, {opposite}{scale_factor_variable})'
+            f'(sunspecScale({right_hand_side}, {opposite}{scale_factor_variable}))'
         )
 
     if parameter.nv_cast:
