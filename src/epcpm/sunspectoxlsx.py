@@ -68,6 +68,7 @@ point_fields = Fields(
     size=data_point_fields.size,
     type=data_point_fields.type_uuid,
     scale_factor=data_point_fields.factor_uuid,
+    units=data_point_fields.units,
 )
 
 
@@ -424,7 +425,8 @@ class Point:
             row.label = parameter.name
             row.name = parameter.abbreviation
             row.notes = parameter.notes
-            row.units = parameter.units
+            if row.units is None:
+                row.units = parameter.units
             row.description = parameter.comment
             row.read_write = 'R' if parameter.read_only else 'RW'
 

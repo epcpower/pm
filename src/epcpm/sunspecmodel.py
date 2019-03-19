@@ -265,6 +265,8 @@ class DataPoint(epyqlib.treenode.TreeNode):
         )
     )
 
+    units = epyqlib.attrsmodel.create_str_or_none_attribute()
+
     get = attr.ib(
         default=None,
         converter=epyqlib.attrsmodel.to_str_or_none,
@@ -1095,6 +1097,7 @@ columns = epyqlib.attrsmodel.columns(
         DataPoint,
         TableRepeatingBlockReferenceDataPointReference,
     ),
+    merge('units', DataPoint),
     merge('enumeration_uuid', DataPoint),
     merge('type_uuid', DataPoint),
     merge('parameter_table_uuid', Table),

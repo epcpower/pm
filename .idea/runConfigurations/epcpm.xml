@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="epcpm" type="PythonConfigurationType" factoryName="Python">
+  <configuration default="false" name="epcpm" type="PythonConfigurationType" factoryName="Python" singleton="false">
     <module name="p" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
@@ -12,7 +12,7 @@
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/venv/Scripts/epcpm" />
-    <option name="PARAMETERS" value="--project src/epcpm/tests/project/project.pmp" />
+    <option name="PARAMETERS" value="--project ../grid-tied/interface/pm/project.pmp" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />
