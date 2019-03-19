@@ -742,7 +742,10 @@ class Window:
         view.setCurrentIndex(index)
         view.selectionModel().select(
             index,
-            QtCore.QItemSelectionModel.ClearAndSelect,
+            (
+                QtCore.QItemSelectionModel.ClearAndSelect
+                | QtCore.QItemSelectionModel.Rows
+            ),
         )
 
     # TODO: CAMPid 0795409054128050124650546086
