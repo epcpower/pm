@@ -6,7 +6,7 @@
 #
 -e file:sub/epyqlib#egg=epyqlib
 -e git+https://github.com/altendky/pycparser@b19d2b7cb78bccc89ef187c1c4eb5db0fdd3bbf9#egg=pycparser
--e git+https://github.com/Loran425/PyInstaller@fb24e328a764dd6748a9973a28c90466833793f4#egg=PyInstaller
+-e git+https://github.com/Loran425/PyInstaller@5bed1af275dfaeb2267af2d10a808bd29a8674f7#egg=PyInstaller
 -e git+https://github.com/altendky/pysunspec@f197baa9c373ff93b13bff22a1ca0368aa89b305#egg=pysunspec
 altgraph==0.16.1          # via macholib
 arrow==0.13.1
