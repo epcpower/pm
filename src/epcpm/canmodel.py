@@ -500,6 +500,8 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
         if isinstance(node, epyqlib.pm.parametermodel.Table):
             return CanTable(table_uuid=node.uuid)
 
+        return node
+
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
     check = epyqlib.attrsmodel.check_just_children
