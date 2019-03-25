@@ -111,12 +111,18 @@ class Group:
         return {
             'name': self.wrapped.name,
             'children': [
-                builders.wrap(
-                    wrapped=child,
-                    can_root=self.can_root,
-                    parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
-                ).gen()
-                for child in self.wrapped.children
+                result
+                for result in (
+                    builders.wrap(
+                        wrapped=child,
+                        can_root=self.can_root,
+                        parameter_uuid_to_can_node=(
+                            self.parameter_uuid_to_can_node
+                        ),
+                    ).gen()
+                    for child in self.wrapped.children
+                )
+                if result is not None
             ],
         }
 
@@ -129,7 +135,10 @@ class Parameter:
     parameter_uuid_to_can_node = attr.ib()
 
     def gen(self):
-        signal = self.parameter_uuid_to_can_node[self.wrapped.uuid]
+        signal = self.parameter_uuid_to_can_node.get(self.wrapped.uuid)
+
+        if signal is None:
+            return None
 
         message = signal.tree_parent
 
