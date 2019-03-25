@@ -129,7 +129,12 @@ class Signal(epyqlib.treenode.TreeNode):
         super().__init__()
 
     def can_drop_on(self, node):
-        return False
+        return isinstance(node, epyqlib.pm.parametermodel.Parameter)
+
+    def child_from(self, node):
+        self.parameter_uuid = node.uuid
+
+        return None
 
     can_delete = epyqlib.attrsmodel.childless_can_delete
 
@@ -171,7 +176,6 @@ class Signal(epyqlib.treenode.TreeNode):
         return result
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
-    child_from = epyqlib.attrsmodel.default_child_from
     internal_move = epyqlib.attrsmodel.default_internal_move
 
 
