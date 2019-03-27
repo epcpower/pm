@@ -212,6 +212,9 @@ class Models:
             enumerations_root
         )
 
+        self.can.list_selection_roots['enumerations'] = (
+            enumerations_root
+        )
         self.parameters.update_nodes()
         self.can.update_nodes()
         self.sunspec.update_nodes()
