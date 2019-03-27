@@ -5,6 +5,7 @@ import graham
 import marshmallow
 
 import epyqlib.attrsmodel
+import epyqlib.checkresultmodel
 import epyqlib.pm.parametermodel
 import epyqlib.utils
 import epyqlib.utils.qt
@@ -326,9 +327,35 @@ class DataPoint(epyqlib.treenode.TreeNode):
         if node is None:
             return self.tree_parent.can_delete(node=self)
 
+    @epyqlib.attrsmodel.check_children
+    def check(self, result):
+        results = []
+
+        if self.parameter_uuid is None:
+            results.append(
+                f'No parameter connected',
+            )
+        else:
+            root = self.find_root()
+            parameter = root.model.node_from_uuid(self.parameter_uuid)
+            if (
+                    parameter.tree_parent.name.startswith('SunSpec')
+                    and parameter.tree_parent.tree_parent.tree_parent is None
+            ):
+                results.append(
+                    f'Connected to temporary SunSpec imported parameter',
+                )
+
+        for r in results:
+            result.append_child(epyqlib.checkresultmodel.Result(
+                node=self,
+                message=r,
+            ))
+
+        return result
+
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
-    check = epyqlib.attrsmodel.check_just_children
 
 
 def check_block_offsets_and_length(self):
