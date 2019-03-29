@@ -441,18 +441,56 @@ class Point:
             ]
             setter = []
 
-            if parameter.nv_format is not None:
-                internal_variable = parameter.nv_format.format(meta)
+            sunspec_model_variable = f'sunspecInterface.model{self.model_id}'
 
-                sunspec_model_variable = (
-                    'sunspecInterface.model{}'.format(
-                        self.wrapped.tree_parent.tree_parent.id,
+            sunspec_variable = (
+                f'{sunspec_model_variable}.{parameter.abbreviation}'
+            )
+
+            if row.type == 'pad':
+                getter.append(
+                    f'{sunspec_variable} = 0x8000;'
+                )
+            elif self.wrapped.not_implemented:
+                print()
+                value = {
+                    'int16': 'INT16_C(0x8000)',
+                    'uint16': 'UINT16_C(0xffff)',
+                    'acc16': 'UINT16_C(0x0000)',
+                    'enum16': 'UINT16_C(0xffff)',
+                    'bitfield16': 'UINT16_C(0xffff)',
+                    'int32': 'sunspecInt32ToSS32_returns(INT32_C(0x80000000))',
+                    'uint32': 'sunspecUint32ToSSU32_returns(UINT32_C(0xffffffff))',
+                    'acc32': 'sunspecUint32ToSSU32_returns(UINT32_C(0x00000000))',
+                    'enum32': 'sunspecUint32ToSSU32_returns(UINT32_C(0xffffffff))',
+                    'bitfield32': 'UINT32_C(0xffffffff)',
+                    'ipaddr': 'sunspecUint32ToSSU32_returns(UINT32_C(0x00000000))',
+                    'int64': 'sunspecInt64ToSS64_returns(INT64_C(0x8000000000000000))',
+                    # yes, acc64 seems to be an int64, not a uint64
+                    'acc64': 'sunspecInt64ToSS64_returns(INT64_C(0x0000000000000000))',
+                    'ipv6addr': 'INT128_C(0x00000000000000000000000000000000)',
+                    'float32': 'NAN',
+                    'sunssf': 'INT16_C(0x8000)',
+                    'string': 'UINT16_C(0x0000)',
+                }[row.type]
+                if row.type == 'string':
+                    getter.extend([
+                        f'for (size_t i = 0; i < LENGTHOF({sunspec_variable}); i++) {{',
+                        [
+                            f'{sunspec_variable}[i] = {value};'
+                        ],
+                        '}',
+                    ])
+                elif row.type.startswith('bitfield'):
+                    getter.append(
+                        f'{sunspec_variable}.raw = {value};'
                     )
-                )
-
-                sunspec_variable = (
-                    f'{sunspec_model_variable}.{parameter.abbreviation}'
-                )
+                else:
+                    getter.append(
+                        f'{sunspec_variable} = {value};'
+                    )
+            elif parameter.nv_format is not None:
+                internal_variable = parameter.nv_format.format(meta)
 
                 # TODO: CAMPid 075780541068182645821856068542023499
                 converter = {

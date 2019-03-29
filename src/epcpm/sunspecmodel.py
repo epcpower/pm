@@ -213,6 +213,10 @@ class DataPoint(epyqlib.treenode.TreeNode):
     factor_uuid = create_factor_uuid_attribute()
     parameter_uuid = create_parameter_uuid_attribute()
 
+    not_implemented = epyqlib.attrsmodel.create_checkbox_attribute(
+        default=False,
+    )
+
     type_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,
         allow_none=True,
@@ -1117,6 +1121,7 @@ columns = epyqlib.attrsmodel.columns(
         )
     ),
     merge('abbreviation', TableRepeatingBlock),
+    merge('not_implemented', DataPoint),
     merge('length', Model) + merge('size', DataPoint),
     merge('repeats', TableRepeatingBlock),
     merge(
