@@ -61,13 +61,7 @@ class Signal(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.String(),
         ),
     )
-    bits = attr.ib(
-        default=0,
-        converter=int,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.Integer(),
-        ),
-    )
+    bits = epyqlib.attrsmodel.create_integer_attribute(default=0)
     signed = attr.ib(
         default=False,
         convert=epyqlib.attrsmodel.two_state_checkbox,
@@ -82,12 +76,7 @@ class Signal(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.Decimal(as_string=True),
         ),
     )
-    start_bit = attr.ib(
-        default=0,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.Integer(),
-        ),
-    )
+    start_bit = epyqlib.attrsmodel.create_integer_attribute(default=0)
 
     parameter_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,
@@ -210,12 +199,7 @@ class Message(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.Boolean(),
         ),
     )
-    length = attr.ib(
-        default=0,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.Int(),
-        ),
-    )
+    length = epyqlib.attrsmodel.create_integer_attribute(default=0)
     cycle_time = attr.ib(
         default=None,
         convert=epyqlib.attrsmodel.to_decimal_or_none,
@@ -300,13 +284,7 @@ class Multiplexer(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.Integer(allow_none=True),
         )
     )
-    length = attr.ib(
-        default=0,
-        convert=int,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.Int(),
-        ),
-    )
+    length = epyqlib.attrsmodel.create_integer_attribute(default=0)
     cycle_time = attr.ib(
         default=None,
         convert=epyqlib.attrsmodel.to_decimal_or_none,
@@ -420,13 +398,7 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.Boolean(),
         ),
     )
-    length = attr.ib(
-        default=0,
-        convert=int,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.Integer(),
-        ),
-    )
+    length = epyqlib.attrsmodel.create_integer_attribute(default=0)
     sendable = attr.ib(
         default=True,
         convert=epyqlib.attrsmodel.two_state_checkbox,
