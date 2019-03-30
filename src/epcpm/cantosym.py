@@ -36,6 +36,34 @@ def export(path, can_model, parameters_model):
         f.write(builder.gen())
 
 
+class SignalOutsideMessageError(Exception):
+    @classmethod
+    def build(cls, signal):
+        path = [signal]
+
+        while True:
+            parent = path[0].tree_parent
+
+            if parent.tree_parent is None:
+                break
+
+            path.insert(0, parent)
+
+        path_string = ' : '.join(element.name for element in path)
+
+        message_range = [0, (path[-2].length * 8) - 1]
+        signal_range = [signal.start_bit, signal.start_bit + signal.bits - 1]
+
+        message = (
+              f'{path_string} spans bits'
+              f' [{signal_range[0]}, {signal_range[1]}]'
+              f' which is outside the range'
+              f' [{message_range[0]}, {message_range[1]}]'
+        )
+
+        return cls(message)
+
+
 @builders(epcpm.canmodel.Root)
 @attr.s
 class Root:
@@ -164,6 +192,12 @@ class Signal:
             skip_access_level=False,
             skip_configuration=False,
     ):
+        if (
+                self.wrapped.start_bit < 0
+                or 64 < self.wrapped.start_bit + self.wrapped.bits
+        ):
+            raise SignalOutsideMessageError.build(signal=self.wrapped)
+
         extras = {}
         can_find_parameter = (
             self.wrapped.parameter_uuid is not None
