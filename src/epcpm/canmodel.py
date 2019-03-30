@@ -50,16 +50,21 @@ class HexadecimalIntegerField(marshmallow.fields.Field):
         return int(value, 0)
 
 
+def create_child_signal_from(node):
+    name = epyqlib.attrsmodel.fields(Signal).name.converter.suggest(
+        node.name,
+    )
+
+    return Signal(name=name, parameter_uuid=node.uuid)
+
+
 @graham.schemify(tag='signal')
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Signal(epyqlib.treenode.TreeNode):
-    name = attr.ib(
-        default='New Signal',
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
-        ),
+    name = epyqlib.attrsmodel.create_code_identifier_string_attribute(
+        default='NewSignal',
     )
     bits = epyqlib.attrsmodel.create_integer_attribute(default=0)
     signed = attr.ib(
@@ -173,11 +178,8 @@ class Signal(epyqlib.treenode.TreeNode):
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Message(epyqlib.treenode.TreeNode):
-    name = attr.ib(
-        default='New Message',
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
-        ),
+    name = epyqlib.attrsmodel.create_code_identifier_string_attribute(
+        default='NewMessage',
     )
 
     identifier = attr.ib(
@@ -271,11 +273,8 @@ class Message(epyqlib.treenode.TreeNode):
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Multiplexer(epyqlib.treenode.TreeNode):
-    name = attr.ib(
-        default='New Multiplexer',
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
-        ),
+    name = epyqlib.attrsmodel.create_code_identifier_string_attribute(
+        default='NewMultiplexer',
     )
     identifier = attr.ib(
         default=None,
@@ -338,7 +337,7 @@ class Multiplexer(epyqlib.treenode.TreeNode):
         super().__init__()
 
     def child_from(self, node):
-        return Signal(name=node.name, parameter_uuid=node.uuid)
+        return create_child_signal_from(node=node)
 
     @classmethod
     def all_addable_types(cls):
@@ -372,11 +371,8 @@ class Multiplexer(epyqlib.treenode.TreeNode):
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class MultiplexedMessage(epyqlib.treenode.TreeNode):
-    name = attr.ib(
-        default='New Multiplexed Message',
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
-        ),
+    name = epyqlib.attrsmodel.create_code_identifier_string_attribute(
+        default='NewMultiplexedMessage',
     )
 
     identifier = attr.ib(
@@ -471,7 +467,7 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
     @staticmethod
     def child_from(node):
         if isinstance(node, epyqlib.pm.parametermodel.Parameter):
-            return Signal(name=node.name, parameter_uuid=node.uuid)
+            return create_child_signal_from(node=node)
 
         if isinstance(node, epyqlib.pm.parametermodel.Table):
             return CanTable(table_uuid=node.uuid)
