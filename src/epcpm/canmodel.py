@@ -904,6 +904,8 @@ class CanTable(epyqlib.treenode.TreeNode):
                     multiplexer.path = multiplexer_path
                     multiplexer.path_children = multiplexer_path_children
 
+                multiplexer.length = 8
+
                 mux_value += 1
 
                 stripped_chunk = []

@@ -38,7 +38,7 @@ def export(path, can_model, parameters_model):
 
 class SignalOutsideMessageError(Exception):
     @classmethod
-    def build(cls, signal):
+    def build(cls, signal, message_length):
         path = [signal]
 
         while True:
@@ -51,7 +51,7 @@ class SignalOutsideMessageError(Exception):
 
         path_string = ' : '.join(element.name for element in path)
 
-        message_range = [0, (path[-2].length * 8) - 1]
+        message_range = [0, max(0, (message_length * 8) - 1)]
         signal_range = [signal.start_bit, signal.start_bit + signal.bits - 1]
 
         message = (
@@ -173,6 +173,7 @@ class Message:
         for child in self.wrapped.children:
             signal = builders.wrap(
                 wrapped=child,
+                message_length=self.wrapped.length,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             ).gen()
             frame.signals.append(signal)
@@ -184,6 +185,7 @@ class Message:
 @attr.s
 class Signal:
     wrapped = attr.ib()
+    message_length = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     def gen(
@@ -193,10 +195,19 @@ class Signal:
             skip_configuration=False,
     ):
         if (
-                self.wrapped.start_bit < 0
-                or 64 < self.wrapped.start_bit + self.wrapped.bits
+                self.message_length is not None
+                and (
+                    self.wrapped.start_bit < 0
+                    or (
+                        self.message_length * 8
+                        < self.wrapped.start_bit + self.wrapped.bits
+                    )
+                )
         ):
-            raise SignalOutsideMessageError.build(signal=self.wrapped)
+            raise SignalOutsideMessageError.build(
+                signal=self.wrapped,
+                message_length=self.message_length,
+            )
 
         extras = {}
         can_find_parameter = (
@@ -354,6 +365,7 @@ class MultiplexedMessage:
 
         mux_signal = builders.wrap(
             wrapped=self.wrapped.children[0],
+            message_length=None,
             parameter_uuid_finder=self.parameter_uuid_finder,
         ).gen(
             multiplex_id='Multiplexor',
@@ -418,6 +430,7 @@ class MultiplexedMessage:
             for signal in multiplexer.children:
                 signal = builders.wrap(
                     wrapped=signal,
+                    message_length=multiplexer.length,
                     parameter_uuid_finder=self.parameter_uuid_finder,
                 ).gen(
                     multiplex_id=multiplexer.identifier,
@@ -438,6 +451,7 @@ class MultiplexedMessage:
 
                 matrix_signal = builders.wrap(
                     wrapped=signal,
+                    message_length=multiplexer.length,
                     parameter_uuid_finder=self.parameter_uuid_finder,
                 ).gen(
                     multiplex_id=multiplexer.identifier,
