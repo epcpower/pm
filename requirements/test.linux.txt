@@ -38,7 +38,7 @@ incremental==17.5.0       # via twisted
 jdcal==1.4                # via openpyxl
 lxml==4.3.0
 macholib==1.11
-marshmallow==2.19.1       # via graham
+marshmallow==2.19.2       # via graham
 more-itertools==7.0.0     # via pytest
 natsort==6.0.0
 openpyxl==2.5.12
