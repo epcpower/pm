@@ -45,33 +45,33 @@ def test_():
     can_root.append_child(multiplexed_message)
 
     multiplexer_a = epcpm.canmodel.Multiplexer(
-        name='Multiplexer A',
+        name='Multiplexer_A',
         uuid='78ce435e-1ba8-424f-aec4-212bbba0c612',
     )
     multiplexed_message.append_child(multiplexer_a)
 
     signal_aa = epcpm.canmodel.Signal(
-        name='Signal PAA',
+        name='Signal_PAA',
         parameter_uuid=parameter_aa.uuid,
         uuid='3c25a151-2ae0-4a8d-bc77-704123aa6547',
     )
     multiplexer_a.append_child(signal_aa)
 
     multiplexer_b = epcpm.canmodel.Multiplexer(
-        name='Multiplexer B',
+        name='Multiplexer_B',
         uuid='464d14d3-9bd6-45af-aac8-29cb87faff23',
     )
     multiplexed_message.append_child(multiplexer_b)
 
     signal_ab = epcpm.canmodel.Signal(
-        name='Signal PAB',
+        name='Signal_PAB',
         parameter_uuid=parameter_ab.uuid,
         uuid='84d3eb7a-212c-4634-b46f-92e51b6147fd',
     )
     multiplexer_b.append_child(signal_ab)
 
     signal_a = epcpm.canmodel.Signal(
-        name='Signal PA',
+        name='Signal_PA',
         parameter_uuid=parameter_a.uuid,
         uuid='db7a51b2-db17-427e-9acc-45d6a988d3d4',
     )
@@ -83,18 +83,18 @@ def test_():
                 'name': 'Group A',
                 'children': [
                     [
-                        'Multiplexer A',
-                        'Signal PAA',
+                        'Multiplexer_A',
+                        'Signal_PAA',
                     ],
                     [
-                        'Multiplexer B',
-                        'Signal PAB',
+                        'Multiplexer_B',
+                        'Signal_PAB',
                     ],
                 ]
             },
             [
-                'Multiplexer B',
-                'Signal PA',
+                'Multiplexer_B',
+                'Signal_PA',
             ],
         ]
     }

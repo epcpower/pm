@@ -9,6 +9,8 @@
             "extended": true,
             "length": 0,
             "cycle_time": null,
+            "sendable": true,
+            "receivable": true,
             "comment": null,
             "children": [
                 {
@@ -17,7 +19,10 @@
                     "bits": 0,
                     "signed": false,
                     "factor": "1",
+                    "start_bit": 0,
                     "parameter_uuid": "c25cd4e2-b2a8-4106-8610-4e0db6033a17",
+                    "enumeration_uuid": null,
+                    "path": [],
                     "uuid": "02b7c6f9-8447-4a84-b107-385749066bd3"
                 },
                 {
@@ -26,7 +31,10 @@
                     "bits": 0,
                     "signed": false,
                     "factor": "1",
+                    "start_bit": 0,
                     "parameter_uuid": "422638c9-87d1-4c86-aa8c-73bd8bfff99c",
+                    "enumeration_uuid": null,
+                    "path": [],
                     "uuid": "4cfe3c01-4543-456b-8396-2793faafec95"
                 }
             ],
@@ -34,11 +42,13 @@
         },
         {
             "_type": "message",
-            "name": "New Message",
+            "name": "New_Message",
             "identifier": "0x1fffffff",
             "extended": true,
             "length": 0,
             "cycle_time": null,
+            "sendable": true,
+            "receivable": true,
             "comment": null,
             "children": [
                 {
@@ -47,7 +57,10 @@
                     "bits": 0,
                     "signed": false,
                     "factor": "1",
+                    "start_bit": 0,
                     "parameter_uuid": "6516a19e-ecb8-4cd9-acc1-3894193886f7",
+                    "enumeration_uuid": null,
+                    "path": [],
                     "uuid": "2759cd9c-e53e-44f3-974e-2a7c343a2d0a"
                 }
             ],
@@ -55,47 +68,60 @@
         },
         {
             "_type": "multiplexed_message",
-            "name": "New Multiplexed Message",
+            "name": "New_Multiplexed_Message",
             "identifier": "0x1fffffff",
             "extended": true,
+            "length": 0,
+            "sendable": true,
+            "receivable": true,
             "comment": null,
             "children": [
                 {
                     "_type": "signal",
-                    "name": "Mux Signal",
+                    "name": "Mux_Signal",
                     "bits": 2,
                     "signed": false,
                     "factor": "1",
+                    "start_bit": 0,
                     "parameter_uuid": null,
+                    "enumeration_uuid": null,
+                    "path": [],
                     "uuid": "c03fda26-bdbb-4dc7-8a2b-f0da0d32b48a"
                 },
                 {
                     "_type": "signal",
-                    "name": "Common Signal",
+                    "name": "Common_Signal",
                     "bits": 0,
                     "signed": false,
                     "factor": "1",
+                    "start_bit": 0,
                     "parameter_uuid": null,
+                    "enumeration_uuid": null,
+                    "path": [],
                     "uuid": "bed79739-bedd-429d-bd96-63bf8213252a"
                 },
                 {
                     "_type": "multiplexer",
-                    "name": "Multiplexer A",
+                    "name": "Multiplexer_A",
                     "identifier": 1,
                     "length": 0,
                     "cycle_time": null,
                     "comment": null,
                     "children": [],
+                    "path": [],
+                    "path_children": [],
                     "uuid": "1491d55a-ef3d-4079-9443-3a0790b033b9"
                 },
                 {
                     "_type": "multiplexer",
-                    "name": "Multiplexer B",
+                    "name": "Multiplexer_B",
                     "identifier": 2,
                     "length": 0,
                     "cycle_time": null,
                     "comment": null,
                     "children": [],
+                    "path": [],
+                    "path_children": [],
                     "uuid": "4e06142b-b91c-4916-985f-509336ed3b1d"
                 }
             ],

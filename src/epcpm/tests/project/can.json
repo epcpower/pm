@@ -14,7 +14,7 @@
             "children": [
                 {
                     "_type": "signal",
-                    "name": "Multiplex Signal",
+                    "name": "MultiplexSignal",
                     "bits": 8,
                     "signed": false,
                     "factor": "1",
@@ -33,7 +33,7 @@
                     "children": [
                         {
                             "_type": "signal",
-                            "name": "Array One",
+                            "name": "ArrayOne",
                             "bits": 8,
                             "signed": false,
                             "factor": "1",
@@ -45,7 +45,7 @@
                         },
                         {
                             "_type": "signal",
-                            "name": "Array Two",
+                            "name": "ArrayTwo",
                             "bits": 16,
                             "signed": false,
                             "factor": "1",
@@ -57,15 +57,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-0ET-0_Array One",
+                            "name": "EO_0ET_0_ArrayOne",
                             "identifier": 5,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AO-0",
+                                    "name": "AO_0",
                                     "bits": 8,
                                     "signed": false,
                                     "factor": "1",
@@ -82,7 +82,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AO-1",
+                                    "name": "AO_1",
                                     "bits": 8,
                                     "signed": false,
                                     "factor": "1",
@@ -111,15 +111,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-0ET-0_Array Two_A",
+                            "name": "EO_0ET_0_ArrayTwo_A",
                             "identifier": 6,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AT-0",
+                                    "name": "AT_0",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -136,7 +136,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-1",
+                                    "name": "AT_1",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -153,7 +153,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-2",
+                                    "name": "AT_2",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -183,15 +183,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-0ET-0_Array Two_B",
+                            "name": "EO_0ET_0_ArrayTwo_B",
                             "identifier": 7,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AT-3",
+                                    "name": "AT_3",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -208,7 +208,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-4",
+                                    "name": "AT_4",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -237,15 +237,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-0ET-1_Array One",
+                            "name": "EO_0ET_1_ArrayOne",
                             "identifier": 8,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AO-0",
+                                    "name": "AO_0",
                                     "bits": 8,
                                     "signed": false,
                                     "factor": "1",
@@ -262,7 +262,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AO-1",
+                                    "name": "AO_1",
                                     "bits": 8,
                                     "signed": false,
                                     "factor": "1",
@@ -291,15 +291,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-0ET-1_Array Two_A",
+                            "name": "EO_0ET_1_ArrayTwo_A",
                             "identifier": 9,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AT-0",
+                                    "name": "AT_0",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -316,7 +316,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-1",
+                                    "name": "AT_1",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -333,7 +333,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-2",
+                                    "name": "AT_2",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -363,15 +363,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-0ET-1_Array Two_B",
+                            "name": "EO_0ET_1_ArrayTwo_B",
                             "identifier": 10,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AT-3",
+                                    "name": "AT_3",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -388,7 +388,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-4",
+                                    "name": "AT_4",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -417,15 +417,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-0ET-2_Array One",
+                            "name": "EO_0ET_2_ArrayOne",
                             "identifier": 11,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AO-0",
+                                    "name": "AO_0",
                                     "bits": 8,
                                     "signed": false,
                                     "factor": "1",
@@ -442,7 +442,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AO-1",
+                                    "name": "AO_1",
                                     "bits": 8,
                                     "signed": false,
                                     "factor": "1",
@@ -471,15 +471,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-0ET-2_Array Two_A",
+                            "name": "EO_0ET_2_ArrayTwo_A",
                             "identifier": 12,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AT-0",
+                                    "name": "AT_0",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -496,7 +496,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-1",
+                                    "name": "AT_1",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -513,7 +513,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-2",
+                                    "name": "AT_2",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -543,15 +543,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-0ET-2_Array Two_B",
+                            "name": "EO_0ET_2_ArrayTwo_B",
                             "identifier": 13,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AT-3",
+                                    "name": "AT_3",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -568,7 +568,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-4",
+                                    "name": "AT_4",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -597,15 +597,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-0ET-3_Array One",
+                            "name": "EO_0ET_3_ArrayOne",
                             "identifier": 14,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AO-0",
+                                    "name": "AO_0",
                                     "bits": 8,
                                     "signed": false,
                                     "factor": "1",
@@ -622,7 +622,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AO-1",
+                                    "name": "AO_1",
                                     "bits": 8,
                                     "signed": false,
                                     "factor": "1",
@@ -651,15 +651,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-0ET-3_Array Two_A",
+                            "name": "EO_0ET_3_ArrayTwo_A",
                             "identifier": 15,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AT-0",
+                                    "name": "AT_0",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -676,7 +676,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-1",
+                                    "name": "AT_1",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -693,7 +693,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-2",
+                                    "name": "AT_2",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -723,15 +723,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-0ET-3_Array Two_B",
+                            "name": "EO_0ET_3_ArrayTwo_B",
                             "identifier": 16,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AT-3",
+                                    "name": "AT_3",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -748,7 +748,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-4",
+                                    "name": "AT_4",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -777,15 +777,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-1ET-0_Array One",
+                            "name": "EO_1ET_0_ArrayOne",
                             "identifier": 17,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AO-0",
+                                    "name": "AO_0",
                                     "bits": 8,
                                     "signed": false,
                                     "factor": "1",
@@ -802,7 +802,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AO-1",
+                                    "name": "AO_1",
                                     "bits": 8,
                                     "signed": false,
                                     "factor": "1",
@@ -831,15 +831,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-1ET-0_Array Two_A",
+                            "name": "EO_1ET_0_ArrayTwo_A",
                             "identifier": 18,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AT-0",
+                                    "name": "AT_0",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -856,7 +856,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-1",
+                                    "name": "AT_1",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -873,7 +873,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-2",
+                                    "name": "AT_2",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -903,15 +903,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-1ET-0_Array Two_B",
+                            "name": "EO_1ET_0_ArrayTwo_B",
                             "identifier": 19,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AT-3",
+                                    "name": "AT_3",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -928,7 +928,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-4",
+                                    "name": "AT_4",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -957,15 +957,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-1ET-1_Array One",
+                            "name": "EO_1ET_1_ArrayOne",
                             "identifier": 20,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AO-0",
+                                    "name": "AO_0",
                                     "bits": 8,
                                     "signed": false,
                                     "factor": "1",
@@ -982,7 +982,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AO-1",
+                                    "name": "AO_1",
                                     "bits": 8,
                                     "signed": false,
                                     "factor": "1",
@@ -1011,15 +1011,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-1ET-1_Array Two_A",
+                            "name": "EO_1ET_1_ArrayTwo_A",
                             "identifier": 21,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AT-0",
+                                    "name": "AT_0",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -1036,7 +1036,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-1",
+                                    "name": "AT_1",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -1053,7 +1053,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-2",
+                                    "name": "AT_2",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -1083,15 +1083,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-1ET-1_Array Two_B",
+                            "name": "EO_1ET_1_ArrayTwo_B",
                             "identifier": 22,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AT-3",
+                                    "name": "AT_3",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -1108,7 +1108,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-4",
+                                    "name": "AT_4",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -1137,15 +1137,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-1ET-2_Array One",
+                            "name": "EO_1ET_2_ArrayOne",
                             "identifier": 23,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AO-0",
+                                    "name": "AO_0",
                                     "bits": 8,
                                     "signed": false,
                                     "factor": "1",
@@ -1162,7 +1162,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AO-1",
+                                    "name": "AO_1",
                                     "bits": 8,
                                     "signed": false,
                                     "factor": "1",
@@ -1191,15 +1191,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-1ET-2_Array Two_A",
+                            "name": "EO_1ET_2_ArrayTwo_A",
                             "identifier": 24,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AT-0",
+                                    "name": "AT_0",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -1216,7 +1216,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-1",
+                                    "name": "AT_1",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -1233,7 +1233,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-2",
+                                    "name": "AT_2",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -1263,15 +1263,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-1ET-2_Array Two_B",
+                            "name": "EO_1ET_2_ArrayTwo_B",
                             "identifier": 25,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AT-3",
+                                    "name": "AT_3",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -1288,7 +1288,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-4",
+                                    "name": "AT_4",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -1317,15 +1317,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-1ET-3_Array One",
+                            "name": "EO_1ET_3_ArrayOne",
                             "identifier": 26,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AO-0",
+                                    "name": "AO_0",
                                     "bits": 8,
                                     "signed": false,
                                     "factor": "1",
@@ -1342,7 +1342,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AO-1",
+                                    "name": "AO_1",
                                     "bits": 8,
                                     "signed": false,
                                     "factor": "1",
@@ -1371,15 +1371,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-1ET-3_Array Two_A",
+                            "name": "EO_1ET_3_ArrayTwo_A",
                             "identifier": 27,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AT-0",
+                                    "name": "AT_0",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -1396,7 +1396,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-1",
+                                    "name": "AT_1",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -1413,7 +1413,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-2",
+                                    "name": "AT_2",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -1443,15 +1443,15 @@
                         },
                         {
                             "_type": "multiplexer",
-                            "name": "EO-1ET-3_Array Two_B",
+                            "name": "EO_1ET_3_ArrayTwo_B",
                             "identifier": 28,
-                            "length": 0,
+                            "length": 8,
                             "cycle_time": null,
                             "comment": null,
                             "children": [
                                 {
                                     "_type": "signal",
-                                    "name": "AT-3",
+                                    "name": "AT_3",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",
@@ -1468,7 +1468,7 @@
                                 },
                                 {
                                     "_type": "signal",
-                                    "name": "AT-4",
+                                    "name": "AT_4",
                                     "bits": 16,
                                     "signed": false,
                                     "factor": "1",

@@ -219,7 +219,7 @@ def test_add_enumerator_update_table(sample):
     )
 
     enumeration.append_child(epyqlib.pm.parametermodel.Enumerator(
-        name='ET-New',
+        name='ET_New',
         value=42,
         uuid='173ba72c-bf2a-42a1-aab6-3e5fc49f10e7',
     ))
