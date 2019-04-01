@@ -395,6 +395,12 @@ class Window:
             for i in range(column_count):
                 view.resizeColumnToContents(i)
 
+            header = view.header()
+            header.setSectionResizeMode(
+                0,
+                QtWidgets.QHeaderView.ResizeToContents,
+            )
+
             view.setContextMenuPolicy(
                 QtCore.Qt.CustomContextMenu)
             m = functools.partial(
