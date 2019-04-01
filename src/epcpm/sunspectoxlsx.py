@@ -452,7 +452,6 @@ class Point:
                     f'{sunspec_variable} = 0x8000;'
                 )
             elif self.wrapped.not_implemented:
-                print()
                 value = {
                     'int16': 'INT16_C(0x8000)',
                     'uint16': 'UINT16_C(0xffff)',
