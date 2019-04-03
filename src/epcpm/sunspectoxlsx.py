@@ -484,6 +484,17 @@ class Point:
                     getter.append(
                         f'{sunspec_variable}.raw = {value};'
                     )
+                    # # below because parsesunspec only detects bitfields
+                    # # if they have values
+                    # if self.wrapped.enumeration_uuid is not None:
+                    #     getter.append(
+                    #         f'{sunspec_variable}.raw = {value};'
+                    #     )
+                    # else:
+                    #     getter.append(
+                    #         f'*((uint{row.type[-2:]}_t*) &{sunspec_variable})'
+                    #         f' = {value};'
+                    #     )
                 else:
                     getter.append(
                         f'{sunspec_variable} = {value};'
@@ -543,6 +554,20 @@ class Point:
 
                 # minimum_variable = parameter.nv_format.format('[Meta_Min]')
                 # maximum_variable = parameter.nv_format.format('[Meta_Max]')
+            else:
+                if getattr(parameter, 'embedded_getter', None) is not None:
+                    getter.append(
+                        parameter.embedded_getter.format(
+                            interface=sunspec_variable,
+                        )
+                    )
+
+                if getattr(parameter, 'embedded_setter', None) is not None:
+                    setter.append(
+                        parameter.embedded_setter.format(
+                            interface=sunspec_variable,
+                        )
+                    )
 
             row.get = epcpm.c.format_nested_lists(getter)
 
