@@ -64,9 +64,9 @@ pyasn1==0.4.5             # via pyasn1-modules, service-identity, twisted
 pyelftools==0.25
 pygments==2.3.1           # via readme-renderer
 pyhamcrest==1.9.0         # via twisted
-pyobjc-core==5.1.2        # via pyobjc-framework-cfnetwork, pyobjc-framework-cocoa, twisted
-pyobjc-framework-cfnetwork==5.1.2  # via twisted
-pyobjc-framework-cocoa==5.1.2  # via pyobjc-framework-cfnetwork, twisted
+pyobjc-core==5.2          # via pyobjc-framework-cfnetwork, pyobjc-framework-cocoa, twisted
+pyobjc-framework-cfnetwork==5.2  # via twisted
+pyobjc-framework-cocoa==5.2  # via pyobjc-framework-cfnetwork, twisted
 pyopenssl==19.0.0         # via twisted
 pyqt5-sip==4.19.15        # via pyqt5
 pyqt5==5.11.2

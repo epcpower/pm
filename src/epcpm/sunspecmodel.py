@@ -332,7 +332,7 @@ class DataPoint(epyqlib.treenode.TreeNode):
             return self.tree_parent.can_delete(node=self)
 
     @epyqlib.attrsmodel.check_children
-    def check(self, result):
+    def check(self, result, models):
         results = []
 
         if self.parameter_uuid is None:

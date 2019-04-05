@@ -547,7 +547,10 @@ class Window:
                 name=name,
                 node=model.root,
             )
-            model.root.check_and_append(parent=node)
+            model.root.check_and_append(
+                parent=node,
+                models=self.project.models,
+            )
             root.append_child(node)
 
         # self.check_view = QtWidgets.QTreeView()

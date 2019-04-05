@@ -153,7 +153,7 @@ class Signal(epyqlib.treenode.TreeNode):
         return minimum, maximum
 
     @epyqlib.attrsmodel.check_children
-    def check(self, result):
+    def check(self, result, models):
         results = []
 
         if self.bits < 1:
