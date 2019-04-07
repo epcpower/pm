@@ -177,13 +177,13 @@ class DataPoint:
         original = parameter.original
         if isinstance(original.tree_parent, epyqlib.pm.parametermodel.Group):
             getter_setter = {
-                'get': original.embedded_getter,
-                'set': original.embedded_setter,
+                'get': original.can_getter,
+                'set': original.can_setter,
             }
         elif isinstance(original.tree_parent, epyqlib.pm.parametermodel.Array):
             getter_setter = {
-                'get': parameter_table.embedded_getter,
-                'set': parameter_table.embedded_setter,
+                'get': parameter_table.can_getter,
+                'set': parameter_table.can_setter,
             }
 
         if getter_setter['get'] is None:

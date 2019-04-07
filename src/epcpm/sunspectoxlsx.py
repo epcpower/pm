@@ -555,16 +555,16 @@ class Point:
                 # minimum_variable = parameter.nv_format.format('[Meta_Min]')
                 # maximum_variable = parameter.nv_format.format('[Meta_Max]')
             else:
-                if getattr(parameter, 'embedded_getter', None) is not None:
+                if getattr(parameter, 'sunspec_getter', None) is not None:
                     getter.append(
-                        parameter.embedded_getter.format(
+                        parameter.sunspec_getter.format(
                             interface=sunspec_variable,
                         )
                     )
 
-                if getattr(parameter, 'embedded_setter', None) is not None:
+                if getattr(parameter, 'sunspec_setter', None) is not None:
                     setter.append(
-                        parameter.embedded_setter.format(
+                        parameter.sunspec_setter.format(
                             interface=sunspec_variable,
                         )
                     )

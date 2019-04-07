@@ -509,9 +509,14 @@ class FixedBlock(epyqlib.treenode.TreeNode):
     def can_delete(self, node=None):
         return False
 
+    def child_from(self, node):
+        if isinstance(node, epyqlib.pm.parametermodel.Parameter):
+            return DataPoint(parameter_uuid=node.uuid)
+
+        return node
+
     check_offsets_and_length = check_block_offsets_and_length
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
-    child_from = epyqlib.attrsmodel.default_child_from
     internal_move = epyqlib.attrsmodel.default_internal_move
     check = epyqlib.attrsmodel.check_just_children
 

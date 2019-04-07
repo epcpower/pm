@@ -113,8 +113,8 @@ class CanTable:
     def table_lines(self, parameter_table):
         lines = []
 
-        embedded_getter = parameter_table.embedded_getter
-        embedded_setter = parameter_table.embedded_setter
+        can_getter = parameter_table.can_getter
+        can_setter = parameter_table.can_setter
 
         for child in self.wrapped.children:
             if not isinstance(child, epcpm.canmodel.Multiplexer):
@@ -123,8 +123,8 @@ class CanTable:
             builder = builders.wrap(
                 wrapped=child,
                 table_name=self.wrapped.name,
-                embedded_getter=embedded_getter,
-                embedded_setter=embedded_setter,
+                can_getter=can_getter,
+                can_setter=can_setter,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
 
@@ -179,8 +179,8 @@ def get_curve_type(combination_string):
 class Multiplexer:
     wrapped = attr.ib()
     table_name = attr.ib()
-    embedded_getter = attr.ib()
-    embedded_setter = attr.ib()
+    can_getter = attr.ib()
+    can_setter = attr.ib()
     parameter_uuid_finder = attr.ib()
 
     def gen(self, get_or_set):
@@ -193,8 +193,8 @@ class Multiplexer:
             builder = builders.wrap(
                 wrapped=child,
                 table_name=self.table_name,
-                embedded_getter=self.embedded_getter,
-                embedded_setter=self.embedded_setter,
+                can_getter=self.can_getter,
+                can_setter=self.can_setter,
                 multiplexer_name=self.wrapped.name,
                 curve_type=curve_type,
                 parameter_uuid_finder=self.parameter_uuid_finder,
@@ -227,8 +227,8 @@ class Signal:
     wrapped = attr.ib()
     table_name = attr.ib()
     multiplexer_name = attr.ib()
-    embedded_getter = attr.ib()
-    embedded_setter = attr.ib()
+    can_getter = attr.ib()
+    can_setter = attr.ib()
     curve_type = attr.ib()
     parameter_uuid_finder = attr.ib()
 
@@ -248,17 +248,17 @@ class Signal:
             original = original.original
 
         if isinstance(original.tree_parent, epyqlib.pm.parametermodel.Group):
-            embedded_getter = original.embedded_getter
-            embedded_setter = original.embedded_setter
+            can_getter = original.can_getter
+            can_setter = original.can_setter
         elif isinstance(original.tree_parent, epyqlib.pm.parametermodel.Array):
-            embedded_getter = self.embedded_getter
-            embedded_setter = self.embedded_setter
+            can_getter = self.can_getter
+            can_setter = self.can_setter
 
-        if embedded_getter is None:
-            embedded_getter = ''
+        if can_getter is None:
+            can_getter = ''
 
-        if embedded_setter is None:
-            embedded_setter = ''
+        if can_setter is None:
+            can_setter = ''
 
         axis = table_array_element.tree_parent.axis
         if axis is None:
@@ -268,8 +268,8 @@ class Signal:
 
         return [
             {
-                'get': embedded_getter,
-                'set': embedded_setter,
+                'get': can_getter,
+                'set': can_setter,
             }[get_or_set].format(
                 curve_type=self.curve_type,
                 interface_signal=interface_signal,
