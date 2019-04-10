@@ -462,13 +462,13 @@ class Point:
                     'uint32': 'sunspecUint32ToSSU32_returns(UINT32_C(0xffffffff))',
                     'acc32': 'sunspecUint32ToSSU32_returns(UINT32_C(0x00000000))',
                     'enum32': 'sunspecUint32ToSSU32_returns(UINT32_C(0xffffffff))',
-                    'bitfield32': 'UINT32_C(0xffffffff)',
+                    'bitfield32': 'sunspecUint32ToSSU32_returns(UINT32_C(0xffffffff))',
                     'ipaddr': 'sunspecUint32ToSSU32_returns(UINT32_C(0x00000000))',
                     'int64': 'sunspecInt64ToSS64_returns(INT64_C(0x8000000000000000))',
                     # yes, acc64 seems to be an int64, not a uint64
                     'acc64': 'sunspecInt64ToSS64_returns(INT64_C(0x0000000000000000))',
-                    'ipv6addr': 'INT128_C(0x00000000000000000000000000000000)',
-                    'float32': 'NAN',
+                    # 'ipv6addr': 'INT128_C(0x00000000000000000000000000000000)',
+                    # 'float32': 'NAN',
                     'sunssf': 'INT16_C(0x8000)',
                     'string': 'UINT16_C(0x0000)',
                 }[row.type]
