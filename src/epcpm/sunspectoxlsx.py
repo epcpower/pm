@@ -539,6 +539,7 @@ class Point:
                         right_hand_side=internal_variable,
                         sunspec_model_variable=sunspec_model_variable,
                         scale_factor=row.scale_factor,
+                        internal_scale=self.wrapped.internal_scale_factor,
                         parameter=parameter,
                         factor_operator='*',
                     ))
@@ -548,6 +549,7 @@ class Point:
                         right_hand_side=sunspec_variable,
                         sunspec_model_variable=sunspec_model_variable,
                         scale_factor=row.scale_factor,
+                        internal_scale=self.wrapped.internal_scale_factor,
                         parameter=parameter,
                         factor_operator='/',
                     ))
@@ -599,6 +601,7 @@ def adjust_assignment(
         right_hand_side,
         sunspec_model_variable,
         scale_factor,
+        internal_scale,
         parameter,
         factor_operator,
 ):
@@ -612,7 +615,8 @@ def adjust_assignment(
         opposite = '' if factor_operator == '*' else '-'
 
         right_hand_side = (
-            f'(sunspecScale({right_hand_side}, {opposite}{scale_factor_variable}))'
+            f'(sunspecScale({right_hand_side},'
+            f' {opposite}({scale_factor_variable} + {internal_scale})))'
         )
 
     if parameter.nv_cast:

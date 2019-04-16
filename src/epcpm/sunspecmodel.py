@@ -211,6 +211,13 @@ class ScaleFactorDelegate(QtWidgets.QStyledItemDelegate):
 @attr.s(hash=False)
 class DataPoint(epyqlib.treenode.TreeNode):
     factor_uuid = create_factor_uuid_attribute()
+    internal_scale_factor = attr.ib(
+        default=0,
+        converter=int,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(),
+        ),
+    )
     parameter_uuid = create_parameter_uuid_attribute()
 
     not_implemented = epyqlib.attrsmodel.create_checkbox_attribute(
@@ -1134,6 +1141,7 @@ columns = epyqlib.attrsmodel.columns(
         DataPoint,
         TableRepeatingBlockReferenceDataPointReference,
     ),
+    merge('internal_scale_factor', DataPoint),
     merge('units', DataPoint),
     merge('enumeration_uuid', DataPoint),
     merge('type_uuid', DataPoint),
