@@ -518,16 +518,26 @@ class Point:
                 if converter is not None:
                     get_converter = converter['get']
                     set_converter = converter['set']
+
+                    get_cast = ''
+                    set_cast = ''
+                    if parameter.nv_cast:
+                        set_cast = f'(__typeof__({internal_variable})) '
+                        get_type = {
+                            'uint32': 'uint32_t',
+                        }[row.type]
+                        get_cast = f'({get_type})'
+
                     getter.extend([
                         f'{get_converter}(',
                         [
                             f'&{sunspec_variable},',
-                            f'{internal_variable}',
+                            f'{get_cast}{internal_variable}',
                         ],
                         ');',
                     ])
                     setter.extend([
-                        f'{internal_variable} = {set_converter}(',
+                        f'{internal_variable} = {set_cast}{set_converter}(',
                         [
                             f'&{sunspec_variable}',
                         ],
