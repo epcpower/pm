@@ -379,8 +379,6 @@ class Point:
     def gen(self):
         row = Fields()
 
-        scale_factor_parameter = None
-
         for name, field in attr.asdict(point_fields).items():
             if field is None:
                 continue
