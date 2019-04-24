@@ -379,6 +379,8 @@ class Point:
     def gen(self):
         row = Fields()
 
+        scale_factor_parameter = None
+
         for name, field in attr.asdict(point_fields).items():
             if field is None:
                 continue
@@ -432,14 +434,25 @@ class Point:
 
             meta = '[Meta_Value]'
 
-            getter = [
+            getter = []
+            setter = []
+
+            if row.scale_factor is not None:
+                f = 'getSUNSPEC_MODEL{model_id:}_{abbreviation}();'
+                get_scale_factor = f.format(
+                    model_id=self.model_id,
+                    abbreviation=row.scale_factor,
+                )
+                getter.append(get_scale_factor)
+                setter.append(get_scale_factor)
+
+            getter.append(
                 getter_call(
                     parameter=parameter,
                     model_id=self.model_id,
                     is_table=self.is_table,
                 ) + ';',
-            ]
-            setter = []
+            )
 
             sunspec_model_variable = f'sunspecInterface.model{self.model_id}'
 
