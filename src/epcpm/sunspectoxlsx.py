@@ -3,6 +3,7 @@ import itertools
 import attr
 import openpyxl
 
+import epyqlib.pm.parametermodel
 import epyqlib.utils.general
 
 import epcpm.c
@@ -577,6 +578,74 @@ class Point:
 
                 # minimum_variable = parameter.nv_format.format('[Meta_Min]')
                 # maximum_variable = parameter.nv_format.format('[Meta_Max]')
+            elif (
+                    isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
+                    and any(v is not None for v in (
+                        parameter.internal_variable,
+                        parameter.getter_function,
+                        parameter.setter_function,
+                    ))
+            ):
+                # TODO: move this somewhere common in python code...
+                external_type = {
+                    'uint16': 'sunsU16',
+                    'int16': 'sunsS16',
+                    'uint32': 'sunsU32',
+                    'int32': 'sunsS32',
+                }[row.type]
+
+                # TODO: move this to a common location instead of shoving
+                #       into both getter and setter
+
+                if parameter.internal_variable is not None:
+                    var_or_func = 'variable'
+                    variable_or_getter_setter = [
+                        f'.variable = &{parameter.internal_variable},'
+                    ]
+                else:
+                    var_or_func = 'function'
+                    variable_or_getter_setter = [
+                        f'.getter = {parameter.getter_function},'
+                        f'.setter = {parameter.setter_function},'
+                    ]
+
+                interface_item_type = (
+                    f'InterfaceItem_{var_or_func}'
+                    f'_{parameter.internal_type}_{external_type}'
+                )
+
+                if row.scale_factor is None:
+                    scale_factor_variable = 'NULL'
+                else:
+                    scale_factor_variable = (
+                        f'&{sunspec_model_variable}.{row.scale_factor}'
+                    )
+
+                internal_scale = self.wrapped.internal_scale_factor
+
+                interface_item = [
+                    f'{interface_item_type} const item = {{',
+                    [
+                        '.common = {',
+                        [
+                            f'.sunspecScaleFactor = {scale_factor_variable},',
+                            f'.internalScaleFactor = {internal_scale},',
+                        ],
+                        '},',
+                        f'.sunspecVariable = &{sunspec_variable},',
+                        *variable_or_getter_setter,
+                        f'.item_getter = {interface_item_type}_getter,',
+                        f'.item_setter = {interface_item_type}_setter,',
+                    ],
+                    '};',
+                    '',
+                ]
+
+                getter.extend(interface_item)
+                setter.extend(interface_item)
+
+                getter.append('item.item_getter((InterfaceItem *) &item);')
+                setter.append('item.item_setter((InterfaceItem *) &item);')
             else:
                 if getattr(parameter, 'sunspec_getter', None) is not None:
                     getter.append(
