@@ -561,7 +561,7 @@ class Point:
                         right_hand_side=internal_variable,
                         sunspec_model_variable=sunspec_model_variable,
                         scale_factor=row.scale_factor,
-                        internal_scale=self.wrapped.internal_scale_factor,
+                        internal_scale=parameter.internal_scale_factor,
                         parameter=parameter,
                         factor_operator='*',
                     ))
@@ -571,7 +571,7 @@ class Point:
                         right_hand_side=sunspec_variable,
                         sunspec_model_variable=sunspec_model_variable,
                         scale_factor=row.scale_factor,
-                        internal_scale=self.wrapped.internal_scale_factor,
+                        internal_scale=parameter.internal_scale_factor,
                         parameter=parameter,
                         factor_operator='/',
                     ))
@@ -621,7 +621,7 @@ class Point:
                         f'&{sunspec_model_variable}.{row.scale_factor}'
                     )
 
-                internal_scale = self.wrapped.internal_scale_factor
+                internal_scale = parameter.internal_scale_factor
 
                 interface_item = [
                     f'{interface_item_type} const item = {{',
