@@ -599,14 +599,21 @@ class Point:
 
                 if parameter.internal_variable is not None:
                     var_or_func = 'variable'
+
+                    if parameter.setter_function is None:
+                        setter_function = 'NULL'
+                    else:
+                        setter_function = parameter.setter_function
+
                     variable_or_getter_setter = [
-                        f'.variable = &{parameter.internal_variable},'
+                        f'.variable = &{parameter.internal_variable},',
+                        f'.setter = {setter_function},',
                     ]
                 else:
-                    var_or_func = 'function'
+                    var_or_func = 'functions'
                     variable_or_getter_setter = [
-                        f'.getter = {parameter.getter_function},'
-                        f'.setter = {parameter.setter_function},'
+                        f'.getter = {parameter.getter_function},',
+                        f'.setter = {parameter.setter_function},',
                     ]
 
                 interface_item_type = (
