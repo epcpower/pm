@@ -39,6 +39,7 @@ class Fields:
     modbus_address = attr.ib(default=None)
     get = attr.ib(default=None)
     set = attr.ib(default=None)
+    item = attr.ib(default=None)
 
 
 field_names = Fields(
@@ -60,6 +61,7 @@ field_names = Fields(
     modbus_address='Modbus Address',
     get='get',
     set='set',
+    item='item',
 )
 
 
@@ -435,6 +437,7 @@ class Point:
 
             getter = []
             setter = []
+            item = []
 
             if row.scale_factor is not None:
                 f = 'getSUNSPEC_MODEL{model_id:}_{abbreviation}();'
@@ -630,8 +633,10 @@ class Point:
 
                 internal_scale = parameter.internal_scale_factor
 
+                item_name = f'sunspec_{self.model_id}_{parameter.abbreviation}'
+
                 interface_item = [
-                    f'{interface_item_type} const item = {{',
+                    f'{interface_item_type} const {item_name} = {{',
                     [
                         '.common = {',
                         [
@@ -648,11 +653,14 @@ class Point:
                     '',
                 ]
 
-                getter.extend(interface_item)
-                setter.extend(interface_item)
+                item.extend(interface_item)
 
-                getter.append('item.item_getter((InterfaceItem *) &item);')
-                setter.append('item.item_setter((InterfaceItem *) &item);')
+                getter.append(
+                    f'{item_name}.item_getter((InterfaceItem *) &{item_name});'
+                )
+                setter.append(
+                    f'{item_name}.item_setter((InterfaceItem *) &{item_name});'
+                )
             else:
                 if getattr(parameter, 'sunspec_getter', None) is not None:
                     getter.append(
@@ -681,6 +689,8 @@ class Point:
                 row.set = epcpm.c.format_nested_lists(setter)
             else:
                 row.set = None
+
+            row.item = epcpm.c.format_nested_lists(item)
 
         row.field_type = self.model_type
 
