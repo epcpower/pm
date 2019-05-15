@@ -592,6 +592,7 @@ class Point:
                 # TODO: move this somewhere common in python code...
                 external_type = {
                     'uint16': 'sunsU16',
+                    'enum16': 'sunsU16',
                     'int16': 'sunsS16',
                     'uint32': 'sunsU32',
                     'int32': 'sunsS32',
