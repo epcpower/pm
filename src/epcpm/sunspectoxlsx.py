@@ -439,22 +439,60 @@ class Point:
             setter = []
             item = []
 
-            if row.scale_factor is not None:
-                f = 'getSUNSPEC_MODEL{model_id:}_{abbreviation}();'
-                get_scale_factor = f.format(
-                    model_id=self.model_id,
-                    abbreviation=row.scale_factor,
-                )
-                getter.append(get_scale_factor)
-                setter.append(get_scale_factor)
-
-            getter.append(
-                getter_call(
-                    parameter=parameter,
-                    model_id=self.model_id,
-                    is_table=self.is_table,
-                ) + ';',
+            uses_interface_item = (
+                isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
+                and any(v is not None for v in (
+                    parameter.internal_variable,
+                    parameter.getter_function,
+                    parameter.setter_function,
+                ))
             )
+
+            if row.scale_factor is not None:
+                scale_factor_updater_name = (
+                    f'getSUNSPEC_MODEL{self.model_id}_{row.scale_factor}'
+                )
+                scale_factor_updater = f'&{scale_factor_updater_name}'
+            else:
+                scale_factor_updater = 'NULL'
+
+            hand_coded_getter_function_name = getter_name(
+                parameter=parameter,
+                model_id=self.model_id,
+                is_table=self.is_table,
+            )
+
+            hand_coded_setter_function_name = setter_name(
+                parameter=parameter,
+                model_id=self.model_id,
+                is_table=self.is_table,
+            )
+
+            if uses_interface_item:
+                if self.wrapped.hand_coded_getter:
+                    hand_coded_getter_function = (
+                        f'&{hand_coded_getter_function_name}'
+                    )
+                else:
+                    hand_coded_getter_function = 'NULL'
+
+                if self.wrapped.hand_coded_setter:
+                    hand_coded_setter_function = (
+                        f'&{hand_coded_setter_function_name}'
+                    )
+                else:
+                    hand_coded_setter_function = 'NULL'
+            else:
+                if row.scale_factor is not None:
+                    f = f'{scale_factor_updater_name}();'
+                    get_scale_factor = f.format(
+                        model_id=self.model_id,
+                        abbreviation=row.scale_factor,
+                    )
+                    getter.append(get_scale_factor)
+                    setter.append(get_scale_factor)
+
+                getter.append(f'{hand_coded_getter_function_name}();')
 
             sunspec_model_variable = f'sunspecInterface.model{self.model_id}'
 
@@ -581,14 +619,7 @@ class Point:
 
                 # minimum_variable = parameter.nv_format.format('[Meta_Min]')
                 # maximum_variable = parameter.nv_format.format('[Meta_Max]')
-            elif (
-                    isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
-                    and any(v is not None for v in (
-                        parameter.internal_variable,
-                        parameter.getter_function,
-                        parameter.setter_function,
-                    ))
-            ):
+            elif uses_interface_item:
                 # TODO: move this somewhere common in python code...
                 external_type = {
                     'uint16': 'sunsU16',
@@ -642,6 +673,9 @@ class Point:
                         '.common = {',
                         [
                             f'.sunspecScaleFactor = {scale_factor_variable},',
+                            f'.scaleFactorUpdater = {scale_factor_updater},',
+                            f'.handSunSpecGetterFunction = {hand_coded_getter_function},',
+                            f'.handSunSpecSetterFunction = {hand_coded_setter_function},',
                             f'.internalScaleFactor = {internal_scale},',
                         ],
                         '},',
@@ -679,13 +713,9 @@ class Point:
 
             row.get = epcpm.c.format_nested_lists(getter)
 
-            setter.append(
-                setter_call(
-                    parameter=parameter,
-                    model_id=self.model_id,
-                    is_table=self.is_table,
-                ) + ';',
-            )
+            if not uses_interface_item:
+                setter.append(f'{hand_coded_setter_function_name}();')
+
             if not parameter.read_only:
                 row.set = epcpm.c.format_nested_lists(setter)
             else:
@@ -753,8 +783,8 @@ def getter_setter_name(get_set, parameter, model_id, is_table):
     )
 
 
-def getter_call(parameter, model_id, is_table):
-    return getter_setter_call(
+def getter_name(parameter, model_id, is_table):
+    return getter_setter_name(
         get_set='get',
         parameter=parameter,
         model_id=model_id,
@@ -762,20 +792,10 @@ def getter_call(parameter, model_id, is_table):
     )
 
 
-def setter_call(parameter, model_id, is_table):
-    return getter_setter_call(
+def setter_name(parameter, model_id, is_table):
+    return getter_setter_name(
         get_set='set',
         parameter=parameter,
         model_id=model_id,
         is_table=is_table,
     )
-
-
-def getter_setter_call(get_set, parameter, model_id, is_table):
-    name = getter_setter_name(
-        get_set=get_set,
-        parameter=parameter,
-        model_id=model_id,
-        is_table=is_table,
-    )
-    return f'{name}()'
