@@ -1,3 +1,5 @@
+import decimal
+
 import attr
 
 import epyqlib.pm.parametermodel
@@ -470,6 +472,58 @@ class Parameter:
 
         access_level = f'CAN_Enum_AccessLevel_{access_level_name}'
 
+        def create_literal(value, type):
+            value *= decimal.Decimal(10)**internal_scale
+
+            suffix = ''
+
+            if type == 'float':
+                suffix = 'f'
+                value = float(value)
+            elif type == 'bool':
+                value = str(bool(value)).lower()
+            elif type.startswith('uint'):
+                suffix = 'U'
+                value = int(round(value))
+            else:
+                value = int(round(value))
+
+            return str(value) + suffix
+
+        if parameter.default is None:
+            meta_default = 0
+        else:
+            meta_default = parameter.default
+        meta_default = create_literal(
+            value=meta_default,
+            type=parameter.internal_type,
+        )
+
+        if parameter.minimum is None:
+            meta_minimum = 0
+        else:
+            meta_minimum = parameter.minimum
+        meta_minimum = create_literal(
+            value=meta_minimum,
+            type=parameter.internal_type,
+        )
+
+        if parameter.maximum is None:
+            meta_maximum = 0
+        else:
+            meta_maximum = parameter.maximum
+        meta_maximum = create_literal(
+            value=meta_maximum,
+            type=parameter.internal_type,
+        )
+
+        meta_initializer_values = [
+            f'[Meta_UserDefault - 1] = {meta_default},',
+            f'[Meta_FactoryDefault - 1] = {meta_default},',
+            f'[Meta_Min - 1] = {meta_minimum},',
+            f'[Meta_Max - 1] = {meta_maximum}',
+        ]
+
         item = [
             f'// {parameter.uuid}',
             f'{interface_item_type} const {item_name} = {{',
@@ -507,7 +561,9 @@ class Parameter:
                 *variable_or_getter_setter,
                 # f'.getter = {interface_item_type}_getter,',
                 # f'.setter = {interface_item_type}_setter,',
-                # TODO: meta stuffs for funcs
+                '.meta_values = {',
+                meta_initializer_values,
+                '}',
             ],
             '};',
             '',
