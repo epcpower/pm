@@ -437,24 +437,11 @@ class Point:
 
             getter = []
             setter = []
-            item = []
 
             uses_interface_item = (
                 isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
-                and any(v is not None for v in (
-                    parameter.internal_variable,
-                    parameter.getter_function,
-                    parameter.setter_function,
-                ))
+                and parameter.uses_interface_item()
             )
-
-            if row.scale_factor is not None:
-                scale_factor_updater_name = (
-                    f'getSUNSPEC_MODEL{self.model_id}_{row.scale_factor}'
-                )
-                scale_factor_updater = f'&{scale_factor_updater_name}'
-            else:
-                scale_factor_updater = 'NULL'
 
             hand_coded_getter_function_name = getter_name(
                 parameter=parameter,
@@ -468,22 +455,12 @@ class Point:
                 is_table=self.is_table,
             )
 
-            if uses_interface_item:
-                if self.wrapped.hand_coded_getter:
-                    hand_coded_getter_function = (
-                        f'&{hand_coded_getter_function_name}'
-                    )
-                else:
-                    hand_coded_getter_function = 'NULL'
-
-                if self.wrapped.hand_coded_setter:
-                    hand_coded_setter_function = (
-                        f'&{hand_coded_setter_function_name}'
-                    )
-                else:
-                    hand_coded_setter_function = 'NULL'
-            else:
+            if not uses_interface_item:
                 if row.scale_factor is not None:
+                    scale_factor_updater_name = (
+                        f'getSUNSPEC_MODEL{self.model_id}_{row.scale_factor}'
+                    )
+
                     f = f'{scale_factor_updater_name}();'
                     get_scale_factor = f.format(
                         model_id=self.model_id,
@@ -620,82 +597,26 @@ class Point:
                 # minimum_variable = parameter.nv_format.format('[Meta_Min]')
                 # maximum_variable = parameter.nv_format.format('[Meta_Max]')
             elif uses_interface_item:
-                # TODO: move this somewhere common in python code...
-                external_type = {
-                    'uint16': 'sunsU16',
-                    'enum16': 'sunsU16',
-                    'int16': 'sunsS16',
-                    'uint32': 'sunsU32',
-                    'int32': 'sunsS32',
-                }[row.type]
+                parameter_uuid = str(parameter.uuid).replace('-', '_')
+                item_name = f'interfaceItem_{parameter_uuid}'
 
-                # TODO: move this to a common location instead of shoving
-                #       into both getter and setter
-
-                if parameter.internal_variable is not None:
-                    var_or_func = 'variable'
-
-                    if parameter.setter_function is None:
-                        setter_function = 'NULL'
-                    else:
-                        setter_function = parameter.setter_function
-
-                    variable_or_getter_setter = [
-                        f'.variable = &{parameter.internal_variable},',
-                        f'.setter = {setter_function},',
-                    ]
-                else:
-                    var_or_func = 'functions'
-                    variable_or_getter_setter = [
-                        f'.getter = {parameter.getter_function},',
-                        f'.setter = {parameter.setter_function},',
-                    ]
-
-                interface_item_type = (
-                    f'InterfaceItem_{var_or_func}'
-                    f'_{parameter.internal_type}_{external_type}'
-                )
-
-                if row.scale_factor is None:
-                    scale_factor_variable = 'NULL'
-                else:
-                    scale_factor_variable = (
-                        f'&{sunspec_model_variable}.{row.scale_factor}'
-                    )
-
-                internal_scale = parameter.internal_scale_factor
-
-                item_name = f'sunspec_{self.model_id}_{parameter.abbreviation}'
-
-                interface_item = [
-                    f'{interface_item_type} const {item_name} = {{',
+                getter.extend([
+                    f'{item_name}.common.sunspec.getter(',
                     [
-                        '.common = {',
-                        [
-                            f'.sunspecScaleFactor = {scale_factor_variable},',
-                            f'.scaleFactorUpdater = {scale_factor_updater},',
-                            f'.handSunSpecGetterFunction = {hand_coded_getter_function},',
-                            f'.handSunSpecSetterFunction = {hand_coded_setter_function},',
-                            f'.internalScaleFactor = {internal_scale},',
-                        ],
-                        '},',
-                        f'.sunspecVariable = &{sunspec_variable},',
-                        *variable_or_getter_setter,
-                        f'.item_getter = {interface_item_type}_getter,',
-                        f'.item_setter = {interface_item_type}_setter,',
+                        f'(InterfaceItem_void *) &{item_name},',
+                        f'Meta_Value',
                     ],
-                    '};',
-                    '',
-                ]
-
-                item.extend(interface_item)
-
-                getter.append(
-                    f'{item_name}.item_getter((InterfaceItem *) &{item_name});'
-                )
-                setter.append(
-                    f'{item_name}.item_setter((InterfaceItem *) &{item_name});'
-                )
+                    f');',
+                ])
+                setter.extend([
+                    f'{item_name}.common.sunspec.setter(',
+                    [
+                        f'(InterfaceItem_void *) &{item_name},',
+                        f'true,',
+                        f'Meta_Value',
+                    ],
+                    f');',
+                ])
             else:
                 if getattr(parameter, 'sunspec_getter', None) is not None:
                     getter.append(
@@ -720,8 +641,6 @@ class Point:
                 row.set = epcpm.c.format_nested_lists(setter)
             else:
                 row.set = None
-
-            row.item = epcpm.c.format_nested_lists(item)
 
         row.field_type = self.model_type
 

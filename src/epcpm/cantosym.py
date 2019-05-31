@@ -280,6 +280,25 @@ class Signal:
                     extras.get('comment', ''),
                     ':'.join(segments),
                 ).strip()
+            elif (
+                    (
+                        isinstance(
+                            parameter,
+                            epyqlib.pm.parametermodel.Parameter,
+                        )
+                        and parameter.uses_interface_item()
+                    )
+                    # or isinstance(
+                    #     parameter,
+                    #     epyqlib.pm.parametermodel.TableArrayElement,
+                    # )
+            ):
+                extras['comment'] = '{}  <InterfaceItem:{}>'.format(
+                    extras.get('comment', ''),
+                    'interfaceItem_{}'.format(
+                        str(parameter.uuid).replace('-', '_'),
+                    ),
+                ).strip()
 
             if parameter.units is not None:
                 extras['unit'] = parameter.units

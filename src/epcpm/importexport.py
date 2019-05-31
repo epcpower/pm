@@ -10,6 +10,7 @@ import graham
 import epcpm.cantosym
 import epcpm.cantotablesc
 import epcpm.parameterstohierarchy
+import epcpm.parameterstointerface
 import epcpm.project
 import epcpm.smdxtosunspec
 import epcpm.sunspecmodel
@@ -117,6 +118,14 @@ def full_export(project, paths, target_directory, first_time=False):
     epcpm.parameterstohierarchy.export(
         path=paths.hierarchy,
         can_model=project.models.can,
+        parameters_model=project.models.parameters,
+    )
+
+    epcpm.parameterstointerface.export(
+        c_path=paths.interface_c,
+        h_path=paths.interface_c.with_suffix('.h'),
+        can_model=project.models.can,
+        sunspec_model=project.models.sunspec,
         parameters_model=project.models.parameters,
     )
 

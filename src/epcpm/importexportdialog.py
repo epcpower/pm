@@ -48,6 +48,10 @@ def import_dialog():
     dialog.ui.sunspec_tables_c.hide()
     dialog.ui.pick_sunspec_tables_c.hide()
 
+    dialog.ui.interface_c_label.hide()
+    dialog.ui.interface_c.hide()
+    dialog.ui.pick_interface_c.hide()
+
     return dialog
 
 
@@ -72,6 +76,7 @@ class ImportPaths:
     spreadsheet = attr.ib(converter=path_or_none)
     smdx = attr.ib(converter=paths_or_none)
     sunspec_c = attr.ib(converter=path_or_none)
+    interface_c = attr.ib(converter=path_or_none)
 
 
 def paths_from_directory(directory):
@@ -88,6 +93,7 @@ def paths_from_directory(directory):
         spreadsheet=embedded / 'MODBUS_SunSpec-EPC.xlsx',
         smdx=sorted(sunspec.glob('smdx_*.xml')),
         sunspec_c=sunspec,
+        interface_c=interface / 'interfaceGen.c',
     )
 
 
@@ -115,6 +121,7 @@ class Dialog(UiBase):
         )
         self.ui.pick_spreadsheet.clicked.connect(self.pick_spreadsheet)
         self.ui.pick_sunspec_c.clicked.connect(self.pick_sunspec_c)
+        self.ui.pick_interface_c.clicked.connect(self.pick_interface.c)
         self.ui.pick_smdx.clicked.connect(self.pick_smdx)
         self.ui.remove_smdx.clicked.connect(self.remove_smdx)
         self.ui.from_directory.clicked.connect(self.from_directory)
@@ -133,6 +140,7 @@ class Dialog(UiBase):
             spreadsheet=self.ui.spreadsheet.text(),
             smdx=smdx,
             sunspec_c=self.ui.sunspec_c.text(),
+            interface_c=self.ui.interface_c.text(),
         )
         super().accept()
 
@@ -151,6 +159,7 @@ class Dialog(UiBase):
         self.ui.sunspec_tables_c.setText(os.fspath(paths.sunspec_tables_c))
         self.ui.spreadsheet.setText(os.fspath(paths.spreadsheet))
         self.ui.sunspec_c.setText(os.fspath(paths.sunspec_c))
+        self.ui.interface_c.setText(os.fspath(paths.interface_c))
 
         self.clear_smdx_list()
         if not self.for_save:
@@ -240,6 +249,18 @@ class Dialog(UiBase):
             return
 
         self.ui.sunspec_c.setText(directory)
+
+    def pick_interface_c(self):
+        filters = (
+            ('Tables C', ['c']),
+            all_files_filter,
+        )
+
+        self.file_dialog(
+            target=self.ui.sunspec_tables_c,
+            filters=filters,
+            multiple=False,
+        )
 
     def pick_smdx(self):
         filters = (
