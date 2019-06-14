@@ -232,9 +232,10 @@ class Group:
             if not isinstance(
                     child,
                     (
-                            epyqlib.pm.parametermodel.Group,
-                            epyqlib.pm.parametermodel.Parameter,
-                            # epcpm.parametermodel.EnumeratedParameter,
+                        epyqlib.pm.parametermodel.Group,
+                        epyqlib.pm.parametermodel.Parameter,
+                        epyqlib.pm.parametermodel.Table,
+                        # epcpm.parametermodel.EnumeratedParameter,
                     ),
             ):
                 continue
@@ -328,9 +329,6 @@ class Parameter:
                 f'.setter = {parameter.setter_function},',
             ]
 
-        parameter_uuid = str(parameter.uuid).replace('-', '_')
-        item_name = f'interfaceItem_{parameter_uuid}'
-
         if sunspec_point is None:
             sunspec_variable = 'NULL'
             sunspec_getter = 'NULL'
@@ -412,235 +410,439 @@ class Parameter:
                 for x in getter_setter_list + ['setter']
             )
 
-        internal_scale = parameter.internal_scale_factor
-
         interface_item_type = (
             f'InterfaceItem_{var_or_func}_{parameter.internal_type}'
         )
 
-        if can_signal is None:
-            can_variable = 'NULL'
-            can_getter = 'NULL'
-            can_setter = 'NULL'
-        else:
-            can_variable = (
-                f'&{can_signal.tree_parent.tree_parent.name}'
-                f'.{can_signal.tree_parent.name}'
-                f'.{can_signal.name}'
-            )
-
-            if can_signal.signed:
-                can_type = ''
-            else:
-                can_type = 'u'
-
-            can_type += 'int'
-
-            if can_signal.bits <= 16:
-                can_type += '16'
-            elif can_signal.bits <=32:
-                can_type += '32'
-            else:
-                raise Exception('ack')
-
-            can_type += '_t'
-
-            getter_setter_list = [
-                'InterfaceItem',
-                var_or_func,
-                parameter.internal_type,
-                'can',
-                can_type,
-            ]
-
-            can_getter = '_'.join(
-                str(x)
-                for x in getter_setter_list + ['getter']
-            )
-            can_setter = '_'.join(
-                str(x)
-                for x in getter_setter_list + ['setter']
-            )
-
-        if parameter.access_level_uuid is not None:
-            access_level_name = (
-                self.parameter_uuid_finder(parameter.access_level_uuid).name
-            )
-        else:
-            # TODO: stop defaulting here
-            access_level_name = 'User'
-
-        access_level = f'CAN_Enum_AccessLevel_{access_level_name}'
-
-        def create_literal(value, type):
-            value *= decimal.Decimal(10)**internal_scale
-
-            suffix = ''
-
-            if type == 'float':
-                suffix = 'f'
-                value = float(value)
-            elif type == 'bool':
-                value = str(bool(value)).lower()
-            elif type.startswith('uint'):
-                suffix = 'U'
-                value = int(round(value))
-            else:
-                value = int(round(value))
-
-            return str(value) + suffix
-
-        if parameter.default is None:
-            meta_default = 0
-        else:
-            meta_default = parameter.default
-        meta_default = create_literal(
-            value=meta_default,
-            type=parameter.internal_type,
+        can_getter, can_setter, can_variable = can_getter_setter_variable(
+            can_signal=can_signal,
+            parameter=parameter,
+            var_or_func_or_table=var_or_func,
         )
 
-        if parameter.minimum is None:
-            meta_minimum = 0
-        else:
-            meta_minimum = parameter.minimum
-        meta_minimum = create_literal(
-            value=meta_minimum,
-            type=parameter.internal_type,
+        access_level = get_access_level_string(
+            parameter=parameter,
+            parameter_uuid_finder=self.parameter_uuid_finder,
         )
 
-        if parameter.maximum is None:
-            meta_maximum = 0
-        else:
-            meta_maximum = parameter.maximum
-        meta_maximum = create_literal(
-            value=meta_maximum,
-            type=parameter.internal_type,
+        result = create_item(
+            item_uuid=parameter.uuid,
+            access_level=access_level, 
+            can_getter=can_getter, 
+            can_setter=can_setter,
+            can_variable=can_variable,
+            hand_coded_sunspec_getter_function=hand_coded_sunspec_getter_function,
+            hand_coded_sunspec_setter_function=hand_coded_sunspec_setter_function,
+            interface_item_type=interface_item_type,
+            internal_scale=parameter.internal_scale_factor,
+            meta_initializer_values=create_meta_initializer_values(parameter),
+            parameter=parameter,
+            scale_factor_updater=scale_factor_updater, 
+            scale_factor_variable=scale_factor_variable,
+            sunspec_getter=sunspec_getter, 
+            sunspec_setter=sunspec_setter,
+            sunspec_variable=sunspec_variable, 
+            variable_or_getter_setter=variable_or_getter_setter,
         )
 
-        meta_initializer_values = [
-            f'[Meta_UserDefault - 1] = {meta_default},',
-            f'[Meta_FactoryDefault - 1] = {meta_default},',
-            f'[Meta_Min - 1] = {meta_minimum},',
-            f'[Meta_Max - 1] = {meta_maximum}',
+        return result
+
+
+def create_meta_initializer_values(parameter):
+    def create_literal(value, type):
+        value *= decimal.Decimal(10) ** parameter.internal_scale_factor
+
+        suffix = ''
+
+        if type == 'float':
+            suffix = 'f'
+            value = float(value)
+        elif type == 'bool':
+            value = str(bool(value)).lower()
+        elif type.startswith('uint'):
+            suffix = 'U'
+            value = int(round(value))
+        else:
+            value = int(round(value))
+
+        return str(value) + suffix
+
+    if parameter.default is None:
+        meta_default = 0
+    else:
+        meta_default = parameter.default
+    meta_default = create_literal(
+        value=meta_default,
+        type=parameter.internal_type,
+    )
+    if parameter.minimum is None:
+        meta_minimum = 0
+    else:
+        meta_minimum = parameter.minimum
+    meta_minimum = create_literal(
+        value=meta_minimum,
+        type=parameter.internal_type,
+    )
+    if parameter.maximum is None:
+        meta_maximum = 0
+    else:
+        meta_maximum = parameter.maximum
+    meta_maximum = create_literal(
+        value=meta_maximum,
+        type=parameter.internal_type,
+    )
+    meta_initializer_values = [
+        f'[Meta_UserDefault - 1] = {meta_default},',
+        f'[Meta_FactoryDefault - 1] = {meta_default},',
+        f'[Meta_Min - 1] = {meta_minimum},',
+        f'[Meta_Max - 1] = {meta_maximum}',
+    ]
+    return meta_initializer_values
+
+
+def get_access_level_string(parameter, parameter_uuid_finder):
+    if parameter.access_level_uuid is not None:
+        access_level_name = (
+            parameter_uuid_finder(parameter.access_level_uuid).name
+        )
+    else:
+        # TODO: stop defaulting here
+        access_level_name = 'User'
+    access_level = f'CAN_Enum_AccessLevel_{access_level_name}'
+    return access_level
+
+
+def can_getter_setter_variable(can_signal, parameter, var_or_func_or_table):
+    if can_signal is None:
+        can_variable = 'NULL'
+        can_getter = 'NULL'
+        can_setter = 'NULL'
+    else:
+        can_variable = (
+            f'&{can_signal.tree_parent.tree_parent.name}'
+            f'.{can_signal.tree_parent.name}'
+            f'.{can_signal.name}'
+        )
+
+        if can_signal.signed:
+            can_type = ''
+        else:
+            can_type = 'u'
+
+        can_type += 'int'
+
+        if can_signal.bits <= 16:
+            can_type += '16'
+        elif can_signal.bits <= 32:
+            can_type += '32'
+        else:
+            raise Exception('ack')
+
+        can_type += '_t'
+
+        getter_setter_list = [
+            'InterfaceItem',
+            var_or_func_or_table,
+            parameter.internal_type,
+            'can',
+            can_type,
         ]
 
-        item = [
-            f'// {parameter.uuid}',
-            f'{interface_item_type} const {item_name} = {{',
+        can_getter = '_'.join(
+            str(x)
+            for x in getter_setter_list + ['getter']
+        )
+        can_setter = '_'.join(
+            str(x)
+            for x in getter_setter_list + ['setter']
+        )
+    return can_getter, can_setter, can_variable
+
+
+@builders(epyqlib.pm.parametermodel.Table)
+@attr.s
+class Table:
+    wrapped = attr.ib()
+    can_root = attr.ib()
+    sunspec_root = attr.ib()
+    parameter_uuid_to_can_node = attr.ib()
+    parameter_uuid_to_sunspec_node = attr.ib()
+    parameter_uuid_finder = attr.ib()
+
+    def gen(self):
+        group, = (
+            child
+            for child in self.wrapped.children
+            if isinstance(child, epyqlib.pm.parametermodel.TableGroupElement)
+        )
+
+        return builders.wrap(
+            wrapped=group,
+            can_root=self.can_root,
+            sunspec_root=self.sunspec_root,
+            parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
+            parameter_uuid_to_sunspec_node=(
+                self.parameter_uuid_to_sunspec_node
+            ),
+            parameter_uuid_finder=self.parameter_uuid_finder,
+        ).gen()
+
+
+@builders(epyqlib.pm.parametermodel.TableGroupElement)
+@attr.s
+class TableGroupElement:
+    wrapped = attr.ib()
+    can_root = attr.ib()
+    sunspec_root = attr.ib()
+    parameter_uuid_to_can_node = attr.ib()
+    parameter_uuid_to_sunspec_node = attr.ib()
+    parameter_uuid_finder = attr.ib()
+    layers = attr.ib(default=[])
+
+    def gen(self):
+        c = []
+        h = []
+
+        table_tree_root = not isinstance(
+            self.wrapped.tree_parent,
+            epyqlib.pm.parametermodel.TableGroupElement,
+        )
+
+        layers = list(self.layers)
+        if not table_tree_root:
+            layers.append(self.wrapped.name)
+
+        for child in self.wrapped.children:
+            result = builders.wrap(
+                wrapped=child,
+                can_root=self.can_root,
+                sunspec_root=self.sunspec_root,
+                parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
+                parameter_uuid_to_sunspec_node=(
+                    self.parameter_uuid_to_sunspec_node
+                ),
+                parameter_uuid_finder=self.parameter_uuid_finder,
+                layers=layers,
+            ).gen()
+
+            c_built, h_built = result
+            c.extend(c_built)
+            h.extend(h_built)
+
+        return c, h
+
+
+# TODO: CAMPid 079549750417808543178043180
+def get_curve_type(combination_string):
+    # TODO: backmatching
+    return {
+        'LowRideThrough': 'IEEE1547_CURVE_TYPE_LRT',
+        'HighRideThrough': 'IEEE1547_CURVE_TYPE_HRT',
+        'LowTrip': 'IEEE1547_CURVE_TYPE_LTRIP',
+        'HighTrip': 'IEEE1547_CURVE_TYPE_HTRIP',
+    }.get(combination_string)
+
+
+@builders(epyqlib.pm.parametermodel.TableArrayElement)
+@attr.s
+class TableArrayElement:
+    wrapped = attr.ib()
+    can_root = attr.ib()
+    sunspec_root = attr.ib()
+    layers = attr.ib()
+    parameter_uuid_to_can_node = attr.ib()
+    parameter_uuid_to_sunspec_node = attr.ib()
+    parameter_uuid_finder = attr.ib()
+
+    def gen(self):
+        # lineMonitorParams->fMonitorTables[{curve_type}           ].curves[{curve_index}].tbl[{point_index}].x
+        # lineMonitorParams->fMonitorTables[IEEE1547_CURVE_TYPE_LRT].curves[0            ].tbl[0            ].x
+        # lineMonitorParams->voltWatts.modes[{curve_index}].tbl[{point_index}].{axis};
+
+        table_element = self.wrapped
+        array_element = table_element.original
+
+        if isinstance(array_element, epyqlib.pm.parametermodel.Parameter):
+            parameter = array_element
+        else:
+            parameter = array_element.tree_parent.children[0]
+
+        if parameter.setter_function is None:
+            return [[], []]
+
+        can_signal = self.parameter_uuid_to_can_node.get(parameter.uuid)
+        sunspec_point = self.parameter_uuid_to_sunspec_node.get(parameter.uuid)
+
+        access_level = get_access_level_string(
+            parameter=parameter,
+            parameter_uuid_finder=self.parameter_uuid_finder,
+        )
+
+        axis = table_element.tree_parent.axis
+
+        # if parameter.setter_function is None:
+        #     setter_function = 'NULL'
+        # else:
+        #     setter_function = parameter.setter_function.format(
+        #         upper_axis=axis.upper(),
+        #     )
+
+        setter_function = parameter.setter_function.format(
+            upper_axis=axis.upper(),
+        )
+
+        curve_type = get_curve_type(''.join(self.layers[:2]))
+
+        curve_index = self.layers[-2]
+        point_index = int(table_element.name.lstrip('_').lstrip('0')) - 1
+
+        internal_variable = parameter.internal_variable.format(
+            curve_type=curve_type,
+            curve_index=curve_index,
+            point_index=point_index,
+        )
+
+        variable_or_getter_setter = [
+            f'.variable = &{internal_variable},',
+            f'.setter = {setter_function},',
+            f'.zone = {curve_type if curve_type is not None else "0"},',
+            f'.curve = {curve_index},',
+            f'.index = {point_index},',
+        ]
+
+        # var_or_func = 'variable'
+
+        can_getter, can_setter, can_variable = can_getter_setter_variable(
+            can_signal,
+            parameter,
+            var_or_func_or_table='table',
+        )
+
+        interface_item_type = (
+            f'InterfaceItem_table_{parameter.internal_type}'
+        )
+
+        # signal = self.parameter_uuid_to_can_node.get(self.wrapped.uuid)
+        #
+        # if signal is None:
+        #     return None
+        #
+        # message = signal.tree_parent
+        #
+        # can_table = message.tree_parent
+
+        # can_getter_setter_base = '_'.join(
+        #     'InterfaceItem',
+        #     'table',
+        #     parameter.internal_type,
+        #     'can',
+        #     signal.can_interface_type,
+        # )
+
+        # can_getter, can_setter, can_variable = can_getter_setter_variable(
+        #     can_signal,
+        #     parameter,
+        #     var_or_func_or_table=var_or_func,
+        # )
+
+        result = create_item(
+            item_uuid=table_element.uuid,
+            access_level=access_level,
+            can_getter=can_getter,
+            can_setter=can_setter,
+            can_variable=can_variable,
+            hand_coded_sunspec_getter_function='NULL',
+            hand_coded_sunspec_setter_function='NULL',
+            interface_item_type=interface_item_type,
+            internal_scale=parameter.internal_scale_factor,
+            meta_initializer_values=create_meta_initializer_values(parameter),
+            parameter=parameter,
+            scale_factor_updater='NULL',
+            scale_factor_variable='NULL',
+            sunspec_getter='NULL',
+            sunspec_setter='NULL',
+            sunspec_variable='NULL',
+            variable_or_getter_setter=variable_or_getter_setter,
+        )
+
+        return result
+
+
+def create_item(
+        item_uuid,
+        access_level,
+        can_getter,
+        can_setter,
+        can_variable,
+        hand_coded_sunspec_getter_function,
+        hand_coded_sunspec_setter_function, 
+        interface_item_type,
+        internal_scale, 
+        meta_initializer_values,
+        parameter, 
+        scale_factor_updater, 
+        scale_factor_variable,
+        sunspec_getter,
+        sunspec_setter, 
+        sunspec_variable,
+        variable_or_getter_setter,
+):
+    item_uuid_string = str(item_uuid).replace('-', '_')
+    item_name = f'interfaceItem_{item_uuid_string}'
+
+    if meta_initializer_values is None:
+        meta_initializer = []
+    else:
+        meta_initializer = [
+            '.meta_values = {',
+            meta_initializer_values,
+            '}',
+        ]
+
+    item = [
+        f'// {parameter.uuid}',
+        f'{interface_item_type} const {item_name} = {{',
+        [
+            '.common = {',
             [
-                '.common = {',
+                f'.sunspecScaleFactor = {scale_factor_variable},',
+                f'.canScaleFactor = NULL,',
+                f'.scaleFactorUpdater = {scale_factor_updater},',
+                # f'.handSunSpecGetterFunction = {hand_coded_getter_function},',
+                # f'.handSunSpecSetterFunction = {hand_coded_setter_function},',
+                f'.internalScaleFactor = {internal_scale},',
+                f'.sunspec = {{',
                 [
-                    f'.sunspecScaleFactor = {scale_factor_variable},',
-                    f'.canScaleFactor = NULL,',
-                    f'.scaleFactorUpdater = {scale_factor_updater},',
-                    # f'.handSunSpecGetterFunction = {hand_coded_getter_function},',
-                    # f'.handSunSpecSetterFunction = {hand_coded_setter_function},',
-                    f'.internalScaleFactor = {internal_scale},',
-                    f'.sunspec = {{',
-                    [
-                        f'.variable = {sunspec_variable},',
-                        f'.getter = {sunspec_getter},',
-                        f'.setter = {sunspec_setter},',
-                        f'.handGetter = {hand_coded_sunspec_getter_function},',
-                        f'.handSetter = {hand_coded_sunspec_setter_function},',
-                    ],
-                    f'}},',
-                    f'.can = {{',
-                    [
-                        f'.variable = {can_variable},',
-                        f'.getter = {can_getter},',
-                        f'.setter = {can_setter},',
-                        f'.handGetter = NULL,',
-                        f'.handSetter = NULL,',
-                    ],
-                    f'}},',
-                    f'.access_level = {access_level},',
+                    f'.variable = {sunspec_variable},',
+                    f'.getter = {sunspec_getter},',
+                    f'.setter = {sunspec_setter},',
+                    f'.handGetter = {hand_coded_sunspec_getter_function},',
+                    f'.handSetter = {hand_coded_sunspec_setter_function},',
                 ],
-                '},',
-                # f'.sunspecVariable = {sunspec_variable},',
-                *variable_or_getter_setter,
-                # f'.getter = {interface_item_type}_getter,',
-                # f'.setter = {interface_item_type}_setter,',
-                '.meta_values = {',
-                meta_initializer_values,
-                '}',
+                f'}},',
+                f'.can = {{',
+                [
+                    f'.variable = {can_variable},',
+                    f'.getter = {can_getter},',
+                    f'.setter = {can_setter},',
+                    f'.handGetter = NULL,',
+                    f'.handSetter = NULL,',
+                ],
+                f'}},',
+                f'.access_level = {access_level},',
             ],
-            '};',
-            '',
-        ]
+            '},',
+            # f'.sunspecVariable = {sunspec_variable},',
+            *variable_or_getter_setter,
+            # f'.getter = {interface_item_type}_getter,',
+            # f'.setter = {interface_item_type}_setter,',
+            *meta_initializer,
+        ],
+        '};',
+        '',
+    ]
 
-        return [
-            item,
-            [f'extern {interface_item_type} const {item_name};'],
-        ]
-
-
-# @builders(epyqlib.pm.parametermodel.Table)
-# @attr.s
-# class Table:
-#     wrapped = attr.ib()
-#     can_root = attr.ib()
-#     parameter_uuid_to_can_node = attr.ib()
-#
-#     def gen(self):
-#         group, = (
-#             child
-#             for child in self.wrapped.children
-#             if isinstance(child, epyqlib.pm.parametermodel.TableGroupElement)
-#         )
-#         return {
-#             'name': self.wrapped.name,
-#             'children': builders.wrap(
-#                 wrapped=group,
-#                 can_root=self.can_root,
-#                 parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
-#             ).gen()['children'],
-#         }
-#
-#
-# @builders(epyqlib.pm.parametermodel.TableGroupElement)
-# @attr.s
-# class TableGroupElement:
-#     wrapped = attr.ib()
-#     can_root = attr.ib()
-#     parameter_uuid_to_can_node = attr.ib()
-#
-#     def gen(self):
-#         children = []
-#         for child in self.wrapped.children:
-#             result = builders.wrap(
-#                 wrapped=child,
-#                 can_root=self.can_root,
-#                 parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
-#             ).gen()
-#
-#             if result is not None:
-#                 children.append(result)
-#
-#         return {
-#             'name': self.wrapped.name,
-#             'children': children,
-#         }
-#
-#
-# @builders(epyqlib.pm.parametermodel.TableArrayElement)
-# @attr.s
-# class TableArrayElement:
-#     wrapped = attr.ib()
-#     can_root = attr.ib()
-#     parameter_uuid_to_can_node = attr.ib()
-#
-#     def gen(self):
-#         signal = self.parameter_uuid_to_can_node.get(self.wrapped.uuid)
-#
-#         if signal is None:
-#             return None
-#
-#         message = signal.tree_parent
-#
-#         can_table = message.tree_parent
-#
-#         return [
-#             dehumanize_name(can_table.name + message.name),
-#             dehumanize_name(signal.name),
-#         ]
+    return [
+        item,
+        [f'extern {interface_item_type} const {item_name};'],
+    ]

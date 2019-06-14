@@ -218,6 +218,21 @@ class Signal:
         if can_find_parameter:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
+            original_parameter = parameter
+            if isinstance(
+                    parameter,
+                    epyqlib.pm.parametermodel.TableArrayElement,
+            ):
+                array_element = parameter.original
+
+                if isinstance(
+                        array_element,
+                        epyqlib.pm.parametermodel.Parameter,
+                ):
+                    original_parameter = array_element
+                else:
+                    original_parameter = array_element.tree_parent.children[0]
+
             if parameter.minimum is not None:
                 extras['min'] = parameter.minimum
 
@@ -283,10 +298,10 @@ class Signal:
             elif (
                     (
                         isinstance(
-                            parameter,
+                            original_parameter,
                             epyqlib.pm.parametermodel.Parameter,
                         )
-                        and parameter.uses_interface_item()
+                        and original_parameter.uses_interface_item()
                     )
                     # or isinstance(
                     #     parameter,
@@ -296,7 +311,7 @@ class Signal:
                 extras['comment'] = '{}  <InterfaceItem:{}>'.format(
                     extras.get('comment', ''),
                     'interfaceItem_{}'.format(
-                        str(parameter.uuid).replace('-', '_'),
+                        str(self.wrapped.parameter_uuid).replace('-', '_'),
                     ),
                 ).strip()
 
@@ -447,6 +462,30 @@ class MultiplexedMessage:
                     )
 
             for signal in multiplexer.children:
+                # interface_item = None
+                #
+                # if signal.parameter_uuid is not None:
+                #     parameter = self.parameter_uuid_finder(
+                #         signal.parameter_uuid,
+                #     )
+                #
+                #     if isinstance(
+                #             parameter,
+                #             epyqlib.pm.parametermodel.TableArrayElement,
+                #     ):
+                #         array_element = parameter.original
+                #
+                #         if isinstance(
+                #                 array_element,
+                #                 epyqlib.pm.parametermodel.Parameter,
+                #         ):
+                #             parameter = array_element
+                #         else:
+                #             parameter = array_element.tree_parent.children[0]
+                #
+                #         if parameter.setter_function is None:
+                #             interface_item = None
+
                 signal = builders.wrap(
                     wrapped=signal,
                     message_length=multiplexer.length,
