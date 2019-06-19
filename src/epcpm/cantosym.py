@@ -308,11 +308,27 @@ class Signal:
                     #     epyqlib.pm.parametermodel.TableArrayElement,
                     # )
             ):
-                extras['comment'] = '{}  <InterfaceItem:{}>'.format(
-                    extras.get('comment', ''),
-                    'interfaceItem_{}'.format(
+                is_table = isinstance(
+                    parameter,
+                    epyqlib.pm.parametermodel.TableArrayElement,
+                )
+                if is_table:
+                    getter = 'table_items_getMeta'
+                    setter = 'table_items_setMeta'
+                else:
+                    getter = 'items_getMeta'
+                    setter = 'items_setMeta'
+
+                comment_format = (
+                    '{comment}  <InterfaceItem:{item}:{getter}:{setter}>'
+                )
+                extras['comment'] = comment_format.format(
+                    comment=extras.get('comment', ''),
+                    item='interfaceItem_{}'.format(
                         str(self.wrapped.parameter_uuid).replace('-', '_'),
                     ),
+                    getter=getter,
+                    setter=setter,
                 ).strip()
 
             if parameter.units is not None:

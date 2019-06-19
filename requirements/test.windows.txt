@@ -12,7 +12,7 @@
 altgraph==0.16.1          # via macholib
 appdirs==1.4.3            # via twisted
 argparse==1.4.0           # via codecov
-arrow==0.13.1
+arrow==0.14.2
 asn1crypto==0.24.0        # via cryptography
 atomicwrites==1.3.0       # via pytest
 attrs==18.2.0
@@ -20,7 +20,7 @@ automat==0.7.0            # via twisted
 bitstruct==7.1.0          # via canmatrix
 bleach==3.1.0             # via readme-renderer
 canmatrix==0.7
-certifi==2019.3.9         # via requests
+certifi==2019.6.16        # via requests
 cffi==1.12.3              # via cryptography
 chardet==3.0.4            # via requests
 click==7.0
@@ -28,7 +28,7 @@ codecov==2.0.5
 colorama==0.4.1           # via pytest
 constantly==15.1.0        # via twisted
 coverage==4.5.3           # via codecov, pytest-cov
-cryptography==2.6.1       # via pyopenssl, service-identity, twisted
+cryptography==2.7         # via pyopenssl, service-identity, twisted
 decorator==4.4.0
 defusedxml==0.6.0         # via soappy
 docutils==0.14            # via readme-renderer
@@ -43,30 +43,31 @@ hpack==3.0.0              # via h2
 hyperframe==5.2.0         # via h2
 hyperlink==19.0.0         # via twisted
 idna==2.7                 # via hyperlink, requests, twisted
+importlib-metadata==0.18  # via pluggy
 incremental==17.5.0       # via twisted
 jdcal==1.4.1              # via openpyxl
 lxml==4.3.0
 macholib==1.11
-marshmallow==2.19.2       # via graham
+marshmallow==2.19.5       # via graham
 more-itertools==7.0.0     # via pytest
 natsort==6.0.0
 openpyxl==2.5.12
 pathlib2==2.3.3           # via canmatrix
-pbr==5.2.0                # via wstools
+pbr==5.3.0                # via wstools
 pefile==2019.4.18
 pint==0.9
 pip-tools==3.3.2
 pkginfo==1.5.0.1          # via twine
-pluggy==0.9.0             # via pytest, tox
+pluggy==0.12.0            # via pytest, tox
 priority==1.3.0           # via twisted
 py==1.8.0                 # via pytest, tox
 pyasn1-modules==0.2.5     # via service-identity
 pyasn1==0.4.5             # via pyasn1-modules, service-identity, twisted
 pyelftools==0.25
-pygments==2.3.1           # via readme-renderer
+pygments==2.4.2           # via readme-renderer
 pyhamcrest==1.9.0         # via twisted
 pyopenssl==19.0.0         # via twisted
-pyqt5-sip==4.19.15        # via pyqt5
+pyqt5-sip==4.19.17        # via pyqt5
 pyqt5==5.11.2
 pyserial==3.4
 pytest-cov==2.5.1
@@ -75,7 +76,7 @@ pytest==3.8.2
 python-can==2.2.1
 python-dateutil==2.8.0    # via arrow
 python-docx==0.8.10
-python-dotenv==0.10.1
+python-dotenv==0.10.3
 pywin32-ctypes==0.2.0
 pywin32==224              # via twisted
 qt5reactor==0.5
@@ -87,17 +88,19 @@ service-identity==18.1.0  # via twisted
 six==1.12.0               # via automat, bleach, cryptography, pathlib2, pip-tools, pyhamcrest, pyopenssl, pytest, python-dateutil, readme-renderer, wstools, xmldiff
 smmap2==2.0.5             # via gitdb2
 soappy==0.12.22           # via twisted
+toolz==0.9.0
 tox==2.8.2
-tqdm==4.31.1              # via twine
+tqdm==4.32.2              # via twine
 twine==1.13.0
 twisted==18.9.0 ; platform_system == "Windows"
 urllib3==1.24.3           # via requests
-virtualenv==16.5.0        # via tox
+virtualenv==16.6.1        # via tox
 webencodings==0.5.1       # via bleach
 wheel==0.33.1
-wrapt==1.11.1             # via python-can
+wrapt==1.11.2             # via python-can
 wstools==0.4.8            # via soappy
 xmldiff==2.2
+zipp==0.5.1               # via importlib-metadata
 zope.interface==4.6.0     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:

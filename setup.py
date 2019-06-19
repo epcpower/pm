@@ -38,6 +38,7 @@ setuptools.setup(
         'pycparser',
         'pysunspec',
         'pyqt5',
+        'toolz',
         'xmldiff',
     ],
     extras_require={

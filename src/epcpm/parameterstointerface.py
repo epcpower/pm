@@ -1,6 +1,8 @@
 import decimal
+import re
 
 import attr
+import toolz
 
 import epyqlib.pm.parametermodel
 import epyqlib.utils.general
@@ -443,6 +445,7 @@ class Parameter:
             sunspec_setter=sunspec_setter,
             sunspec_variable=sunspec_variable, 
             variable_or_getter_setter=variable_or_getter_setter,
+            can_scale_factor=getattr(can_signal, 'factor', None),
         )
 
         return result
@@ -518,11 +521,19 @@ def can_getter_setter_variable(can_signal, parameter, var_or_func_or_table):
         can_getter = 'NULL'
         can_setter = 'NULL'
     else:
-        can_variable = (
-            f'&{can_signal.tree_parent.tree_parent.name}'
-            f'.{can_signal.tree_parent.name}'
-            f'.{can_signal.name}'
-        )
+        if var_or_func_or_table != 'table':
+            can_variable = (
+                f'&{can_signal.tree_parent.tree_parent.name}'
+                f'.{can_signal.tree_parent.name}'
+                f'.{can_signal.name}'
+            )
+        else:
+            can_variable = (
+                f'&{can_signal.tree_parent.tree_parent.tree_parent.name}'
+                f'.{can_signal.tree_parent.tree_parent.name}'
+                f'{can_signal.tree_parent.name}'
+                f'.{can_signal.name}'
+            )
 
         if can_signal.signed:
             can_type = ''
@@ -559,6 +570,185 @@ def can_getter_setter_variable(can_signal, parameter, var_or_func_or_table):
     return can_getter, can_setter, can_variable
 
 
+def breakdown_nested_array(s):
+    split = re.split(r'\[(.*?)\].', s)
+
+    array_layers = list(toolz.partition(2, split))
+    remainder, = split[2 * len(array_layers):]
+
+    return array_layers, remainder
+
+
+@attr.s
+class NestedArrays:
+    array_layers = attr.ib()
+    remainder = attr.ib()
+
+    @classmethod
+    def build(cls, s):
+        array_layers, remainder = breakdown_nested_array(s)
+
+        return cls(
+            array_layers=array_layers,
+            remainder=remainder,
+        )
+
+    def index(self, indexes):
+        return '.'.join(
+            '{layer}[{index}]'.format(
+                layer=layer,
+                index=index_format.format(**indexes),
+            )
+            for (layer, index_format), index in zip(self.array_layers, indexes)
+        )
+
+    def sizeof(self, layers):
+        indexed = self.index(indexes={layer: 0 for layer in layers})
+
+        return f'sizeof({indexed})'
+
+    # def sizeof(self, layers, remainder=False):
+    #     indexed = self.index(indexes={layer: 0 for layer in layers})
+
+    #     if remainder:
+    #         if len(layers) != len(self.array_layers):
+    #             raise Exception('Remainder requested without specifying all layers')
+
+    #         indexed += f'.{self.remainder}'
+
+    #     return f'sizeof({indexed})'
+
+
+@attr.s
+class TableBaseStructures:
+    uuid = attr.ib()
+    array_nests = attr.ib()
+    parameter_uuid_to_can_node = attr.ib()
+    parameter_uuid_to_sunspec_node = attr.ib()
+    parameter_uuid_finder = attr.ib()
+    common_structure_names = attr.ib(factory=dict)
+    c_code = attr.ib(factory=list)
+    h_code = attr.ib(factory=list)
+
+    def ensure_common_structure(
+            self,
+            internal_type,
+            common_initializers,
+            meta_initializer,
+    ):
+        name = self.common_structure_names.get(internal_type)
+
+        if name is None:
+            if len(self.h_code) > 0:
+                self.h_code.append('')
+            if len(self.c_code) > 0:
+                self.c_code.append('')
+
+            formatted_uuid = str(self.uuid).replace('-', '_')
+            name = f'InterfaceItem_table_common_{internal_type}_{formatted_uuid}'
+
+            self.common_structure_names[internal_type] = name
+            self.h_code.append(
+                f'extern InterfaceItem_table_common_{internal_type} {name};',
+            )
+            self.c_code.extend([
+                f'InterfaceItem_table_common_{internal_type} {name} = {{',
+                [
+                    f'.common = {{',
+                    common_initializers,
+                    f'}},',
+                    f'.variable_base = {0},',
+                    f'.zone_size = {0},',
+                    f'.curve_size = {0},',
+                    f'.point_size = {0},',
+                    f'.meta_values = {{',
+                    meta_initializer,
+                    f'}},',
+                ],
+                f'}};',
+            ])
+
+        return name
+
+    def create_item(self, table_element, layers):
+        array_element = table_element.original
+
+        if isinstance(array_element, epyqlib.pm.parametermodel.Parameter):
+            parameter = array_element
+        else:
+            parameter = array_element.tree_parent.children[0]
+
+        if parameter.setter_function is None:
+            return [[], []]
+
+        curve_type = get_curve_type(''.join(layers[:2]))
+
+        curve_index = layers[-2]
+        point_index = int(table_element.name.lstrip('_').lstrip('0')) - 1
+
+        access_level = get_access_level_string(
+            parameter=parameter,
+            parameter_uuid_finder=self.parameter_uuid_finder,
+        )
+
+        can_signal = self.parameter_uuid_to_can_node.get(table_element.uuid)
+
+        can_getter, can_setter, can_variable = can_getter_setter_variable(
+            can_signal,
+            parameter,
+            var_or_func_or_table='table',
+        )
+
+        common_initializers = create_common_initializers(
+            access_level=access_level,
+            can_getter=can_getter,
+            can_setter=can_setter,
+            can_variable=can_variable,
+            hand_coded_sunspec_getter_function='NULL',
+            hand_coded_sunspec_setter_function='NULL',
+            internal_scale=parameter.internal_scale_factor,
+            scale_factor_updater='NULL',
+            scale_factor_variable='NULL',
+            sunspec_getter='NULL',
+            sunspec_setter='NULL',
+            sunspec_variable='NULL',
+            can_scale_factor=can_signal.factor,
+        )
+
+        meta_initializer = create_meta_initializer_values(parameter)
+
+        common_structure_name = self.ensure_common_structure(
+            internal_type=parameter.internal_type,
+            common_initializers=common_initializers,
+            meta_initializer=meta_initializer,
+        )
+
+        interface_item_type = (
+            f'InterfaceItem_table_{parameter.internal_type}'
+        )
+
+        item_uuid_string = str(table_element.uuid).replace('-', '_')
+        item_name = f'interfaceItem_{item_uuid_string}'
+
+        c = [
+            f'// {parameter.uuid}',
+            f'{interface_item_type} const {item_name} = {{',
+            [
+                f'.table_common = &{common_structure_name},',
+                f'.zone = {curve_type if curve_type is not None else "0"},',
+                f'.curve = {curve_index},',
+                f'.point = {point_index},',
+            ],
+            '};',
+            '',
+        ]
+
+        return [
+            c,
+            [f'extern {interface_item_type} const {item_name};'],
+        ]
+
+
 @builders(epyqlib.pm.parametermodel.Table)
 @attr.s
 class Table:
@@ -576,16 +766,55 @@ class Table:
             if isinstance(child, epyqlib.pm.parametermodel.TableGroupElement)
         )
 
-        return builders.wrap(
+        arrays = [
+            child
+            for child in self.wrapped.children
+            if isinstance(child, epyqlib.pm.parametermodel.Array)
+        ]
+
+        # TODO: CAMPid 0795436754762451671643967431
+        # TODO: get this from the ...  wherever we have it
+        axes = ['x', 'y', 'z']
+
+        array_nests = {
+            name: NestedArrays.build(s=array.children[0].internal_variable)
+            for name, array in zip(axes, arrays)
+        }
+
+        table_base_structures = TableBaseStructures(
+            uuid=self.wrapped.uuid,
+            array_nests=array_nests,
+            parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
+            parameter_uuid_to_sunspec_node=(
+                self.parameter_uuid_to_sunspec_node
+            ),
+            parameter_uuid_finder=self.parameter_uuid_finder,
+        )
+
+        item_code = builders.wrap(
             wrapped=group,
             can_root=self.can_root,
             sunspec_root=self.sunspec_root,
+            table_base_structures=table_base_structures,
             parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
             parameter_uuid_to_sunspec_node=(
                 self.parameter_uuid_to_sunspec_node
             ),
             parameter_uuid_finder=self.parameter_uuid_finder,
         ).gen()
+
+        return [
+            [
+                *table_base_structures.c_code,
+                '',
+                *item_code[0],
+            ],
+            [
+                *table_base_structures.h_code,
+                '',
+                *item_code[1],
+            ],
+        ]
 
 
 @builders(epyqlib.pm.parametermodel.TableGroupElement)
@@ -594,6 +823,7 @@ class TableGroupElement:
     wrapped = attr.ib()
     can_root = attr.ib()
     sunspec_root = attr.ib()
+    table_base_structures = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
     parameter_uuid_to_sunspec_node = attr.ib()
     parameter_uuid_finder = attr.ib()
@@ -617,6 +847,7 @@ class TableGroupElement:
                 wrapped=child,
                 can_root=self.can_root,
                 sunspec_root=self.sunspec_root,
+                table_base_structures=self.table_base_structures,
                 parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
                 parameter_uuid_to_sunspec_node=(
                     self.parameter_uuid_to_sunspec_node
@@ -649,12 +880,17 @@ class TableArrayElement:
     wrapped = attr.ib()
     can_root = attr.ib()
     sunspec_root = attr.ib()
+    table_base_structures = attr.ib()
     layers = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
     parameter_uuid_to_sunspec_node = attr.ib()
     parameter_uuid_finder = attr.ib()
 
     def gen(self):
+        return self.table_base_structures.create_item(
+            table_element=self.wrapped,
+            layers=self.layers,
+        )
         # lineMonitorParams->fMonitorTables[{curve_type}           ].curves[{curve_index}].tbl[{point_index}].x
         # lineMonitorParams->fMonitorTables[IEEE1547_CURVE_TYPE_LRT].curves[0            ].tbl[0            ].x
         # lineMonitorParams->voltWatts.modes[{curve_index}].tbl[{point_index}].{axis};
@@ -707,7 +943,7 @@ class TableArrayElement:
             f'.setter = {setter_function},',
             f'.zone = {curve_type if curve_type is not None else "0"},',
             f'.curve = {curve_index},',
-            f'.index = {point_index},',
+            f'.point = {point_index},',
         ]
 
         # var_or_func = 'variable'
@@ -775,17 +1011,18 @@ def create_item(
         can_setter,
         can_variable,
         hand_coded_sunspec_getter_function,
-        hand_coded_sunspec_setter_function, 
+        hand_coded_sunspec_setter_function,
         interface_item_type,
-        internal_scale, 
+        internal_scale,
         meta_initializer_values,
-        parameter, 
-        scale_factor_updater, 
+        parameter,
+        scale_factor_updater,
         scale_factor_variable,
         sunspec_getter,
-        sunspec_setter, 
+        sunspec_setter,
         sunspec_variable,
         variable_or_getter_setter,
+        can_scale_factor,
 ):
     item_uuid_string = str(item_uuid).replace('-', '_')
     item_name = f'interfaceItem_{item_uuid_string}'
@@ -799,43 +1036,30 @@ def create_item(
             '}',
         ]
 
+    common_initializers = create_common_initializers(
+        access_level=access_level, 
+        can_getter=can_getter, 
+        can_setter=can_setter,
+        can_variable=can_variable,
+        hand_coded_sunspec_getter_function=hand_coded_sunspec_getter_function,
+        hand_coded_sunspec_setter_function=hand_coded_sunspec_setter_function,
+        internal_scale=internal_scale, 
+        scale_factor_updater=scale_factor_updater,
+        scale_factor_variable=scale_factor_variable, 
+        sunspec_getter=sunspec_getter,
+        sunspec_setter=sunspec_setter,
+        sunspec_variable=sunspec_variable,
+        can_scale_factor=can_scale_factor,
+    )
+
     item = [
         f'// {parameter.uuid}',
         f'{interface_item_type} const {item_name} = {{',
         [
             '.common = {',
-            [
-                f'.sunspecScaleFactor = {scale_factor_variable},',
-                f'.canScaleFactor = NULL,',
-                f'.scaleFactorUpdater = {scale_factor_updater},',
-                # f'.handSunSpecGetterFunction = {hand_coded_getter_function},',
-                # f'.handSunSpecSetterFunction = {hand_coded_setter_function},',
-                f'.internalScaleFactor = {internal_scale},',
-                f'.sunspec = {{',
-                [
-                    f'.variable = {sunspec_variable},',
-                    f'.getter = {sunspec_getter},',
-                    f'.setter = {sunspec_setter},',
-                    f'.handGetter = {hand_coded_sunspec_getter_function},',
-                    f'.handSetter = {hand_coded_sunspec_setter_function},',
-                ],
-                f'}},',
-                f'.can = {{',
-                [
-                    f'.variable = {can_variable},',
-                    f'.getter = {can_getter},',
-                    f'.setter = {can_setter},',
-                    f'.handGetter = NULL,',
-                    f'.handSetter = NULL,',
-                ],
-                f'}},',
-                f'.access_level = {access_level},',
-            ],
+            common_initializers,
             '},',
-            # f'.sunspecVariable = {sunspec_variable},',
             *variable_or_getter_setter,
-            # f'.getter = {interface_item_type}_getter,',
-            # f'.setter = {interface_item_type}_setter,',
             *meta_initializer,
         ],
         '};',
@@ -846,3 +1070,50 @@ def create_item(
         item,
         [f'extern {interface_item_type} const {item_name};'],
     ]
+
+
+def create_common_initializers(
+        access_level, 
+        can_getter, 
+        can_setter, 
+        can_variable,
+        hand_coded_sunspec_getter_function,
+        hand_coded_sunspec_setter_function,
+        internal_scale,
+        scale_factor_updater, 
+        scale_factor_variable, 
+        sunspec_getter,
+        sunspec_setter, 
+        sunspec_variable,
+        can_scale_factor,
+):
+    if can_scale_factor is None:
+        # TODO: don't default here?
+        can_scale_factor = 1
+
+    common_initializers = [
+        f'.sunspecScaleFactor = {scale_factor_variable},',
+        f'.canScaleFactor = {float(can_scale_factor)}f,',
+        f'.scaleFactorUpdater = {scale_factor_updater},',
+        f'.internalScaleFactor = {internal_scale},',
+        f'.sunspec = {{',
+        [
+            f'.variable = {sunspec_variable},',
+            f'.getter = {sunspec_getter},',
+            f'.setter = {sunspec_setter},',
+            f'.handGetter = {hand_coded_sunspec_getter_function},',
+            f'.handSetter = {hand_coded_sunspec_setter_function},',
+        ],
+        f'}},',
+        f'.can = {{',
+        [
+            f'.variable = {can_variable},',
+            f'.getter = {can_getter},',
+            f'.setter = {can_setter},',
+            f'.handGetter = NULL,',
+            f'.handSetter = NULL,',
+        ],
+        f'}},',
+        f'.access_level = {access_level},',
+    ]
+    return common_initializers
