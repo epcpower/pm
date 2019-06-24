@@ -1,4 +1,5 @@
 import decimal
+import string
 import re
 
 import attr
@@ -48,6 +49,8 @@ def export(c_path, h_path, parameters_model, can_model, sunspec_model):
 
     c_path.parent.mkdir(parents=True, exist_ok=True)
     c_gen = [
+        '#include <stdint.h>',
+        '',
         '#include "interface.h"',
         '#include "canInterfaceGen.h"',
         '#include "sunspecInterfaceGen.h"',
@@ -451,6 +454,101 @@ class Parameter:
         return result
 
 
+@attr.s(frozen=True)
+class FixedWidthType:
+    name = attr.ib()
+    bits = attr.ib()
+    signed = attr.ib()
+    minimum_code = attr.ib()
+    maximum_code = attr.ib()
+
+    @classmethod
+    def build(cls, bits, signed):
+        return cls(
+            name=fixed_width_name(bits=bits, signed=signed),
+            bits=bits,
+            signed=signed,
+            minimum_code=fixed_width_limit_text(
+                bits=bits,
+                signed=signed,
+                limit='min',
+            ),
+            maximum_code=fixed_width_limit_text(
+                bits=bits,
+                signed=signed,
+                limit='max',
+            ),
+        )
+
+
+@attr.s(frozen=True)
+class FloatingType:
+    name = attr.ib()
+    bits = attr.ib()
+    minimum_code = attr.ib()
+    maximum_code = attr.ib()
+
+    @classmethod
+    def build(cls, bits):
+        return cls(
+            name={32: 'float', 64: 'double'}[bits],
+            bits=bits,
+            minimum_code='(-INFINITY)',
+            maximum_code='(INFINITY)',
+        )
+
+
+@attr.s(frozen=True)
+class BooleanType:
+    name = attr.ib(default='bool')
+    bits = attr.ib(default=2)
+    minimum_code = attr.ib(default='(false)')
+    maximum_code = attr.ib(default='(true)')
+
+
+def fixed_width_name(bits, signed):
+    if signed:
+        u = ''
+    else:
+        u = 'u'
+
+    return f'{u}int{bits}_t'
+
+
+def fixed_width_limit_text(bits, signed, limit):
+    limits = ('min', 'max')
+
+    if limit not in limits:
+        raise Exception(f'Requested limit not found in {list(limits)}: {limit:!r}')
+
+    if not signed and limit == 'min':
+        return '(0U)'
+
+    u = '' if signed else 'U'
+
+    return f'({u}INT{bits}_{limit.upper()})'
+
+
+types = {
+    type.name: type
+    for type in (
+        *(
+            FixedWidthType.build(
+                bits=bits,
+                signed=signed,
+            )
+            for bits in (8, 16, 32, 64)
+            for signed in (False, True)
+        ),
+        *(
+            FloatingType.build(bits=bits)
+            for bits in (32, 64)
+        ),
+        BooleanType(),
+    )
+}
+
+
 def create_meta_initializer_values(parameter):
     def create_literal(value, type):
         value *= decimal.Decimal(10) ** parameter.internal_scale_factor
@@ -478,22 +576,25 @@ def create_meta_initializer_values(parameter):
         value=meta_default,
         type=parameter.internal_type,
     )
+
     if parameter.minimum is None:
-        meta_minimum = 0
+        meta_minimum = types[parameter.internal_type].minimum_code
     else:
         meta_minimum = parameter.minimum
-    meta_minimum = create_literal(
-        value=meta_minimum,
-        type=parameter.internal_type,
-    )
+        meta_minimum = create_literal(
+            value=meta_minimum,
+            type=parameter.internal_type,
+        )
+
     if parameter.maximum is None:
-        meta_maximum = 0
+        meta_maximum = types[parameter.internal_type].maximum_code
     else:
         meta_maximum = parameter.maximum
-    meta_maximum = create_literal(
-        value=meta_maximum,
-        type=parameter.internal_type,
-    )
+        meta_maximum = create_literal(
+            value=meta_maximum,
+            type=parameter.internal_type,
+        )
+
     meta_initializer_values = [
         f'[Meta_UserDefault - 1] = {meta_default},',
         f'[Meta_FactoryDefault - 1] = {meta_default},',
@@ -594,13 +695,16 @@ class NestedArrays:
         )
 
     def index(self, indexes):
-        return '.'.join(
-            '{layer}[{index}]'.format(
-                layer=layer,
-                index=index_format.format(**indexes),
+        try:
+            return '.'.join(
+                '{layer}[{index}]'.format(
+                    layer=layer,
+                    index=index_format.format(**indexes),
+                )
+                for (layer, index_format), index in zip(self.array_layers, indexes)
             )
-            for (layer, index_format), index in zip(self.array_layers, indexes)
-        )
+        except KeyError as e:
+            raise
 
     def sizeof(self, layers):
         indexed = self.index(indexes={layer: 0 for layer in layers})
@@ -645,7 +749,42 @@ class TableBaseStructures:
                 self.c_code.append('')
 
             formatted_uuid = str(self.uuid).replace('-', '_')
-            name = f'InterfaceItem_table_common_{internal_type}_{formatted_uuid}'
+            name = (
+                f'InterfaceItem_table_common_{internal_type}_{formatted_uuid}'
+            )
+
+            nested_array = self.array_nests['x']
+
+            layers = []
+            for layer in nested_array.array_layers:
+                layer_format_name, = [
+                    list(field)[0][1]
+                    for field in [string.Formatter().parse(layer[1])]
+                ]
+                layers.append(layer_format_name)
+
+            variable_base = nested_array.index(
+                indexes={
+                    layer: 0
+                    for layer in layers
+                },
+            )
+
+            sizes = [
+                self.array_nests['x'].sizeof(layers[:i + 1])
+                for i in range(len(layers))
+            ]
+
+            if len(sizes) == 3:
+                zone_size, curve_size, point_size = sizes
+            else:
+                zone_size = 0
+                curve_size, point_size = sizes
+
+            axis_offsets = [
+                f'[{index}] = &{variable_base}.{nested_array.remainder} - &{variable_base},'
+                for index, nested_array in enumerate(self.array_nests.values())
+            ]
 
             self.common_structure_names[internal_type] = name
             self.h_code.append(
@@ -657,10 +796,13 @@ class TableBaseStructures:
                     f'.common = {{',
                     common_initializers,
                     f'}},',
-                    f'.variable_base = {0},',
-                    f'.zone_size = {0},',
-                    f'.curve_size = {0},',
-                    f'.point_size = {0},',
+                    f'.variable_base = ({internal_type} *) &{variable_base},',
+                    f'.zone_size = {zone_size},',
+                    f'.curve_size = {curve_size},',
+                    f'.point_size = {point_size},',
+                    f'.axis_offsets = {{',
+                    axis_offsets,
+                    f'}},',
                     f'.meta_values = {{',
                     meta_initializer,
                     f'}},',
@@ -703,7 +845,8 @@ class TableBaseStructures:
             access_level=access_level,
             can_getter=can_getter,
             can_setter=can_setter,
-            can_variable=can_variable,
+            # not to be used so really hardcode NULL
+            can_variable='NULL',
             hand_coded_sunspec_getter_function='NULL',
             hand_coded_sunspec_setter_function='NULL',
             internal_scale=parameter.internal_scale_factor,
@@ -711,6 +854,7 @@ class TableBaseStructures:
             scale_factor_variable='NULL',
             sunspec_getter='NULL',
             sunspec_setter='NULL',
+            # not to be used so really hardcode NULL
             sunspec_variable='NULL',
             can_scale_factor=can_signal.factor,
         )
@@ -730,14 +874,25 @@ class TableBaseStructures:
         item_uuid_string = str(table_element.uuid).replace('-', '_')
         item_name = f'interfaceItem_{item_uuid_string}'
 
+        remainder = NestedArrays.build(parameter.internal_variable).remainder
+
+        axis_index, = (
+            index
+            for index, name in enumerate(self.array_nests)
+            if name == remainder
+        )
+
         c = [
             f'// {parameter.uuid}',
             f'{interface_item_type} const {item_name} = {{',
             [
                 f'.table_common = &{common_structure_name},',
+                f'.can_variable = {can_variable},',
+                f'.sunspec_variable = NULL,',
                 f'.zone = {curve_type if curve_type is not None else "0"},',
                 f'.curve = {curve_index},',
                 f'.point = {point_index},',
+                f'.axis = {axis_index},',
             ],
             '};',
             '',
