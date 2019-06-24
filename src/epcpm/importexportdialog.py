@@ -121,7 +121,7 @@ class Dialog(UiBase):
         )
         self.ui.pick_spreadsheet.clicked.connect(self.pick_spreadsheet)
         self.ui.pick_sunspec_c.clicked.connect(self.pick_sunspec_c)
-        self.ui.pick_interface_c.clicked.connect(self.pick_interface.c)
+        self.ui.pick_interface_c.clicked.connect(self.pick_interface_c)
         self.ui.pick_smdx.clicked.connect(self.pick_smdx)
         self.ui.remove_smdx.clicked.connect(self.remove_smdx)
         self.ui.from_directory.clicked.connect(self.from_directory)
