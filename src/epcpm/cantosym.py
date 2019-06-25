@@ -308,11 +308,17 @@ class Signal:
                     #     epyqlib.pm.parametermodel.TableArrayElement,
                     # )
             ):
-                is_table = isinstance(
-                    parameter,
-                    epyqlib.pm.parametermodel.TableArrayElement,
+                is_table_array = (
+                    isinstance(
+                        parameter,
+                        epyqlib.pm.parametermodel.TableArrayElement,
+                    )
+                    and isinstance(
+                        original_parameter.tree_parent,
+                        epyqlib.pm.parametermodel.Array,
+                    )
                 )
-                if is_table:
+                if is_table_array:
                     getter = 'table_items_getMeta'
                     setter = 'table_items_setMeta'
                 else:

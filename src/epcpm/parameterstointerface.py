@@ -630,53 +630,67 @@ def can_getter_setter_variable(can_signal, parameter, var_or_func_or_table):
         can_variable = 'NULL'
         can_getter = 'NULL'
         can_setter = 'NULL'
+
+        return can_getter, can_setter, can_variable
+
+    in_table = isinstance(
+        can_signal.tree_parent.tree_parent,
+        epcpm.canmodel.CanTable,
+    )
+    if in_table:
+        can_variable = (
+            f'&{can_signal.tree_parent.tree_parent.tree_parent.name}'
+            f'.{can_signal.tree_parent.tree_parent.name}'
+            f'{can_signal.tree_parent.name}'
+            f'.{can_signal.name}'
+        )
     else:
-        if var_or_func_or_table != 'table':
-            can_variable = (
-                f'&{can_signal.tree_parent.tree_parent.name}'
-                f'.{can_signal.tree_parent.name}'
-                f'.{can_signal.name}'
-            )
-        else:
-            can_variable = (
-                f'&{can_signal.tree_parent.tree_parent.tree_parent.name}'
-                f'.{can_signal.tree_parent.tree_parent.name}'
-                f'{can_signal.tree_parent.name}'
-                f'.{can_signal.name}'
-            )
-
-        if can_signal.signed:
-            can_type = ''
-        else:
-            can_type = 'u'
-
-        can_type += 'int'
-
-        if can_signal.bits <= 16:
-            can_type += '16'
-        elif can_signal.bits <= 32:
-            can_type += '32'
-        else:
-            raise Exception('ack')
-
-        can_type += '_t'
-
-        getter_setter_list = [
-            'InterfaceItem',
-            var_or_func_or_table,
-            parameter.internal_type,
-            'can',
-            can_type,
-        ]
-
-        can_getter = '_'.join(
-            str(x)
-            for x in getter_setter_list + ['getter']
+        can_variable = (
+            f'&{can_signal.tree_parent.tree_parent.name}'
+            f'.{can_signal.tree_parent.name}'
+            f'.{can_signal.name}'
         )
-        can_setter = '_'.join(
-            str(x)
-            for x in getter_setter_list + ['setter']
-        )
+    # elif var_or_func_or_table == 'table_group':
+    #     can_variable = (
+    #         f'&{can_signal.tree_parent.tree_parent.tree_parent.name}'
+    #         f'.{can_signal.tree_parent.tree_parent.name}'
+    #         f'{can_signal.tree_parent.name}'
+    #         f'.{can_signal.name}'
+    #     )
+
+    if can_signal.signed:
+        can_type = ''
+    else:
+        can_type = 'u'
+
+    can_type += 'int'
+
+    if can_signal.bits <= 16:
+        can_type += '16'
+    elif can_signal.bits <= 32:
+        can_type += '32'
+    else:
+        raise Exception('ack')
+
+    can_type += '_t'
+
+    getter_setter_list = [
+        'InterfaceItem',
+        var_or_func_or_table,
+        parameter.internal_type,
+        'can',
+        can_type,
+    ]
+
+    can_getter = '_'.join(
+        str(x)
+        for x in getter_setter_list + ['getter']
+    )
+    can_setter = '_'.join(
+        str(x)
+        for x in getter_setter_list + ['setter']
+    )
+
     return can_getter, can_setter, can_variable
 
 
@@ -822,6 +836,7 @@ class TableBaseStructures:
         return name
 
     def create_item(self, table_element, layers):
+        # TODO: CAMPid 9655426754319431461354643167
         array_element = table_element.original
 
         if isinstance(array_element, epyqlib.pm.parametermodel.Parameter):
@@ -1051,15 +1066,9 @@ class TableArrayElement:
     parameter_uuid_finder = attr.ib()
 
     def gen(self):
-        return self.table_base_structures.create_item(
-            table_element=self.wrapped,
-            layers=self.layers,
-        )
-        # lineMonitorParams->fMonitorTables[{curve_type}           ].curves[{curve_index}].tbl[{point_index}].x
-        # lineMonitorParams->fMonitorTables[IEEE1547_CURVE_TYPE_LRT].curves[0            ].tbl[0            ].x
-        # lineMonitorParams->voltWatts.modes[{curve_index}].tbl[{point_index}].{axis};
-
         table_element = self.wrapped
+
+        # TODO: CAMPid 9655426754319431461354643167
         array_element = table_element.original
 
         if isinstance(array_element, epyqlib.pm.parametermodel.Parameter):
@@ -1067,18 +1076,43 @@ class TableArrayElement:
         else:
             parameter = array_element.tree_parent.children[0]
 
-        if parameter.setter_function is None:
+        is_group = isinstance(
+            parameter.tree_parent,
+            epyqlib.pm.parametermodel.Group,
+        )
+
+        if is_group:
+            return self.handle_group()
+
+        return self.handle_array()
+
+    def handle_array(self):
+        return self.table_base_structures.create_item(
+            table_element=self.wrapped,
+            layers=self.layers,
+        )
+
+    def handle_group(self):
+        # raise Exception('...')
+
+        table_element = self.wrapped
+
+        curve_index = self.layers[-2]
+
+        parameter = table_element.original
+
+        if parameter.internal_variable is None:
             return [[], []]
 
-        can_signal = self.parameter_uuid_to_can_node.get(parameter.uuid)
-        sunspec_point = self.parameter_uuid_to_sunspec_node.get(parameter.uuid)
+        can_signal = self.parameter_uuid_to_can_node.get(table_element.uuid)
+        sunspec_point = self.parameter_uuid_to_sunspec_node.get(table_element.uuid)
 
         access_level = get_access_level_string(
-            parameter=parameter,
+            parameter=table_element,
             parameter_uuid_finder=self.parameter_uuid_finder,
         )
 
-        axis = table_element.tree_parent.axis
+        # axis = table_element.tree_parent.axis
 
         # if parameter.setter_function is None:
         #     setter_function = 'NULL'
@@ -1087,27 +1121,29 @@ class TableArrayElement:
         #         upper_axis=axis.upper(),
         #     )
 
-        setter_function = parameter.setter_function.format(
-            upper_axis=axis.upper(),
-        )
+        if parameter.setter_function is None:
+            setter_function = 'NULL'
+        else:
+            setter_function = '&' + parameter.setter_function
 
         curve_type = get_curve_type(''.join(self.layers[:2]))
-
-        curve_index = self.layers[-2]
-        point_index = int(table_element.name.lstrip('_').lstrip('0')) - 1
 
         internal_variable = parameter.internal_variable.format(
             curve_type=curve_type,
             curve_index=curve_index,
-            point_index=point_index,
         )
+
+        meta_initializer = create_meta_initializer_values(parameter)
 
         variable_or_getter_setter = [
             f'.variable = &{internal_variable},',
             f'.setter = {setter_function},',
-            f'.zone = {curve_type if curve_type is not None else "0"},',
-            f'.curve = {curve_index},',
-            f'.point = {point_index},',
+            f'.meta_values = {{',
+            meta_initializer,
+            f'}},',
+            # f'.zone = {curve_type if curve_type is not None else "0"},',
+            # f'.curve = {curve_index},',
+            # f'.point = 0,',
         ]
 
         # var_or_func = 'variable'
@@ -1115,11 +1151,11 @@ class TableArrayElement:
         can_getter, can_setter, can_variable = can_getter_setter_variable(
             can_signal,
             parameter,
-            var_or_func_or_table='table',
+            var_or_func_or_table='variable',
         )
 
         interface_item_type = (
-            f'InterfaceItem_table_{parameter.internal_type}'
+            f'InterfaceItem_variable_{parameter.internal_type}'
         )
 
         # signal = self.parameter_uuid_to_can_node.get(self.wrapped.uuid)
@@ -1163,6 +1199,7 @@ class TableArrayElement:
             sunspec_setter='NULL',
             sunspec_variable='NULL',
             variable_or_getter_setter=variable_or_getter_setter,
+            can_scale_factor=getattr(can_signal, 'factor', None),
         )
 
         return result
