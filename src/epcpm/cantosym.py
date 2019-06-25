@@ -484,30 +484,6 @@ class MultiplexedMessage:
                     )
 
             for signal in multiplexer.children:
-                # interface_item = None
-                #
-                # if signal.parameter_uuid is not None:
-                #     parameter = self.parameter_uuid_finder(
-                #         signal.parameter_uuid,
-                #     )
-                #
-                #     if isinstance(
-                #             parameter,
-                #             epyqlib.pm.parametermodel.TableArrayElement,
-                #     ):
-                #         array_element = parameter.original
-                #
-                #         if isinstance(
-                #                 array_element,
-                #                 epyqlib.pm.parametermodel.Parameter,
-                #         ):
-                #             parameter = array_element
-                #         else:
-                #             parameter = array_element.tree_parent.children[0]
-                #
-                #         if parameter.setter_function is None:
-                #             interface_item = None
-
                 signal = builders.wrap(
                     wrapped=signal,
                     message_length=multiplexer.length,
