@@ -296,17 +296,11 @@ class Signal:
                     ':'.join(segments),
                 ).strip()
             elif (
-                    (
-                        isinstance(
-                            original_parameter,
-                            epyqlib.pm.parametermodel.Parameter,
-                        )
-                        and original_parameter.uses_interface_item()
+                    isinstance(
+                        original_parameter,
+                        epyqlib.pm.parametermodel.Parameter,
                     )
-                    # or isinstance(
-                    #     parameter,
-                    #     epyqlib.pm.parametermodel.TableArrayElement,
-                    # )
+                    and original_parameter.uses_interface_item()
             ):
                 is_table_array = (
                     isinstance(
