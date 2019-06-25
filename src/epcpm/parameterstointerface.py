@@ -829,7 +829,7 @@ class TableBaseStructures:
         else:
             parameter = array_element.tree_parent.children[0]
 
-        if parameter.setter_function is None:
+        if parameter.internal_variable is None:
             return [[], []]
 
         curve_type = get_curve_type(''.join(layers[:2]))
