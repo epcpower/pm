@@ -506,6 +506,14 @@ class BooleanType:
     maximum_code = attr.ib(default='(true)')
 
 
+@attr.s(frozen=True)
+class SizeType:
+    name = attr.ib(default='size_t')
+    bits = attr.ib(default=32)
+    minimum_code = attr.ib(default='(0)')
+    maximum_code = attr.ib(default='(SIZE_MAX)')
+
+
 def fixed_width_name(bits, signed):
     if signed:
         u = ''
@@ -545,6 +553,7 @@ types = {
             for bits in (32, 64)
         ),
         BooleanType(),
+        SizeType(),
     )
 }
 
