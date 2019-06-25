@@ -18,6 +18,7 @@ def test_blank(qtbot):
         smdx=[],
         sunspec_tables_c=None,
         sunspec_c=None,
+        interface_c=None,
     )
 
 
