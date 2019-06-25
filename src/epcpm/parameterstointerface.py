@@ -650,13 +650,6 @@ def can_getter_setter_variable(can_signal, parameter, var_or_func_or_table):
             f'.{can_signal.tree_parent.name}'
             f'.{can_signal.name}'
         )
-    # elif var_or_func_or_table == 'table_group':
-    #     can_variable = (
-    #         f'&{can_signal.tree_parent.tree_parent.tree_parent.name}'
-    #         f'.{can_signal.tree_parent.tree_parent.name}'
-    #         f'{can_signal.tree_parent.name}'
-    #         f'.{can_signal.name}'
-    #     )
 
     if can_signal.signed:
         can_type = ''
@@ -1141,9 +1134,6 @@ class TableArrayElement:
             f'.meta_values = {{',
             meta_initializer,
             f'}},',
-            # f'.zone = {curve_type if curve_type is not None else "0"},',
-            # f'.curve = {curve_index},',
-            # f'.point = 0,',
         ]
 
         # var_or_func = 'variable'
