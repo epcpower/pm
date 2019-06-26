@@ -503,6 +503,8 @@ class FixedBlock(epyqlib.treenode.TreeNode):
 
     def __attrs_post_init__(self):
         super().__init__()
+        self.pyqt_signals.child_added_complete.connect(self.update)
+        self.pyqt_signals.child_removed_complete.connect(self.update)
 
     def can_drop_on(self, node):
         return isinstance(
@@ -514,13 +516,22 @@ class FixedBlock(epyqlib.treenode.TreeNode):
         )
 
     def can_delete(self, node=None):
-        return False
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+        return isinstance(node, DataPoint)
 
     def child_from(self, node):
         if isinstance(node, epyqlib.pm.parametermodel.Parameter):
             return DataPoint(parameter_uuid=node.uuid)
 
         return node
+
+    def update(self):
+        block_offset = 0
+        for pt in self.children:
+            pt.block_offset = block_offset
+            block_offset = block_offset + pt.size
 
     check_offsets_and_length = check_block_offsets_and_length
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
