@@ -900,7 +900,7 @@ class TableBaseStructures:
         )
 
         c = [
-            f'// {parameter.uuid}',
+            f'// {table_element.uuid}',
             f'{interface_item_type} const {item_name} = {{',
             [
                 f'.table_common = &{common_structure_name},',
@@ -1244,7 +1244,7 @@ def create_item(
     )
 
     item = [
-        f'// {parameter.uuid}',
+        f'// {item_uuid}',
         f'{interface_item_type} const {item_name} = {{',
         [
             '.common = {',
