@@ -15,6 +15,16 @@ import epcpm.sunspectoxlsx
 builders = epyqlib.utils.general.TypeMap()
 
 
+# TODO: move this somewhere common in python code...
+sunspec_types = {
+    'uint16': 'sunsU16',
+    'enum16': 'sunsU16',
+    'int16': 'sunsS16',
+    'uint32': 'sunsU32',
+    'int32': 'sunsS32',
+}
+
+
 def export(c_path, h_path, parameters_model, can_model, sunspec_model):
     builder = builders.wrap(
         wrapped=parameters_model.root,
@@ -343,20 +353,11 @@ class Parameter:
         else:
             model_id = sunspec_point.tree_parent.tree_parent.id
             # TODO: move this somewhere common in python code...
-            sunspec_type = {
-                'uint16': 'sunsU16',
-                'enum16': 'sunsU16',
-                'int16': 'sunsS16',
-                'uint32': 'sunsU32',
-                'int32': 'sunsS32',
-            }[self.parameter_uuid_finder(sunspec_point.type_uuid).name]
+            sunspec_type = sunspec_types[
+                self.parameter_uuid_finder(sunspec_point.type_uuid).name
+            ]
 
             # TODO: handle tables with repeating blocks and references
-
-            sunspec_scale_factor = None
-            if sunspec_point.factor_uuid is not None:
-                factor_point = self.sunspec_root.model.node_from_uuid(sunspec_point.factor_uuid)
-                sunspec_scale_factor = self.parameter_uuid_finder(factor_point.parameter_uuid).abbreviation
 
             hand_coded_getter_function_name = epcpm.sunspectoxlsx.getter_name(
                 parameter=parameter,
@@ -386,7 +387,15 @@ class Parameter:
 
             sunspec_model_variable = f'sunspecInterface.model{model_id}'
 
-            if sunspec_scale_factor is not None:
+            # TODO: CAMPid 67549654267913467967436
+            if sunspec_point.factor_uuid is not None:
+                factor_point = self.sunspec_root.model.node_from_uuid(
+                    sunspec_point.factor_uuid,
+                )
+                sunspec_scale_factor = self.parameter_uuid_finder(
+                    factor_point.parameter_uuid,
+                ).abbreviation
+
                 scale_factor_variable = (
                     f'&{sunspec_model_variable}.{sunspec_scale_factor}'
                 )
@@ -399,6 +408,7 @@ class Parameter:
                 f'&{sunspec_model_variable}.{parameter.abbreviation}'
             )
 
+            # TODO: CAMPid 9675436715674367943196954756419543975314
             getter_setter_list = [
                 'InterfaceItem',
                 var_or_func,
@@ -828,7 +838,7 @@ class TableBaseStructures:
 
         return name
 
-    def create_item(self, table_element, layers):
+    def create_item(self, table_element, layers, sunspec_point):
         # TODO: CAMPid 9655426754319431461354643167
         array_element = table_element.original
 
@@ -842,7 +852,7 @@ class TableBaseStructures:
 
         curve_type = get_curve_type(''.join(layers[:2]))
 
-        curve_index = layers[-2]
+        curve_index = int(layers[-2])
         point_index = int(table_element.name.lstrip('_').lstrip('0')) - 1
 
         access_level = get_access_level_string(
@@ -858,6 +868,76 @@ class TableBaseStructures:
             var_or_func_or_table='table',
         )
 
+        # TODO: CAMPid 954679654745154274579654265294624765247569765479
+        sunspec_getter = 'NULL'
+        sunspec_setter = 'NULL'
+        sunspec_variable = 'NULL'
+        scale_factor_variable = 'NULL'
+        scale_factor_updater = 'NULL'
+
+        if sunspec_point is not None:
+            sunspec_type = sunspec_types[
+                self.parameter_uuid_finder(sunspec_point.type_uuid).name
+            ]
+
+            # TODO: CAMPid 9675436715674367943196954756419543975314
+            getter_setter_list = [
+                'InterfaceItem',
+                'table',
+                parameter.internal_type,
+                'sunspec',
+                sunspec_type,
+            ]
+
+            node_in_model = get_sunspec_point_from_table_element(
+                sunspec_point=sunspec_point,
+                table_element=table_element,
+            )
+
+            if node_in_model is not None:
+                model_id = node_in_model.tree_parent.tree_parent.id
+                sunspec_model_variable = f'sunspecInterface.model{model_id}'
+                abbreviation = table_element.abbreviation
+                sunspec_variable = (
+                    f'&{sunspec_model_variable}'
+                    f'.Curve_{curve_index + 1:>02}_{abbreviation}'
+                )
+
+                sunspec_getter = '_'.join(
+                    str(x)
+                    for x in getter_setter_list + ['getter']
+                )
+                sunspec_setter = '_'.join(
+                    str(x)
+                    for x in getter_setter_list + ['setter']
+                )
+
+            # TODO: CAMPid 67549654267913467967436
+            sunspec_scale_factor = None
+            factor_uuid = None
+            if node_in_model is not None:
+                if node_in_model.factor_uuid is not None:
+                    factor_uuid = node_in_model.factor_uuid
+
+            if factor_uuid is not None:
+                root = node_in_model.find_root()
+                factor_point = root.model.node_from_uuid(
+                    node_in_model.factor_uuid,
+                )
+                sunspec_scale_factor_node = self.parameter_uuid_finder(
+                    factor_point.parameter_uuid,
+                )
+                sunspec_scale_factor = sunspec_scale_factor_node.abbreviation
+
+            if sunspec_scale_factor is not None:
+                scale_factor_variable = (
+                    f'&{sunspec_model_variable}.{sunspec_scale_factor}'
+                )
+                scale_factor_updater_name = (
+                    f'getSUNSPEC_MODEL{model_id}_{sunspec_scale_factor}'
+                )
+                scale_factor_updater = f'&{scale_factor_updater_name}'
+
         common_initializers = create_common_initializers(
             access_level=access_level,
             can_getter=can_getter,
@@ -867,10 +947,10 @@ class TableBaseStructures:
             hand_coded_sunspec_getter_function='NULL',
             hand_coded_sunspec_setter_function='NULL',
             internal_scale=parameter.internal_scale_factor,
-            scale_factor_updater='NULL',
-            scale_factor_variable='NULL',
-            sunspec_getter='NULL',
-            sunspec_setter='NULL',
+            scale_factor_updater=scale_factor_updater,
+            scale_factor_variable=scale_factor_variable,
+            sunspec_getter=sunspec_getter,
+            sunspec_setter=sunspec_setter,
             # not to be used so really hardcode NULL
             sunspec_variable='NULL',
             can_scale_factor=can_signal.factor,
@@ -905,7 +985,7 @@ class TableBaseStructures:
             [
                 f'.table_common = &{common_structure_name},',
                 f'.can_variable = {can_variable},',
-                f'.sunspec_variable = NULL,',
+                f'.sunspec_variable = {sunspec_variable},',
                 f'.zone = {curve_type if curve_type is not None else "0"},',
                 f'.curve = {curve_index},',
                 f'.point = {point_index},',
@@ -919,6 +999,79 @@ class TableBaseStructures:
             c,
             [f'extern {interface_item_type} const {item_name};'],
         ]
+
+
+# TODO: CAMPid 3078980986754174316996743174316967431
+def get_sunspec_point_from_table_element(sunspec_point, table_element):
+    value = table_element.original
+
+    if isinstance(value, epyqlib.pm.parametermodel.ArrayParameterElement):
+        value = value.original
+
+    value = value.uuid
+
+    nodes_in_model = [
+        node
+        for node in sunspec_point.find_root().nodes_by_attribute(
+            attribute_value=value,
+            attribute_name='parameter_uuid',
+            raise_=False,
+        )
+        if isinstance(
+            node,
+            epcpm.sunspecmodel.TableRepeatingBlockReferenceDataPointReference,
+        )
+    ]
+
+    for node in nodes_in_model:
+        for child in node.tree_parent.original.children:
+            if child.parameter_uuid == sunspec_point.parameter_uuid:
+                node_in_model = node
+                break
+        else:
+            continue
+
+        break
+    else:
+        node_in_model = None
+    return node_in_model
+
+
+# TODO: CAMPid 3078980986754174316996743174316967431
+def get_sunspec_model_from_table_group_element(sunspec_point, table_element):
+    nodes_in_model = [
+        node
+        for node in sunspec_point.find_root().nodes_by_attribute(
+            attribute_value=table_element.uuid,
+            attribute_name='parameter_uuid',
+            raise_=False,
+        )
+        if isinstance(node, epcpm.sunspecmodel.DataPoint)
+    ]
+
+    for node in nodes_in_model:
+        for child in node.tree_parent.children:
+            if child.parameter_uuid == table_element.uuid:
+                node_in_model = node
+                break
+        else:
+            continue
+
+        break
+    else:
+        return None
+
+    model_repeating_block, = [
+        node
+        for node in sunspec_point.find_root().nodes_by_attribute(
+            attribute_value=node_in_model.tree_parent,
+            attribute_name='original',
+            raise_=False,
+        )
+        if isinstance(node, epcpm.sunspecmodel.TableRepeatingBlockReference)
+    ]
+
+    return model_repeating_block.tree_parent
 
 
 @builders(epyqlib.pm.parametermodel.Table)
@@ -1080,17 +1233,32 @@ class TableArrayElement:
         return self.handle_array()
 
     def handle_array(self):
+        table_element = self.wrapped
+        zone_node = table_element.tree_parent.tree_parent.tree_parent
+        curve_node = zone_node.children[0]
+        parameter = curve_node.descendent(
+            self.wrapped.tree_parent.name,
+            self.wrapped.name,
+        )
+
+        sunspec_point = self.parameter_uuid_to_sunspec_node.get(parameter.uuid)
+
         return self.table_base_structures.create_item(
             table_element=self.wrapped,
             layers=self.layers,
+            sunspec_point=sunspec_point,
         )
 
     def handle_group(self):
         # raise Exception('...')
 
         table_element = self.wrapped
+        zone_node = table_element.tree_parent.tree_parent.tree_parent
+        curve_node = zone_node.children[0]
+        axis_node = curve_node.descendent(*self.layers[1:])
+        curve_0_table_element = axis_node.descendent(table_element.name)
 
-        curve_index = self.layers[-2]
+        curve_index = int(self.layers[-2])
 
         parameter = table_element.original
 
@@ -1098,7 +1266,6 @@ class TableArrayElement:
             return [[], []]
 
         can_signal = self.parameter_uuid_to_can_node.get(table_element.uuid)
-        sunspec_point = self.parameter_uuid_to_sunspec_node.get(table_element.uuid)
 
         access_level = get_access_level_string(
             parameter=table_element,
@@ -1171,6 +1338,51 @@ class TableArrayElement:
         #     var_or_func_or_table=var_or_func,
         # )
 
+        # TODO: CAMPid 954679654745154274579654265294624765247569765479
+        sunspec_getter = 'NULL'
+        sunspec_setter = 'NULL'
+        sunspec_variable = 'NULL'
+
+        sunspec_point = self.parameter_uuid_to_sunspec_node.get(
+            table_element.original.uuid,
+        )
+
+        if sunspec_point is not None:
+            sunspec_type = sunspec_types[
+                self.parameter_uuid_finder(sunspec_point.type_uuid).name
+            ]
+
+            # TODO: CAMPid 9675436715674367943196954756419543975314
+            getter_setter_list = [
+                'InterfaceItem',
+                'variable',
+                parameter.internal_type,
+                sunspec_type,
+            ]
+            print(end='')
+            model = get_sunspec_model_from_table_group_element(
+                sunspec_point=sunspec_point,
+                table_element=curve_0_table_element,
+            )
+
+            if model is not None:
+                model_id = model.id
+                sunspec_model_variable = f'sunspecInterface.model{model_id}'
+                abbreviation = parameter.abbreviation
+                sunspec_variable = (
+                    f'&{sunspec_model_variable}'
+                    f'.Curve_{curve_index + 1:>02}_{abbreviation}'
+                )
+
+                sunspec_getter = '_'.join(
+                    str(x)
+                    for x in getter_setter_list + ['getter']
+                )
+                sunspec_setter = '_'.join(
+                    str(x)
+                    for x in getter_setter_list + ['setter']
+                )
+
         result = create_item(
             item_uuid=table_element.uuid,
             access_level=access_level,
@@ -1185,9 +1397,9 @@ class TableArrayElement:
             parameter=parameter,
             scale_factor_updater='NULL',
             scale_factor_variable='NULL',
-            sunspec_getter='NULL',
-            sunspec_setter='NULL',
-            sunspec_variable='NULL',
+            sunspec_getter=sunspec_getter,
+            sunspec_setter=sunspec_setter,
+            sunspec_variable=sunspec_variable,
             variable_or_getter_setter=variable_or_getter_setter,
             can_scale_factor=getattr(can_signal, 'factor', None),
         )
