@@ -808,7 +808,13 @@ class TableBaseStructures:
                 curve_size, point_size = sizes
 
             axis_offsets = [
-                f'[{index}] = &{variable_base}.{nested_array.remainder} - &{variable_base},'
+                (
+                    f'[{index}] = '
+                    f'((char *) &{variable_base}.{nested_array.remainder})'
+                    f' - '
+                    f'((char *) &{variable_base})'
+                    f','
+                )
                 for index, nested_array in enumerate(self.array_nests.values())
             ]
 
