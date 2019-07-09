@@ -455,7 +455,7 @@ class Point:
                 is_table=self.is_table,
             )
 
-            if not uses_interface_item:
+            if not uses_interface_item and not self.wrapped.not_implemented:
                 if row.scale_factor is not None:
                     scale_factor_updater_name = (
                         f'getSUNSPEC_MODEL{self.model_id}_{row.scale_factor}'
@@ -529,6 +529,8 @@ class Point:
                     getter.append(
                         f'{sunspec_variable} = {value};'
                     )
+
+                setter.append('// point not implemented, do nothing')
             elif parameter.nv_format is not None:
                 internal_variable = parameter.nv_format.format(meta)
 
@@ -635,7 +637,7 @@ class Point:
 
             row.get = epcpm.c.format_nested_lists(getter)
 
-            if not uses_interface_item:
+            if not uses_interface_item and not self.wrapped.not_implemented:
                 setter.append(f'{hand_coded_setter_function_name}();')
 
             if not parameter.read_only:
