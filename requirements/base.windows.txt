@@ -8,7 +8,7 @@
 -e git+https://github.com/altendky/pycparser@b19d2b7cb78bccc89ef187c1c4eb5db0fdd3bbf9#egg=pycparser
 -e git+https://github.com/altendky/PyInstaller@07e1623bcec47f36735ef459a9d0b8d845852635#egg=PyInstaller
 -e git+https://github.com/altendky/pysunspec@f197baa9c373ff93b13bff22a1ca0368aa89b305#egg=pysunspec
-aenum==2.1.2              # via python-can
+aenum==2.2.0              # via python-can
 altgraph==0.16.1          # via macholib
 appdirs==1.4.3            # via twisted
 arrow==0.14.2
@@ -16,7 +16,7 @@ asn1crypto==0.24.0        # via cryptography
 attrs==18.2.0
 automat==0.7.0            # via twisted
 bcrypt==3.1.7             # via twisted
-bitstruct==7.1.0          # via canmatrix
+bitstruct==8.0.0          # via canmatrix
 bleach==3.1.0             # via readme-renderer
 canmatrix==0.7
 certifi==2019.6.16        # via requests
@@ -46,7 +46,7 @@ marshmallow==2.19.5       # via graham
 natsort==6.0.0
 openpyxl==2.5.12
 pathlib2==2.3.4           # via canmatrix
-pbr==5.3.1                # via wstools
+pbr==5.4.1                # via wstools
 pefile==2019.4.18
 pint==0.9
 pip-tools==3.3.2
@@ -60,10 +60,10 @@ pyelftools==0.25
 pygments==2.4.2           # via readme-renderer
 pyhamcrest==1.9.0         # via twisted
 pyopenssl==19.0.0         # via twisted
-pyqt5-sip==4.19.17        # via pyqt5
+pyqt5-sip==4.19.18        # via pyqt5
 pyqt5==5.11.2
 pyserial==3.4
-python-can==3.2.1
+python-can==3.3.0
 python-dateutil==2.8.0    # via arrow
 python-docx==0.8.10
 python-dotenv==0.10.3
@@ -83,14 +83,14 @@ tqdm==4.32.2              # via twine
 twine==1.13.0
 twisted[windows_platform]==19.2.1  # via qt5reactor
 urllib3==1.24.3           # via requests
-virtualenv==16.6.1        # via tox
+virtualenv==16.6.2        # via tox
 webencodings==0.5.1       # via bleach
 wheel==0.33.1
 windows-curses==1.1       # via python-can
 wrapt==1.11.2             # via python-can
 wstools==0.4.8            # via soappy
 xmldiff==2.2
-zipp==0.5.1               # via importlib-metadata
+zipp==0.5.2               # via importlib-metadata
 zope.interface==4.6.0     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
