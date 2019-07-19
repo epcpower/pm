@@ -10,6 +10,7 @@ import graham
 import epcpm.cantosym
 import epcpm.cantotablesc
 import epcpm.parameterstohierarchy
+import epcpm.parameterstosil
 import epcpm.project
 import epcpm.smdxtosunspec
 import epcpm.sunspecmodel
@@ -137,6 +138,12 @@ def full_export(project, paths, target_directory, first_time=False):
         sunspec_model=project.models.sunspec,
     )
 
+    epcpm.parameterstosil.export(
+        c_path=paths.sil_c,
+        h_path=paths.sil_c.with_suffix('.h'),
+        parameters_model=project.models.parameters,
+    )
+
     if first_time:
         epcpm.sunspectomanualc.export(
             path=paths.sunspec_c,
@@ -232,6 +239,11 @@ def is_stale(project, paths):
         for model, extension in itertools.product(sunspec_models, ('c', 'h'))
     )
 
+    sil_c_h = (
+        paths.sil_c,
+        paths.sil_c.with_suffix('.h')
+    )
+
     destination_paths = [
         paths.can,
         paths.hierarchy,
@@ -240,6 +252,7 @@ def is_stale(project, paths):
         *smdx,
         *sunspec_c_h,
         paths.tables_c,
+        *sil_c_h,
     ]
 
     destination_modification_time = min(
