@@ -186,6 +186,7 @@ class Root:
                     (
                         epyqlib.pm.parametermodel.Group,
                         epyqlib.pm.parametermodel.Parameter,
+                        epyqlib.pm.parametermodel.Table,
                         # epcpm.parametermodel.EnumeratedParameter,
                     ),
             ):
@@ -751,7 +752,6 @@ class NestedArrays:
 
 @attr.s
 class TableBaseStructures:
-    uuid = attr.ib()
     array_nests = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
     parameter_uuid_to_sunspec_node = attr.ib()
@@ -763,10 +763,12 @@ class TableBaseStructures:
     def ensure_common_structure(
             self,
             internal_type,
+            parameter_uuid,
+            remainder,
             common_initializers,
             meta_initializer,
     ):
-        name = self.common_structure_names.get(internal_type)
+        name = self.common_structure_names.get(parameter_uuid)
 
         if name is None:
             if len(self.h_code) > 0:
@@ -774,7 +776,7 @@ class TableBaseStructures:
             if len(self.c_code) > 0:
                 self.c_code.append('')
 
-            formatted_uuid = str(self.uuid).replace('-', '_')
+            formatted_uuid = str(parameter_uuid).replace('-', '_')
             name = (
                 f'InterfaceItem_table_common_{internal_type}_{formatted_uuid}'
             )
@@ -807,18 +809,7 @@ class TableBaseStructures:
                 zone_size = 0
                 curve_size, point_size = sizes
 
-            axis_offsets = [
-                (
-                    f'[{index}] = '
-                    f'((char *) &{variable_base}.{nested_array.remainder})'
-                    f' - '
-                    f'((char *) &{variable_base})'
-                    f','
-                )
-                for index, nested_array in enumerate(self.array_nests.values())
-            ]
-
-            self.common_structure_names[internal_type] = name
+            self.common_structure_names[parameter_uuid] = name
             self.h_code.append(
                 f'extern InterfaceItem_table_common_{internal_type} {name};',
             )
@@ -828,13 +819,10 @@ class TableBaseStructures:
                     f'.common = {{',
                     common_initializers,
                     f'}},',
-                    f'.variable_base = ({internal_type} *) &{variable_base},',
+                    f'.variable_base = &{variable_base}.{remainder},',
                     f'.zone_size = {zone_size},',
                     f'.curve_size = {curve_size},',
                     f'.point_size = {point_size},',
-                    f'.axis_offsets = {{',
-                    axis_offsets,
-                    f'}},',
                     f'.meta_values = {{',
                     meta_initializer,
                     f'}},',
@@ -964,8 +952,12 @@ class TableBaseStructures:
 
         meta_initializer = create_meta_initializer_values(parameter)
 
+        remainder = NestedArrays.build(parameter.internal_variable).remainder
+
         common_structure_name = self.ensure_common_structure(
             internal_type=parameter.internal_type,
+            parameter_uuid=parameter.uuid,
+            remainder=remainder,
             common_initializers=common_initializers,
             meta_initializer=meta_initializer,
         )
@@ -977,14 +969,6 @@ class TableBaseStructures:
         item_uuid_string = str(table_element.uuid).replace('-', '_')
         item_name = f'interfaceItem_{item_uuid_string}'
 
-        remainder = NestedArrays.build(parameter.internal_variable).remainder
-
-        axis_index, = (
-            index
-            for index, name in enumerate(self.array_nests)
-            if name == remainder
-        )
-
         c = [
             f'// {table_element.uuid}',
             f'{interface_item_type} const {item_name} = {{',
@@ -995,7 +979,6 @@ class TableBaseStructures:
                 f'.zone = {curve_type if curve_type is not None else "0"},',
                 f'.curve = {curve_index},',
                 f'.point = {point_index},',
-                f'.axis = {axis_index},',
             ],
             '};',
             '',
@@ -1113,7 +1096,6 @@ class Table:
         }
 
         table_base_structures = TableBaseStructures(
-            uuid=self.wrapped.uuid,
             array_nests=array_nests,
             parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
             parameter_uuid_to_sunspec_node=(
