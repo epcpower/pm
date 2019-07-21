@@ -26,7 +26,7 @@ constantly==15.1.0        # via twisted
 coverage==4.5.3           # via codecov, pytest-cov
 ddt==1.2.1                # via gitpython
 decorator==4.4.0
-docutils==0.14            # via readme-renderer
+docutils==0.15            # via readme-renderer
 et-xmlfile==1.0.1         # via openpyxl
 future==0.17.1            # via canmatrix, pefile
 gitdb2==2.0.5             # via gitpython

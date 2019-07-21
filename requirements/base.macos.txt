@@ -27,7 +27,7 @@ constantly==15.1.0        # via twisted
 cryptography==2.7         # via pyopenssl, service-identity, twisted
 ddt==1.2.1                # via gitpython
 defusedxml==0.6.0         # via soappy
-docutils==0.14            # via readme-renderer
+docutils==0.15            # via readme-renderer
 et-xmlfile==1.0.1         # via openpyxl
 future==0.17.1            # via canmatrix, pefile
 gitdb2==2.0.5             # via gitpython
