@@ -129,8 +129,10 @@ class CanTable:
             )
 
             for get_or_set in ('get', 'set'):
-                lines.extend(builder.gen(get_or_set=get_or_set))
-                lines.append('')
+                new_lines = builder.gen(get_or_set=get_or_set)
+                if len(new_lines) > 0:
+                    lines.extend(new_lines)
+                    lines.append('')
 
         return lines
 
@@ -164,6 +166,7 @@ class CanTable:
         return lines
 
 
+# TODO: CAMPid 079549750417808543178043180
 def get_curve_type(combination_string):
     # TODO: backmatching
     return {
@@ -203,6 +206,15 @@ class Multiplexer:
             children_lines.extend(builder.gen(
                 get_or_set=get_or_set,
             ))
+
+        if len(children_lines) > 0 and all(line is None for line in children_lines):
+            return []
+
+        children_lines = [
+            line
+            for line in children_lines
+            if line is not None
+        ]
 
         lines = [
             'void {get_or_set}{table}{mux}(void)'.format(
@@ -247,6 +259,9 @@ class Signal:
         while not isinstance(original, epyqlib.pm.parametermodel.Parameter):
             original = original.original
 
+        if original.uses_interface_item():
+            return [None]
+
         if isinstance(original.tree_parent, epyqlib.pm.parametermodel.Group):
             can_getter = original.can_getter
             can_setter = original.can_setter
@@ -266,7 +281,7 @@ class Signal:
 
         curve_index = table_array_element.tree_parent.tree_parent.curve_index
 
-        return [
+        lines = [
             {
                 'get': can_getter,
                 'set': can_setter,
@@ -279,3 +294,11 @@ class Signal:
                 curve_index=curve_index,
             )
         ]
+
+        lines = [
+            line
+            for line in lines
+            if len(line.strip()) > 0
+        ]
+
+        return lines

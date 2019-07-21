@@ -32,6 +32,7 @@ class Root:
     def gen(self):
         both_lines = [
             [
+                '#include "interfaceGen.h"',
                 '#include "sunspecInterfaceGen.h"',
                 '#include "sunspecInterfaceGenTables.h"',
                 '#include "IEEE1547.h"',
@@ -169,18 +170,44 @@ class DataPoint:
     parameter_uuid_finder = attr.ib()
 
     def gen(self):
-        parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+        table_element = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+        curve_parent = table_element.tree_parent.tree_parent.tree_parent
+        table_element = curve_parent.descendent(
+            str(self.curve_index),
+            table_element.tree_parent.name,
+            table_element.name,
+        )
+
         parameter_table = self.parameter_uuid_finder(
             self.wrapped.tree_parent.tree_parent.parameter_table_uuid,
         )
 
-        original = parameter.original
-        if isinstance(original.tree_parent, epyqlib.pm.parametermodel.Group):
+        array_or_group_element = table_element.original
+
+        is_a_parameter = isinstance(
+            array_or_group_element,
+            epyqlib.pm.parametermodel.Parameter,
+        )
+        if is_a_parameter:
+            parameter = array_or_group_element
+        else:
+            parameter = array_or_group_element.original
+
+        is_group = isinstance(
+            array_or_group_element.tree_parent,
+            epyqlib.pm.parametermodel.Group,
+        )
+        is_array = isinstance(
+            array_or_group_element.tree_parent,
+            epyqlib.pm.parametermodel.Array,
+        )
+
+        if is_group:
             getter_setter = {
-                'get': original.can_getter,
-                'set': original.can_setter,
+                'get': array_or_group_element.can_getter,
+                'set': array_or_group_element.can_setter,
             }
-        elif isinstance(original.tree_parent, epyqlib.pm.parametermodel.Array):
+        elif is_array:
             getter_setter = {
                 'get': parameter_table.can_getter,
                 'set': parameter_table.can_setter,
@@ -192,14 +219,14 @@ class DataPoint:
         if getter_setter['set'] is None:
             getter_setter['set'] = ''
 
-        axis = parameter.tree_parent.axis
+        axis = table_element.tree_parent.axis
         if axis is None:
             axis = '<no axis>'
 
         interface_variable = (
             f'sunspecInterface'
             f'.model{self.model_id}'
-            f'.Curve_{self.curve_index + 1:02}_{parameter.abbreviation}'
+            f'.Curve_{self.curve_index + 1:02}_{table_element.abbreviation}'
         )
 
         both_lines = [[], []]
@@ -224,13 +251,58 @@ class DataPoint:
 
             body_lines = []
 
-            if converter is not None:
+            if parameter.uses_interface_item():
+                # TODO: CAMPid 9685439641536675431653179671436
+                item_uuid_string = str(table_element.uuid).replace('-', '_')
+                item_name = f'interfaceItem_{item_uuid_string}'
+
+                if is_group:
+                    if get_set == 'get':
+                        body_lines.extend([
+                            f'{item_name}.common.sunspec.getter(',
+                            [
+                                f'(InterfaceItem_void *) &{item_name},',
+                                f'Meta_Value',
+                            ],
+                            f');',
+                        ])
+                    elif get_set == 'set':
+                        body_lines.extend([
+                            f'{item_name}.common.sunspec.setter(',
+                            [
+                                f'(InterfaceItem_void *) &{item_name},',
+                                f'true,',
+                                f'Meta_Value',
+                            ],
+                            f');',
+                        ])
+                elif is_array:
+                    if get_set == 'get':
+                        body_lines.extend([
+                            f'{item_name}.table_common->common.sunspec.getter(',
+                            [
+                                f'(InterfaceItem_void *) &{item_name},',
+                                f'Meta_Value',
+                            ],
+                            f');',
+                        ])
+                    elif get_set == 'set':
+                        body_lines.extend([
+                            f'{item_name}.table_common->common.sunspec.setter(',
+                            [
+                                f'(InterfaceItem_void *) &{item_name},',
+                                f'true,',
+                                f'Meta_Value',
+                            ],
+                            f');',
+                        ])
+            elif converter is not None:
                 converter = converter[get_set]
                 if get_set == 'get':
                     formatted = embedded.format(
                         curve_type=self.curve_type,
                         interface_signal=interface_variable,
-                        point_index=parameter.index,
+                        point_index=table_element.index,
                         axis=axis,
                         upper_axis=axis.upper(),
                         curve_index=self.curve_index,
@@ -252,7 +324,7 @@ class DataPoint:
                     body_lines.append(embedded.format(
                         curve_type=self.curve_type,
                         interface_signal=f'{converter}(&{interface_variable})',
-                        point_index=parameter.index,
+                        point_index=table_element.index,
                         axis=axis,
                         upper_axis=axis.upper(),
                         curve_index=self.curve_index,
@@ -261,17 +333,19 @@ class DataPoint:
                 body_lines.append(embedded.format(
                     curve_type=self.curve_type,
                     interface_signal=interface_variable,
-                    point_index=parameter.index,
+                    point_index=table_element.index,
                     axis=axis,
                     upper_axis=axis.upper(),
                     curve_index=self.curve_index,
                 ))
 
-            function_signature = (
-                f'void'
-                f' {get_set}SunspecModel{self.model_id}_Curve_{self.curve_index + 1:02}_{parameter.abbreviation}'
-                f' (void)'
-            )
+            function_name = '_'.join([
+                f'{get_set}SunspecModel{self.model_id}',
+                'Curve',
+                f'{self.curve_index + 1:02}',
+                table_element.abbreviation,
+            ])
+            function_signature = f'void {function_name} (void)'
 
             both_lines[0].extend([
                 f'{function_signature} {{',

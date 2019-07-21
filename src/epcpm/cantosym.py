@@ -218,6 +218,21 @@ class Signal:
         if can_find_parameter:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
+            original_parameter = parameter
+            if isinstance(
+                    parameter,
+                    epyqlib.pm.parametermodel.TableArrayElement,
+            ):
+                array_element = parameter.original
+
+                if isinstance(
+                        array_element,
+                        epyqlib.pm.parametermodel.Parameter,
+                ):
+                    original_parameter = array_element
+                else:
+                    original_parameter = array_element.tree_parent.children[0]
+
             if parameter.minimum is not None:
                 extras['min'] = parameter.minimum
 
@@ -279,6 +294,41 @@ class Signal:
                 extras['comment'] = '{}  <{}>'.format(
                     extras.get('comment', ''),
                     ':'.join(segments),
+                ).strip()
+            elif (
+                    isinstance(
+                        original_parameter,
+                        epyqlib.pm.parametermodel.Parameter,
+                    )
+                    and original_parameter.uses_interface_item()
+            ):
+                is_table_array = (
+                    isinstance(
+                        parameter,
+                        epyqlib.pm.parametermodel.TableArrayElement,
+                    )
+                    and isinstance(
+                        original_parameter.tree_parent,
+                        epyqlib.pm.parametermodel.Array,
+                    )
+                )
+                if is_table_array:
+                    getter = 'table_items_getMeta'
+                    setter = 'table_items_setMeta'
+                else:
+                    getter = 'items_getMeta'
+                    setter = 'items_setMeta'
+
+                comment_format = (
+                    '{comment}  <InterfaceItem:{item}:{getter}:{setter}>'
+                )
+                extras['comment'] = comment_format.format(
+                    comment=extras.get('comment', ''),
+                    item='interfaceItem_{}'.format(
+                        str(self.wrapped.parameter_uuid).replace('-', '_'),
+                    ),
+                    getter=getter,
+                    setter=setter,
                 ).strip()
 
             if parameter.units is not None:

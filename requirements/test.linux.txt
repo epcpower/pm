@@ -24,12 +24,14 @@ click==7.0
 codecov==2.0.5
 constantly==15.1.0        # via twisted
 coverage==4.5.3           # via codecov, pytest-cov
+ddt==1.2.1                # via gitpython
 decorator==4.4.0
-docutils==0.14            # via readme-renderer
+docutils==0.15            # via readme-renderer
 et-xmlfile==1.0.1         # via openpyxl
 future==0.17.1            # via canmatrix, pefile
 gitdb2==2.0.5             # via gitpython
-gitpython==2.1.11
+gitdb==0.6.4              # via gitpython
+gitpython==2.1.12
 graham==0.1.10
 greenlet==0.4.15
 hyperlink==19.0.0         # via twisted
@@ -40,7 +42,7 @@ jdcal==1.4.1              # via openpyxl
 lxml==4.3.0
 macholib==1.11
 marshmallow==2.19.5       # via graham
-more-itertools==7.1.0     # via pytest
+more-itertools==7.2.0     # via pytest
 natsort==6.0.0
 openpyxl==2.5.12
 pathlib2==2.3.4           # via canmatrix
@@ -70,6 +72,8 @@ requests==2.20.0
 romp==2019.4.1
 six==1.12.0               # via automat, bleach, pathlib2, pip-tools, pyhamcrest, pytest, python-dateutil, readme-renderer, xmldiff
 smmap2==2.0.5             # via gitdb2
+smmap==0.9.0              # via gitdb
+toolz==0.9.0
 tox==2.8.2
 tqdm==4.32.2              # via twine
 twine==1.13.0
