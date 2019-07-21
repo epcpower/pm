@@ -43,12 +43,7 @@ def export(c_path, h_path, parameters_model):
     contents.c.extend([
         '#include "libEpcControlInterfaceGen.h"',
         '',
-        *[
-            f'#include "{name}"'
-            for name in [
-                'islandControlI.h',
-            ]
-        ],
+        f'#include "interfaceAccessors.h"',
         '',
         '',
     ])
