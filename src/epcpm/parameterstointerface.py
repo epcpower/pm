@@ -698,6 +698,7 @@ def can_getter_setter_variable(can_signal, parameter, var_or_func_or_table):
     return can_getter, can_setter, can_variable
 
 
+# TODO: CAMPid 68945967541316743769675426795146379678431
 def breakdown_nested_array(s):
     split = re.split(r'\[(.*?)\].', s)
 
@@ -707,6 +708,7 @@ def breakdown_nested_array(s):
     return array_layers, remainder
 
 
+# TODO: CAMPid 0974567213671436714671907842679364
 @attr.s
 class NestedArrays:
     array_layers = attr.ib()
