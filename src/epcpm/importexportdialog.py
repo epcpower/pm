@@ -48,6 +48,10 @@ def import_dialog():
     dialog.ui.sunspec_tables_c.hide()
     dialog.ui.pick_sunspec_tables_c.hide()
 
+    dialog.ui.sil_tables_c_label.hide()
+    dialog.ui.sil_tables_c.hide()
+    dialog.ui.pick_sil_tables_c.hide()
+
     dialog.ui.interface_c_label.hide()
     dialog.ui.interface_c.hide()
     dialog.ui.pick_interface_c.hide()
@@ -76,6 +80,7 @@ class ImportPaths:
     spreadsheet = attr.ib(converter=path_or_none)
     smdx = attr.ib(converter=paths_or_none)
     sunspec_c = attr.ib(converter=path_or_none)
+    sil_c = attr.ib(converter=path_or_none)
     interface_c = attr.ib(converter=path_or_none)
 
 
@@ -93,6 +98,7 @@ def paths_from_directory(directory):
         spreadsheet=embedded / 'MODBUS_SunSpec-EPC.xlsx',
         smdx=sorted(sunspec.glob('smdx_*.xml')),
         sunspec_c=sunspec,
+        sil_c=path / 'SIL' / 'libEpcControlInterfaceGen.c',
         interface_c=interface / 'interfaceGen.c',
     )
 
@@ -121,6 +127,7 @@ class Dialog(UiBase):
         )
         self.ui.pick_spreadsheet.clicked.connect(self.pick_spreadsheet)
         self.ui.pick_sunspec_c.clicked.connect(self.pick_sunspec_c)
+        self.ui.pick_sil_c.clicked.connect(self.pick_sil_c)
         self.ui.pick_interface_c.clicked.connect(self.pick_interface_c)
         self.ui.pick_smdx.clicked.connect(self.pick_smdx)
         self.ui.remove_smdx.clicked.connect(self.remove_smdx)
@@ -140,6 +147,7 @@ class Dialog(UiBase):
             spreadsheet=self.ui.spreadsheet.text(),
             smdx=smdx,
             sunspec_c=self.ui.sunspec_c.text(),
+            sil_c=self.ui.sil_c.text(),
             interface_c=self.ui.interface_c.text(),
         )
         super().accept()
@@ -159,6 +167,7 @@ class Dialog(UiBase):
         self.ui.sunspec_tables_c.setText(os.fspath(paths.sunspec_tables_c))
         self.ui.spreadsheet.setText(os.fspath(paths.spreadsheet))
         self.ui.sunspec_c.setText(os.fspath(paths.sunspec_c))
+        self.ui.sil_c.setText(os.fspath(paths.sil_c))
         self.ui.interface_c.setText(os.fspath(paths.interface_c))
 
         self.clear_smdx_list()
@@ -249,6 +258,14 @@ class Dialog(UiBase):
             return
 
         self.ui.sunspec_c.setText(directory)
+
+    def pick_sil_c(self):
+        directory = QtWidgets.QFileDialog.getExistingDirectory(parent=self)
+
+        if len(directory) == 0:
+            return
+
+        self.ui.sil_c.setText(directory)
 
     def pick_interface_c(self):
         filters = (
