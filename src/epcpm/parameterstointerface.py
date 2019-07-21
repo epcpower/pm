@@ -443,8 +443,8 @@ class Parameter:
 
         result = create_item(
             item_uuid=parameter.uuid,
-            access_level=access_level, 
-            can_getter=can_getter, 
+            access_level=access_level,
+            can_getter=can_getter,
             can_setter=can_setter,
             can_variable=can_variable,
             hand_coded_sunspec_getter_function=hand_coded_sunspec_getter_function,
@@ -453,11 +453,11 @@ class Parameter:
             internal_scale=parameter.internal_scale_factor,
             meta_initializer_values=create_meta_initializer_values(parameter),
             parameter=parameter,
-            scale_factor_updater=scale_factor_updater, 
+            scale_factor_updater=scale_factor_updater,
             scale_factor_variable=scale_factor_variable,
-            sunspec_getter=sunspec_getter, 
+            sunspec_getter=sunspec_getter,
             sunspec_setter=sunspec_setter,
-            sunspec_variable=sunspec_variable, 
+            sunspec_variable=sunspec_variable,
             variable_or_getter_setter=variable_or_getter_setter,
             can_scale_factor=getattr(can_signal, 'factor', None),
         )
@@ -1428,15 +1428,15 @@ def create_item(
         ]
 
     common_initializers = create_common_initializers(
-        access_level=access_level, 
-        can_getter=can_getter, 
+        access_level=access_level,
+        can_getter=can_getter,
         can_setter=can_setter,
         can_variable=can_variable,
         hand_coded_sunspec_getter_function=hand_coded_sunspec_getter_function,
         hand_coded_sunspec_setter_function=hand_coded_sunspec_setter_function,
-        internal_scale=internal_scale, 
+        internal_scale=internal_scale,
         scale_factor_updater=scale_factor_updater,
-        scale_factor_variable=scale_factor_variable, 
+        scale_factor_variable=scale_factor_variable,
         sunspec_getter=sunspec_getter,
         sunspec_setter=sunspec_setter,
         sunspec_variable=sunspec_variable,
@@ -1464,17 +1464,17 @@ def create_item(
 
 
 def create_common_initializers(
-        access_level, 
-        can_getter, 
-        can_setter, 
+        access_level,
+        can_getter,
+        can_setter,
         can_variable,
         hand_coded_sunspec_getter_function,
         hand_coded_sunspec_setter_function,
         internal_scale,
-        scale_factor_updater, 
-        scale_factor_variable, 
+        scale_factor_updater,
+        scale_factor_variable,
         sunspec_getter,
-        sunspec_setter, 
+        sunspec_setter,
         sunspec_variable,
         can_scale_factor,
 ):
