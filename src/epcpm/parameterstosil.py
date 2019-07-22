@@ -104,6 +104,7 @@ class Root:
 
             items = builders.wrap(
                 wrapped=child,
+                path=(),
                 parameters_root=self.parameters_root,
                 parameter_uuid_finder=self.wrapped.model.node_from_uuid,
             ).gen()
@@ -152,6 +153,7 @@ class Root:
 @attr.s
 class Group:
     wrapped = attr.ib()
+    path = attr.ib()
     parameters_root = attr.ib()
     parameter_uuid_finder = attr.ib()
 
@@ -171,6 +173,7 @@ class Group:
 
             built = builders.wrap(
                 wrapped=child,
+                path=self.path + (self.wrapped.name,),
                 parameters_root=self.parameters_root,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             ).gen()
@@ -189,6 +192,7 @@ class Item:
     internal_scale = attr.ib()
     is_table = attr.ib(default=False)
     table_info = attr.ib(default=None)
+    path = attr.ib(default=[])
     #     factory=lambda: TableInfo(zone=0, curve=0, index=0, setter=0, type=''),
     # )
 
@@ -201,8 +205,11 @@ class Item:
         else:
             index_text = ''
 
+        path = ' > '.join(self.path)
+        path_comment = f' // {path}'
+
         item_initializer = [
-            f'{index_text}{{',
+            f'{index_text}{{{path_comment}',
             initializers,
             '},',
         ]
@@ -277,6 +284,7 @@ class TableInfo:
 @attr.s
 class Parameter:
     wrapped = attr.ib()
+    path = attr.ib()
     parameters_root = attr.ib()
     parameter_uuid_finder = attr.ib()
 
@@ -302,6 +310,7 @@ class Parameter:
             type=parameter.internal_type,
             on_write=on_write,
             internal_scale=parameter.internal_scale_factor,
+            path=self.path,
         )
 
         if ignore_item(item):
@@ -379,6 +388,7 @@ axes = ['x', 'y', 'z']
 @attr.s
 class Table:
     wrapped = attr.ib()
+    path = attr.ib()
     parameters_root = attr.ib()
     parameter_uuid_finder = attr.ib()
 
@@ -402,6 +412,7 @@ class Table:
 
         items = builders.wrap(
             wrapped=group,
+            path=self.path + (self.wrapped.name,),
             table=self.wrapped,
             array_nests=array_nests,
             parameter_uuid_finder=self.parameter_uuid_finder,
@@ -414,6 +425,7 @@ class Table:
 @attr.s
 class TableGroupElement:
     wrapped = attr.ib()
+    path = attr.ib()
     table = attr.ib()
     array_nests = attr.ib()
     parameter_uuid_finder = attr.ib()
@@ -434,6 +446,7 @@ class TableGroupElement:
         for child in self.wrapped.children:
             result = builders.wrap(
                 wrapped=child,
+                path=self.path + (self.wrapped.name,),
                 table=self.table,
                 layers=layers,
                 array_nests=self.array_nests,
@@ -449,6 +462,7 @@ class TableGroupElement:
 @attr.s
 class TableArrayElement:
     wrapped = attr.ib()
+    path = attr.ib()
     table = attr.ib()
     layers = attr.ib()
     array_nests = attr.ib()
@@ -522,6 +536,7 @@ class TableArrayElement:
                 internal_scale=parameter.internal_scale_factor,
                 is_table=True,
                 table_info=table_info,
+                path=self.path,
             )
         ]
 
@@ -554,6 +569,7 @@ class TableArrayElement:
             type=parameter.internal_type,
             on_write=setter_function,
             internal_scale=parameter.internal_scale_factor,
+            path=self.path,
         )
 
         return [item]
