@@ -331,6 +331,9 @@ class Signal:
                     setter=setter,
                 ).strip()
 
+            comment = extras.get('comment', '')
+            extras['comment'] = f'{comment}  <uuid:{parameter.uuid}>'.strip()
+
             if parameter.units is not None:
                 extras['unit'] = parameter.units
 
