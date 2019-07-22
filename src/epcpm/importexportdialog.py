@@ -98,7 +98,7 @@ def paths_from_directory(directory):
         spreadsheet=embedded / 'MODBUS_SunSpec-EPC.xlsx',
         smdx=sorted(sunspec.glob('smdx_*.xml')),
         sunspec_c=sunspec,
-        sil_c=path / 'SIL' / 'libEpcControlInterfaceGen.c',
+        sil_c=path / 'sil' / 'libEpcControlInterfaceGen.c',
         interface_c=interface / 'interfaceGen.c',
     )
 
