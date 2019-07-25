@@ -31,7 +31,7 @@ setuptools.setup(
     install_requires=[
         'canmatrix',
         'click',
-        'epyqlib>=2019.7',
+        'epyqlib>=2019.7.1',
         'graham',
         'lxml',
         'openpyxl',

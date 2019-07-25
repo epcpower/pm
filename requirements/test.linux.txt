@@ -26,7 +26,7 @@ constantly==15.1.0        # via twisted
 coverage==4.5.3           # via codecov, pytest-cov
 ddt==1.2.1                # via gitpython
 decorator==4.4.0
-docutils==0.15            # via readme-renderer
+docutils==0.15.1.post1    # via readme-renderer
 et-xmlfile==1.0.1         # via openpyxl
 future==0.17.1            # via canmatrix, pefile
 gitdb2==2.0.5             # via gitpython
@@ -79,7 +79,7 @@ tqdm==4.32.2              # via twine
 twine==1.13.0
 twisted==19.2.1 ; platform_system != "Darwin" and platform_system != "Windows"
 urllib3==1.24.3           # via requests
-virtualenv==16.6.2        # via tox
+virtualenv==16.7.1        # via tox
 webencodings==0.5.1       # via bleach
 wheel==0.33.1
 wrapt==1.11.2             # via python-can

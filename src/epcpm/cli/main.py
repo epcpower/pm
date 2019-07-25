@@ -5,6 +5,7 @@ import sys
 import textwrap
 
 import click
+import epyqlib.pm.valuesetmodel
 import lxml.etree
 
 import epcpm.__main__
@@ -311,3 +312,30 @@ def transition(target_path):
 
     click.echo()
     click.echo('done')
+
+
+@main.group()
+def pmvs():
+    pass
+
+
+@pmvs.command()
+@epcpm.cli.utils.project_option(required=True)
+@click.option('--input', type=click.File())
+@click.option('--output', type=click.Path(dir_okay=False))
+def filter(project, input, output):
+    """Export PM data to embedded project directory"""
+    project = pathlib.Path(project)
+    project = epcpm.project.loadp(project)
+
+    value_set = epyqlib.pm.valuesetmodel.load(input)
+    items = epcpm.parameterstosil.collect_items(project.models.parameters.root)
+    item_uuids = {item.uuid for item in items}
+
+    values = list(value_set.model.root.children)
+
+    for index, value in reversed(list(enumerate(values))):
+        if value.parameter_uuid not in item_uuids:
+            value_set.model.root.remove_child(row=index)
+
+    value_set.save(path=output)

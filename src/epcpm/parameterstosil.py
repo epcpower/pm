@@ -37,7 +37,6 @@ class CHContents:
 def export(c_path, h_path, parameters_model):
     builder = builders.wrap(
         wrapped=parameters_model.root,
-        parameters_root=parameters_model.root,
     )
 
     contents = CHContents()
@@ -74,51 +73,57 @@ def export(c_path, h_path, parameters_model):
         f.write(epcpm.c.format_nested_lists(contents.h))
 
 
+def collect_items(parameters_root):
+    all_items = []
+
+    parameters = next(
+        node
+        for node in parameters_root.children
+        if node.name == 'Parameters'
+    )
+
+    for child in parameters.children:
+        if not isinstance(
+                child,
+                (
+                        epyqlib.pm.parametermodel.Group,
+                        epyqlib.pm.parametermodel.Parameter,
+                        epyqlib.pm.parametermodel.Table,
+                ),
+        ):
+            continue
+
+        items = builders.wrap(
+            wrapped=child,
+            path=(),
+            parameters_root=parameters_root,
+            parameter_uuid_finder=parameters_root.model.node_from_uuid,
+        ).gen()
+
+        all_items.extend(items)
+
+    return all_items
+
+
 @builders(epyqlib.pm.parametermodel.Root)
 @attr.s
 class Root:
     wrapped = attr.ib()
-    parameters_root = attr.ib()
 
     def gen(self):
-        parameters = next(
-            node
-            for node in self.wrapped.children
-            if node.name == 'Parameters'
-        )
-
         contents = CHContents()
-        item_count = 0
         types = set()
 
-        for child in parameters.children:
-            if not isinstance(
-                    child,
-                    (
-                        epyqlib.pm.parametermodel.Group,
-                        epyqlib.pm.parametermodel.Parameter,
-                        epyqlib.pm.parametermodel.Table,
-                    ),
-            ):
-                continue
-
-            items = builders.wrap(
-                wrapped=child,
-                path=(),
-                parameters_root=self.parameters_root,
-                parameter_uuid_finder=self.wrapped.model.node_from_uuid,
-            ).gen()
-            
-            for item in items:
-                types.add(item.type)
-                item_lines = item.create_initializer(index=item_count)
-                contents.c.extend(item_lines)
-                item_count += 1
+        items = collect_items(parameters_root=self.wrapped)
+        for index, item in enumerate(items):
+            types.add(item.type)
+            item_lines = item.create_initializer(index=index)
+            contents.c.extend(item_lines)
 
         everything = CHContents()
 
         everything.c.extend([
-                f'Item SIL_interfaceItems[{item_count}] = {{',
+                f'Item SIL_interfaceItems[{len(items)}] = {{',
                 contents.c,
                 '};',
         ])
@@ -185,7 +190,7 @@ class Group:
 
 @attr.s
 class Item:
-    item_uuid = attr.ib()
+    uuid = attr.ib()
     variable = attr.ib()
     type = attr.ib()
     on_write = attr.ib()
@@ -227,7 +232,7 @@ class Item:
         is_table = 'true' if self.is_table else 'false'
 
         initializers = [
-            f'.uuid = "{self.item_uuid}",',
+            f'.uuid = "{self.uuid}",',
             f'.setterType = setter_{self.type},',
             f'.setter = {{ .{self.type}_ = {self.on_write} }},',
             f'.variable = {{ .{self.type}_ = {self.variable} }},',
@@ -305,7 +310,7 @@ class Parameter:
             on_write = f'&{parameter.setter_function}'
 
         item = Item(
-            item_uuid=parameter.uuid,
+            uuid=parameter.uuid,
             variable=f'&{parameter.internal_variable}',
             type=parameter.internal_type,
             on_write=on_write,
@@ -529,7 +534,7 @@ class TableArrayElement:
 
         return [
             Item(
-                item_uuid=table_element.uuid,
+                uuid=table_element.uuid,
                 variable=variable,
                 type=parameter.internal_type,
                 on_write='NULL',
@@ -564,7 +569,7 @@ class TableArrayElement:
         )
 
         item = Item(
-            item_uuid=table_element.uuid,
+            uuid=table_element.uuid,
             variable=f'&{internal_variable}',
             type=parameter.internal_type,
             on_write=setter_function,
