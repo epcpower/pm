@@ -148,7 +148,7 @@ class Root:
             # ],
             # '} Setter;',
             # '',
-            f'extern Item SIL_interfaceItems[{item_count}];',
+            f'extern Item SIL_interfaceItems[{len(items)}];',
         ])
 
         return everything
