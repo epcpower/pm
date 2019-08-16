@@ -3,13 +3,9 @@ import pathlib
 
 import attr
 import epyqlib.utils.qt
-import PyQt5.uic
 from PyQt5 import QtWidgets
 
-
-Ui, UiBase = PyQt5.uic.loadUiType(
-    pathlib.Path(__file__).with_suffix('.ui'),
-)
+import epcpm.importexportdialog_ui
 
 
 all_files_filter = ('All Files', ['*'])
@@ -104,8 +100,8 @@ def paths_from_directory(directory):
 
 
 @attr.s
-class Dialog(UiBase):
-    ui = attr.ib(factory=Ui)
+class Dialog(QtWidgets.QDialog):
+    ui = attr.ib(factory=epcpm.importexportdialog_ui.Ui_Dialog)
     paths_result = attr.ib(default=None)
     for_save = attr.ib(default=False)
     _parent = attr.ib(default=None)

@@ -48,7 +48,6 @@ def main(project, verbosity, logger):
 
     window = epcpm.mainwindow.Window(
         title='EPC Parameter Manager',
-        ui_file='__main__.ui',
         icon_path='icon.ico',
     )
 
@@ -58,7 +57,7 @@ def main(project, verbosity, logger):
         filename = os.path.abspath(project)
         window.open_project(filename=filename)
 
-    window.ui.show()
+    window.main_window.show()
 
     return app.exec()
 

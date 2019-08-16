@@ -1,6 +1,13 @@
-import setuptools
+import pathlib
 
+import alqtendpy.compileui
+import setuptools
 import versioneer
+
+
+alqtendpy.compileui.compile_ui(
+    directory_paths=[pathlib.Path(__file__).parent  / 'src' / 'epcpm'],
+)
 
 
 setuptools.setup(

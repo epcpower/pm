@@ -7,12 +7,9 @@ import os
 import pathlib
 
 import attr
-import graham
 import pycparser.c_ast
 import pycparser.c_generator
-import PyQt5.QtCore
 from PyQt5 import QtCore, QtGui, QtWidgets
-import PyQt5.uic
 
 import epyqlib.attrsmodel
 import epyqlib.checkresultmodel
@@ -32,6 +29,9 @@ import epcpm.sunspecmodel
 import epcpm.sunspectoxlsx
 import epcpm.symtoproject
 
+import epcpm.mainwindow_ui
+
+
 # See file COPYING in this source tree
 __copyright__ = 'Copyright 2019, EPC Power Corp.'
 __license__ = 'GPLv2+'
@@ -49,14 +49,12 @@ class ModelView:
 
 
 class Window:
-    def __init__(self, title, ui_file, icon_path):
+    def __init__(self, title, icon_path):
         logging.debug('Working directory: {}'.format(os.getcwd()))
-        logging.debug('Loading UI from: {}'.format(ui_file))
 
-        self.ui = PyQt5.uic.loadUi(pathlib.Path(
-            pathlib.Path(__file__).parents[0],
-            ui_file,
-        ))
+        self.main_window = QtWidgets.QMainWindow()
+        self.ui = epcpm.mainwindow_ui.Ui_MainWindow()
+        self.ui.setupUi(self.main_window)
 
         self.ui.action_new_project.triggered.connect(
             lambda _: self.open_project(),
@@ -98,10 +96,10 @@ class Window:
 
         self.ui.action_about.triggered.connect(self.about_dialog)
 
-        self.ui.setWindowTitle(title)
+        self.main_window.setWindowTitle(title)
 
         logging.debug('Loading icon from: {}'.format(icon_path))
-        self.ui.setWindowIcon(QtGui.QIcon(str(pathlib.Path(
+        self.main_window.setWindowIcon(QtGui.QIcon(str(pathlib.Path(
             pathlib.Path(__file__).parents[0],
             icon_path,
         ))))
@@ -182,7 +180,7 @@ class Window:
         if detail is not None:
             title = ' - '.join((title, detail))
 
-        self.ui.setWindowTitle(title)
+        self.main_window.setWindowTitle(title)
 
     def set_model(self, name, view_model):
         self.view_models[name] = view_model
@@ -213,7 +211,7 @@ class Window:
     def open_project_from_dialog(self):
         filename = epyqlib.utils.qt.file_dialog(
             self.project_filters,
-            parent=self.ui,
+            parent=self.main_window,
         )
 
         if filename is None:
@@ -224,7 +222,7 @@ class Window:
     def import_sym(self):
         sym_path = epyqlib.utils.qt.file_dialog(
             filters=self.can_filters,
-            parent=self.ui,
+            parent=self.main_window,
         )
 
         if sym_path is None:
@@ -232,7 +230,7 @@ class Window:
 
         hierarchy_path = epyqlib.utils.qt.file_dialog(
             filters=self.hierarchy_filters,
-            parent=self.ui,
+            parent=self.main_window,
             caption='Open Parameter Hierarchy',
         )
 
@@ -276,7 +274,7 @@ class Window:
     def import_smdx(self):
         selected = epyqlib.utils.qt.file_dialog(
             filters=self.smdx_filters,
-            parent=self.ui,
+            parent=self.main_window,
             path_factory=pathlib.Path,
             multiple=True,
         )
@@ -304,7 +302,7 @@ class Window:
         self.open_project(project=project)
 
         QtWidgets.QMessageBox.information(
-            self.ui,
+            self.main_window,
             'Import Complete',
             'Import complete.',
         )
@@ -330,7 +328,7 @@ class Window:
         )
 
         QtWidgets.QMessageBox.information(
-            self.ui,
+            self.main_window,
             'Export Complete',
             'Export complete.',
         )
@@ -420,7 +418,7 @@ class Window:
         return
 
     def save_project(self):
-        self.project.save(parent=self.ui)
+        self.project.save(parent=self.main_window)
 
     def save_as_project(self):
         project = attr.evolve(self.project)
@@ -429,7 +427,7 @@ class Window:
         #       original project is referencing
         project.paths.set_all(None)
 
-        project.save(parent=self.ui)
+        project.save(parent=self.main_window)
         self.project = project
 
     def new_value_set(self):
@@ -442,7 +440,7 @@ class Window:
         )
 
         human_names = QtWidgets.QMessageBox.question(
-            self.ui,
+            self.main_window,
             'Humanized Names',
             'Use humanized names in new value set?',
             buttons=(
@@ -453,7 +451,7 @@ class Window:
         ) == QtWidgets.QMessageBox.Yes
 
         only_parameters = QtWidgets.QMessageBox.question(
-            self.ui,
+            self.main_window,
             'Only Parameters',
             'Only include parameters group in new value set?',
             buttons=(
@@ -464,7 +462,7 @@ class Window:
         ) == QtWidgets.QMessageBox.Yes
 
         calculate_unspecified_min_max = QtWidgets.QMessageBox.question(
-            self.ui,
+            self.main_window,
             'Calculate Unspecified',
             (
                 'Calculate unspecified minimum And maximum values from '
@@ -519,7 +517,7 @@ class Window:
     def open_value_set_from_dialog(self):
         path = epyqlib.utils.qt.file_dialog(
             attr.fields(epyqlib.pm.valuesetmodel.ValueSet).filters.default,
-            parent=self.ui,
+            parent=self.main_window,
         )
 
         if path is None:
@@ -530,13 +528,13 @@ class Window:
         self.set_active_value_set(value_set)
 
     def save_value_set(self):
-        self.value_set.save(parent=self.ui)
+        self.value_set.save(parent=self.main_window)
 
     def save_as_value_set(self):
         value_set = attr.evolve(self.value_set)
         value_set.path = None
 
-        value_set.save(parent=self.ui)
+        value_set.save(parent=self.main_window)
         self.value_set = value_set
 
     def check(self):
@@ -699,7 +697,7 @@ class Window:
         generator = pycparser.c_generator.CGenerator()
         s = generator.visit(ast)
         epyqlib.utils.qt.dialog(
-            parent=self.ui,
+            parent=self.main_window,
             message=s,
             modal=False,
         )
@@ -717,7 +715,7 @@ class Window:
         )
 
         epyqlib.utils.qt.dialog(
-            parent=self.ui,
+            parent=self.main_window,
             message=builder.gen(),
             modal=False,
             save_filters=(
@@ -800,7 +798,7 @@ class Window:
         message = '\n'.join(message)
 
         epyqlib.utils.qt.dialog(
-            parent=self.ui,
+            parent=self.main_window,
             title='About',
             message=message,
         )

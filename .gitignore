@@ -5,6 +5,7 @@ generated/
 *.stats
 *.exe
 designer*
+*_ui.py
 
 # PyCharm
 .idea/workspace.xml
