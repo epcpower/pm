@@ -28,7 +28,7 @@ et-xmlfile==1.0.1         # via openpyxl
 future==0.17.1            # via canmatrix, pefile
 gitdb2==2.0.5             # via gitpython
 gitpython==3.0.1
-graham==0.1.10
+graham==0.1.11
 hyperlink==19.0.0         # via twisted
 idna==2.7                 # via hyperlink, requests
 importlib-metadata==0.19  # via pluggy
@@ -36,7 +36,7 @@ incremental==17.5.0       # via twisted
 jdcal==1.4.1              # via openpyxl
 lxml==4.3.0
 macholib==1.11
-marshmallow==3.0.0        # via graham
+marshmallow==2.20.1       # via graham
 natsort==6.0.0
 openpyxl==2.5.12
 pathlib2==2.3.4           # via canmatrix
