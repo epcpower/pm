@@ -6,12 +6,12 @@
 #
 -e file:sub/epyqlib#egg=epyqlib
 -e git+https://github.com/altendky/pycparser@b19d2b7cb78bccc89ef187c1c4eb5db0fdd3bbf9#egg=pycparser
--e git+https://github.com/altendky/PyInstaller@07e1623bcec47f36735ef459a9d0b8d845852635#egg=PyInstaller
+-e git+https://github.com/pyinstaller/PyInstaller@46286a1f455d8e0837f7c2b9e1bbdff1ef858f0f#egg=PyInstaller
 -e git+https://github.com/altendky/pysunspec@f197baa9c373ff93b13bff22a1ca0368aa89b305#egg=pysunspec
 -e git+https://github.com/altendky/pytest-twisted@0560511d0954c75cac43a47c685287ba93e01ba7#egg=pytest-twisted
 alqtendpy==0.0.4
 altendpy==0.0.17          # via alqtendpy
-altgraph==0.16.1          # via macholib
+altgraph==0.16.1
 appdirs==1.4.3            # via twisted
 argparse==1.4.0           # via codecov
 arrow==0.14.5
@@ -51,7 +51,6 @@ importlib-metadata==0.19  # via pluggy
 incremental==17.5.0       # via twisted
 jdcal==1.4.1              # via openpyxl
 lxml==4.3.0
-macholib==1.11
 marshmallow==2.20.2       # via graham
 more-itertools==7.2.0     # via pytest
 natsort==6.0.0

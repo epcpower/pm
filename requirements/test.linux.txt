@@ -6,12 +6,12 @@
 #
 -e file:sub/epyqlib#egg=epyqlib
 -e git+https://github.com/altendky/pycparser@b19d2b7cb78bccc89ef187c1c4eb5db0fdd3bbf9#egg=pycparser
--e git+https://github.com/altendky/PyInstaller@07e1623bcec47f36735ef459a9d0b8d845852635#egg=PyInstaller
+-e git+https://github.com/pyinstaller/PyInstaller@46286a1f455d8e0837f7c2b9e1bbdff1ef858f0f#egg=PyInstaller
 -e git+https://github.com/altendky/pysunspec@f197baa9c373ff93b13bff22a1ca0368aa89b305#egg=pysunspec
 -e git+https://github.com/altendky/pytest-twisted@0560511d0954c75cac43a47c685287ba93e01ba7#egg=pytest-twisted
 alqtendpy==0.0.4
 altendpy==0.0.17          # via alqtendpy
-altgraph==0.16.1          # via macholib
+altgraph==0.16.1
 argparse==1.4.0           # via codecov
 arrow==0.14.5
 atomicwrites==1.3.0       # via pytest
@@ -30,7 +30,7 @@ ddt==1.2.1                # via gitpython
 decorator==4.4.0
 docutils==0.15.2          # via readme-renderer
 et-xmlfile==1.0.1         # via openpyxl
-future==0.17.1            # via canmatrix, pefile
+future==0.17.1            # via canmatrix
 gitdb2==2.0.5             # via gitpython
 gitpython==3.0.1
 graham==0.1.11
@@ -41,13 +41,11 @@ importlib-metadata==0.19  # via pluggy
 incremental==17.5.0       # via twisted
 jdcal==1.4.1              # via openpyxl
 lxml==4.3.0
-macholib==1.11
 marshmallow==2.20.2       # via graham
 more-itertools==7.2.0     # via pytest
 natsort==6.0.0
 openpyxl==2.5.12
 pathlib2==2.3.4           # via canmatrix
-pefile==2019.4.18
 pint==0.9
 pip-tools==4.0.0
 pkginfo==1.5.0.1          # via twine
