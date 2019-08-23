@@ -62,7 +62,8 @@ export.add_command(epcpm.cli.exportdocx.cli, name='docx')
 @epcpm.cli.utils.project_option(required=True)
 @epcpm.cli.utils.target_path_option(required=True)
 @click.option('--if-stale/--assume-stale', 'only_if_stale')
-def build(project, target_path, only_if_stale):
+@click.option('--skip-sunspec/--generate-sunspec', 'skip_sunspec')
+def build(project, target_path, only_if_stale, skip_sunspec):
     """Export PM data to embedded project directory"""
     project = pathlib.Path(project)
     target_path = pathlib.Path(target_path)
@@ -88,6 +89,7 @@ def build(project, target_path, only_if_stale):
         target_directory=target_path,
         paths=paths,
         first_time=False,
+        skip_sunspec=skip_sunspec,
     )
 
     click.echo()

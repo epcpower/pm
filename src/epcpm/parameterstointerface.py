@@ -25,11 +25,23 @@ sunspec_types = {
 }
 
 
-def export(c_path, h_path, parameters_model, can_model, sunspec_model):
+def export(
+        c_path,
+        h_path,
+        parameters_model,
+        can_model,
+        sunspec_model,
+        skip_sunspec=False,
+):
+    if skip_sunspec:
+        sunspec_root = None
+    else:
+        sunspec_root = sunspec_model.root
+
     builder = builders.wrap(
         wrapped=parameters_model.root,
         can_root=can_model.root,
-        sunspec_root=sunspec_model.root
+        sunspec_root=sunspec_root,
     )
 
     model_ids = [
@@ -161,14 +173,17 @@ class Root:
 
             return True
 
-        sunspec_nodes_with_parameter_uuid = self.sunspec_root.nodes_by_filter(
-            filter=sunspec_node_wanted,
-        )
+        if self.sunspec_root is None:
+            parameter_uuid_to_sunspec_node = {}
+        else:
+            sunspec_nodes_with_parameter_uuid = self.sunspec_root.nodes_by_filter(
+                filter=sunspec_node_wanted,
+            )
 
-        parameter_uuid_to_sunspec_node = {
-            node.parameter_uuid: node
-            for node in sunspec_nodes_with_parameter_uuid
-        }
+            parameter_uuid_to_sunspec_node = {
+                node.parameter_uuid: node
+                for node in sunspec_nodes_with_parameter_uuid
+            }
 
         lengths_equal = (
             len(can_nodes_with_parameter_uuid)

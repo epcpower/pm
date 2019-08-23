@@ -109,7 +109,13 @@ def full_import(paths):
     return project
 
 
-def full_export(project, paths, target_directory, first_time=False):
+def full_export(
+        project,
+        paths,
+        target_directory,
+        first_time=False,
+        skip_sunspec=False,
+):
     epcpm.cantosym.export(
         path=paths.can,
         can_model=project.models.can,
@@ -128,24 +134,27 @@ def full_export(project, paths, target_directory, first_time=False):
         can_model=project.models.can,
         sunspec_model=project.models.sunspec,
         parameters_model=project.models.parameters,
+        skip_sunspec=skip_sunspec,
     )
 
-    epcpm.sunspectoxlsx.export(
-        path=paths.spreadsheet,
-        sunspec_model=project.models.sunspec,
-        parameters_model=project.models.parameters,
-    )
+    if not skip_sunspec:
+        epcpm.sunspectoxlsx.export(
+            path=paths.spreadsheet,
+            sunspec_model=project.models.sunspec,
+            parameters_model=project.models.parameters,
+        )
 
     epcpm.cantotablesc.export(
         path=paths.tables_c,
         can_model=project.models.can,
     )
 
-    epcpm.sunspectotablesc.export(
-        c_path=paths.sunspec_tables_c,
-        h_path=paths.sunspec_tables_c.with_suffix('.h'),
-        sunspec_model=project.models.sunspec,
-    )
+    if not skip_sunspec:
+        epcpm.sunspectotablesc.export(
+            c_path=paths.sunspec_tables_c,
+            h_path=paths.sunspec_tables_c.with_suffix('.h'),
+            sunspec_model=project.models.sunspec,
+        )
 
     epcpm.parameterstosil.export(
         c_path=paths.sil_c,
@@ -153,7 +162,7 @@ def full_export(project, paths, target_directory, first_time=False):
         parameters_model=project.models.parameters,
     )
 
-    if first_time:
+    if first_time and not skip_sunspec:
         epcpm.sunspectomanualc.export(
             path=paths.sunspec_c,
             sunspec_model=project.models.sunspec,
@@ -164,10 +173,10 @@ def full_export(project, paths, target_directory, first_time=False):
             sunspec_model=project.models.sunspec,
         )
 
-    run_generation_scripts(target_directory)
+    run_generation_scripts(target_directory, skip_sunspec=skip_sunspec)
 
 
-def run_generation_scripts(base_path):
+def run_generation_scripts(base_path, skip_sunspec=False):
     scripts = base_path/'venv'/'Scripts'
     interface = base_path/'interface'
 
@@ -189,14 +198,15 @@ def run_generation_scripts(base_path):
         check=True,
     )
 
-    emb_lib = base_path/'embedded-library'
-    subprocess.run(
-        [
-            os.fspath(scripts/'sunspecparser'),
-            os.fspath(emb_lib/'MODBUS_SunSpec-EPC.xlsx'),
-        ],
-        check=True,
-    )
+    if not skip_sunspec:
+        emb_lib = base_path/'embedded-library'
+        subprocess.run(
+            [
+                os.fspath(scripts/'sunspecparser'),
+                os.fspath(emb_lib/'MODBUS_SunSpec-EPC.xlsx'),
+            ],
+            check=True,
+        )
 
 
 def modification_time_or(path, alternative):
