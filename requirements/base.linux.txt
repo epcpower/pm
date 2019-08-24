@@ -22,19 +22,20 @@ certifi==2019.6.16        # via requests
 chardet==3.0.4            # via requests
 click==7.0
 constantly==15.1.0        # via twisted
-ddt==1.2.1                # via gitpython
 docutils==0.15.2          # via readme-renderer
 et-xmlfile==1.0.1         # via openpyxl
 future==0.17.1            # via canmatrix
 gitdb2==2.0.5             # via gitpython
-gitpython==3.0.1
+gitpython==3.0.2
 graham==0.1.11
 hyperlink==19.0.0         # via twisted
 idna==2.7                 # via hyperlink, requests
 importlib-metadata==0.19  # via pluggy
 incremental==17.5.0       # via twisted
 jdcal==1.4.1              # via openpyxl
+jinja2==2.10.1
 lxml==4.3.0
+markupsafe==1.1.1         # via jinja2
 marshmallow==2.20.2       # via graham
 natsort==6.0.0
 openpyxl==2.5.12
@@ -69,7 +70,7 @@ tqdm==4.34.0              # via twine
 twine==1.13.0
 twisted==19.7.0           # via qt5reactor
 urllib3==1.24.3           # via requests
-virtualenv==16.7.3        # via tox
+virtualenv==16.7.4        # via tox
 webencodings==0.5.1       # via bleach
 wheel==0.33.4
 wrapt==1.11.2             # via python-can

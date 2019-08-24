@@ -32,14 +32,13 @@ colorama==0.4.1           # via pytest
 constantly==15.1.0        # via twisted
 coverage==4.5.4           # via codecov, pytest-cov
 cryptography==2.7         # via pyopenssl, service-identity, twisted
-ddt==1.2.1                # via gitpython
 decorator==4.4.0
 defusedxml==0.6.0         # via soappy
 docutils==0.15.2          # via readme-renderer
 et-xmlfile==1.0.1         # via openpyxl
 future==0.17.1            # via canmatrix, pefile
 gitdb2==2.0.5             # via gitpython
-gitpython==3.0.1
+gitpython==3.0.2
 graham==0.1.11
 greenlet==0.4.15
 h2==3.1.1                 # via twisted
@@ -50,7 +49,9 @@ idna==2.7                 # via hyperlink, requests, twisted
 importlib-metadata==0.19  # via pluggy
 incremental==17.5.0       # via twisted
 jdcal==1.4.1              # via openpyxl
+jinja2==2.10.1
 lxml==4.3.0
+markupsafe==1.1.1         # via jinja2
 marshmallow==2.20.2       # via graham
 more-itertools==7.2.0     # via pytest
 natsort==6.0.0
@@ -99,7 +100,7 @@ tqdm==4.34.0              # via twine
 twine==1.13.0
 twisted==19.2.1 ; platform_system == "Windows"
 urllib3==1.24.3           # via requests
-virtualenv==16.7.3        # via tox
+virtualenv==16.7.4        # via tox
 webencodings==0.5.1       # via bleach
 wheel==0.33.4
 wrapt==1.11.2             # via python-can

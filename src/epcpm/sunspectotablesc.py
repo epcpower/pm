@@ -18,9 +18,22 @@ def export(c_path, h_path, sunspec_model):
     c_path.parent.mkdir(parents=True, exist_ok=True)
     c_content, h_content = builder.gen()
 
-    for path, content in ((c_path, c_content), (h_path, h_content)):
-        with path.open('w', newline='\n') as f:
-            f.write(content)
+    template_context = {
+        'definitions': c_content,
+        'declarations': h_content,
+    }
+
+    epcpm.c.render(
+        source=c_path.with_suffix(f'{c_path.suffix}_pm'),
+        destination=c_path,
+        context=template_context,
+    )
+
+    epcpm.c.render(
+        source=h_path.with_suffix(f'{h_path.suffix}_pm'),
+        destination=h_path,
+        context=template_context,
+    )
 
 
 @builders(epcpm.sunspecmodel.Root)
@@ -30,18 +43,7 @@ class Root:
     parameter_uuid_finder = attr.ib()
 
     def gen(self):
-        both_lines = [
-            [
-                '#include "interfaceGen.h"',
-                '#include "sunspecInterfaceGen.h"',
-                '#include "sunspecInterfaceGenTables.h"',
-                '#include "IEEE1547.h"',
-                '#include "gridMonitor.h"',
-                '',
-                '',
-            ],
-            [],
-        ]
+        both_lines = [[], []]
 
         # table_results = []
 
