@@ -39,38 +39,27 @@ def export(c_path, h_path, parameters_model):
         wrapped=parameters_model.root,
     )
 
-    contents = CHContents()
-
     c_path.parent.mkdir(parents=True, exist_ok=True)
-    contents.c.extend([
-        '#include "libEpcControlInterfaceGen.h"',
-        '',
-        f'#include "interfaceAccessors.h"',
-        '',
-        '',
-    ])
 
-    contents.h.extend([
-        f'#ifndef libEpcControlInterfaceGen_h_guard',
-        f'#define libEpcControlInterfaceGen_h_guard',
-        f'',
-        f'#include "libEpcControlInterface.h"',
-        f'',
-    ])
+    built, items = builder.gen()
 
-    built = builder.gen()
-    contents.extend(built)
+    template_context = {
+        'item_count': len(items),
+        'initializers': epcpm.c.format_nested_lists(built.c).rstrip(),
+        'declarations': epcpm.c.format_nested_lists(built.h).rstrip(),
+    }
 
-    contents.h.extend([
-        '',
-        '#endif',
-    ])
+    epcpm.c.render(
+        source=c_path.with_suffix(f'{c_path.suffix}_pm'),
+        destination=c_path,
+        context=template_context,
+    )
 
-    with c_path.open('w', newline='\n') as f:
-        f.write(epcpm.c.format_nested_lists(contents.c))
-
-    with h_path.open('w', newline='\n') as f:
-        f.write(epcpm.c.format_nested_lists(contents.h))
+    epcpm.c.render(
+        source=h_path.with_suffix(f'{h_path.suffix}_pm'),
+        destination=h_path,
+        context=template_context,
+    )
 
 
 def collect_items(parameters_root):
@@ -123,9 +112,7 @@ class Root:
         everything = CHContents()
 
         everything.c.extend([
-                f'Item SIL_interfaceItems[{len(items)}] = {{',
                 contents.c,
-                '};',
         ])
 
         everything.h.extend([
@@ -151,7 +138,7 @@ class Root:
             f'extern Item SIL_interfaceItems[{len(items)}];',
         ])
 
-        return everything
+        return everything, items
 
 
 @builders(epyqlib.pm.parametermodel.Group)

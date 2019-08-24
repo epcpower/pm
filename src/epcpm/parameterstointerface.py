@@ -1,8 +1,10 @@
 import decimal
+import os
 import string
 import re
 
 import attr
+import jinja2
 import toolz
 
 import epyqlib.pm.parametermodel
@@ -70,53 +72,35 @@ def export(
     ]
 
     c_path.parent.mkdir(parents=True, exist_ok=True)
-    c_gen = [
-        '#include <stdint.h>',
-        '',
-        '#include "interface.h"',
-        '#include "canInterfaceGen.h"',
-        '#include "sunspecInterfaceGen.h"',
-        '',
-    ]
-    # TODO: stop hardcoding this
-    c_gen.extend(
-        f'#include "sunspecInterfaceGen{id}.h"'
-        for id in model_ids
-    )
-    c_gen.append('')
-    c_gen.extend(
-        f'#include "sunspecInterface{id:05}.h"'
-        for id in model_ids
-    )
-    c_gen.extend(['', ''])
-
-    h_gen = [
-        f'#ifndef {h_path.stem.upper()}_H',
-        f'#define {h_path.stem.upper()}_H',
-        f'',
-        f'#include "interface.h"',
-        # f'',
-        # *(
-        #     f'#include "sunspecInterface{id:05}.h"'
-        #     for id in model_ids
-        # ),
-        f'',
-        f'',
-    ]
 
     built_c, built_h = builder.gen()
-    c_gen.extend(built_c)
-    h_gen.extend(built_h)
-    h_gen.extend([
-        '',
-        '#endif',
-    ])
 
-    with c_path.open('w', newline='\n') as f:
-        f.write(epcpm.c.format_nested_lists(c_gen))
+    template_context = {
+        'sunspec_interface_gen_headers': (
+            f'sunspecInterfaceGen{id}.h'
+            for id in model_ids
+        ),
+        'sunspec_interface_headers': (
+            f'sunspecInterface{id:05}.h'
+            for id in model_ids
+        ),
+        'interface_items': epcpm.c.format_nested_lists(
+            built_c,
+        ).strip(),
+        'declarations': epcpm.c.format_nested_lists(built_h).strip(),
+    }
 
-    with h_path.open('w', newline='\n') as f:
-        f.write(epcpm.c.format_nested_lists(h_gen))
+    epcpm.c.render(
+        source=c_path.with_suffix(f'{c_path.suffix}_pm'),
+        destination=c_path,
+        context=template_context,
+    )
+
+    epcpm.c.render(
+        source=h_path.with_suffix(f'{h_path.suffix}_pm'),
+        destination=h_path,
+        context=template_context,
+    )
 
 
 @builders(epyqlib.pm.parametermodel.Root)

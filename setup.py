@@ -40,6 +40,7 @@ setuptools.setup(
         'click',
         'epyqlib>=2019.8.1',
         'graham',
+        'jinja2',
         'lxml',
         'openpyxl',
         'pycparser',
