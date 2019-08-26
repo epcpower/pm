@@ -137,24 +137,24 @@ def full_export(
         skip_sunspec=skip_sunspec,
     )
 
-    if not skip_sunspec:
-        epcpm.sunspectoxlsx.export(
-            path=paths.spreadsheet,
-            sunspec_model=project.models.sunspec,
-            parameters_model=project.models.parameters,
-        )
+    epcpm.sunspectoxlsx.export(
+        path=paths.spreadsheet,
+        sunspec_model=project.models.sunspec,
+        parameters_model=project.models.parameters,
+        skip_sunspec=skip_sunspec,
+    )
 
     epcpm.cantotablesc.export(
         path=paths.tables_c,
         can_model=project.models.can,
     )
 
-    if not skip_sunspec:
-        epcpm.sunspectotablesc.export(
-            c_path=paths.sunspec_tables_c,
-            h_path=paths.sunspec_tables_c.with_suffix('.h'),
-            sunspec_model=project.models.sunspec,
-        )
+    epcpm.sunspectotablesc.export(
+        c_path=paths.sunspec_tables_c,
+        h_path=paths.sunspec_tables_c.with_suffix('.h'),
+        sunspec_model=project.models.sunspec,
+        skip_sunspec=skip_sunspec,
+    )
 
     epcpm.parameterstosil.export(
         c_path=paths.sil_c,
@@ -198,15 +198,14 @@ def run_generation_scripts(base_path, skip_sunspec=False):
         check=True,
     )
 
-    if not skip_sunspec:
-        emb_lib = base_path/'embedded-library'
-        subprocess.run(
-            [
-                os.fspath(scripts/'sunspecparser'),
-                os.fspath(emb_lib/'MODBUS_SunSpec-EPC.xlsx'),
-            ],
-            check=True,
-        )
+    emb_lib = base_path/'embedded-library'
+    subprocess.run(
+        [
+            os.fspath(scripts/'sunspecparser'),
+            os.fspath(emb_lib/'MODBUS_SunSpec-EPC.xlsx'),
+        ],
+        check=True,
+    )
 
 
 def modification_time_or(path, alternative):

@@ -85,11 +85,12 @@ enumerator_fields = Fields(
 )
 
 
-def export(path, sunspec_model, parameters_model):
+def export(path, sunspec_model, parameters_model, skip_sunspec=False):
     builder = epcpm.sunspectoxlsx.builders.wrap(
         wrapped=sunspec_model.root,
         parameter_uuid_finder=sunspec_model.node_from_uuid,
         parameter_model=parameters_model,
+        skip_sunspec=skip_sunspec,
     )
 
     workbook = builder.gen()
@@ -102,6 +103,7 @@ def export(path, sunspec_model, parameters_model):
 @attr.s
 class Root:
     wrapped = attr.ib()
+    skip_sunspec = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
     parameter_model = attr.ib(default=None)
 
@@ -113,19 +115,20 @@ class Root:
         workbook.create_sheet('Summary')
         workbook.create_sheet('Index')
 
-        for model in self.wrapped.children:
-            if isinstance(model, epcpm.sunspecmodel.Table):
-                # TODO: for now, implement it soon...
-                continue
+        if not self.skip_sunspec:
+            for model in self.wrapped.children:
+                if isinstance(model, epcpm.sunspecmodel.Table):
+                    # TODO: for now, implement it soon...
+                    continue
 
-            worksheet = workbook.create_sheet()
+                worksheet = workbook.create_sheet()
 
-            builders.wrap(
-                wrapped=model,
-                worksheet=worksheet,
-                padding_type=self.parameter_model.list_selection_roots['sunspec types'].child_by_name('pad'),
-                parameter_uuid_finder=self.parameter_uuid_finder,
-            ).gen()
+                builders.wrap(
+                    wrapped=model,
+                    worksheet=worksheet,
+                    padding_type=self.parameter_model.list_selection_roots['sunspec types'].child_by_name('pad'),
+                    parameter_uuid_finder=self.parameter_uuid_finder,
+                ).gen()
 
         return workbook
 

@@ -9,10 +9,11 @@ import epcpm.sunspecmodel
 builders = epyqlib.utils.general.TypeMap()
 
 
-def export(c_path, h_path, sunspec_model):
+def export(c_path, h_path, sunspec_model, skip_sunspec=False):
     builder = builders.wrap(
         wrapped=sunspec_model.root,
         parameter_uuid_finder=sunspec_model.node_from_uuid,
+        skip_sunspec=skip_sunspec,
     )
 
     c_path.parent.mkdir(parents=True, exist_ok=True)
@@ -41,44 +42,46 @@ def export(c_path, h_path, sunspec_model):
 class Root:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
+    skip_sunspec = attr.ib()
 
     def gen(self):
         both_lines = [[], []]
 
         # table_results = []
 
-        for child in self.wrapped.children:
-            if not isinstance(child, epcpm.sunspecmodel.Model):
-                continue
+        if not self.skip_sunspec:
+            for child in self.wrapped.children:
+                if not isinstance(child, epcpm.sunspecmodel.Model):
+                    continue
 
-            builder = builders.wrap(
-                wrapped=child,
-                parameter_uuid_finder=self.parameter_uuid_finder,
-            )
+                builder = builders.wrap(
+                    wrapped=child,
+                    parameter_uuid_finder=self.parameter_uuid_finder,
+                )
 
-            # table_results.append(builder.gen())
-            # lines.extend(table_results[-1].table_lines)
+                # table_results.append(builder.gen())
+                # lines.extend(table_results[-1].table_lines)
 
-            for lines, more_lines in zip(both_lines, builder.gen()):
-                lines.extend(more_lines)
-                lines.append('')
+                for lines, more_lines in zip(both_lines, builder.gen()):
+                    lines.extend(more_lines)
+                    lines.append('')
 
-        # active_curves = parameter_query.child_by_name('ActiveCurves')
-        #
-        # for get_or_set in ('get', 'set'):
-        #     active_lines = []
-        #     for table_result in table_results:
-        #         active_lines.extend(
-        #             table_result.active_curves_lines[get_or_set],
-        #         )
-        #
-        #     lines.extend([
-        #         f'void {get_or_set}{active_curves.name}(void)',
-        #         '{',
-        #         active_lines,
-        #         '}',
-        #         '',
-        #     ])
+            # active_curves = parameter_query.child_by_name('ActiveCurves')
+            #
+            # for get_or_set in ('get', 'set'):
+            #     active_lines = []
+            #     for table_result in table_results:
+            #         active_lines.extend(
+            #             table_result.active_curves_lines[get_or_set],
+            #         )
+            #
+            #     lines.extend([
+            #         f'void {get_or_set}{active_curves.name}(void)',
+            #         '{',
+            #         active_lines,
+            #         '}',
+            #         '',
+            #     ])
 
         return tuple(
             epyqlib.utils.general.format_nested_lists(lines)

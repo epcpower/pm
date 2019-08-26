@@ -46,30 +46,33 @@ def export(
         sunspec_root=sunspec_root,
     )
 
-    model_ids = [
-        1,
-        17,
-        103,
-        120,
-        121,
-        122,
-        123,
-        126,
-        129,
-        130,
-        132,
-        134,
-        135,
-        136,
-        137,
-        138,
-        141,
-        142,
-        145,
-        160,
-        *range(65000, 65011),
-        65534,
-    ]
+    if skip_sunspec:
+        model_ids = []
+    else:
+        model_ids = [
+            1,
+            17,
+            103,
+            120,
+            121,
+            122,
+            123,
+            126,
+            129,
+            130,
+            132,
+            134,
+            135,
+            136,
+            137,
+            138,
+            141,
+            142,
+            145,
+            160,
+            *range(65000, 65011),
+            65534,
+        ]
 
     c_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -315,12 +318,17 @@ class Parameter:
         can_signal = self.parameter_uuid_to_can_node.get(parameter.uuid)
         sunspec_point = self.parameter_uuid_to_sunspec_node.get(parameter.uuid)
 
+        interface_data = [
+            can_signal,
+            sunspec_point,
+        ]
+
         uses_interface_item = (
             isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
             and parameter.uses_interface_item()
         )
 
-        if not uses_interface_item:
+        if not uses_interface_item or all(x is None for x in interface_data):
             return [[], []]
 
         scale_factor_variable = 'NULL'
