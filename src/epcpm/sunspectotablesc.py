@@ -42,7 +42,7 @@ def export(c_path, h_path, sunspec_model, skip_sunspec=False):
 class Root:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
-    skip_sunspec = attr.ib()
+    skip_sunspec = attr.ib(default=False)
 
     def gen(self):
         both_lines = [[], []]

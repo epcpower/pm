@@ -103,7 +103,7 @@ def export(path, sunspec_model, parameters_model, skip_sunspec=False):
 @attr.s
 class Root:
     wrapped = attr.ib()
-    skip_sunspec = attr.ib()
+    skip_sunspec = attr.ib(default=False)
     parameter_uuid_finder = attr.ib(default=None)
     parameter_model = attr.ib(default=None)
 
