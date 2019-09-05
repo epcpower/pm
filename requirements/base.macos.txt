@@ -10,9 +10,9 @@
 -e git+https://github.com/altendky/pysunspec@f197baa9c373ff93b13bff22a1ca0368aa89b305#egg=pysunspec
 aenum==2.2.1              # via python-can
 alqtendpy==0.0.4
-altendpy==0.0.17          # via alqtendpy
+altendpy==0.0.18          # via alqtendpy
 altgraph==0.16.1          # via macholib
-arrow==0.14.5
+arrow==0.14.7
 attrs==18.2.0
 automat==0.7.0            # via twisted
 bitstruct==8.0.0          # via canmatrix
@@ -30,14 +30,15 @@ gitpython==3.0.2
 graham==0.1.11
 hyperlink==19.0.0         # via twisted
 idna==2.7                 # via hyperlink, requests
-importlib-metadata==0.19  # via pluggy
+importlib-metadata==0.20  # via pluggy
 incremental==17.5.0       # via twisted
 jdcal==1.4.1              # via openpyxl
 jinja2==2.10.1
 lxml==4.3.0
 macholib==1.11
 markupsafe==1.1.1         # via jinja2
-marshmallow==2.20.2       # via graham
+marshmallow==2.20.3       # via graham
+more-itertools==7.2.0     # via zipp
 natsort==6.0.0
 openpyxl==2.5.12
 pathlib2==2.3.4           # via canmatrix
@@ -67,16 +68,16 @@ six==1.12.0               # via automat, bleach, pathlib2, pip-tools, pyhamcrest
 smmap2==2.0.5             # via gitdb2
 toolz==0.9.0
 tox==2.8.2
-tqdm==4.34.0              # via twine
+tqdm==4.35.0              # via twine
 twine==1.13.0
 twisted==19.7.0           # via qt5reactor
 urllib3==1.24.3           # via requests
-virtualenv==16.7.4        # via tox
+virtualenv==16.7.5        # via tox
 webencodings==0.5.1       # via bleach
 wheel==0.33.4
 wrapt==1.11.2             # via python-can
 xmldiff==2.2
-zipp==0.5.2               # via importlib-metadata
+zipp==0.6.0               # via importlib-metadata
 zope.interface==4.6.0     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
