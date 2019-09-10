@@ -144,6 +144,19 @@ def full_export(
         skip_sunspec=skip_sunspec,
     )
 
+    epcpm.sunspectoxlsx.export(
+        path=paths.spreadsheet_user,
+        sunspec_model=project.models.sunspec,
+        parameters_model=project.models.parameters,
+        skip_sunspec=skip_sunspec,
+        column_filter=attr.evolve(
+            epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True), 
+            get=False,
+            set=False,
+            item=False,
+        )
+    )
+
     epcpm.cantotablesc.export(
         path=paths.tables_c,
         can_model=project.models.can,
@@ -267,6 +280,7 @@ def is_stale(project, paths):
         paths.hierarchy,
         *paths.smdx,
         paths.spreadsheet,
+        paths.spreadsheet_user,
         *smdx,
         *sunspec_c_h,
         paths.tables_c,

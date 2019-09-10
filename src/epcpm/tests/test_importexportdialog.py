@@ -15,6 +15,7 @@ def test_blank(qtbot):
         hierarchy=None,
         tables_c=None,
         spreadsheet=None,
+        spreadsheet_user=None,
         smdx=[],
         sunspec_tables_c=None,
         sunspec_c=None,

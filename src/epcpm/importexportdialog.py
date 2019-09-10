@@ -74,6 +74,7 @@ class ImportPaths:
     tables_c = attr.ib(converter=path_or_none)
     sunspec_tables_c = attr.ib(converter=path_or_none)
     spreadsheet = attr.ib(converter=path_or_none)
+    spreadsheet_user = attr.ib(converter=path_or_none)
     smdx = attr.ib(converter=paths_or_none)
     sunspec_c = attr.ib(converter=path_or_none)
     sil_c = attr.ib(converter=path_or_none)
@@ -92,6 +93,7 @@ def paths_from_directory(directory):
         tables_c=interface / 'canInterfaceGenTables.c',
         sunspec_tables_c=sunspec / 'sunspecInterfaceGenTables.c',
         spreadsheet=embedded / 'MODBUS_SunSpec-EPC.xlsx',
+        spreadsheet_user=embedded / 'EPCSunspec.xlsx',
         smdx=sorted(sunspec.glob('smdx_*.xml')),
         sunspec_c=sunspec,
         sil_c=path / 'sil' / 'libEpcControlInterfaceGen.c',
@@ -122,6 +124,7 @@ class Dialog(QtWidgets.QDialog):
             self.pick_sunspec_tables_c,
         )
         self.ui.pick_spreadsheet.clicked.connect(self.pick_spreadsheet)
+        self.ui.pick_spreadsheet_user.clicked.connect(self.pick_spreadsheet_user)
         self.ui.pick_sunspec_c.clicked.connect(self.pick_sunspec_c)
         self.ui.pick_sil_c.clicked.connect(self.pick_sil_c)
         self.ui.pick_interface_c.clicked.connect(self.pick_interface_c)
@@ -141,6 +144,7 @@ class Dialog(QtWidgets.QDialog):
             tables_c=self.ui.tables_c.text(),
             sunspec_tables_c=self.ui.sunspec_tables_c.text(),
             spreadsheet=self.ui.spreadsheet.text(),
+            spreadsheet_user=self.ui.spreadsheet_user.text(),
             smdx=smdx,
             sunspec_c=self.ui.sunspec_c.text(),
             sil_c=self.ui.sil_c.text(),
@@ -162,6 +166,7 @@ class Dialog(QtWidgets.QDialog):
         self.ui.tables_c.setText(os.fspath(paths.tables_c))
         self.ui.sunspec_tables_c.setText(os.fspath(paths.sunspec_tables_c))
         self.ui.spreadsheet.setText(os.fspath(paths.spreadsheet))
+        self.ui.spreadsheet_user.setText(os.fspath(paths.spreadsheet_user))
         self.ui.sunspec_c.setText(os.fspath(paths.sunspec_c))
         self.ui.sil_c.setText(os.fspath(paths.sil_c))
         self.ui.interface_c.setText(os.fspath(paths.interface_c))
@@ -243,6 +248,18 @@ class Dialog(QtWidgets.QDialog):
 
         self.file_dialog(
             target=self.ui.spreadsheet,
+            filters=filters,
+            multiple=False,
+        )
+
+    def pick_spreadsheet_user(self):
+        filters = (
+            ('SunSpec Spreadsheet', ['xls']),
+            all_files_filter,
+        )
+
+        self.file_dialog(
+            target=self.ui.spreadsheet_user,
             filters=filters,
             multiple=False,
         )

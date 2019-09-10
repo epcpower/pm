@@ -67,6 +67,10 @@ def test_x():
         wrapped=attrs_model.root,
         parameter_uuid_finder=attrs_model.node_from_uuid,
         parameter_model=project.models.parameters,
+        column_filter=epcpm.sunspectoxlsx.attr_fill(
+            epcpm.sunspectoxlsx.Fields,
+            True
+        ),
     )
 
     workbook = builder.gen()

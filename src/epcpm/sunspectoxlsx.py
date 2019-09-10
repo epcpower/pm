@@ -19,6 +19,10 @@ epc_enumerator_fields = attr.fields(
 )
 
 
+def attr_fill(cls, value):
+    return cls(**{field.name: value for field in attr.fields(cls) if field.init})
+
+
 @attr.s
 class Fields:
     field_type = attr.ib(default=None)
@@ -40,6 +44,13 @@ class Fields:
     get = attr.ib(default=None)
     set = attr.ib(default=None)
     item = attr.ib(default=None)
+
+    def as_filtered_tuple(self, filter_):
+        return tuple(
+            value
+            for value, f in zip(attr.astuple(self), attr.astuple(filter_))
+            if f
+        )
 
 
 field_names = Fields(
@@ -85,12 +96,22 @@ enumerator_fields = Fields(
 )
 
 
-def export(path, sunspec_model, parameters_model, skip_sunspec=False):
+def export(
+        path,
+        sunspec_model,
+        parameters_model,
+        column_filter=None,
+        skip_sunspec=False
+    ):
+    if column_filter is None:
+        column_filter = attr_fill(Fields, True)
+
     builder = epcpm.sunspectoxlsx.builders.wrap(
         wrapped=sunspec_model.root,
         parameter_uuid_finder=sunspec_model.node_from_uuid,
         parameter_model=parameters_model,
         skip_sunspec=skip_sunspec,
+        column_filter=column_filter,
     )
 
     workbook = builder.gen()
@@ -103,6 +124,7 @@ def export(path, sunspec_model, parameters_model, skip_sunspec=False):
 @attr.s
 class Root:
     wrapped = attr.ib()
+    column_filter = attr.ib()
     skip_sunspec = attr.ib(default=False)
     parameter_uuid_finder = attr.ib(default=None)
     parameter_model = attr.ib(default=None)
@@ -128,6 +150,7 @@ class Root:
                     worksheet=worksheet,
                     padding_type=self.parameter_model.list_selection_roots['sunspec types'].child_by_name('pad'),
                     parameter_uuid_finder=self.parameter_uuid_finder,
+                    column_filter=self.column_filter,
                 ).gen()
 
         return workbook
@@ -139,11 +162,12 @@ class Model:
     wrapped = attr.ib()
     worksheet = attr.ib()
     padding_type = attr.ib()
+    column_filter = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
         self.worksheet.title = str(self.wrapped.id)
-        self.worksheet.append(attr.astuple(field_names))
+        self.worksheet.append(field_names.as_filtered_tuple(self.column_filter))
 
         self.wrapped.children[0].check_offsets_and_length()
 
@@ -182,7 +206,7 @@ class Model:
             elif i == 1:
                 row.value = length
 
-            self.worksheet.append(attr.astuple(row))
+            self.worksheet.append(row.as_filtered_tuple(self.column_filter))
 
         for block in self.wrapped.children:
             to_be_handled = isinstance(
@@ -210,9 +234,13 @@ class Model:
                 rows = builder.gen()
 
                 for row in rows:
-                    self.worksheet.append(attr.astuple(row))
+                    self.worksheet.append(
+                        row.as_filtered_tuple(self.column_filter)
+                    )
 
-                self.worksheet.append(attr.astuple(Fields()))
+                self.worksheet.append(
+                    Fields().as_filtered_tuple(self.column_filter)
+                )
 
 
 @builders(epcpm.sunspecmodel.Table)
@@ -221,6 +249,7 @@ class Table:
     wrapped = attr.ib()
     worksheet = attr.ib()
     padding_type = attr.ib()
+    column_filter = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
