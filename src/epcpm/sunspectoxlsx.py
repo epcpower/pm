@@ -77,7 +77,6 @@ field_names = Fields(
 
 
 point_fields = Fields(
-    address_offset=data_point_fields.offset,
     block_offset=data_point_fields.block_offset,
     size=data_point_fields.size,
     type=data_point_fields.type_uuid,
@@ -171,14 +170,16 @@ class Model:
 
         self.wrapped.children[0].check_offsets_and_length()
 
-        length = sum(
+        overall_length = sum(
             child.check_offsets_and_length()
             for child in self.wrapped.children[1:]
         )
 
-        add_padding = (length % 2) == 1
+        add_padding = (overall_length % 2) == 1
         if add_padding:
-            length += 1
+            overall_length += 1
+
+        accumulated_length = 0
 
         rows = []
 
@@ -193,10 +194,12 @@ class Model:
                 model_type=model_type,
                 model_id=self.wrapped.id,
                 parameter_uuid_finder=self.parameter_uuid_finder,
+                address_offset=accumulated_length,
             )
 
-            for row in builder.gen():
-                rows.append(row)
+            built_rows, block_length = builder.gen()
+            accumulated_length += block_length
+            rows.extend(built_rows)
 
             rows.append(Fields())
 
@@ -204,7 +207,7 @@ class Model:
             if i == 0:
                 row.value = self.wrapped.id
             elif i == 1:
-                row.value = length
+                row.value = overall_length
 
             self.worksheet.append(row.as_filtered_tuple(self.column_filter))
 
@@ -328,6 +331,7 @@ class Block:
     padding_type = attr.ib()
     model_type = attr.ib()
     model_id = attr.ib()
+    address_offset = attr.ib()
     repeating_block_reference = attr.ib(default=None)
     parameter_uuid_finder = attr.ib(default=None)
     is_table = attr.ib(default=False)
@@ -359,6 +363,8 @@ class Block:
             point.tree_parent = self.wrapped
             points.append(point)
 
+        summed_increments = 0
+
         for child in points:
             builder = builders.wrap(
                 wrapped=child,
@@ -368,10 +374,13 @@ class Block:
                 model_id=self.model_id,
                 is_table=self.is_table,
                 repeating_block_reference=self.repeating_block_reference,
+                address_offset=self.address_offset + summed_increments,
             )
-            rows.append(builder.gen())
+            built_rows, address_offset_increment = builder.gen()
+            summed_increments += address_offset_increment
+            rows.append(built_rows)
 
-        return rows
+        return rows, summed_increments
 
 
 @builders(epcpm.sunspecmodel.TableRepeatingBlockReference)
@@ -382,6 +391,7 @@ class TableRepeatingBlockReference:
     padding_type = attr.ib()
     model_type = attr.ib()
     model_id = attr.ib()
+    address_offset = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
@@ -394,6 +404,7 @@ class TableRepeatingBlockReference:
             model_id=self.model_id,
             is_table=True,
             repeating_block_reference=self.wrapped,
+            address_offset=self.address_offset,
         )
 
         return builder.gen()
@@ -407,12 +418,14 @@ class Point:
     model_type = attr.ib()
     model_id = attr.ib()
     is_table = attr.ib()
+    address_offset = attr.ib()
     repeating_block_reference = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     # TODO: CAMPid 07397546759269756456100183066795496952476951653
     def gen(self):
         row = Fields()
+        row.address_offset = self.address_offset
 
         for name, field in attr.asdict(point_fields).items():
             if field is None:
@@ -685,7 +698,7 @@ class Point:
             row.read_write = 'R'
             row.mandatory = 'O'
 
-        return row
+        return row, row.size
 
 
 def adjust_assignment(
