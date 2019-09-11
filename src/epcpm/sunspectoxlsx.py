@@ -144,12 +144,13 @@ class Root:
 
                 worksheet = workbook.create_sheet()
 
-                builders.wrap(
+                model_offset += builders.wrap(
                     wrapped=model,
                     worksheet=worksheet,
                     padding_type=self.parameter_model.list_selection_roots['sunspec types'].child_by_name('pad'),
                     parameter_uuid_finder=self.parameter_uuid_finder,
                     column_filter=self.column_filter,
+                    model_offset=model_offset,
                 ).gen()
 
         return workbook
@@ -162,6 +163,7 @@ class Model:
     worksheet = attr.ib()
     padding_type = attr.ib()
     column_filter = attr.ib()
+    model_offset = attr.ib() #starting Modbus address for the model
     parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
@@ -193,6 +195,7 @@ class Model:
                 padding_type=self.padding_type,
                 model_type=model_type,
                 model_id=self.wrapped.id,
+                model_offset=self.model_offset,
                 parameter_uuid_finder=self.parameter_uuid_finder,
                 address_offset=accumulated_length,
             )
@@ -244,6 +247,7 @@ class Model:
                 self.worksheet.append(
                     Fields().as_filtered_tuple(self.column_filter)
                 )
+        return overall_length + 2 #add header length
 
 
 @builders(epcpm.sunspecmodel.Table)
@@ -331,6 +335,7 @@ class Block:
     padding_type = attr.ib()
     model_type = attr.ib()
     model_id = attr.ib()
+    model_offset = attr.ib()
     address_offset = attr.ib()
     repeating_block_reference = attr.ib(default=None)
     parameter_uuid_finder = attr.ib(default=None)
@@ -372,6 +377,7 @@ class Block:
                 scale_factor_from_uuid=scale_factor_from_uuid,
                 parameter_uuid_finder=self.parameter_uuid_finder,
                 model_id=self.model_id,
+                model_offset=self.model_offset,
                 is_table=self.is_table,
                 repeating_block_reference=self.repeating_block_reference,
                 address_offset=self.address_offset + summed_increments,
@@ -391,6 +397,7 @@ class TableRepeatingBlockReference:
     padding_type = attr.ib()
     model_type = attr.ib()
     model_id = attr.ib()
+    model_offset = attr.ib()
     address_offset = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
@@ -402,6 +409,7 @@ class TableRepeatingBlockReference:
             add_padding=self.add_padding,
             padding_type=self.padding_type,
             model_id=self.model_id,
+            model_offset=self.model_offset,
             is_table=True,
             repeating_block_reference=self.wrapped,
             address_offset=self.address_offset,
@@ -417,6 +425,7 @@ class Point:
     scale_factor_from_uuid = attr.ib()
     model_type = attr.ib()
     model_id = attr.ib()
+    model_offset = attr.ib()
     is_table = attr.ib()
     address_offset = attr.ib()
     repeating_block_reference = attr.ib()
@@ -426,6 +435,7 @@ class Point:
     def gen(self):
         row = Fields()
         row.address_offset = self.address_offset
+        row.modbus_address = self.model_offset + self.address_offset
 
         for name, field in attr.asdict(point_fields).items():
             if field is None:
