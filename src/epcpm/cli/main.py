@@ -71,7 +71,11 @@ def build(project, target_path, only_if_stale, skip_sunspec):
     paths = epcpm.importexportdialog.paths_from_directory(target_path)
 
     if only_if_stale:
-        if not epcpm.importexport.is_stale(project=project, paths=paths):
+        if not epcpm.importexport.is_stale(
+                project=project,
+                paths=paths,
+                skip_sunspec=skip_sunspec,
+        ):
             click.echo(
                 'Generated files appear to be up to date, skipping export',
             )

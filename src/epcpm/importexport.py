@@ -240,7 +240,7 @@ def get_sunspec_models(path):
     )
 
 
-def is_stale(project, paths):
+def is_stale(project, paths, skip_sunspec=False):
     loaded_project = epcpm.project.loadp(project, post_load=False)
 
     source_paths = (
@@ -256,9 +256,12 @@ def is_stale(project, paths):
         for path in source_paths
     )
 
-    sunspec_models = get_sunspec_models(
-        project.parent / loaded_project.paths.sunspec,
-    )
+    if skip_sunspec:
+        sunspec_models = []
+    else:
+        sunspec_models = get_sunspec_models(
+            project.parent / loaded_project.paths.sunspec,
+        )
 
     smdx = tuple(
         paths.sunspec_c/f'smdx_{model:05}.xml'
