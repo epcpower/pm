@@ -1,4 +1,5 @@
 import itertools
+import math
 
 import attr
 import openpyxl
@@ -137,8 +138,16 @@ class Root:
         workbook.create_sheet('Index')
 
         if not self.skip_sunspec:
+            children = sorted(
+                self.wrapped.children,
+                key=lambda child: (
+                    0 if isinstance(child, epcpm.sunspecmodel.Model) else 1,
+                    getattr(child, 'id', math.inf),
+                )
+            )
+
             model_offset = 2 #account for starting 'SunS'
-            for model in self.wrapped.children:
+            for model in children:
                 if isinstance(model, epcpm.sunspecmodel.Table):
                     # TODO: for now, implement it soon...
                     continue
