@@ -137,7 +137,7 @@ class Root:
         workbook.create_sheet('Index')
 
         if not self.skip_sunspec:
-            model_offset = 0
+            model_offset = 2 #account for starting 'SunS'
             for model in self.wrapped.children:
                 if isinstance(model, epcpm.sunspecmodel.Table):
                     # TODO: for now, implement it soon...
