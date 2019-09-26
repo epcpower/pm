@@ -776,6 +776,7 @@ class TableBaseStructures:
             remainder,
             common_initializers,
             meta_initializer,
+            setter,
     ):
         name = self.common_structure_names.get(parameter_uuid)
 
@@ -829,6 +830,7 @@ class TableBaseStructures:
                     common_initializers,
                     f'}},',
                     f'.variable_base = &{variable_base}.{remainder},',
+                    f'.setter = {setter},',
                     f'.zone_size = {zone_size},',
                     f'.curve_size = {curve_size},',
                     f'.point_size = {point_size},',
@@ -969,6 +971,7 @@ class TableBaseStructures:
             remainder=remainder,
             common_initializers=common_initializers,
             meta_initializer=meta_initializer,
+            setter=parameter.setter_function,
         )
 
         interface_item_type = (
