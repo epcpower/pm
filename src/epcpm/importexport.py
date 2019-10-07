@@ -115,6 +115,7 @@ def full_export(
         target_directory,
         first_time=False,
         skip_sunspec=False,
+        include_uuid_in_item=False,
 ):
     epcpm.cantosym.export(
         path=paths.can,
@@ -135,6 +136,7 @@ def full_export(
         sunspec_model=project.models.sunspec,
         parameters_model=project.models.parameters,
         skip_sunspec=skip_sunspec,
+        include_uuid_in_item=include_uuid_in_item,
     )
 
     epcpm.sunspectoxlsx.export(

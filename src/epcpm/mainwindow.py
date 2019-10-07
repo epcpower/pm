@@ -325,6 +325,7 @@ class Window:
             paths=paths,
             target_directory=dialog.directory,
             first_time=first_time,
+            include_uuid_in_item=True,
         )
 
         QtWidgets.QMessageBox.information(

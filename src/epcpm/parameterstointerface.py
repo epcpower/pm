@@ -34,6 +34,7 @@ def export(
         can_model,
         sunspec_model,
         skip_sunspec=False,
+        include_uuid_in_item=False,
 ):
     if skip_sunspec:
         sunspec_root = None
@@ -44,6 +45,7 @@ def export(
         wrapped=parameters_model.root,
         can_root=can_model.root,
         sunspec_root=sunspec_root,
+        include_uuid_in_item=include_uuid_in_item,
     )
 
     if skip_sunspec:
@@ -112,6 +114,7 @@ class Root:
     wrapped = attr.ib()
     can_root = attr.ib()
     sunspec_root = attr.ib()
+    include_uuid_in_item = attr.ib()
 
     def gen(self):
         parameters = next(
@@ -198,6 +201,7 @@ class Root:
                 wrapped=child,
                 can_root=self.can_root,
                 sunspec_root=self.sunspec_root,
+                include_uuid_in_item=self.include_uuid_in_item,
                 parameter_uuid_to_can_node=parameter_uuid_to_can_node,
                 parameter_uuid_to_sunspec_node=(
                     parameter_uuid_to_sunspec_node
@@ -239,6 +243,7 @@ class Group:
     wrapped = attr.ib()
     can_root = attr.ib()
     sunspec_root = attr.ib()
+    include_uuid_in_item = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
     parameter_uuid_to_sunspec_node = attr.ib()
     parameter_uuid_finder = attr.ib()
@@ -262,6 +267,7 @@ class Group:
                 wrapped=child,
                 can_root=self.can_root,
                 sunspec_root=self.sunspec_root,
+                include_uuid_in_item=self.include_uuid_in_item,
                 parameter_uuid_to_can_node=(
                     self.parameter_uuid_to_can_node
                 ),
@@ -309,6 +315,7 @@ class Parameter:
     wrapped = attr.ib()
     can_root = attr.ib()
     sunspec_root = attr.ib()
+    include_uuid_in_item = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
     parameter_uuid_to_sunspec_node = attr.ib()
     parameter_uuid_finder = attr.ib()
@@ -450,6 +457,7 @@ class Parameter:
 
         result = create_item(
             item_uuid=parameter.uuid,
+            include_uuid_in_item=self.include_uuid_in_item,
             access_level=access_level,
             can_getter=can_getter,
             can_setter=can_setter,
@@ -765,6 +773,7 @@ class TableBaseStructures:
     parameter_uuid_to_can_node = attr.ib()
     parameter_uuid_to_sunspec_node = attr.ib()
     parameter_uuid_finder = attr.ib()
+    include_uuid_in_item = attr.ib()
     common_structure_names = attr.ib(factory=dict)
     c_code = attr.ib(factory=list)
     h_code = attr.ib(factory=list)
@@ -959,6 +968,8 @@ class TableBaseStructures:
             # not to be used so really hardcode NULL
             sunspec_variable='NULL',
             can_scale_factor=can_signal.factor,
+            uuid_=table_element.uuid,
+            include_uuid_in_item=self.include_uuid_in_item,
         )
 
         meta_initializer = create_meta_initializer_values(parameter)
@@ -981,6 +992,10 @@ class TableBaseStructures:
         item_uuid_string = str(table_element.uuid).replace('-', '_')
         item_name = f'interfaceItem_{item_uuid_string}'
 
+        maybe_uuid = []
+        if self.include_uuid_in_item:
+            maybe_uuid = [f'.uuid = {uuid_initializer(table_element.uuid)},']
+
         c = [
             f'// {table_element.uuid}',
             f'{interface_item_type} const {item_name} = {{',
@@ -991,6 +1006,7 @@ class TableBaseStructures:
                 f'.zone = {curve_type if curve_type is not None else "0"},',
                 f'.curve = {curve_index},',
                 f'.point = {point_index},',
+                *maybe_uuid,
             ],
             '};',
             '',
@@ -1081,6 +1097,7 @@ class Table:
     wrapped = attr.ib()
     can_root = attr.ib()
     sunspec_root = attr.ib()
+    include_uuid_in_item = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
     parameter_uuid_to_sunspec_node = attr.ib()
     parameter_uuid_finder = attr.ib()
@@ -1114,6 +1131,7 @@ class Table:
                 self.parameter_uuid_to_sunspec_node
             ),
             parameter_uuid_finder=self.parameter_uuid_finder,
+            include_uuid_in_item=self.include_uuid_in_item,
         )
 
         item_code = builders.wrap(
@@ -1126,6 +1144,7 @@ class Table:
                 self.parameter_uuid_to_sunspec_node
             ),
             parameter_uuid_finder=self.parameter_uuid_finder,
+            include_uuid_in_item=self.include_uuid_in_item,
         ).gen()
 
         return [
@@ -1149,6 +1168,7 @@ class TableGroupElement:
     can_root = attr.ib()
     sunspec_root = attr.ib()
     table_base_structures = attr.ib()
+    include_uuid_in_item = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
     parameter_uuid_to_sunspec_node = attr.ib()
     parameter_uuid_finder = attr.ib()
@@ -1179,6 +1199,7 @@ class TableGroupElement:
                 ),
                 parameter_uuid_finder=self.parameter_uuid_finder,
                 layers=layers,
+                include_uuid_in_item=self.include_uuid_in_item,
             ).gen()
 
             c_built, h_built = result
@@ -1207,6 +1228,7 @@ class TableArrayElement:
     sunspec_root = attr.ib()
     table_base_structures = attr.ib()
     layers = attr.ib()
+    include_uuid_in_item = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
     parameter_uuid_to_sunspec_node = attr.ib()
     parameter_uuid_finder = attr.ib()
@@ -1402,6 +1424,7 @@ class TableArrayElement:
             sunspec_variable=sunspec_variable,
             variable_or_getter_setter=variable_or_getter_setter,
             can_scale_factor=getattr(can_signal, 'factor', None),
+            include_uuid_in_item=self.include_uuid_in_item,
         )
 
         return result
@@ -1409,6 +1432,7 @@ class TableArrayElement:
 
 def create_item(
         item_uuid,
+        include_uuid_in_item,
         access_level,
         can_getter,
         can_setter,
@@ -1453,6 +1477,8 @@ def create_item(
         sunspec_setter=sunspec_setter,
         sunspec_variable=sunspec_variable,
         can_scale_factor=can_scale_factor,
+        uuid_=item_uuid,
+        include_uuid_in_item=include_uuid_in_item,
     )
 
     item = [
@@ -1475,6 +1501,15 @@ def create_item(
     ]
 
 
+def uuid_initializer(uuid_):
+    return '{{{}}}'.format(
+        ', '.join(
+            '0x{:02x}{:02x}'.format(high, low)
+            for low, high in toolz.partition_all(2, uuid_.bytes)
+        ),
+    )
+
+
 def create_common_initializers(
         access_level,
         can_getter,
@@ -1489,10 +1524,16 @@ def create_common_initializers(
         sunspec_setter,
         sunspec_variable,
         can_scale_factor,
+        uuid_,
+        include_uuid_in_item,
 ):
     if can_scale_factor is None:
         # TODO: don't default here?
         can_scale_factor = 1
+
+    maybe_uuid = []
+    if include_uuid_in_item:
+        maybe_uuid = [f'.uuid = {uuid_initializer(uuid_)},']
 
     common_initializers = [
         f'.sunspecScaleFactor = {scale_factor_variable},',
@@ -1518,5 +1559,6 @@ def create_common_initializers(
         ],
         f'}},',
         f'.access_level = {access_level},',
+        *maybe_uuid,
     ]
     return common_initializers
