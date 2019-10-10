@@ -833,7 +833,9 @@ class TableBaseStructures:
                 f'extern InterfaceItem_table_common_{internal_type} {name};',
             )
             self.c_code.extend([
-                f'InterfaceItem_table_common_{internal_type} {name} = {{',
+                f'#pragma DATA_SECTION({name}, "Interface")',
+                f'// {parameter_uuid}',
+                f'InterfaceItem_table_common_{internal_type} const {name} = {{',
                 [
                     f'.common = {{',
                     common_initializers,
@@ -997,6 +999,7 @@ class TableBaseStructures:
             maybe_uuid = [f'.uuid = {uuid_initializer(table_element.uuid)},']
 
         c = [
+            f'#pragma DATA_SECTION({item_name}, "Interface")',
             f'// {table_element.uuid}',
             f'{interface_item_type} const {item_name} = {{',
             [
@@ -1482,6 +1485,7 @@ def create_item(
     )
 
     item = [
+        f'#pragma DATA_SECTION({item_name}, "Interface")',
         f'// {item_uuid}',
         f'{interface_item_type} const {item_name} = {{',
         [
