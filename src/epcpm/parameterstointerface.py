@@ -354,9 +354,14 @@ class Parameter:
             ]
         else:
             var_or_func = 'functions'
+            if parameter.setter_function is None:
+                setter_function = 'NULL'
+            else:
+                setter_function = parameter.setter_function
+
             variable_or_getter_setter = [
                 f'.getter = {parameter.getter_function},',
-                f'.setter = {parameter.setter_function},',
+                f'.setter = {setter_function},',
             ]
 
         if sunspec_point is None:
