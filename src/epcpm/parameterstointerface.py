@@ -27,6 +27,17 @@ sunspec_types = {
 }
 
 
+class InvalidAccessLevelError(Exception):
+    @classmethod
+    def build(cls, value, parameter):
+        message = (
+            f'Invalid access level specified for'
+            f' {parameter.name} ({parameter.uuid}): {value}'
+        )
+
+        return cls(message)
+
+
 def export(
         c_path,
         h_path,
@@ -640,14 +651,18 @@ def create_meta_initializer_values(parameter):
 
 
 def get_access_level_string(parameter, parameter_uuid_finder):
-    if parameter.access_level_uuid is not None:
-        access_level_name = (
-            parameter_uuid_finder(parameter.access_level_uuid).name
-        )
-    else:
-        # TODO: stop defaulting here
-        access_level_name = 'User'
-    access_level = f'CAN_Enum_AccessLevel_{access_level_name}'
+    access_level_uuid = parameter.access_level_uuid
+
+    try:
+        access_level = parameter_uuid_finder(access_level_uuid)
+    except epyqlib.attrsmodel.NotFoundError as e:
+        raise InvalidAccessLevelError.build(
+            value=access_level_uuid,
+            parameter=parameter,
+        ) from e
+
+    access_level = f'CAN_Enum_AccessLevel_{access_level.name}'
+
     return access_level
 
 
