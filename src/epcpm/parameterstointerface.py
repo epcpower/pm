@@ -354,21 +354,21 @@ class Parameter:
 
         if parameter.internal_variable is not None:
             var_or_func = 'variable'
-            if parameter.setter_function is None:
-                setter_function = 'NULL'
-            else:
-                setter_function = parameter.setter_function
 
             variable_or_getter_setter = [
                 f'.variable = &{parameter.internal_variable},',
-                f'.setter = {setter_function},',
             ]
         else:
             var_or_func = 'functions'
             variable_or_getter_setter = [
                 f'.getter = {parameter.getter_function},',
-                f'.setter = {parameter.setter_function},',
             ]
+
+        if parameter.setter_function is None:
+            setter_function = 'NULL'
+        else:
+            setter_function = parameter.setter_function
+        variable_or_getter_setter.append(f'.setter = {setter_function},')
 
         if sunspec_point is None:
             sunspec_variable = 'NULL'
