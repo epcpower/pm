@@ -352,6 +352,16 @@ class Parameter:
         scale_factor_variable = 'NULL'
         scale_factor_updater = 'NULL'
 
+        if parameter.getter_function is None:
+            getter_function = 'NULL'
+        else:
+            getter_function = parameter.getter_function
+
+        if parameter.setter_function is None:
+            setter_function = 'NULL'
+        else:
+            setter_function = parameter.setter_function
+
         if parameter.internal_variable is not None:
             var_or_func = 'variable'
 
@@ -360,14 +370,11 @@ class Parameter:
             ]
         else:
             var_or_func = 'functions'
+
             variable_or_getter_setter = [
-                f'.getter = {parameter.getter_function},',
+                f'.getter = {getter_function},',
             ]
 
-        if parameter.setter_function is None:
-            setter_function = 'NULL'
-        else:
-            setter_function = parameter.setter_function
         variable_or_getter_setter.append(f'.setter = {setter_function},')
 
         if sunspec_point is None:
