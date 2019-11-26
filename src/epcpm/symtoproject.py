@@ -752,13 +752,13 @@ def go_add_tables(parameters_root, can_root):
             epyqlib.pm.parametermodel.Parameter(
                 name='RampRateIncrement',
                 units='%/minute',
-                can_getter='{interface_signal} = lineMonitorParams->voltVar.droopTable.modes[{curve_index}].rampRateInc;',
+                can_getter='{interface_signal} = lineMonitorParams->voltVar.droopTable.curves[{curve_index}].rampRateInc;',
                 can_setter='gridMonitor_setVoltVarCurveRampInc({curve_index}, {interface_signal});',
             ),
             epyqlib.pm.parametermodel.Parameter(
                 name='RampRateDecrement',
                 units='%/minute',
-                can_getter='{interface_signal} = lineMonitorParams->voltVar.droopTable.modes[{curve_index}].rampRateDec;',
+                can_getter='{interface_signal} = lineMonitorParams->voltVar.droopTable.curves[{curve_index}].rampRateDec;',
                 can_setter='gridMonitor_setVoltVarCurveRampDec({curve_index}, {interface_signal});',
             ),
         ),
@@ -768,10 +768,10 @@ def go_add_tables(parameters_root, can_root):
         parent=tables_group,
         name='VoltVar',
         enumerations=(curves,),
-        can_getter='{interface_signal} = lineMonitorParams->voltVar.droopTable.modes[{curve_index}].tbl[{point_index}].{axis};',
+        can_getter='{interface_signal} = lineMonitorParams->voltVar.droopTable.curves[{curve_index}].tbl[{point_index}].{axis};',
         can_setter='gridMonitor_setVoltVarCurve{upper_axis}Point({curve_index}, {point_index}, {interface_signal});',
-        active_curve_getter='{interface_signal} = lineMonitorParams->voltVar.droopTable.activeMode;',
-        active_curve_setter='gridMonitor_setVoltVarActiveMode({interface_signal});',
+        active_curve_getter='{interface_signal} = lineMonitorParams->voltVar.droopTable.activeCurve;',
+        active_curve_setter='gridMonitor_setVoltVarActiveCurve({interface_signal});',
         arrays=(
             settings,
             array_definition(
@@ -799,13 +799,13 @@ def go_add_tables(parameters_root, can_root):
             epyqlib.pm.parametermodel.Parameter(
                 name='RampRateIncrement',
                 units='%/minute',
-                can_getter='{interface_signal} = lineMonitorParams->hzWatts.modes[{curve_index}].rampRateInc;',
+                can_getter='{interface_signal} = lineMonitorParams->hzWatts.curves[{curve_index}].rampRateInc;',
                 can_setter='gridMonitor_setHzWattsCurveRampInc({curve_index}, {interface_signal});',
             ),
             epyqlib.pm.parametermodel.Parameter(
                 name='RampRateDecrement',
                 units='%/minute',
-                can_getter='{interface_signal} = lineMonitorParams->hzWatts.modes[{curve_index}].rampRateDec;',
+                can_getter='{interface_signal} = lineMonitorParams->hzWatts.curves[{curve_index}].rampRateDec;',
                 can_setter='gridMonitor_setHzWattsCurveRampDec({curve_index}, {interface_signal});',
             ),
         ),
@@ -815,10 +815,10 @@ def go_add_tables(parameters_root, can_root):
         parent=tables_group,
         name='HzWatts',
         enumerations=(curves,),
-        can_getter='{interface_signal} = lineMonitorParams->hzWatts.modes[{curve_index}].tbl[{point_index}].{axis};',
+        can_getter='{interface_signal} = lineMonitorParams->hzWatts.curves[{curve_index}].tbl[{point_index}].{axis};',
         can_setter='gridMonitor_setHzWattsCurve{upper_axis}Point({curve_index}, {point_index}, {interface_signal});',
-        active_curve_getter='{interface_signal} = lineMonitorParams->hzWatts.activeMode;',
-        active_curve_setter='gridMonitor_setHzWattsActiveMode({interface_signal});',
+        active_curve_getter='{interface_signal} = lineMonitorParams->hzWatts.activeCurve;',
+        active_curve_setter='gridMonitor_setHzWattsActiveCurve({interface_signal});',
         groups=(settings,),
         arrays=(
             array_definition(
@@ -846,13 +846,13 @@ def go_add_tables(parameters_root, can_root):
             epyqlib.pm.parametermodel.Parameter(
                 name='RampRateIncrement',
                 units='%/minute',
-                can_getter='{interface_signal} = lineMonitorParams->voltWatts.modes[{curve_index}].rampRateInc;',
+                can_getter='{interface_signal} = lineMonitorParams->voltWatts.curves[{curve_index}].rampRateInc;',
                 can_setter='gridMonitor_setVoltWattsCurveRampInc({curve_index}, {interface_signal});',
             ),
             epyqlib.pm.parametermodel.Parameter(
                 name='RampRateDecrement',
                 units='%/minute',
-                can_getter='{interface_signal} = lineMonitorParams->voltWatts.modes[{curve_index}].rampRateDec;',
+                can_getter='{interface_signal} = lineMonitorParams->voltWatts.curves[{curve_index}].rampRateDec;',
                 can_setter='gridMonitor_setVoltWattsCurveRampDec({curve_index}, {interface_signal});',
             ),
         ),
@@ -862,10 +862,10 @@ def go_add_tables(parameters_root, can_root):
         parent=tables_group,
         name='VoltWatts',
         enumerations=(curves,),
-        can_getter='{interface_signal} = lineMonitorParams->voltWatts.modes[{curve_index}].tbl[{point_index}].{axis};',
+        can_getter='{interface_signal} = lineMonitorParams->voltWatts.curves[{curve_index}].tbl[{point_index}].{axis};',
         can_setter='gridMonitor_setVoltWattsCurve{upper_axis}Point({curve_index}, {point_index}, {interface_signal});',
-        active_curve_getter='{interface_signal} = lineMonitorParams->voltWatts.activeMode;',
-        active_curve_setter='gridMonitor_setVoltWattsActiveMode({interface_signal});',
+        active_curve_getter='{interface_signal} = lineMonitorParams->voltWatts.activeCurve;',
+        active_curve_setter='gridMonitor_setVoltWattsActiveCurve({interface_signal});',
         groups=(settings,),
         arrays=(
             array_definition(
