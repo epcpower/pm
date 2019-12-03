@@ -285,7 +285,6 @@ class Parameter:
 
         supported_item_type = (
             parameter.uses_interface_item()
-            and parameter.internal_variable is not None
         )
 
         if not supported_item_type:
@@ -296,9 +295,14 @@ class Parameter:
         else:
             on_write = f'&{parameter.setter_function}'
 
+        if parameter.internal_variable is None:
+            variable = 'NULL'
+        else:
+            variable = f'&{parameter.internal_variable}'
+
         item = Item(
             uuid=parameter.uuid,
-            variable=f'&{parameter.internal_variable}',
+            variable=variable,
             type=parameter.internal_type,
             on_write=on_write,
             internal_scale=parameter.internal_scale_factor,
