@@ -376,10 +376,10 @@ def test_basic_parameter_array():
     enum ArrayName_e
     {
       ArrayName_ParameterName = 0,
-      ArrayName_NewArrayParameterElement = 1,
-      ArrayName_NewArrayParameterElement = 2,
-      ArrayName_NewArrayParameterElement = 3,
-      ArrayName_NewArrayParameterElement = 4,
+      ArrayName__2 = 1,
+      ArrayName__3 = 2,
+      ArrayName__4 = 3,
+      ArrayName__5 = 4,
       ArrayName_Count = 5
     };
     typedef enum ArrayName_e ArrayName_et;
@@ -412,10 +412,10 @@ def test_grouped_parameter_array():
     enum ArrayName_e
     {
       ArrayName_ParameterName = 0,
-      ArrayName_NewArrayParameterElement = 1,
-      ArrayName_NewArrayParameterElement = 2,
-      ArrayName_NewArrayParameterElement = 3,
-      ArrayName_NewArrayParameterElement = 4,
+      ArrayName__2 = 1,
+      ArrayName__3 = 2,
+      ArrayName__4 = 3,
+      ArrayName__5 = 4,
       ArrayName_Count = 5
     };
     typedef enum ArrayName_e ArrayName_et;
