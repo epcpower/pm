@@ -86,3 +86,9 @@ target/
 /src/epcpm/__build.py
 /lextab.py
 /yacctab.py
+
+# Tests
+test_sunspectoxlsx.csv
+test_sunspectoxlsx.xlxx
+src/epcpm/tests/project_with_sunspec
+
