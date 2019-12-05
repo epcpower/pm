@@ -89,6 +89,6 @@ target/
 
 # Tests
 test_sunspectoxlsx.csv
-test_sunspectoxlsx.xlxx
+test_sunspectoxlsx.xlsx
 src/epcpm/tests/project_with_sunspec
 
