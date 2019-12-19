@@ -76,9 +76,9 @@ class Root:
         matrix = canmatrix.canmatrix.CanMatrix()
         # TODO: this shouldn't need to be copied from:
         #           canmatrix.sym.load()
-        matrix.addFrameDefines("GenMsgCycleTime", 'INT 0 65535')
-        matrix.addFrameDefines("Receivable", 'BOOL False True')
-        matrix.addFrameDefines("Sendable", 'BOOL False True')
+        matrix.add_frame_defines("GenMsgCycleTime", 'INT 0 65535')
+        matrix.add_frame_defines("Receivable", 'BOOL False True')
+        matrix.add_frame_defines("Sendable", 'BOOL False True')
         matrix.addSignalDefines("GenSigStartValue", 'FLOAT -3.4E+038 3.4E+038')
         matrix.addSignalDefines("HexadecimalOutput", 'BOOL False True')
         matrix.addSignalDefines("DisplayDecimalPlaces", 'INT 0 65535')

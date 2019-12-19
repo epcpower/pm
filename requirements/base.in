@@ -14,7 +14,7 @@ xmldiff==2.2
 openpyxl==2.5.12
 
 
-canmatrix==0.7
+canmatrix==0.9.1
 graham==0.1.11
 pyserial==3.4
 
