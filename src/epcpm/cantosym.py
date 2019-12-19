@@ -79,10 +79,10 @@ class Root:
         matrix.add_frame_defines("GenMsgCycleTime", 'INT 0 65535')
         matrix.add_frame_defines("Receivable", 'BOOL False True')
         matrix.add_frame_defines("Sendable", 'BOOL False True')
-        matrix.addSignalDefines("GenSigStartValue", 'FLOAT -3.4E+038 3.4E+038')
-        matrix.addSignalDefines("HexadecimalOutput", 'BOOL False True')
-        matrix.addSignalDefines("DisplayDecimalPlaces", 'INT 0 65535')
-        matrix.addSignalDefines("LongName", 'STR')
+        matrix.add_signal_defines("GenSigStartValue", 'FLOAT -3.4E+038 3.4E+038')
+        matrix.add_signal_defines("HexadecimalOutput", 'BOOL False True')
+        matrix.add_signal_defines("DisplayDecimalPlaces", 'INT 0 65535')
+        matrix.add_signal_defines("LongName", 'STR')
 
         for child in self.wrapped.children:
             frame = builders.wrap(
