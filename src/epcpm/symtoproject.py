@@ -368,7 +368,7 @@ def build_message(
 
 def message_from_matrix(frame, factory, **extras):
     extras.setdefault('name', humanize_name(frame.name))
-    extras.setdefault('identifier', frame.id)
+    extras.setdefault('identifier', frame.arbitration_id)
     extras.setdefault('extended', frame.extended)
     extras.setdefault('comment', frame.comment)
     extras.setdefault('sendable', frame.attributes['Sendable'] == 'True')

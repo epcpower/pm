@@ -36,9 +36,9 @@ setuptools.setup(
         ],
     },
     install_requires=[
-        'canmatrix',
+        'canmatrix>=0.9.1',
         'click',
-        'epyqlib>=2019.8.1',
+        'epyqlib>=2019.12.8',
         'graham',
         'jinja2',
         'lxml',
