@@ -90,7 +90,7 @@ class Root:
                 access_levels=self.access_levels,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             ).gen()
-            matrix.addFrame(frame)
+            matrix.add_frame(frame)
 
         enumerations = self.collect_enumerations()
         used_enumerations = {
@@ -109,7 +109,7 @@ class Root:
                 for e in enumeration.children
             )
 
-            matrix.addValueTable(
+            matrix.add_value_table(
                 name=dehumanize_name(enumeration.name),
                 valueTable=enumerators,
             )
@@ -158,8 +158,10 @@ class Message:
     def gen(self):
         frame = canmatrix.canmatrix.Frame(
             name=dehumanize_name(self.wrapped.name),
-            id=self.wrapped.identifier,
-            extended=self.wrapped.extended,
+            arbitration_id=canmatrix.canmatrix.ArbitrationId(
+                id=self.wrapped.identifier,
+                extended=self.wrapped.extended,
+            ),
             size=self.wrapped.length,
             comment=self.wrapped.comment,
         )
@@ -351,7 +353,7 @@ class Signal:
             size=self.wrapped.bits,
             is_signed=self.wrapped.signed,
             factor=self.wrapped.factor,
-            startBit=self.wrapped.start_bit,
+            start_bit=self.wrapped.start_bit,
             calc_min_for_none=False,
             calc_max_for_none=False,
             **extras,
@@ -399,8 +401,10 @@ class MultiplexedMessage:
 
         frame = canmatrix.canmatrix.Frame(
             name=dehumanize_name(self.wrapped.name),
-            id=self.wrapped.identifier,
-            extended=self.wrapped.extended,
+            arbitration_id=canmatrix.canmatrix.ArbitrationId(
+                id=self.wrapped.identifier,
+                extended=self.wrapped.extended,
+            ),
             size=not_signals[0].length,
             comment=self.wrapped.comment,
             attributes={

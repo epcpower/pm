@@ -368,8 +368,8 @@ def build_message(
 
 def message_from_matrix(frame, factory, **extras):
     extras.setdefault('name', humanize_name(frame.name))
-    extras.setdefault('identifier', frame.arbitration_id)
-    extras.setdefault('extended', frame.extended)
+    extras.setdefault('identifier', frame.arbitration_id.id)
+    extras.setdefault('extended', frame.arbitration_id.extended)
     extras.setdefault('comment', frame.comment)
     extras.setdefault('sendable', frame.attributes['Sendable'] == 'True')
     extras.setdefault('receivable', frame.attributes['Receivable'] == 'True')
@@ -389,7 +389,7 @@ def signal_from_matrix(
     extras.setdefault('bits', matrix_signal.size)
     extras.setdefault('factor', matrix_signal.factor)
     extras.setdefault('signed', matrix_signal.is_signed)
-    extras.setdefault('start_bit', matrix_signal.getStartbit())
+    extras.setdefault('start_bit', matrix_signal.get_startbit())
 
     extras.setdefault(
         'enumeration_uuid',
