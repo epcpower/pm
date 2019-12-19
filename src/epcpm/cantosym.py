@@ -164,7 +164,11 @@ class Message:
             ),
             size=self.wrapped.length,
             comment=self.wrapped.comment,
-            cycle_time=self.wrapped.cycle_time,
+            cycle_time=(
+                self.wrapped.cycle_time
+                if self.wrapped.cycle_time is not None
+                else 0
+            ),
         )
 
         frame.attributes['Receivable'] = str(self.wrapped.receivable)
@@ -215,6 +219,7 @@ class Signal:
             and self.parameter_uuid_finder is not None
         )
         parameter = None
+        initial_value = None
         if can_find_parameter:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
@@ -345,6 +350,13 @@ class Signal:
                 extras['enumeration'] = dehumanize_name(enumeration.name)
                 extras['values'] = {v: k for k, v in enumeration.items()}
 
+            if parameter.default is not None:
+                # TODO: it seems this shouldn't be needed...  0754397432978432
+                initial_value = parameter.default / self.wrapped.factor
+
+        if initial_value is not None:
+            extras['initial_value'] = initial_value
+
         signal = canmatrix.canmatrix.Signal(
             name=dehumanize_name(self.wrapped.name),
             multiplex=multiplex_id,
@@ -362,12 +374,6 @@ class Signal:
 
             attributes['LongName'] = parameter.name
             attributes['HexadecimalOutput'] = parameter.display_hexadecimal
-
-            if parameter.default is not None:
-                # TODO: it seems this shouldn't be needed...  0754397432978432
-                attributes['GenSigStartValue'] = (
-                    parameter.default / self.wrapped.factor
-                )
 
             if parameter.decimal_places is not None:
                 attributes['DisplayDecimalPlaces'] = parameter.decimal_places
@@ -405,7 +411,11 @@ class MultiplexedMessage:
             ),
             size=not_signals[0].length,
             comment=self.wrapped.comment,
-            cycle_time=not_signals[0].cycle_time,
+            cycle_time=(
+                not_signals[0].cycle_time
+                if not_signals[0].cycle_time is not None
+                else 0
+            ),
             attributes={
                 'Receivable': str(self.wrapped.receivable),
                 'Sendable': str(self.wrapped.sendable),

@@ -87,11 +87,6 @@ def test_export():
 def normalized_attributes(attributes):
     attributes = dict(attributes)
 
-    if 'GenSigStartValue' in attributes:
-        attributes['GenSigStartValue'] = decimal.Decimal(
-            attributes['GenSigStartValue'],
-        )
-
     return attributes
 
 
@@ -132,13 +127,6 @@ def assert_signals_equal(
 
     tweaked_attributes = normalized_attributes(tweaked)
     original_attributes = normalized_attributes(original.attributes)
-
-    if 'GenSigStartValue' in original_attributes:
-        diff = abs(
-            tweaked_attributes.pop('GenSigStartValue')
-            - original_attributes.pop('GenSigStartValue')
-        )
-        assert diff < 1
 
     assert tweaked_attributes == original_attributes, original.name
 

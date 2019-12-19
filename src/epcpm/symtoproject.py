@@ -442,9 +442,8 @@ def build_multiplexed_message(
             if len(mux_comment) > 0:
                 extras['comment'] = mux_comment
 
-        cycle_time = frame.attributes.get('GenMsgCycleTime')
-        if cycle_time is not None:
-            extras['cycle_time'] = cycle_time
+        if frame.cycle_time != 0:
+            extras['cycle_time'] = frame.cycle_time
 
         multiplexer = epcpm.canmodel.Multiplexer(
             name=humanize_name(mux_name),
@@ -1237,10 +1236,9 @@ def parameter_from_signal(
         if len(matrix_signal.unit) > 0:
             extras['units'] = matrix_signal.unit
 
-    default = attributes.get('GenSigStartValue')
+    default = matrix_signal.initial_value
     if default is not None:
         if matrix_signal.factor is not None:
-            default = decimal.Decimal(default)
             # TODO: it seems this shouldn't be needed...  0754397432978432
             default *= decimal.Decimal(matrix_signal.factor)
         extras['default'] = default
