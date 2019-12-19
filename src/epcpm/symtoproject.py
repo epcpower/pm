@@ -148,7 +148,7 @@ def load_can_file(
     enumeration_name_to_uuid = {}
     access_levels = None
     variants = None
-    for name, values in sorted(matrix.valueTables.items()):
+    for name, values in sorted(matrix.value_tables.items()):
         if name == 'AccessLevel':
             enumeration = epyqlib.pm.parametermodel.AccessLevels(name=name)
             access_levels = enumeration

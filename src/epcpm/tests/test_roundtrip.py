@@ -599,4 +599,4 @@ def test_roundtrip():
     assert exported.load_errors == []
 
     assert_frame_lists_equal(original.frames, exported.frames)
-    assert_value_tables_equal(original.valueTables, exported.valueTables)
+    assert_value_tables_equal(original.value_tables, exported.value_tables)
