@@ -326,9 +326,8 @@ def build_message(
 ):
     extras = {}
 
-    cycle_time = frame.attributes.get('GenMsgCycleTime')
-    if cycle_time is not None:
-        extras['cycle_time'] = cycle_time
+    if frame.cycle_time is not None:
+        extras['cycle_time'] = frame.cycle_time
 
     message = message_from_matrix(
         frame=frame,

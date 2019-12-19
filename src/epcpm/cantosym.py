@@ -164,10 +164,8 @@ class Message:
             ),
             size=self.wrapped.length,
             comment=self.wrapped.comment,
+            cycle_time=self.wrapped.cycle_time,
         )
-
-        if self.wrapped.cycle_time is not None:
-            frame.attributes['GenMsgCycleTime'] = str(self.wrapped.cycle_time)
 
         frame.attributes['Receivable'] = str(self.wrapped.receivable)
         frame.attributes['Sendable'] = str(self.wrapped.sendable)
@@ -407,15 +405,12 @@ class MultiplexedMessage:
             ),
             size=not_signals[0].length,
             comment=self.wrapped.comment,
+            cycle_time=not_signals[0].cycle_time,
             attributes={
                 'Receivable': str(self.wrapped.receivable),
                 'Sendable': str(self.wrapped.sendable),
-            }
+            },
         )
-
-        cycle_time = not_signals[0].cycle_time
-        if cycle_time is not None:
-            frame.attributes['GenMsgCycleTime'] = str(cycle_time)
 
         if len(self.wrapped.children) == 0:
             return frame
