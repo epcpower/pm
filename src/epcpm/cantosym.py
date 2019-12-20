@@ -351,8 +351,7 @@ class Signal:
                 extras['values'] = {v: k for k, v in enumeration.items()}
 
             if parameter.default is not None:
-                # TODO: it seems this shouldn't be needed...  0754397432978432
-                initial_value = parameter.default / self.wrapped.factor
+                initial_value = parameter.default
 
         if initial_value is not None:
             extras['initial_value'] = initial_value
