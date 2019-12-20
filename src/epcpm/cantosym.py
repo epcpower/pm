@@ -545,7 +545,12 @@ class MultiplexedMessageClone:
         ).gen()
  
         frame.name = self.wrapped.name
-        frame.id = self.wrapped.identifier
+        frame.arbitration_id = canmatrix.canmatrix.ArbitrationId(
+            id=self.wrapped.identifier,
+            # TODO: should technically have it's own extended attribute
+            #       rather than grabbing from the original
+            extended=self.wrapped.original.extended,
+        )
         frame.comment = self.wrapped.comment
         frame.attributes={
             'Receivable': str(self.wrapped.receivable),
