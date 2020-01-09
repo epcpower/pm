@@ -255,7 +255,13 @@ class Message(epyqlib.treenode.TreeNode):
         return {}
 
     def can_drop_on(self, node):
-        return isinstance(node, epyqlib.pm.parametermodel.Parameter)
+        return isinstance(
+            node,
+            (
+                epyqlib.pm.parametermodel.Parameter,
+                Signal,
+            ),
+        )
 
     def can_delete(self, node=None):
         if node is None:
