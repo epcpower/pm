@@ -13,7 +13,7 @@ alqtendpy==0.0.4
 altendpy==0.0.21          # via alqtendpy
 altgraph==0.16.1
 argparse==1.4.0           # via codecov
-arrow==0.15.4
+arrow==0.15.5
 atomicwrites==1.3.0       # via pytest
 attrs==18.2.0
 automat==0.8.0            # via twisted
@@ -27,7 +27,7 @@ click==7.0
 codecov==2.0.5
 colorama==0.4.3           # via pytest
 constantly==15.1.0        # via twisted
-coverage==5.0             # via codecov, pytest-cov
+coverage==5.0.2           # via codecov, pytest-cov
 decorator==4.4.1
 docutils==0.15.2          # via readme-renderer
 et-xmlfile==1.0.1         # via openpyxl
@@ -38,23 +38,24 @@ graham==0.1.11
 greenlet==0.4.15
 hyperlink==19.0.0         # via twisted
 idna==2.7                 # via hyperlink, requests
-importlib-metadata==1.3.0  # via pluggy
+importlib-metadata==1.3.0  # via keyring, pluggy, twine
 incremental==17.5.0       # via twisted
 jdcal==1.4.1              # via openpyxl
 jinja2==2.10.1
+keyring==21.0.0           # via twine
 lxml==4.3.0
 markupsafe==1.1.1         # via jinja2
 marshmallow==2.20.5       # via graham
 more-itertools==8.0.2     # via pytest, zipp
-natsort==6.2.0
+natsort==7.0.0
 openpyxl==2.5.12
 pathlib2==2.3.5           # via canmatrix
 pefile==2019.4.18
-pint==0.9
-pip-tools==4.0.0
+pint==0.10.1
+pip-tools==4.3.0
 pkginfo==1.5.0.1          # via twine
 pluggy==0.13.1            # via pytest, tox
-py==1.8.0                 # via pytest, tox
+py==1.8.1                 # via pytest, tox
 pyelftools==0.26
 pygments==2.5.2           # via readme-renderer
 pyhamcrest==1.9.0         # via twisted
@@ -68,9 +69,9 @@ python-can==2.2.1
 python-dateutil==2.8.1    # via arrow
 python-docx==0.8.10
 python-dotenv==0.10.3
-pywin32-ctypes==0.2.0
+pywin32-ctypes==0.2.0     # via keyring
 qt5reactor==0.5
-qtawesome==0.6.0
+qtawesome==0.6.1
 qtpy==1.9.0               # via qtawesome
 readme-renderer==24.0     # via twine
 requests-toolbelt==0.9.1  # via twine
@@ -81,18 +82,18 @@ six==1.13.0               # via automat, bleach, pathlib2, pip-tools, pyhamcrest
 smmap2==2.0.5             # via gitdb2
 toolz==0.9.0
 tox==2.8.2
-tqdm==4.40.2              # via twine
-twine==1.13.0
+tqdm==4.41.1              # via twine
+twine==3.1.1
 twisted==19.7.0
 urllib3==1.24.3           # via requests
 virtualenv==16.7.9        # via tox
 webencodings==0.5.1       # via bleach
-wheel==0.33.4
+wheel==0.33.6
 wrapt==1.11.2             # via python-can
 xmldiff==2.2
 zipp==0.6.0               # via importlib-metadata
 zope.interface==4.7.1     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
-# pip==19.2.2
-# setuptools==41.1.0
+# pip
+# setuptools
