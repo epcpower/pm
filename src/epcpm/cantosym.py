@@ -328,13 +328,13 @@ class Signal:
                 if multiplex_on_write is None:
                     multiplex_on_write = ''
 
-                comment_format_interface_item_segments = ':'.join(
+                comment_format_interface_item_segments = ':'.join([
                     'InterfaceItem',
                     '{item}',
                     '{getter}',
                     '{setter}',
                     '{multiplex_on_write}'
-                )
+                ])
                 comment_format = (
                     f'{{comment}}  <{comment_format_interface_item_segments}>'
                 )
