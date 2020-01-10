@@ -245,7 +245,7 @@ class Message(epyqlib.treenode.TreeNode):
 
     @staticmethod
     def child_from(node):
-        return Signal(name=node.name, parameter_uuid=node.uuid)
+        return create_child_signal_from(node=node)
 
     @classmethod
     def all_addable_types(cls):

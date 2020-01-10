@@ -51,7 +51,9 @@ def main(project, verbosity, logger):
         icon_path='icon.ico',
     )
 
-    epyqlib.utils.qt.exception_message_box_register_parent(parent=window.ui)
+    epyqlib.utils.qt.exception_message_box_register_parent(
+        parent=window.main_window,
+    )
 
     if project is not None:
         filename = os.path.abspath(project)
