@@ -297,6 +297,7 @@ class Multiplexer(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.Decimal(allow_none=True, as_string=True),
         ),
     )
+    on_write = epyqlib.attrsmodel.create_str_or_none_attribute()
     comment = attr.ib(
         default=None,
         convert=epyqlib.attrsmodel.to_str_or_none,
@@ -1095,6 +1096,7 @@ columns = epyqlib.attrsmodel.columns(
         MultiplexedMessageClone,
         ),
     merge('start_bit', Signal),
+    merge('on_write', Multiplexer),
     merge(
         'comment', 
         Message, 
