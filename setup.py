@@ -52,6 +52,7 @@ setuptools.setup(
     extras_require={
         'test': [
             'codecov',
+            'gitignoreio',
             'pytest',
             'pytest-cov',
             'pytest-qt',
