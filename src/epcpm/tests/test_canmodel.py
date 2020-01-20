@@ -226,3 +226,10 @@ def test_add_enumerator_update_table(sample):
 
     sample.parameter_table.update()
     sample.table.update()
+
+
+TestAttrsModel = epyqlib.attrsmodel.build_tests(
+    types=epcpm.canmodel.types,
+    root_type=epcpm.canmodel.Root,
+    columns=epcpm.canmodel.columns,
+)
