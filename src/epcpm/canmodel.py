@@ -165,6 +165,7 @@ class Signal(epyqlib.treenode.TreeNode):
         for r in results:
             result.append_child(epyqlib.checkresultmodel.Result(
                 node=self,
+                severity=epyqlib.checkresultmodel.ResultSeverity.warning,
                 message=r,
             ))
 
@@ -392,6 +393,7 @@ class Multiplexer(epyqlib.treenode.TreeNode):
 
             result.append_child(epyqlib.checkresultmodel.Result(
                 node=other,
+                severity=epyqlib.checkresultmodel.ResultSeverity.error,
                 message=f'MUX ID {self.identifier} is in use by {other.name}',
             ))
 
@@ -405,6 +407,7 @@ class Multiplexer(epyqlib.treenode.TreeNode):
         if len(x) > 1:
             result.append_child(epyqlib.checkresultmodel.Result(
                 node=self,
+                severity=epyqlib.checkresultmodel.ResultSeverity.error,
                 message=f'uses both new-style interface items and old',
             ))
 
