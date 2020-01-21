@@ -38,7 +38,7 @@ setuptools.setup(
     install_requires=[
         'canmatrix>=0.9.1',
         'click',
-        'epyqlib>=2019.12.10',
+        'epyqlib>=2020.1.4',
         'graham',
         'jinja2',
         'lxml',
@@ -52,6 +52,7 @@ setuptools.setup(
     extras_require={
         'test': [
             'codecov',
+            'gitignoreio',
             'pytest',
             'pytest-cov',
             'pytest-qt',

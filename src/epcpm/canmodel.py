@@ -7,6 +7,7 @@ import marshmallow
 import PyQt5.QtCore
 
 import epyqlib.attrsmodel
+import epyqlib.checkresultmodel
 import epyqlib.pm.parametermodel
 import epyqlib.treenode
 import epyqlib.utils.general
@@ -164,10 +165,14 @@ class Signal(epyqlib.treenode.TreeNode):
         for r in results:
             result.append_child(epyqlib.checkresultmodel.Result(
                 node=self,
+                severity=epyqlib.checkresultmodel.ResultSeverity.warning,
                 message=r,
             ))
 
         return result
+
+    def multiplexer_id_nodes(self):
+        return []
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
@@ -269,6 +274,9 @@ class Message(epyqlib.treenode.TreeNode):
 
         return True
 
+    def multiplexer_id_nodes(self):
+        return [self]
+
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
     check = epyqlib.attrsmodel.check_just_children
@@ -368,9 +376,49 @@ class Multiplexer(epyqlib.treenode.TreeNode):
 
         return True
 
+    @epyqlib.attrsmodel.check_children
+    def check(self, result, models):
+        # TODO: we should really get all the mux id's passed in here.
+        #       searching for them all from each place is wasteful
+
+        multiplexer_message = self.tree_parent
+        while not isinstance(multiplexer_message, MultiplexedMessage):
+            multiplexer_message = multiplexer_message.tree_parent
+
+        for other in multiplexer_message.multiplexer_id_nodes():
+            if other is self:
+                continue
+
+            if other.identifier != self.identifier:
+                continue
+
+            result.append_child(epyqlib.checkresultmodel.Result(
+                node=other,
+                severity=epyqlib.checkresultmodel.ResultSeverity.error,
+                message=f'MUX ID {self.identifier} is in use by {other.name}',
+            ))
+
+        x = set()
+        for signal in self.children:
+            parameter = models['parameters'].node_from_uuid(
+                u=signal.parameter_uuid,
+            )
+            x.add(parameter.uses_interface_item())
+
+        if len(x) > 1:
+            result.append_child(epyqlib.checkresultmodel.Result(
+                node=self,
+                severity=epyqlib.checkresultmodel.ResultSeverity.error,
+                message=f'uses both new-style interface items and old',
+            ))
+
+        return result
+
+    def multiplexer_id_nodes(self):
+        return [self]
+
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
-    check = epyqlib.attrsmodel.check_just_children
 
 
 @graham.schemify(tag='multiplexed_message')
@@ -480,6 +528,12 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
             return CanTable(table_uuid=node.uuid)
 
         return node
+
+    def multiplexer_id_nodes(self):
+        return list(itertools.chain.from_iterable(
+            child.multiplexer_id_nodes()
+            for child in self.children
+        ))
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
@@ -1023,6 +1077,12 @@ class CanTable(epyqlib.treenode.TreeNode):
             return node
 
         raise Exception('unexpected')
+
+    def multiplexer_id_nodes(self):
+        return list(itertools.chain.from_iterable(
+            child.multiplexer_id_nodes()
+            for child in self.children
+        ))
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
