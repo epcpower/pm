@@ -349,17 +349,29 @@ class DataPoint(epyqlib.treenode.TreeNode):
         else:
             root = self.find_root()
             parameter = root.model.node_from_uuid(self.parameter_uuid)
+
             if (
                     parameter.tree_parent.name.startswith('SunSpec')
                     and parameter.tree_parent.tree_parent.tree_parent is None
             ):
                 result.append_child(epyqlib.checkresultmodel.Result(
-                    node=self,
+                    node=parameter,
                     severity=(
                         epyqlib.checkresultmodel.ResultSeverity.information
                     ),
                     message=(
                         'Connected to temporary SunSpec imported parameter'
+                    ),
+                ))
+
+            if not parameter.uses_interface_item():
+                result.append_child(epyqlib.checkresultmodel.Result(
+                    node=parameter,
+                    severity=(
+                        epyqlib.checkresultmodel.ResultSeverity.warning
+                    ),
+                    message=(
+                        'Connected to old-style parameter'
                     ),
                 ))
 
