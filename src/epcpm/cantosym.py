@@ -195,6 +195,7 @@ class Signal:
     def gen(
             self,
             multiplex_id=None,
+            multiplex_on_write=None,
             skip_access_level=False,
             skip_configuration=False,
     ):
@@ -324,8 +325,18 @@ class Signal:
                     getter = 'items_getMeta'
                     setter = 'items_setMeta'
 
+                if multiplex_on_write is None:
+                    multiplex_on_write = ''
+
+                comment_format_interface_item_segments = ':'.join([
+                    'InterfaceItem',
+                    '{item}',
+                    '{getter}',
+                    '{setter}',
+                    '{multiplex_on_write}'
+                ])
                 comment_format = (
-                    '{comment}  <InterfaceItem:{item}:{getter}:{setter}>'
+                    f'{{comment}}  <{comment_format_interface_item_segments}>'
                 )
                 extras['comment'] = comment_format.format(
                     comment=extras.get('comment', ''),
@@ -334,6 +345,7 @@ class Signal:
                     ),
                     getter=getter,
                     setter=setter,
+                    multiplex_on_write=multiplex_on_write,
                 ).strip()
 
             comment = extras.get('comment', '')
@@ -495,6 +507,7 @@ class MultiplexedMessage:
                     parameter_uuid_finder=self.parameter_uuid_finder,
                 ).gen(
                     multiplex_id=multiplexer.identifier,
+                    multiplex_on_write=multiplexer.on_write,
                     skip_access_level=all_access_levels_match,
                 )
 

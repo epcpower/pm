@@ -61,6 +61,7 @@
                             "identifier": 5,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -115,6 +116,7 @@
                             "identifier": 6,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -187,6 +189,7 @@
                             "identifier": 7,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -241,6 +244,7 @@
                             "identifier": 8,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -295,6 +299,7 @@
                             "identifier": 9,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -367,6 +372,7 @@
                             "identifier": 10,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -421,6 +427,7 @@
                             "identifier": 11,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -475,6 +482,7 @@
                             "identifier": 12,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -547,6 +555,7 @@
                             "identifier": 13,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -601,6 +610,7 @@
                             "identifier": 14,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -655,6 +665,7 @@
                             "identifier": 15,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -727,6 +738,7 @@
                             "identifier": 16,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -781,6 +793,7 @@
                             "identifier": 17,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -835,6 +848,7 @@
                             "identifier": 18,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -907,6 +921,7 @@
                             "identifier": 19,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -961,6 +976,7 @@
                             "identifier": 20,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -1015,6 +1031,7 @@
                             "identifier": 21,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -1087,6 +1104,7 @@
                             "identifier": 22,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -1141,6 +1159,7 @@
                             "identifier": 23,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -1195,6 +1214,7 @@
                             "identifier": 24,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -1267,6 +1287,7 @@
                             "identifier": 25,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -1321,6 +1342,7 @@
                             "identifier": 26,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -1375,6 +1397,7 @@
                             "identifier": 27,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
@@ -1447,6 +1470,7 @@
                             "identifier": 28,
                             "length": 8,
                             "cycle_time": null,
+                            "on_write": null,
                             "comment": null,
                             "children": [
                                 {
