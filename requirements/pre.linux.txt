@@ -15,7 +15,6 @@ idna==2.8                 # via requests
 importlib-metadata==1.4.0  # via keyring, twine
 jeepney==0.4.2            # via keyring, secretstorage
 keyring==21.1.0           # via twine
-more-itertools==8.1.0     # via zipp
 pip-tools==4.3.0
 pkginfo==1.5.0.1          # via twine
 pycparser==2.19           # via cffi
@@ -26,12 +25,12 @@ requests==2.22.0          # via requests-toolbelt, romp, twine
 romp==2019.4.1
 secretstorage==3.1.2      # via keyring
 six==1.14.0               # via bleach, cryptography, pip-tools, readme-renderer
-tqdm==4.41.1              # via twine
+tqdm==4.42.0              # via twine
 twine==3.1.1
-urllib3==1.25.7           # via requests
+urllib3==1.25.8           # via requests
 webencodings==0.5.1       # via bleach
 wheel==0.33.6
-zipp==2.0.0               # via importlib-metadata
+zipp==2.1.0               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==19.3.1

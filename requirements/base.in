@@ -20,6 +20,7 @@ pyserial==3.4
 
 -e git+https://github.com/altendky/pysunspec@f197baa9c373ff93b13bff22a1ca0368aa89b305#egg=pysunspec
 -e git+https://github.com/altendky/pycparser@b19d2b7cb78bccc89ef187c1c4eb5db0fdd3bbf9#egg=pycparser
+-e git+https://github.com/epcpower/sunspec-demo@19581317ae2fd136b5df229d824f81a17da52c58#egg=epcsunspecdemo
 
 # https://github.com/pyinstaller/pyinstaller/issues/3942
 -e git+https://github.com/pyinstaller/PyInstaller@46286a1f455d8e0837f7c2b9e1bbdff1ef858f0f#egg=PyInstaller

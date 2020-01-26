@@ -4,6 +4,7 @@
 #
 #    python boots.py lock
 #
+-e git+https://github.com/epcpower/sunspec-demo@19581317ae2fd136b5df229d824f81a17da52c58#egg=epcsunspecdemo
 -e file:sub/epyqlib#egg=epyqlib
 -e git+https://github.com/altendky/pycparser@b19d2b7cb78bccc89ef187c1c4eb5db0fdd3bbf9#egg=pycparser
 -e git+https://github.com/pyinstaller/PyInstaller@46286a1f455d8e0837f7c2b9e1bbdff1ef858f0f#egg=PyInstaller
@@ -46,7 +47,7 @@ lxml==4.3.0
 macholib==1.14
 markupsafe==1.1.1         # via jinja2
 marshmallow==2.20.5       # via graham
-more-itertools==8.1.0     # via pytest, zipp
+more-itertools==8.1.0     # via pytest
 natsort==7.0.0
 openpyxl==2.5.12
 pathlib2==2.3.5           # via canmatrix
@@ -80,7 +81,7 @@ six==1.14.0               # via automat, bleach, pathlib2, pip-tools, pytest, py
 smmap2==2.0.5             # via gitdb2
 toolz==0.9.0
 tox==2.8.2
-tqdm==4.41.1              # via twine
+tqdm==4.42.0              # via twine
 twine==3.1.1
 twisted==19.7.0
 urllib3==1.24.3           # via requests
@@ -89,7 +90,7 @@ webencodings==0.5.1       # via bleach
 wheel==0.33.6
 wrapt==1.11.2             # via python-can
 xmldiff==2.2
-zipp==2.0.0               # via importlib-metadata
+zipp==2.1.0               # via importlib-metadata
 zope.interface==4.7.1     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
