@@ -355,7 +355,7 @@ class DataPoint(epyqlib.treenode.TreeNode):
                     and parameter.tree_parent.tree_parent.tree_parent is None
             ):
                 result.append_child(epyqlib.checkresultmodel.Result(
-                    node=parameter,
+                    node=self,
                     severity=(
                         epyqlib.checkresultmodel.ResultSeverity.information
                     ),
@@ -366,14 +366,29 @@ class DataPoint(epyqlib.treenode.TreeNode):
 
             if not parameter.uses_interface_item():
                 result.append_child(epyqlib.checkresultmodel.Result(
-                    node=parameter,
+                    node=self,
                     severity=(
-                        epyqlib.checkresultmodel.ResultSeverity.warning
+                        epyqlib.checkresultmodel.ResultSeverity.information
                     ),
                     message=(
                         'Connected to old-style parameter'
                     ),
                 ))
+
+                access_level = root.model.node_from_uuid(
+                    parameter.access_level_uuid,
+                )
+
+                if access_level.value > 0:
+                    result.append_child(epyqlib.checkresultmodel.Result(
+                        node=self,
+                        severity=(
+                            epyqlib.checkresultmodel.ResultSeverity.warning
+                        ),
+                        message=(
+                            'Access level will not be enforced'
+                        ),
+                    ))
 
         return result
 
