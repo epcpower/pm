@@ -445,7 +445,7 @@ class Parameter:
             getter_setter_list = [
                 'InterfaceItem',
                 var_or_func,
-                parameter.internal_type,
+                types[parameter.internal_type].name,
                 sunspec_type,
             ]
 
@@ -459,7 +459,7 @@ class Parameter:
             )
 
         interface_item_type = (
-            f'InterfaceItem_{var_or_func}_{parameter.internal_type}'
+            f'InterfaceItem_{var_or_func}_{types[parameter.internal_type].name}'
         )
 
         can_getter, can_setter, can_variable = can_getter_setter_variable(
@@ -501,6 +501,7 @@ class Parameter:
 @attr.s(frozen=True)
 class FixedWidthType:
     name = attr.ib()
+    type = attr.ib()
     bits = attr.ib()
     signed = attr.ib()
     minimum_code = attr.ib()
@@ -510,6 +511,7 @@ class FixedWidthType:
     def build(cls, bits, signed):
         return cls(
             name=fixed_width_name(bits=bits, signed=signed),
+            type=fixed_width_name(bits=bits, signed=signed),
             bits=bits,
             signed=signed,
             minimum_code=fixed_width_limit_text(
@@ -528,6 +530,7 @@ class FixedWidthType:
 @attr.s(frozen=True)
 class FloatingType:
     name = attr.ib()
+    type = attr.ib()
     bits = attr.ib()
     minimum_code = attr.ib()
     maximum_code = attr.ib()
@@ -536,6 +539,7 @@ class FloatingType:
     def build(cls, bits):
         return cls(
             name={32: 'float', 64: 'double'}[bits],
+            type={32: 'float', 64: 'double'}[bits],
             bits=bits,
             minimum_code='(-INFINITY)',
             maximum_code='(INFINITY)',
@@ -545,6 +549,7 @@ class FloatingType:
 @attr.s(frozen=True)
 class BooleanType:
     name = attr.ib(default='bool')
+    type = attr.ib(default='bool')
     bits = attr.ib(default=2)
     minimum_code = attr.ib(default='(false)')
     maximum_code = attr.ib(default='(true)')
@@ -553,9 +558,18 @@ class BooleanType:
 @attr.s(frozen=True)
 class SizeType:
     name = attr.ib(default='size_t')
+    type = attr.ib(default='size_t')
     bits = attr.ib(default=32)
     minimum_code = attr.ib(default='(0)')
     maximum_code = attr.ib(default='(SIZE_MAX)')
+
+
+@attr.s(frozen=True)
+class VoidPointerType:
+    name = attr.ib(default='void_p')
+    type = attr.ib(default='void*')
+    minimum_code = attr.ib(default='(0)')
+    maximum_code = attr.ib(default='(UINT32_C(0x240000))')
 
 
 def fixed_width_name(bits, signed):
@@ -582,7 +596,7 @@ def fixed_width_limit_text(bits, signed, limit):
 
 
 types = {
-    type.name: type
+    type.type: type
     for type in (
         *(
             FixedWidthType.build(
@@ -598,6 +612,7 @@ types = {
         ),
         BooleanType(),
         SizeType(),
+        VoidPointerType(),
     )
 }
 
@@ -718,7 +733,7 @@ def can_getter_setter_variable(can_signal, parameter, var_or_func_or_table):
     getter_setter_list = [
         'InterfaceItem',
         var_or_func_or_table,
-        parameter.internal_type,
+        types[parameter.internal_type].name,
         'can',
         can_type,
     ]
@@ -803,6 +818,7 @@ class TableBaseStructures:
     def ensure_common_structure(
             self,
             internal_type,
+            internal_name,
             parameter_uuid,
             remainder,
             common_initializers,
@@ -852,7 +868,7 @@ class TableBaseStructures:
 
             self.common_structure_names[parameter_uuid] = name
             self.h_code.append(
-                f'extern InterfaceItem_table_common_{internal_type} {name};',
+                f'extern InterfaceItem_table_common_{internal_name} {name};',
             )
             self.c_code.extend([
                 f'#pragma DATA_SECTION({name}, "Interface")',
@@ -922,7 +938,7 @@ class TableBaseStructures:
             getter_setter_list = [
                 'InterfaceItem',
                 'table',
-                parameter.internal_type,
+                types[parameter.internal_type].name,
                 'sunspec',
                 sunspec_type,
             ]
@@ -1002,6 +1018,7 @@ class TableBaseStructures:
 
         common_structure_name = self.ensure_common_structure(
             internal_type=parameter.internal_type,
+            internal_name=types[parameter.internal_type].name,
             parameter_uuid=parameter.uuid,
             remainder=remainder,
             common_initializers=common_initializers,
@@ -1010,7 +1027,7 @@ class TableBaseStructures:
         )
 
         interface_item_type = (
-            f'InterfaceItem_table_{parameter.internal_type}'
+            f'InterfaceItem_table_{types[parameter.internal_type].name}'
         )
 
         item_uuid_string = str(table_element.uuid).replace('-', '_')
@@ -1328,17 +1345,20 @@ class TableArrayElement:
         #         upper_axis=axis.upper(),
         #     )
 
+        def format_it(x):
+            return x.format(
+                curve_type=curve_type,
+                curve_index=curve_index,
+            )
+
         if parameter.setter_function is None:
             setter_function = 'NULL'
         else:
-            setter_function = '&' + parameter.setter_function
+            setter_function = '&' + format_it(parameter.setter_function)
 
         curve_type = get_curve_type(''.join(self.layers[:2]))
 
-        internal_variable = parameter.internal_variable.format(
-            curve_type=curve_type,
-            curve_index=curve_index,
-        )
+        internal_variable = format_it(parameter.internal_variable)
 
         meta_initializer = create_meta_initializer_values(parameter)
 
@@ -1359,7 +1379,7 @@ class TableArrayElement:
         )
 
         interface_item_type = (
-            f'InterfaceItem_variable_{parameter.internal_type}'
+            f'InterfaceItem_variable_{types[parameter.internal_type].name}'
         )
 
         # signal = self.parameter_uuid_to_can_node.get(self.wrapped.uuid)
