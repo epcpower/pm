@@ -492,7 +492,9 @@ class Point:
 
             row.label = parameter.name
             row.name = parameter.abbreviation
-            row.notes = parameter.notes
+            row.notes = '' if parameter.notes is None else parameter.notes
+            row.notes = f'{row.notes}  <uuid:{parameter.uuid}>'.strip()
+
             if row.units is None:
                 row.units = parameter.units
             row.description = parameter.comment
