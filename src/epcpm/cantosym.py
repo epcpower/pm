@@ -250,6 +250,12 @@ class Signal:
                 if len(comment) > 0:
                     extras['comment'] = comment
 
+            extras['comment'] = '{comment} <rw:{r}:{w}>'.format(
+                comment=extras.get('comment', ''),
+                r=1,
+                w=0 if parameter.read_only else 1,
+            ).strip()
+
             handle_access_level = (
                     not skip_access_level
                     and parameter.access_level_uuid is not None
