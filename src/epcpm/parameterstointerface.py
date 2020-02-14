@@ -2,6 +2,7 @@ import decimal
 import os
 import string
 import re
+import uuid
 
 import attr
 import jinja2
@@ -128,33 +129,17 @@ class Root:
     include_uuid_in_item = attr.ib()
 
     def gen(self):
-        parameters = next(
-            node
-            for node in self.wrapped.children
-            if node.name == 'Parameters'
-        )
-
         def can_node_wanted(node):
             if getattr(node, 'parameter_uuid', None) is None:
                 return False
 
-            parameter_query_parent = node.tree_parent.tree_parent
-
-            is_a_can_table = isinstance(
-                node.tree_parent.tree_parent,
-                epcpm.canmodel.CanTable,
-            )
-            if is_a_can_table:
-                parameter_query_parent = parameter_query_parent.tree_parent
-
-            is_a_query = (
-                getattr(parameter_query_parent, 'name', '')
-                == 'ParameterQuery'
-            )
-            if not is_a_query:
-                return False
-
-            return True
+            uuids = [
+                #CCP Response
+                uuid.UUID('39315d58-1ddb-48b9-960c-96e724c89da1'),
+                #CCP
+                uuid.UUID('983bdc5d-8d4e-4107-a0a0-983f0ab101ce'),
+            ]
+            return not any(ancestor.uuid in uuids for ancestor in node.ancestors())
 
         can_nodes_with_parameter_uuid = self.can_root.nodes_by_filter(
             filter=can_node_wanted,
@@ -191,12 +176,14 @@ class Root:
             == len(parameter_uuid_to_can_node)
         )
         if not lengths_equal:
+            uuids = [u.parameter_uuid for u in can_nodes_with_parameter_uuid]
+            print('\n'.join(set(str(u) for u in uuids if uuids.count(u) > 1)))
             raise Exception()
 
         c = []
         h = []
 
-        for child in parameters.children:
+        for child in self.wrapped.children:
             if not isinstance(
                     child,
                     (
