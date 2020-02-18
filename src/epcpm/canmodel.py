@@ -71,7 +71,7 @@ class Signal(epyqlib.treenode.TreeNode):
     bits = epyqlib.attrsmodel.create_integer_attribute(default=0)
     signed = attr.ib(
         default=False,
-        convert=epyqlib.attrsmodel.two_state_checkbox,
+        converter=epyqlib.attrsmodel.two_state_checkbox,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Boolean(),
         ),
@@ -190,7 +190,7 @@ class Message(epyqlib.treenode.TreeNode):
 
     identifier = attr.ib(
         default=0x1fffffff,
-        convert=based_int,
+        converter=based_int,
         metadata=graham.create_metadata(
             field=HexadecimalIntegerField(),
         ),
@@ -202,7 +202,7 @@ class Message(epyqlib.treenode.TreeNode):
 
     extended = attr.ib(
         default=True,
-        convert=epyqlib.attrsmodel.two_state_checkbox,
+        converter=epyqlib.attrsmodel.two_state_checkbox,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Boolean(),
         ),
@@ -210,28 +210,28 @@ class Message(epyqlib.treenode.TreeNode):
     length = epyqlib.attrsmodel.create_integer_attribute(default=0)
     cycle_time = attr.ib(
         default=None,
-        convert=epyqlib.attrsmodel.to_decimal_or_none,
+        converter=epyqlib.attrsmodel.to_decimal_or_none,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Decimal(allow_none=True, as_string=True),
         ),
     )
     sendable = attr.ib(
         default=True,
-        convert=epyqlib.attrsmodel.two_state_checkbox,
+        converter=epyqlib.attrsmodel.two_state_checkbox,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Boolean(),
         ),
     )
     receivable = attr.ib(
         default=True,
-        convert=epyqlib.attrsmodel.two_state_checkbox,
+        converter=epyqlib.attrsmodel.two_state_checkbox,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Boolean(),
         ),
     )
     comment = attr.ib(
         default=None,
-        convert=epyqlib.attrsmodel.to_str_or_none,
+        converter=epyqlib.attrsmodel.to_str_or_none,
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(allow_none=True),
         ),
@@ -293,7 +293,7 @@ class Multiplexer(epyqlib.treenode.TreeNode):
     )
     identifier = attr.ib(
         default=None,
-        convert=epyqlib.attrsmodel.to_int_or_none,
+        converter=epyqlib.attrsmodel.to_int_or_none,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Integer(allow_none=True),
         )
@@ -301,7 +301,7 @@ class Multiplexer(epyqlib.treenode.TreeNode):
     length = epyqlib.attrsmodel.create_integer_attribute(default=0)
     cycle_time = attr.ib(
         default=None,
-        convert=epyqlib.attrsmodel.to_decimal_or_none,
+        converter=epyqlib.attrsmodel.to_decimal_or_none,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Decimal(allow_none=True, as_string=True),
         ),
@@ -309,7 +309,7 @@ class Multiplexer(epyqlib.treenode.TreeNode):
     on_write = epyqlib.attrsmodel.create_str_or_none_attribute()
     comment = attr.ib(
         default=None,
-        convert=epyqlib.attrsmodel.to_str_or_none,
+        converter=epyqlib.attrsmodel.to_str_or_none,
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(allow_none=True),
         ),
@@ -433,7 +433,7 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
 
     identifier = attr.ib(
         default=0x1fffffff,
-        convert=based_int,
+        converter=based_int,
         metadata=graham.create_metadata(
             field=HexadecimalIntegerField(),
         ),
@@ -445,7 +445,7 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
 
     extended = attr.ib(
         default=True,
-        convert=epyqlib.attrsmodel.two_state_checkbox,
+        converter=epyqlib.attrsmodel.two_state_checkbox,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Boolean(),
         ),
@@ -453,21 +453,21 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
     length = epyqlib.attrsmodel.create_integer_attribute(default=0)
     sendable = attr.ib(
         default=True,
-        convert=epyqlib.attrsmodel.two_state_checkbox,
+        converter=epyqlib.attrsmodel.two_state_checkbox,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Boolean(),
         ),
     )
     receivable = attr.ib(
         default=True,
-        convert=epyqlib.attrsmodel.two_state_checkbox,
+        converter=epyqlib.attrsmodel.two_state_checkbox,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Boolean(),
         ),
     )
     comment = attr.ib(
         default=None,
-        convert=epyqlib.attrsmodel.to_str_or_none,
+        converter=epyqlib.attrsmodel.to_str_or_none,
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(allow_none=True),
         ),
@@ -555,7 +555,7 @@ class MultiplexedMessageClone(epyqlib.treenode.TreeNode):
 
     identifier = attr.ib(
         default=0x1fffffff,
-        convert=based_int,
+        converter=based_int,
         metadata=graham.create_metadata(
             field=HexadecimalIntegerField(),
         ),
@@ -577,21 +577,21 @@ class MultiplexedMessageClone(epyqlib.treenode.TreeNode):
     )
     sendable = attr.ib(
         default=True,
-        convert=epyqlib.attrsmodel.two_state_checkbox,
+        converter=epyqlib.attrsmodel.two_state_checkbox,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Boolean(),
         ),
     )
     receivable = attr.ib(
         default=True,
-        convert=epyqlib.attrsmodel.two_state_checkbox,
+        converter=epyqlib.attrsmodel.two_state_checkbox,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Boolean(),
         ),
     )
     comment = attr.ib(
         default=None,
-        convert=epyqlib.attrsmodel.to_str_or_none,
+        converter=epyqlib.attrsmodel.to_str_or_none,
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(allow_none=True),
         ),
@@ -651,14 +651,14 @@ class CanTable(epyqlib.treenode.TreeNode):
     )
     multiplexer_range_first = attr.ib(
         default=0,
-        convert=based_int,
+        converter=based_int,
         metadata=graham.create_metadata(
             field=HexadecimalIntegerField(),
         ),
     )
     multiplexer_range_last = attr.ib(
         default=0x100,
-        convert=based_int,
+        converter=based_int,
         metadata=graham.create_metadata(
             field=HexadecimalIntegerField(),
         ),
