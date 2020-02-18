@@ -480,6 +480,7 @@ class Parameter:
             sunspec_variable=sunspec_variable,
             variable_or_getter_setter=variable_or_getter_setter,
             can_scale_factor=getattr(can_signal, 'factor', None),
+            reject_from_inactive_interfaces=parameter.reject_from_inactive_interfaces,
         )
 
         return result
@@ -995,6 +996,9 @@ class TableBaseStructures:
             # not to be used so really hardcode NULL
             sunspec_variable='NULL',
             can_scale_factor=can_signal.factor,
+            reject_from_inactive_interfaces=(
+                parameter.reject_from_inactive_interfaces
+            ),
             uuid_=table_element.uuid,
             include_uuid_in_item=self.include_uuid_in_item,
         )
@@ -1456,6 +1460,9 @@ class TableArrayElement:
             sunspec_variable=sunspec_variable,
             variable_or_getter_setter=variable_or_getter_setter,
             can_scale_factor=getattr(can_signal, 'factor', None),
+            reject_from_inactive_interfaces=(
+                parameter.reject_from_inactive_interfaces
+            ),
             include_uuid_in_item=self.include_uuid_in_item,
         )
 
@@ -1482,6 +1489,7 @@ def create_item(
         sunspec_variable,
         variable_or_getter_setter,
         can_scale_factor,
+        reject_from_inactive_interfaces,
 ):
     item_uuid_string = str(item_uuid).replace('-', '_')
     item_name = f'interfaceItem_{item_uuid_string}'
@@ -1509,6 +1517,7 @@ def create_item(
         sunspec_setter=sunspec_setter,
         sunspec_variable=sunspec_variable,
         can_scale_factor=can_scale_factor,
+        reject_from_inactive_interfaces=reject_from_inactive_interfaces,
         uuid_=item_uuid,
         include_uuid_in_item=include_uuid_in_item,
     )
@@ -1557,6 +1566,7 @@ def create_common_initializers(
         sunspec_setter,
         sunspec_variable,
         can_scale_factor,
+        reject_from_inactive_interfaces,
         uuid_,
         include_uuid_in_item,
 ):
@@ -1568,11 +1578,18 @@ def create_common_initializers(
     if include_uuid_in_item:
         maybe_uuid = [f'.uuid = {uuid_initializer(uuid_)},']
 
+    reject_from_inactive_interfaces_literal = (
+        'true'
+        if reject_from_inactive_interfaces
+        else 'false'
+    )
+
     common_initializers = [
         f'.sunspecScaleFactor = {scale_factor_variable},',
         f'.canScaleFactor = {float(can_scale_factor)}f,',
         f'.scaleFactorUpdater = {scale_factor_updater},',
         f'.internalScaleFactor = {internal_scale},',
+        f'.rejectFromInactiveInterface = {reject_from_inactive_interfaces_literal},',
         f'.sunspec = {{',
         [
             f'.variable = {sunspec_variable},',
