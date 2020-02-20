@@ -290,6 +290,9 @@ class Parameter:
         if not supported_item_type:
             return []
 
+        if parameter.internal_type == 'void*':
+            return []
+
         if parameter.setter_function is None:
             on_write = 'NULL'
         else:
