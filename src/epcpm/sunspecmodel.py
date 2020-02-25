@@ -100,9 +100,9 @@ def build_sunspec_types_enumeration():
     return enumeration
 
 
-def create_size_attribute():
+def create_size_attribute(default=0):
     return attr.ib(
-        default=0,
+        default=default,
         converter=int,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Integer(),
@@ -334,10 +334,6 @@ class DataPoint(epyqlib.treenode.TreeNode):
 
         return None
 
-    def can_delete(self, node=None):
-        if node is None:
-            return self.tree_parent.can_delete(node=self)
-
     @epyqlib.attrsmodel.check_children
     def check(self, result, models):
         if self.parameter_uuid is None:
@@ -392,8 +388,122 @@ class DataPoint(epyqlib.treenode.TreeNode):
 
         return result
 
+    can_delete = epyqlib.attrsmodel.childless_can_delete
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
+
+
+@graham.schemify(tag='data_point_bitfield_member', register=True)
+@epyqlib.attrsmodel.ify()
+@epyqlib.utils.qt.pyqtify()
+@attr.s(hash=False)
+class DataPointBitfieldMember(epyqlib.treenode.TreeNode):
+    parameter_uuid = create_parameter_uuid_attribute()
+
+    bit_offset = attr.ib(
+        default=None,
+        converter=epyqlib.attrsmodel.to_int_or_none,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(allow_none=True),
+        ),
+    )
+
+    bit_length = create_size_attribute(default=1)
+
+    type_uuid = epyqlib.attrsmodel.attr_uuid(
+        default=None,
+        allow_none=True,
+        human_name='Type',
+        data_display=epyqlib.attrsmodel.name_from_uuid,
+        list_selection_root='sunspec types',
+    )
+
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    def can_drop_on(self, node):
+        return isinstance(node, epyqlib.pm.parametermodel.Parameter)
+
+    def child_from(self, node):
+        self.parameter_uuid = node.uuid
+
+        return None
+
+    can_delete = epyqlib.attrsmodel.childless_can_delete
+    all_addable_types = epyqlib.attrsmodel.empty_all_addable_types
+    addable_types = epyqlib.attrsmodel.empty_addable_types
+    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
+
+
+@graham.schemify(tag='data_point_bitfield', register=True)
+@epyqlib.attrsmodel.ify()
+@epyqlib.utils.qt.pyqtify()
+@attr.s(hash=False)
+class DataPointBitfield(epyqlib.treenode.TreeNode):
+    parameter_uuid = create_parameter_uuid_attribute()
+
+    children = attr.ib(
+        factory=list,
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(fields=(
+                marshmallow.fields.Nested(graham.schema(DataPointBitfieldMember)),
+            )),
+        ),
+    )
+
+    # TODO: though this only really makes sense as one of the bitfield types
+    type_uuid = epyqlib.attrsmodel.attr_uuid(
+        default=None,
+        allow_none=True,
+        human_name='Type',
+        data_display=epyqlib.attrsmodel.name_from_uuid,
+        list_selection_root='sunspec types',
+    )
+
+    block_offset = attr.ib(
+        default=0,
+        converter=int,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(),
+        ),
+    )
+
+    size = create_size_attribute()
+
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    def can_drop_on(self, node):
+        return isinstance(
+            node,
+            (
+                DataPointBitfieldMember,
+                epyqlib.pm.parametermodel.Parameter,
+            ),
+        )
+
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+        return True
+
+    def child_from(self, node):
+        if isinstance(node, epyqlib.pm.parametermodel.Parameter):
+            self.parameter_uuid = node.uuid
+            return None
+
+        return node
+
+    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
 
 
 def check_block_offsets_and_length(self):
@@ -522,6 +632,7 @@ class FixedBlock(epyqlib.treenode.TreeNode):
         metadata=graham.create_metadata(
             field=graham.fields.MixedList(fields=(
                 marshmallow.fields.Nested(graham.schema(DataPoint)),
+                marshmallow.fields.Nested(graham.schema(DataPointBitfield)),
             )),
         ),
     )
@@ -539,6 +650,7 @@ class FixedBlock(epyqlib.treenode.TreeNode):
             (
                 epyqlib.pm.parametermodel.Parameter,
                 DataPoint,
+                DataPointBitfield,
             ),
         )
 
@@ -546,7 +658,7 @@ class FixedBlock(epyqlib.treenode.TreeNode):
         if node is None:
             return self.tree_parent.can_delete(node=self)
 
-        return isinstance(node, DataPoint)
+        return isinstance(node, (DataPoint, DataPointBitfield))
 
     def child_from(self, node):
         if isinstance(node, epyqlib.pm.parametermodel.Parameter):
@@ -1138,6 +1250,8 @@ types = epyqlib.attrsmodel.Types(
         Root,
         Model,
         DataPoint,
+        DataPointBitfield,
+        DataPointBitfieldMember,
         HeaderBlock,
         FixedBlock,
         Table,
@@ -1168,11 +1282,13 @@ columns = epyqlib.attrsmodel.columns(
             'parameter_uuid',
             DataPoint,
             TableRepeatingBlockReferenceDataPointReference,
+            DataPointBitfield,
+            DataPointBitfieldMember,
         )
     ),
     merge('abbreviation', TableRepeatingBlock),
     merge('not_implemented', DataPoint),
-    merge('length', Model) + merge('size', DataPoint),
+    merge('length', Model) + merge('size', DataPoint, DataPointBitfield),
     merge('repeats', TableRepeatingBlock),
     merge('hand_coded_getter', DataPoint),
     merge('hand_coded_setter', DataPoint),
@@ -1183,7 +1299,9 @@ columns = epyqlib.attrsmodel.columns(
     ),
     merge('units', DataPoint),
     merge('enumeration_uuid', DataPoint),
-    merge('type_uuid', DataPoint),
+    merge('type_uuid', DataPoint, DataPointBitfield, DataPointBitfieldMember),
+    merge('bit_length', DataPointBitfieldMember),
+    merge('bit_offset', DataPointBitfieldMember),
     merge('parameter_table_uuid', Table),
     merge('mandatory', DataPoint),
     merge(
@@ -1194,7 +1312,7 @@ columns = epyqlib.attrsmodel.columns(
         TableRepeatingBlockReference,
         TableRepeatingBlock,
     ),
-    merge('block_offset', DataPoint),
+    merge('block_offset', DataPoint, DataPointBitfield),
     merge('uuid', *types.types.values()),
 )
 
@@ -1237,5 +1355,8 @@ class ReferencedUuidNotifier:
         )
         model = index.data(epyqlib.utils.qt.UserRoles.attrs_model)
         node = model.node_from_index(index)
-        if isinstance(node, DataPoint):
-            self.changed.emit(node.parameter_uuid)
+
+        parameter_uuid = getattr(node, 'parameter_uuid', None)
+
+        if parameter_uuid is not None:
+            self.changed.emit(parameter_uuid)

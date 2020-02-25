@@ -18,6 +18,7 @@ data_point_fields = attr.fields(epcpm.sunspecmodel.DataPoint)
 epc_enumerator_fields = attr.fields(
     epyqlib.pm.parametermodel.SunSpecEnumerator,
 )
+bitfield_fields = attr.fields(epcpm.sunspecmodel.DataPointBitfield)
 
 
 def attr_fill(cls, value):
@@ -85,6 +86,11 @@ point_fields = Fields(
     units=data_point_fields.units,
 )
 
+bitfield_fields = Fields(
+    block_offset=bitfield_fields.block_offset,
+    size=bitfield_fields.size,
+    type=bitfield_fields.type_uuid,
+)
 
 enumerator_fields = Fields(
     name=epc_enumerator_fields.name,
@@ -236,7 +242,7 @@ class Model:
                 continue
 
             for point in block.children:
-                enumeration_uuid = point.enumeration_uuid
+                enumeration_uuid = getattr(point, 'enumeration_uuid', None)
                 if enumeration_uuid is None:
                     continue
 
@@ -397,6 +403,91 @@ class Block:
             rows.append(built_rows)
 
         return rows, summed_increments
+
+
+@builders(epcpm.sunspecmodel.DataPointBitfield)
+@attr.s
+class DataPointBitfield:
+    wrapped = attr.ib()
+    model_type = attr.ib()
+    scale_factor_from_uuid = attr.ib()
+    parameter_uuid_finder = attr.ib()
+    model_id = attr.ib()
+    model_offset = attr.ib()
+    is_table = attr.ib()
+    repeating_block_reference = attr.ib()
+    address_offset = attr.ib()
+
+    def gen(self):
+        row = Fields()
+        row.address_offset = self.address_offset
+        row.modbus_address = self.model_offset + self.address_offset
+        row.field_type = self.model_type
+
+        for name, field in attr.asdict(bitfield_fields).items():
+            if field is None:
+                continue
+
+            setattr(row, name, getattr(self.wrapped, field.name))
+
+        if row.type is not None:
+            row.type = self.parameter_uuid_finder(row.type).name
+
+        if self.wrapped.parameter_uuid is not None:
+            parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+
+            row.label = parameter.name
+            row.name = parameter.abbreviation
+            row.notes = '' if parameter.notes is None else parameter.notes
+            row.notes = f'{row.notes}  <uuid:{parameter.uuid}>'.strip()
+
+            if row.units is None:
+                row.units = parameter.units
+            row.description = parameter.comment
+            row.read_write = 'R' if parameter.read_only else 'RW'
+
+        uses_interface_item = (
+                isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
+                and parameter.uses_interface_item()
+        )
+
+        getter = []
+        setter = []
+
+        # TODO: should we just require that it does and assume etc?
+        if uses_interface_item:
+            # TODO: CAMPid 9685439641536675431653179671436
+            parameter_uuid = str(parameter.uuid).replace('-', '_')
+            item_name = f'interfaceItem_{parameter_uuid}'
+
+            getter.extend([
+                f'{item_name}.common.sunspec.getter(',
+                [
+                    f'(InterfaceItem_void *) &{item_name},',
+                    f'Meta_Value',
+                ],
+                f');',
+            ])
+            setter.extend([
+                f'{item_name}.common.sunspec.setter(',
+                [
+                    f'(InterfaceItem_void *) &{item_name},',
+                    f'true,',
+                    f'Meta_Value',
+                ],
+                f');',
+            ])
+
+        if len(getter) > 0:
+            # TODO: what if write-only?
+            row.get = epcpm.c.format_nested_lists(getter)
+
+        if not parameter.read_only:
+            row.set = epcpm.c.format_nested_lists(setter)
+        else:
+            row.set = None
+
+        return row, row.size
 
 
 @builders(epcpm.sunspecmodel.TableRepeatingBlockReference)

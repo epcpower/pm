@@ -112,3 +112,24 @@ class DataPoint:
         lines.append(f'void {set_name}(void);')
 
         return lines
+
+
+@builders(epcpm.sunspecmodel.DataPointBitfield)
+@attr.s
+class DataPointBitfield:
+    wrapped = attr.ib()
+    parameter_uuid_finder = attr.ib()
+
+    def gen(self):
+        #TODO: CAMPid 07954360685417610543064316843160
+
+        name_uuid = str(self.wrapped.uuid).replace('-', '_')
+        members = self.wrapped.children
+        array_name = f'sunspecBitfieldItems_{name_uuid}'
+
+        lines = [
+            f'InterfaceItem_BitfieldMember {array_name} [{len(members)}];',
+            f'InterfaceItem_Bitfield sunspecBitfieldItems_{name_uuid};',
+        ]
+
+        return lines

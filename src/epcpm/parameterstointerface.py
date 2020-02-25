@@ -154,7 +154,11 @@ class Root:
             if getattr(node, 'parameter_uuid', None) is None:
                 return False
 
-            if not isinstance(node, epcpm.sunspecmodel.DataPoint):
+            wanted_types = (
+                epcpm.sunspecmodel.DataPoint,
+                epcpm.sunspecmodel.DataPointBitfieldMember,
+            )
+            if not isinstance(node, wanted_types):
                 return False
 
             return True
@@ -307,6 +311,39 @@ class Group:
         # )
 
 
+@builders(epcpm.sunspecmodel.DataPoint)
+@attr.s
+class DataPoint:
+    wrapped = attr.ib()
+    parameter_uuid_finder = attr.ib()
+
+    def interface_variable_name(self):
+        parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+
+        maybe_model = self.wrapped.tree_parent
+
+        while not isinstance(maybe_model, epcpm.sunspecmodel.Model):
+            maybe_model = maybe_model.tree_parent
+
+        model = maybe_model
+        model_variable = f'sunspecInterface.model{model.id}'
+
+        return f'&{model_variable}.{parameter.abbreviation}'
+
+
+@builders(epcpm.sunspecmodel.DataPointBitfieldMember)
+@attr.s
+class DataPointBitfieldMember:
+    wrapped = attr.ib()
+    parameter_uuid_finder = attr.ib()
+
+    def interface_variable_name(self):
+        parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+
+        uuid_ = str(parameter.uuid).replace('-', '_')
+        return f'&interfaceItem_variable_{uuid_}'
+
+
 @builders(epyqlib.pm.parametermodel.Parameter)
 @attr.s
 class Parameter:
@@ -371,7 +408,13 @@ class Parameter:
             hand_coded_sunspec_getter_function = 'NULL'
             hand_coded_sunspec_setter_function = 'NULL'
         else:
-            model_id = sunspec_point.tree_parent.tree_parent.id
+            maybe_model = sunspec_point.tree_parent
+
+            while not isinstance(maybe_model, epcpm.sunspecmodel.Model):
+                maybe_model = maybe_model.tree_parent
+
+            model = maybe_model
+
             # TODO: move this somewhere common in python code...
             sunspec_type = sunspec_types[
                 self.parameter_uuid_finder(sunspec_point.type_uuid).name
@@ -381,34 +424,32 @@ class Parameter:
 
             hand_coded_getter_function_name = epcpm.sunspectoxlsx.getter_name(
                 parameter=parameter,
-                model_id=model_id,
+                model_id=model.id,
                 is_table=False,
             )
 
             hand_coded_setter_function_name = epcpm.sunspectoxlsx.setter_name(
                 parameter=parameter,
-                model_id=model_id,
+                model_id=model.id,
                 is_table=False,
             )
 
-            if sunspec_point.hand_coded_getter:
+            if getattr(sunspec_point, 'hand_coded_getter', False):
                 hand_coded_sunspec_getter_function = (
                     f'&{hand_coded_getter_function_name}'
                 )
             else:
                 hand_coded_sunspec_getter_function = 'NULL'
 
-            if sunspec_point.hand_coded_setter:
+            if getattr(sunspec_point, 'hand_coded_setter', False):
                 hand_coded_sunspec_setter_function = (
                     f'&{hand_coded_setter_function_name}'
                 )
             else:
                 hand_coded_sunspec_setter_function = 'NULL'
 
-            sunspec_model_variable = f'sunspecInterface.model{model_id}'
-
             # TODO: CAMPid 67549654267913467967436
-            if sunspec_point.factor_uuid is not None:
+            if getattr(sunspec_point, 'factor_uuid', False):
                 factor_point = self.sunspec_root.model.node_from_uuid(
                     sunspec_point.factor_uuid,
                 )
@@ -416,17 +457,21 @@ class Parameter:
                     factor_point.parameter_uuid,
                 ).abbreviation
 
-                scale_factor_variable = (
-                    f'&{sunspec_model_variable}.{sunspec_scale_factor}'
+                sunspec_factor_builder = builders.wrap(
+                    wrapped=factor_point,
+                    parameter_uuid_finder=self.parameter_uuid_finder,
                 )
+                scale_factor_variable = sunspec_factor_builder.interface_variable_name()
                 scale_factor_updater_name = (
-                    f'getSUNSPEC_MODEL{model_id}_{sunspec_scale_factor}'
+                    f'getSUNSPEC_MODEL{model.id}_{sunspec_scale_factor}'
                 )
                 scale_factor_updater = f'&{scale_factor_updater_name}'
 
-            sunspec_variable = (
-                f'&{sunspec_model_variable}.{parameter.abbreviation}'
+            sunspec_point_builder = builders.wrap(
+                wrapped=sunspec_point,
+                parameter_uuid_finder=self.parameter_uuid_finder,
             )
+            sunspec_variable = sunspec_point_builder.interface_variable_name()
 
             # TODO: CAMPid 9675436715674367943196954756419543975314
             getter_setter_list = [

@@ -16,6 +16,7 @@ import epcpm.project
 import epcpm.smdxtosunspec
 import epcpm.sunspecmodel
 import epcpm.sunspecmodel
+import epcpm.sunspectobitfieldsc
 import epcpm.sunspectotablesc
 import epcpm.sunspectomanualc
 import epcpm.sunspectomanualh
@@ -175,6 +176,13 @@ def full_export(
         c_path=paths.sil_c,
         h_path=paths.sil_c.with_suffix('.h'),
         parameters_model=project.models.parameters,
+    )
+
+    epcpm.sunspectobitfieldsc.export(
+        c_path=paths.sunspec_bitfields_c,
+        h_path=paths.sunspec_bitfields_c.with_suffix('.h'),
+        sunspec_model=project.models.sunspec,
+        include_uuid_in_item=include_uuid_in_item,
     )
 
     if first_time and not skip_sunspec:
