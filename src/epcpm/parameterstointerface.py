@@ -505,6 +505,11 @@ class Parameter:
             parameter_uuid_finder=self.parameter_uuid_finder,
         )
 
+        if parameter.rejected_callback is None:
+            rejected_callback = 'NULL'
+        else:
+            rejected_callback = f'&{parameter.rejected_callback}'
+
         result = create_item(
             item_uuid=parameter.uuid,
             include_uuid_in_item=self.include_uuid_in_item,
@@ -524,6 +529,7 @@ class Parameter:
             sunspec_setter=sunspec_setter,
             sunspec_variable=sunspec_variable,
             variable_or_getter_setter=variable_or_getter_setter,
+            rejected_callback=rejected_callback,
             can_scale_factor=getattr(can_signal, 'factor', None),
             reject_from_inactive_interfaces=parameter.reject_from_inactive_interfaces,
         )
@@ -1504,6 +1510,7 @@ class TableArrayElement:
             sunspec_setter=sunspec_setter,
             sunspec_variable=sunspec_variable,
             variable_or_getter_setter=variable_or_getter_setter,
+            rejected_callback='NULL',
             can_scale_factor=getattr(can_signal, 'factor', None),
             reject_from_inactive_interfaces=(
                 parameter.reject_from_inactive_interfaces
@@ -1533,6 +1540,7 @@ def create_item(
         sunspec_setter,
         sunspec_variable,
         variable_or_getter_setter,
+        rejected_callback,
         can_scale_factor,
         reject_from_inactive_interfaces,
 ):
@@ -1576,6 +1584,7 @@ def create_item(
             common_initializers,
             '},',
             *variable_or_getter_setter,
+            f'.rejectedCallback = {rejected_callback},',
             *meta_initializer,
         ],
         '};',

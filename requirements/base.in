@@ -2,7 +2,7 @@
 
 attrs==19.3.0
 click==7.0
-epyqlib==2020.2.5
+epyqlib==2020.2.7
 jinja2==2.10.1
 lxml==4.3.0
 pyqt5==5.13.0
