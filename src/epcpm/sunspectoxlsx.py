@@ -12,6 +12,8 @@ import epcpm.sunspecmodel
 
 
 builders = epyqlib.utils.general.TypeMap()
+enumeration_builders = epyqlib.utils.general.TypeMap()
+enumerator_builders = epyqlib.utils.general.TypeMap()
 
 
 data_point_fields = attr.fields(epcpm.sunspecmodel.DataPoint)
@@ -242,27 +244,24 @@ class Model:
                 continue
 
             for point in block.children:
-                enumeration_uuid = getattr(point, 'enumeration_uuid', None)
-                if enumeration_uuid is None:
-                    continue
-
-                enumeration = self.parameter_uuid_finder(enumeration_uuid)
-                builder = builders.wrap(
-                    wrapped=enumeration,
+                builder = enumeration_builders.wrap(
+                    wrapped=point,
                     point=point,
                     parameter_uuid_finder=self.parameter_uuid_finder,
                 )
 
                 rows = builder.gen()
 
-                for row in rows:
+                if len(rows) > 0:
+                    for row in rows:
+                        self.worksheet.append(
+                            row.as_filtered_tuple(self.column_filter)
+                        )
+
                     self.worksheet.append(
-                        row.as_filtered_tuple(self.column_filter)
+                        Fields().as_filtered_tuple(self.column_filter)
                     )
 
-                self.worksheet.append(
-                    Fields().as_filtered_tuple(self.column_filter)
-                )
         return overall_length + 2 #add header length
 
 
@@ -279,7 +278,7 @@ class Table:
         return []
 
 
-@builders(epyqlib.pm.parametermodel.Enumeration)
+@enumeration_builders(epcpm.sunspecmodel.DataPoint)
 @attr.s
 class Enumeration:
     wrapped = attr.ib()
@@ -289,8 +288,14 @@ class Enumeration:
     def gen(self):
         rows = []
 
-        for enumerator in self.wrapped.children:
-            builder = builders.wrap(
+        enumeration_uuid = getattr(self.wrapped, 'enumeration_uuid', None)
+        if enumeration_uuid is None:
+            return rows
+
+        enumeration = self.parameter_uuid_finder(enumeration_uuid)
+
+        for enumerator in enumeration.children:
+            builder = enumerator_builders.wrap(
                 wrapped=enumerator,
                 point=self.point,
                 parameter_uuid_finder=self.parameter_uuid_finder,
@@ -300,7 +305,7 @@ class Enumeration:
         return rows
 
 
-@builders(epyqlib.pm.parametermodel.SunSpecEnumerator)
+@enumerator_builders(epyqlib.pm.parametermodel.SunSpecEnumerator)
 @attr.s
 class Enumerator:
     wrapped = attr.ib()
@@ -317,9 +322,8 @@ class Enumerator:
 
             setattr(row, name, getattr(self.wrapped, field.name))
 
-        row.applicable_point = (
-            self.parameter_uuid_finder(self.point.parameter_uuid).abbreviation
-        )
+        parameter = self.parameter_uuid_finder(self.point.parameter_uuid)
+        row.applicable_point = parameter.abbreviation
 
         return row
 
@@ -488,6 +492,54 @@ class DataPointBitfield:
             row.set = None
 
         return row, row.size
+
+
+@enumeration_builders(epcpm.sunspecmodel.DataPointBitfield)
+@attr.s
+class DataPointBitfield:
+    wrapped = attr.ib()
+    point = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
+
+    def gen(self):
+        rows = []
+
+        for enumerator in self.wrapped.children:
+            builder = enumerator_builders.wrap(
+                wrapped=enumerator,
+                point=self.point,
+                parameter_uuid_finder=self.parameter_uuid_finder,
+            )
+            rows.append(builder.gen())
+
+        return rows
+
+
+@enumerator_builders(epcpm.sunspecmodel.DataPointBitfieldMember)
+@attr.s
+class DataPointBitfieldMember:
+    wrapped = attr.ib()
+    point = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
+
+    # TODO: CAMPid 07397546759269756456100183066795496952476951653
+    def gen(self):
+        field_parameter = self.parameter_uuid_finder(self.point.parameter_uuid)
+        member_parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+
+        length = self.point.size * 16
+
+        row = Fields(
+            field_type=f'bitfield{length}',
+            value=self.wrapped.bit_offset,
+            applicable_point=field_parameter.abbreviation,
+            name=member_parameter.abbreviation,
+            label=member_parameter.name,
+            description=member_parameter.comment,
+            notes=member_parameter.notes,
+        )
+
+        return row
 
 
 @builders(epcpm.sunspecmodel.TableRepeatingBlockReference)
