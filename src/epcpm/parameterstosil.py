@@ -17,6 +17,9 @@ def ignore_item(item):
     if 'sunspec' in item.variable.casefold():
         return True
 
+    if 'unused placeholder' in item.variable:
+        return True
+
     return False
 
 
