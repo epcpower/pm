@@ -314,17 +314,15 @@ class Signal:
                     )
                     and original_parameter.uses_interface_item()
             ):
-                is_table_array = (
-                    isinstance(
-                        parameter,
-                        epyqlib.pm.parametermodel.TableArrayElement,
-                    )
-                    and isinstance(
-                        original_parameter.tree_parent,
-                        epyqlib.pm.parametermodel.Array,
-                    )
-                )
-                if is_table_array:
+                is_table = False
+                ancestor = original_parameter.tree_parent
+                while ancestor is not None:
+                    if isinstance(ancestor, epyqlib.pm.parametermodel.Table):
+                        is_table = True
+                        break
+                    ancestor = ancestor.tree_parent
+
+                if is_table:
                     getter = 'table_items_getMeta'
                     setter = 'table_items_setMeta'
                 else:

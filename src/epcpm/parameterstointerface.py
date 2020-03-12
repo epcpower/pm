@@ -1,4 +1,5 @@
 import decimal
+import itertools
 import os
 import string
 import re
@@ -876,7 +877,7 @@ class TableBaseStructures:
                 f'InterfaceItem_table_common_{internal_type}_{formatted_uuid}'
             )
 
-            nested_array = self.array_nests['x']
+            nested_array = self.array_nests[remainder]
 
             layers = []
             for layer in nested_array.array_layers:
@@ -894,15 +895,19 @@ class TableBaseStructures:
             )
 
             sizes = [
-                self.array_nests['x'].sizeof(layers[:i + 1])
+                nested_array.sizeof(layers[:i + 1])
                 for i in range(len(layers))
             ]
 
+            zone_size = 0
+            curve_size = 0
+            point_size = 0
             if len(sizes) == 3:
-                zone_size, curve_size, point_size = sizes
+                [zone_size, curve_size, point_size] = sizes
+            elif len(sizes) == 1:
+                [curve_size] = sizes
             else:
-                zone_size = 0
-                curve_size, point_size = sizes
+                [curve_size, point_size] = sizes
 
             self.common_structure_names[parameter_uuid] = name
             self.h_code.append(
@@ -917,7 +922,7 @@ class TableBaseStructures:
                     common_initializers,
                     f'}},',
                     f'.variable_base = &{variable_base}.{remainder},',
-                    f'.setter = {setter},',
+                    f'.setter = {"NULL" if setter is None else setter},',
                     f'.zone_size = {zone_size},',
                     f'.curve_size = {curve_size},',
                     f'.point_size = {point_size},',
@@ -945,7 +950,10 @@ class TableBaseStructures:
         curve_type = get_curve_type(''.join(layers[:2]))
 
         curve_index = int(layers[-2])
-        point_index = int(table_element.name.lstrip('_').lstrip('0')) - 1
+        try:
+            point_index = int(table_element.name.lstrip('_').lstrip('0')) - 1
+        except ValueError:
+            point_index = None
 
         access_level = get_access_level_string(
             parameter=parameter,
@@ -1088,7 +1096,7 @@ class TableBaseStructures:
                 f'.sunspec_variable = {sunspec_variable},',
                 f'.zone = {curve_type if curve_type is not None else "0"},',
                 f'.curve = {curve_index},',
-                f'.point = {point_index},',
+                f'.point = {0 if point_index is None else point_index},',
                 *maybe_uuid,
             ],
             '};',
@@ -1198,6 +1206,14 @@ class Table:
             if isinstance(child, epyqlib.pm.parametermodel.Array)
         ]
 
+        groups = [
+            child
+            for child in self.wrapped.children
+            if isinstance(child, epyqlib.pm.parametermodel.Group)
+        ]
+
+        non_arrays = list(itertools.chain.from_iterable(group.children for group in groups))
+
         # TODO: CAMPid 0795436754762451671643967431
         # TODO: get this from the ...  wherever we have it
         axes = ['x', 'y', 'z']
@@ -1207,8 +1223,18 @@ class Table:
             for name, array in zip(axes, arrays)
         }
 
+        non_array_nests = [
+            NestedArrays.build(s=non_array.internal_variable)
+            for non_array in non_arrays
+            if non_array.internal_variable is not None
+        ]
+        non_array_nests = {
+            nest.remainder: nest
+            for nest in non_array_nests
+        }
+
         table_base_structures = TableBaseStructures(
-            array_nests=array_nests,
+            array_nests={**array_nests, **non_array_nests},
             parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
             parameter_uuid_to_sunspec_node=(
                 self.parameter_uuid_to_sunspec_node
@@ -1318,27 +1344,6 @@ class TableArrayElement:
 
     def gen(self):
         table_element = self.wrapped
-
-        # TODO: CAMPid 9655426754319431461354643167
-        array_element = table_element.original
-
-        if isinstance(array_element, epyqlib.pm.parametermodel.Parameter):
-            parameter = array_element
-        else:
-            parameter = array_element.tree_parent.children[0]
-
-        is_group = isinstance(
-            parameter.tree_parent,
-            epyqlib.pm.parametermodel.Group,
-        )
-
-        if is_group:
-            return self.handle_group()
-
-        return self.handle_array()
-
-    def handle_array(self):
-        table_element = self.wrapped
         zone_node = table_element.tree_parent.tree_parent.tree_parent
         curve_node = zone_node.children[0]
         parameter = curve_node.descendent(
@@ -1353,171 +1358,6 @@ class TableArrayElement:
             layers=self.layers,
             sunspec_point=sunspec_point,
         )
-
-    def handle_group(self):
-        # raise Exception('...')
-
-        table_element = self.wrapped
-        zone_node = table_element.tree_parent.tree_parent.tree_parent
-        curve_node = zone_node.children[0]
-        axis_node = curve_node.descendent(*self.layers[1:])
-        curve_0_table_element = axis_node.descendent(table_element.name)
-
-        curve_index = int(self.layers[-2])
-
-        parameter = table_element.original
-
-        if parameter.internal_variable is None:
-            return [[], []]
-
-        can_signal = self.parameter_uuid_to_can_node.get(table_element.uuid)
-
-        access_level = get_access_level_string(
-            parameter=table_element,
-            parameter_uuid_finder=self.parameter_uuid_finder,
-        )
-
-        # axis = table_element.tree_parent.axis
-
-        # if parameter.setter_function is None:
-        #     setter_function = 'NULL'
-        # else:
-        #     setter_function = parameter.setter_function.format(
-        #         upper_axis=axis.upper(),
-        #     )
-
-        def format_it(x):
-            return x.format(
-                curve_type=curve_type,
-                curve_index=curve_index,
-            )
-
-        if parameter.setter_function is None:
-            setter_function = 'NULL'
-        else:
-            setter_function = '&' + format_it(parameter.setter_function)
-
-        curve_type = get_curve_type(''.join(self.layers[:2]))
-
-        internal_variable = format_it(parameter.internal_variable)
-
-        meta_initializer = create_meta_initializer_values(parameter)
-
-        variable_or_getter_setter = [
-            f'.variable = &{internal_variable},',
-            f'.setter = {setter_function},',
-            f'.meta_values = {{',
-            meta_initializer,
-            f'}},',
-        ]
-
-        # var_or_func = 'variable'
-
-        can_getter, can_setter, can_variable = can_getter_setter_variable(
-            can_signal,
-            parameter,
-            var_or_func_or_table='variable',
-        )
-
-        interface_item_type = (
-            f'InterfaceItem_variable_{types[parameter.internal_type].name}'
-        )
-
-        # signal = self.parameter_uuid_to_can_node.get(self.wrapped.uuid)
-        #
-        # if signal is None:
-        #     return None
-        #
-        # message = signal.tree_parent
-        #
-        # can_table = message.tree_parent
-
-        # can_getter_setter_base = '_'.join(
-        #     'InterfaceItem',
-        #     'table',
-        #     parameter.internal_type,
-        #     'can',
-        #     signal.can_interface_type,
-        # )
-
-        # can_getter, can_setter, can_variable = can_getter_setter_variable(
-        #     can_signal,
-        #     parameter,
-        #     var_or_func_or_table=var_or_func,
-        # )
-
-        # TODO: CAMPid 954679654745154274579654265294624765247569765479
-        sunspec_getter = 'NULL'
-        sunspec_setter = 'NULL'
-        sunspec_variable = 'NULL'
-
-        sunspec_point = self.parameter_uuid_to_sunspec_node.get(
-            table_element.original.uuid,
-        )
-
-        if sunspec_point is not None:
-            sunspec_type = sunspec_types[
-                self.parameter_uuid_finder(sunspec_point.type_uuid).name
-            ]
-
-            # TODO: CAMPid 9675436715674367943196954756419543975314
-            getter_setter_list = [
-                'InterfaceItem',
-                'variable',
-                parameter.internal_type,
-                sunspec_type,
-            ]
-            print(end='')
-            model = get_sunspec_model_from_table_group_element(
-                sunspec_point=sunspec_point,
-                table_element=curve_0_table_element,
-            )
-
-            if model is not None:
-                model_id = model.id
-                sunspec_model_variable = f'sunspecInterface.model{model_id}'
-                abbreviation = parameter.abbreviation
-                sunspec_variable = (
-                    f'&{sunspec_model_variable}'
-                    f'.Curve_{curve_index + 1:>02}_{abbreviation}'
-                )
-
-                sunspec_getter = '_'.join(
-                    str(x)
-                    for x in getter_setter_list + ['getter']
-                )
-                sunspec_setter = '_'.join(
-                    str(x)
-                    for x in getter_setter_list + ['setter']
-                )
-
-        result = create_item(
-            item_uuid=table_element.uuid,
-            access_level=access_level,
-            can_getter=can_getter,
-            can_setter=can_setter,
-            can_variable=can_variable,
-            hand_coded_sunspec_getter_function='NULL',
-            hand_coded_sunspec_setter_function='NULL',
-            interface_item_type=interface_item_type,
-            internal_scale=parameter.internal_scale_factor,
-            meta_initializer_values=create_meta_initializer_values(parameter),
-            parameter=parameter,
-            scale_factor_updater='NULL',
-            scale_factor_variable='NULL',
-            sunspec_getter=sunspec_getter,
-            sunspec_setter=sunspec_setter,
-            sunspec_variable=sunspec_variable,
-            variable_or_getter_setter=variable_or_getter_setter,
-            rejected_callback='NULL',
-            can_scale_factor=getattr(can_signal, 'factor', None),
-            reject_from_inactive_interfaces=(
-                parameter.reject_from_inactive_interfaces
-            ),
-            include_uuid_in_item=self.include_uuid_in_item,
-        )
-
-        return result
 
 
 def create_item(

@@ -261,27 +261,7 @@ class DataPoint:
                 item_uuid_string = str(table_element.uuid).replace('-', '_')
                 item_name = f'interfaceItem_{item_uuid_string}'
 
-                if is_group:
-                    if get_set == 'get':
-                        body_lines.extend([
-                            f'{item_name}.common.sunspec.getter(',
-                            [
-                                f'(InterfaceItem_void *) &{item_name},',
-                                f'Meta_Value',
-                            ],
-                            f');',
-                        ])
-                    elif get_set == 'set':
-                        body_lines.extend([
-                            f'{item_name}.common.sunspec.setter(',
-                            [
-                                f'(InterfaceItem_void *) &{item_name},',
-                                f'true,',
-                                f'Meta_Value',
-                            ],
-                            f');',
-                        ])
-                elif is_array:
+                if True:#is_group:
                     if get_set == 'get':
                         body_lines.extend([
                             f'{item_name}.table_common->common.sunspec.getter(',
