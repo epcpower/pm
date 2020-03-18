@@ -817,7 +817,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                     (1, ('RideThrough', 'Trip')),
                     (0, ('Low', 'High')),
                     (2, ('0', '1', '2', '3')),
-                    (3, ('seconds', 'hertz')),
+                    (3, ('Before', 'seconds', 'hertz', 'After')),
                 ),
             )
         elif table.uuid == uuid.UUID('b148f2a8-6605-4aac-a235-9c66581c213b'):  # Voltage
@@ -827,7 +827,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                     (1, ('RideThrough', 'Trip')),
                     (0, ('Low', 'High')),
                     (2, ('0', '1', '2', '3')),
-                    (3, ('seconds', 'percent')),
+                    (3, ('Before', 'seconds', 'percent', 'After')),
                 ),
             )
         elif table.uuid == uuid.UUID('b1c598b8-1a56-42eb-94b8-85c3b434d7a7'):  # VoltVar
@@ -839,22 +839,22 @@ class CanTable(epyqlib.treenode.TreeNode):
                          'percent_nominal_var', 'After')),
                 ),
             )
-        # elif table.uuid == uuid.UUID('6ea3bd0d-3799-4d2d-8998-a45dc80eb0bd'):  # HertzWatts  (was incorrectly HertzWatts instead of HzWatts that would never have been reached)
-        #     leaves = my_sorted(
-        #         leaves,
-        #         (
-        #             (0, ('0', '1', '2', '3')),
-        #             (1, ('Settings', 'hertz', 'percent_nominal_pwr')),
-        #         ),
-        #     )
-        # elif table.uuid == uuid.UUID('3e435024-5cad-4af0-81f8-dac56fbcc629'):  # VoltWatts  (was incorrectly HertzWatts duplicate that would never have been reached)
-        #     leaves = my_sorted(
-        #         leaves,
-        #         (
-        #             (0, ('0', '1', '2', '3')),
-        #             (1, ('Settings', 'percent_nominal_volts', 'percent_nominal_pwr')),
-        #         ),
-        #     )
+        elif table.uuid == uuid.UUID('6ea3bd0d-3799-4d2d-8998-a45dc80eb0bd'):  # HertzWatts  (was incorrectly HertzWatts instead of HzWatts that would never have been reached)
+            leaves = my_sorted(
+                leaves,
+                (
+                    (0, ('0', '1', '2', '3')),
+                    (1, ('Before', 'Settings', 'hertz', 'percent_nominal_pwr', 'After')),
+                ),
+            )
+        elif table.uuid == uuid.UUID('3e435024-5cad-4af0-81f8-dac56fbcc629'):  # VoltWatts  (was incorrectly HertzWatts duplicate that would never have been reached)
+            leaves = my_sorted(
+                leaves,
+                (
+                    (0, ('0', '1', '2', '3')),
+                    (1, ('Before', 'Settings', 'percent_nominal_volts', 'percent_nominal_pwr', 'After')),
+                ),
+            )
 
         # TODO: this is arrays and groups...
         leaf_groups = [

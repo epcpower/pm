@@ -968,6 +968,11 @@ class TableBaseStructures:
             var_or_func_or_table='table',
         )
 
+        if can_signal is None:
+            can_factor = 1
+        else:
+            can_factor = can_signal.factor
+
         # TODO: CAMPid 954679654745154274579654265294624765247569765479
         sunspec_getter = 'NULL'
         sunspec_setter = 'NULL'
@@ -1053,7 +1058,7 @@ class TableBaseStructures:
             sunspec_setter=sunspec_setter,
             # not to be used so really hardcode NULL
             sunspec_variable='NULL',
-            can_scale_factor=can_signal.factor,
+            can_scale_factor=can_factor,
             reject_from_inactive_interfaces=(
                 parameter.reject_from_inactive_interfaces
             ),
