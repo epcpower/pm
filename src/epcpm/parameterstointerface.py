@@ -907,7 +907,7 @@ class TableBaseStructures:
             elif len(sizes) == 1:
                 [curve_size] = sizes
             else:
-                [curve_size, point_size] = sizes
+                [zone_size, curve_size] = sizes
 
             self.common_structure_names[parameter_uuid] = name
             self.h_code.append(
