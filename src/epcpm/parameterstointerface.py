@@ -894,20 +894,10 @@ class TableBaseStructures:
                 },
             )
 
-            sizes = [
-                nested_array.sizeof(layers[:i + 1])
-                for i in range(len(layers))
-            ]
-
-            zone_size = 0
-            curve_size = 0
-            point_size = 0
-            if len(sizes) == 3:
-                [zone_size, curve_size, point_size] = sizes
-            elif len(sizes) == 1:
-                [curve_size] = sizes
-            else:
-                [zone_size, curve_size] = sizes
+            sizes = {
+                layer: nested_array.sizeof(layers[:i + 1])
+                for i, layer in enumerate(layers)
+            }
 
             self.common_structure_names[parameter_uuid] = name
             self.h_code.append(
@@ -923,9 +913,9 @@ class TableBaseStructures:
                     f'}},',
                     f'.variable_base = &{variable_base}.{remainder},',
                     f'.setter = {"NULL" if setter is None else setter},',
-                    f'.zone_size = {zone_size},',
-                    f'.curve_size = {curve_size},',
-                    f'.point_size = {point_size},',
+                    f'.zone_size = {sizes.get("curve_type", 0)},',
+                    f'.curve_size = {sizes.get("curve_index", 0)},',
+                    f'.point_size = {sizes.get("point_index", 0)},',
                     f'.meta_values = {{',
                     meta_initializer,
                     f'}},',
