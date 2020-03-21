@@ -877,27 +877,33 @@ class TableBaseStructures:
                 f'InterfaceItem_table_common_{internal_type}_{formatted_uuid}'
             )
 
-            nested_array = self.array_nests[remainder]
+            if remainder is None:
+                sizes = {}
+                full_base_variable = 'NULL'
+            else:
+                nested_array = self.array_nests[remainder]
 
-            layers = []
-            for layer in nested_array.array_layers:
-                layer_format_name, = [
-                    list(field)[0][1]
-                    for field in [string.Formatter().parse(layer[1])]
-                ]
-                layers.append(layer_format_name)
+                layers = []
+                for layer in nested_array.array_layers:
+                    layer_format_name, = [
+                        list(field)[0][1]
+                        for field in [string.Formatter().parse(layer[1])]
+                    ]
+                    layers.append(layer_format_name)
 
-            variable_base = nested_array.index(
-                indexes={
-                    layer: 0
-                    for layer in layers
-                },
-            )
+                variable_base = nested_array.index(
+                    indexes={
+                        layer: 0
+                        for layer in layers
+                    },
+                )
 
-            sizes = {
-                layer: nested_array.sizeof(layers[:i + 1])
-                for i, layer in enumerate(layers)
-            }
+                sizes = {
+                    layer: nested_array.sizeof(layers[:i + 1])
+                    for i, layer in enumerate(layers)
+                }
+
+                full_base_variable = f'&{variable_base}.{remainder}'
 
             self.common_structure_names[parameter_uuid] = name
             self.h_code.append(
@@ -911,7 +917,7 @@ class TableBaseStructures:
                     f'.common = {{',
                     common_initializers,
                     f'}},',
-                    f'.variable_base = &{variable_base}.{remainder},',
+                    f'.variable_base = {full_base_variable},',
                     f'.setter = {"NULL" if setter is None else setter},',
                     f'.zone_size = {sizes.get("curve_type", 0)},',
                     f'.curve_size = {sizes.get("curve_index", 0)},',
@@ -934,7 +940,12 @@ class TableBaseStructures:
         else:
             parameter = array_element.tree_parent.children[0]
 
-        if parameter.internal_variable is None:
+        uses_interface_item = (
+            isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
+            and parameter.uses_interface_item()
+        )
+
+        if not uses_interface_item:
             return [[], []]
 
         curve_type = get_curve_type(''.join(layers[:2]))
@@ -1058,7 +1069,10 @@ class TableBaseStructures:
 
         meta_initializer = create_meta_initializer_values(parameter)
 
-        remainder = NestedArrays.build(parameter.internal_variable).remainder
+        if parameter.internal_variable is None:
+            remainder = None
+        else:
+            remainder = NestedArrays.build(parameter.internal_variable).remainder
 
         common_structure_name = self.ensure_common_structure(
             internal_type=parameter.internal_type,

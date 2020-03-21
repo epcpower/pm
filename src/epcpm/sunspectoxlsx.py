@@ -220,9 +220,9 @@ class Model:
 
             built_rows, block_length = builder.gen()
             accumulated_length += block_length
-            rows.extend(built_rows)
-
-            rows.append(Fields())
+            if len(built_rows) > 0:
+                rows.extend(built_rows)
+                rows.append(Fields())
 
         for i, row in enumerate(rows):
             if i == 0:
@@ -233,34 +233,16 @@ class Model:
             self.worksheet.append(row.as_filtered_tuple(self.column_filter))
 
         for block in self.wrapped.children:
-            to_be_handled = isinstance(
-                block,
-                (
-                    epcpm.sunspecmodel.HeaderBlock,
-                    epcpm.sunspecmodel.FixedBlock,
-                ),
+            builder = enumeration_builders.wrap(
+                wrapped=block,
+                parameter_uuid_finder=self.parameter_uuid_finder,
             )
-            if not to_be_handled:
-                continue
+            rows = builder.gen()
 
-            for point in block.children:
-                builder = enumeration_builders.wrap(
-                    wrapped=point,
-                    point=point,
-                    parameter_uuid_finder=self.parameter_uuid_finder,
+            for row in rows:
+                self.worksheet.append(
+                    row.as_filtered_tuple(self.column_filter),
                 )
-
-                rows = builder.gen()
-
-                if len(rows) > 0:
-                    for row in rows:
-                        self.worksheet.append(
-                            row.as_filtered_tuple(self.column_filter)
-                        )
-
-                    self.worksheet.append(
-                        Fields().as_filtered_tuple(self.column_filter)
-                    )
 
         return overall_length + 2 #add header length
 
@@ -324,6 +306,9 @@ class Enumerator:
 
         parameter = self.parameter_uuid_finder(self.point.parameter_uuid)
         row.applicable_point = parameter.abbreviation
+
+        field_type_parameter = self.parameter_uuid_finder(self.point.type_uuid)
+        row.field_type = field_type_parameter.name
 
         return row
 
@@ -540,6 +525,52 @@ class DataPointBitfieldMember:
         )
 
         return row
+
+
+@enumeration_builders(epcpm.sunspecmodel.HeaderBlock)
+@enumeration_builders(epcpm.sunspecmodel.FixedBlock)
+@enumeration_builders(epcpm.sunspecmodel.TableRepeatingBlockReference)
+@attr.s
+class GenericEnumeratorBuilder:
+    wrapped = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
+
+    def gen(self):
+        rows = []
+
+        for child in self.wrapped.children:
+            builder = enumeration_builders.wrap(
+                wrapped=child,
+                point=child,
+                parameter_uuid_finder=self.parameter_uuid_finder,
+            )
+
+            new_rows = builder.gen()
+
+            if len(new_rows) > 0:
+                rows.extend(new_rows)
+                rows.append(Fields())
+
+        return rows
+
+
+@enumeration_builders(
+    epcpm.sunspecmodel.TableRepeatingBlockReferenceDataPointReference,
+)
+@attr.s
+class TableRepeatingBlockReferenceDataPointReferenceEnumerationBuilder:
+    wrapped = attr.ib()
+    point = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
+
+    def gen(self):
+        builder = enumeration_builders.wrap(
+            wrapped=self.wrapped.original,
+            point=self.point.original,
+            parameter_uuid_finder=self.parameter_uuid_finder,
+        )
+
+        return builder.gen()
 
 
 @builders(epcpm.sunspecmodel.TableRepeatingBlockReference)
