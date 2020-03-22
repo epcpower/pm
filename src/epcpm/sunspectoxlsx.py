@@ -95,7 +95,7 @@ bitfield_fields = Fields(
 )
 
 enumerator_fields = Fields(
-    name=epc_enumerator_fields.name,
+    name=epc_enumerator_fields.abbreviation,
     label=epc_enumerator_fields.label,
     description=epc_enumerator_fields.description,
     notes=epc_enumerator_fields.notes,
@@ -303,6 +303,9 @@ class Enumerator:
                 continue
 
             setattr(row, name, getattr(self.wrapped, field.name))
+
+        if row.name is None:
+            row.name = self.wrapped.name
 
         parameter = self.parameter_uuid_finder(self.point.parameter_uuid)
         row.applicable_point = parameter.abbreviation
