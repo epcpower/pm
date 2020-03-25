@@ -26,6 +26,7 @@ sunspec_types = {
     'int16': 'sunsS16',
     'uint32': 'sunsU32',
     'int32': 'sunsS32',
+    'string': 'PackedString',
 }
 
 
@@ -611,6 +612,14 @@ class VoidPointerType:
     maximum_code = attr.ib(default='(UINT32_C(0x240000))')
 
 
+@attr.s(frozen=True)
+class PackedStringType:
+    name = attr.ib(default='PackedString')
+    type = attr.ib(default='PackedString')
+    minimum_code = attr.ib(default='(0)')
+    maximum_code = attr.ib(default='(0)')
+
+
 def fixed_width_name(bits, signed):
     if signed:
         u = ''
@@ -652,6 +661,7 @@ types = {
         BooleanType(),
         SizeType(),
         VoidPointerType(),
+        PackedStringType(),
     )
 }
 
@@ -905,6 +915,15 @@ class TableBaseStructures:
 
                 full_base_variable = f'&{variable_base}.{remainder}'
 
+            if internal_type == 'PackedString':
+                meta_entry = []
+            else:
+                meta_entry = [
+                    f'.meta_values = {{',
+                    meta_initializer,
+                    f'}},',
+                ]
+
             self.common_structure_names[parameter_uuid] = name
             self.h_code.append(
                 f'extern InterfaceItem_table_common_{internal_name} {name};',
@@ -922,9 +941,7 @@ class TableBaseStructures:
                     f'.zone_size = {sizes.get("curve_type", 0)},',
                     f'.curve_size = {sizes.get("curve_index", 0)},',
                     f'.point_size = {sizes.get("point_index", 0)},',
-                    f'.meta_values = {{',
-                    meta_initializer,
-                    f'}},',
+                    *meta_entry,
                 ],
                 f'}};',
             ])
