@@ -47,7 +47,7 @@ setuptools.setup(
         'pysunspec',
         'pyqt5',
         'toolz',
-        'xmldiff',
+        'xmldiff<2.3',
     ],
     extras_require={
         'test': [
