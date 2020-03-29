@@ -913,16 +913,21 @@ class TableBaseStructures:
                     for i, layer in enumerate(layers)
                 }
 
-                full_base_variable = f'&{variable_base}.{remainder}'
+                full_base_variable_name = f'{variable_base}.{remainder}'
+                full_base_variable = f'&{full_base_variable_name}'
 
             if internal_type == 'PackedString':
                 meta_entry = []
+                variable_base_length_entry = [
+                    f'.variable_base_length = sizeof({full_base_variable_name}),',
+                ]
             else:
                 meta_entry = [
                     f'.meta_values = {{',
                     meta_initializer,
                     f'}},',
                 ]
+                variable_base_length_entry = []
 
             self.common_structure_names[parameter_uuid] = name
             self.h_code.append(
@@ -937,6 +942,7 @@ class TableBaseStructures:
                     common_initializers,
                     f'}},',
                     f'.variable_base = {full_base_variable},',
+                    *variable_base_length_entry,
                     f'.setter = {"NULL" if setter is None else setter},',
                     f'.zone_size = {sizes.get("curve_type", 0)},',
                     f'.curve_size = {sizes.get("curve_index", 0)},',
@@ -1112,6 +1118,13 @@ class TableBaseStructures:
         if self.include_uuid_in_item:
             maybe_uuid = [f'.uuid = {uuid_initializer(table_element.uuid)},']
 
+        if parameter.internal_type == 'PackedString':
+            sunspec_variable_length = [
+                f'.sunspec_variable_length = sizeof({sunspec_model_variable}),',
+            ]
+        else:
+            sunspec_variable_length = []
+
         c = [
             f'#pragma DATA_SECTION({item_name}, "Interface")',
             f'// {table_element.uuid}',
@@ -1120,6 +1133,7 @@ class TableBaseStructures:
                 f'.table_common = &{common_structure_name},',
                 f'.can_variable = {can_variable},',
                 f'.sunspec_variable = {sunspec_variable},',
+                *sunspec_variable_length,
                 f'.zone = {curve_type if curve_type is not None else "0"},',
                 f'.curve = {curve_index},',
                 f'.point = {0 if point_index is None else point_index},',
