@@ -1003,6 +1003,7 @@ class TableBaseStructures:
         sunspec_variable = 'NULL'
         scale_factor_variable = 'NULL'
         scale_factor_updater = 'NULL'
+        sunspec_model_variable = 'NULL'
 
         if sunspec_point is not None:
             sunspec_type = sunspec_types[
