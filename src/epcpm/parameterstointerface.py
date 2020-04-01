@@ -30,6 +30,13 @@ sunspec_types = {
 }
 
 
+def node_path_string(node):
+    nodes = [node, *node.ancestors()][:-1]
+    names = [node.name for node in reversed(nodes)]
+
+    return ' > '.join(names)
+
+
 class InvalidAccessLevelError(Exception):
     @classmethod
     def build(cls, value, parameter):
@@ -868,13 +875,13 @@ class TableBaseStructures:
             self,
             internal_type,
             internal_name,
-            parameter_uuid,
+            parameter,
             remainder,
             common_initializers,
             meta_initializer,
             setter,
     ):
-        name = self.common_structure_names.get(parameter_uuid)
+        name = self.common_structure_names.get(parameter.uuid)
 
         if name is None:
             if len(self.h_code) > 0:
@@ -882,7 +889,7 @@ class TableBaseStructures:
             if len(self.c_code) > 0:
                 self.c_code.append('')
 
-            formatted_uuid = str(parameter_uuid).replace('-', '_')
+            formatted_uuid = str(parameter.uuid).replace('-', '_')
             name = (
                 f'InterfaceItem_table_common_{internal_type}_{formatted_uuid}'
             )
@@ -929,13 +936,14 @@ class TableBaseStructures:
                 ]
                 variable_base_length_entry = []
 
-            self.common_structure_names[parameter_uuid] = name
+            self.common_structure_names[parameter.uuid] = name
             self.h_code.append(
                 f'extern InterfaceItem_table_common_{internal_name} {name};',
             )
             self.c_code.extend([
                 f'#pragma DATA_SECTION({name}, "Interface")',
-                f'// {parameter_uuid}',
+                f'// {node_path_string(parameter)}',
+                f'// {parameter.uuid}',
                 f'InterfaceItem_table_common_{internal_type} const {name} = {{',
                 [
                     f'.common = {{',
@@ -1101,7 +1109,7 @@ class TableBaseStructures:
         common_structure_name = self.ensure_common_structure(
             internal_type=parameter.internal_type,
             internal_name=types[parameter.internal_type].name,
-            parameter_uuid=parameter.uuid,
+            parameter=parameter,
             remainder=remainder,
             common_initializers=common_initializers,
             meta_initializer=meta_initializer,
@@ -1128,6 +1136,7 @@ class TableBaseStructures:
 
         c = [
             f'#pragma DATA_SECTION({item_name}, "Interface")',
+            f'// {node_path_string(table_element)}',
             f'// {table_element.uuid}',
             f'{interface_item_type} const {item_name} = {{',
             [
@@ -1457,6 +1466,7 @@ def create_item(
 
     item = [
         f'#pragma DATA_SECTION({item_name}, "Interface")',
+        f'// {node_path_string(parameter)}',
         f'// {item_uuid}',
         f'{interface_item_type} const {item_name} = {{',
         [
