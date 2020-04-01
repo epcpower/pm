@@ -608,8 +608,8 @@ class SizeType:
 class VoidPointerType:
     name = attr.ib(default='void_p')
     type = attr.ib(default='void*')
-    minimum_code = attr.ib(default='(0)')
-    maximum_code = attr.ib(default='(UINT32_C(0x240000))')
+    minimum_code = attr.ib(default='((void *) 0)')
+    maximum_code = attr.ib(default='((void *) UINT32_C(0x240000))')
 
 
 @attr.s(frozen=True)
