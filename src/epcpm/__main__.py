@@ -1,3 +1,7 @@
+import faulthandler
+
+faulthandler.enable()
+
 import logging
 import os.path
 import sys
