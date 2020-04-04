@@ -1088,6 +1088,8 @@ class Table(epyqlib.treenode.TreeNode):
                     point_node = DataPoint(
                         parameter_uuid=element.uuid,
                     )
+                point_node.mandatory = reference_data_point.mandatory
+                point_node.units = reference_data_point.units
                 point_node.type_uuid = reference_data_point.type_uuid
                 point_node.size = reference_data_point.size
                 point_node.enumeration_uuid = (
@@ -1113,6 +1115,8 @@ class Table(epyqlib.treenode.TreeNode):
                     point_node = DataPoint(
                         parameter_uuid=element.uuid,
                     )
+                point_node.mandatory = reference_data_point.mandatory
+                point_node.units = reference_data_point.units
                 point_node.type_uuid = reference_data_point.type_uuid
                 point_node.size = reference_data_point.size
                 point_node.enumeration_uuid = (
@@ -1132,6 +1136,8 @@ class Table(epyqlib.treenode.TreeNode):
                     point_node = DataPoint(
                         parameter_uuid=element.uuid,
                     )
+                point_node.mandatory = reference_data_point.mandatory
+                point_node.units = reference_data_point.units
                 point_node.type_uuid = reference_data_point.type_uuid
                 point_node.size = reference_data_point.size
                 point_node.enumeration_uuid = (
