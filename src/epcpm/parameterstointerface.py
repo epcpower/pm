@@ -1008,7 +1008,7 @@ class TableBaseStructures:
         # TODO: CAMPid 954679654745154274579654265294624765247569765479
         sunspec_getter = 'NULL'
         sunspec_setter = 'NULL'
-        sunspec_variable = 'NULL'
+        sunspec_variable = None
         scale_factor_variable = 'NULL'
         scale_factor_updater = 'NULL'
         sunspec_model_variable = 'NULL'
@@ -1037,7 +1037,7 @@ class TableBaseStructures:
                 sunspec_model_variable = f'sunspecInterface.model{model_id}'
                 abbreviation = table_element.abbreviation
                 sunspec_variable = (
-                    f'&{sunspec_model_variable}'
+                    f'{sunspec_model_variable}'
                     f'.Curve_{curve_index + 1:>02}_{abbreviation}'
                 )
 
@@ -1129,10 +1129,15 @@ class TableBaseStructures:
 
         if parameter.internal_type == 'PackedString':
             sunspec_variable_length = [
-                f'.sunspec_variable_length = sizeof({sunspec_model_variable}),',
+                f'.sunspec_variable_length = sizeof({sunspec_variable}),',
             ]
         else:
             sunspec_variable_length = []
+
+        if sunspec_variable is None:
+            sunspec_variable_initializer = 'NULL'
+        else:
+            sunspec_variable_initializer = f'&{sunspec_variable}'
 
         c = [
             f'#pragma DATA_SECTION({item_name}, "Interface")',
@@ -1142,7 +1147,7 @@ class TableBaseStructures:
             [
                 f'.table_common = &{common_structure_name},',
                 f'.can_variable = {can_variable},',
-                f'.sunspec_variable = {sunspec_variable},',
+                f'.sunspec_variable = {sunspec_variable_initializer},',
                 *sunspec_variable_length,
                 f'.zone = {curve_type if curve_type is not None else "0"},',
                 f'.curve = {curve_index},',
