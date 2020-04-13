@@ -549,6 +549,9 @@ class TableArrayElement:
 
         parameter = table_element.original
 
+        if parameter.internal_type == 'PackedString':
+            return []
+
         if parameter.internal_variable is None:
             return []
 
