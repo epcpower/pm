@@ -1127,16 +1127,14 @@ class TableBaseStructures:
         if self.include_uuid_in_item:
             maybe_uuid = [f'.uuid = {uuid_initializer(table_element.uuid)},']
 
-        if parameter.internal_type == 'PackedString':
-            sunspec_variable_length = [
-                f'.sunspec_variable_length = sizeof({sunspec_variable}),',
-            ]
-        else:
-            sunspec_variable_length = []
-
+        maybe_sunspec_variable_length = []
         if sunspec_variable is None:
             sunspec_variable_initializer = 'NULL'
         else:
+            if parameter.internal_type == 'PackedString':
+                maybe_sunspec_variable_length = [
+                    f'.sunspec_variable_length = sizeof({sunspec_variable}),',
+                ]
             sunspec_variable_initializer = f'&{sunspec_variable}'
 
         c = [
@@ -1148,7 +1146,7 @@ class TableBaseStructures:
                 f'.table_common = &{common_structure_name},',
                 f'.can_variable = {can_variable},',
                 f'.sunspec_variable = {sunspec_variable_initializer},',
-                *sunspec_variable_length,
+                *maybe_sunspec_variable_length,
                 f'.zone = {curve_type if curve_type is not None else "0"},',
                 f'.curve = {curve_index},',
                 f'.point = {0 if point_index is None else point_index},',
