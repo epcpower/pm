@@ -1040,7 +1040,7 @@ class TableBaseStructures:
                 abbreviation = table_element.abbreviation
                 sunspec_variable = (
                     f'{sunspec_model_variable}'
-                    f'.Curve_{curve_index + 1:>02}_{abbreviation}'
+                    f'.Curve_{curve_index:>02}_{abbreviation}'
                 )
 
                 sunspec_getter = '_'.join(
