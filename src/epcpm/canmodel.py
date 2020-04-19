@@ -816,7 +816,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                 (
                     (1, ('RideThrough', 'Trip')),
                     (0, ('Low', 'High')),
-                    (2, ('0', '1', '2', '3')),
+                    (2, ('1', '2', '3', '4')),
                     (3, ('Before', 'seconds', 'hertz', 'After')),
                 ),
             )
@@ -826,7 +826,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                 (
                     (1, ('RideThrough', 'Trip')),
                     (0, ('Low', 'High')),
-                    (2, ('0', '1', '2', '3')),
+                    (2, ('1', '2', '3', '4')),
                     (3, ('Before', 'seconds', 'percent', 'After')),
                 ),
             )
@@ -834,7 +834,7 @@ class CanTable(epyqlib.treenode.TreeNode):
             leaves = my_sorted(
                 leaves,
                 (
-                    (0, ('0', '1', '2', '3')),
+                    (0, ('1', '2', '3', '4')),
                     (1, ('Before', 'Settings', 'percent_nominal_volts',
                          'percent_nominal_var', 'After')),
                 ),
@@ -843,7 +843,7 @@ class CanTable(epyqlib.treenode.TreeNode):
             leaves = my_sorted(
                 leaves,
                 (
-                    (0, ('0', '1', '2', '3')),
+                    (0, ('1', '2', '3', '4')),
                     (1, ('Before', 'Settings', 'hertz', 'percent_nominal_pwr', 'After')),
                 ),
             )
@@ -851,7 +851,7 @@ class CanTable(epyqlib.treenode.TreeNode):
             leaves = my_sorted(
                 leaves,
                 (
-                    (0, ('0', '1', '2', '3')),
+                    (0, ('1', '2', '3', '4')),
                     (1, ('Before', 'Settings', 'percent_nominal_volts', 'percent_nominal_pwr', 'After')),
                 ),
             )

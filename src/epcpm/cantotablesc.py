@@ -55,23 +55,6 @@ class Root:
             lines.extend(table_results[-1].table_lines)
             lines.append('')
 
-        active_curves = parameter_query.child_by_name('ActiveCurves')
-
-        for get_or_set in ('get', 'set'):
-            active_lines = []
-            for table_result in table_results:
-                active_lines.extend(
-                    table_result.active_curves_lines[get_or_set],
-                )
-
-            lines.extend([
-                f'void {get_or_set}{active_curves.name}(void)',
-                '{',
-                active_lines,
-                '}',
-                '',
-            ])
-
         content = epyqlib.utils.general.format_nested_lists(lines)
 
         with self.path.open('w', newline='\n') as f:
@@ -82,7 +65,6 @@ class Root:
 @attr.s
 class TableResults:
     table_lines = attr.ib()
-    active_curves_lines = attr.ib()
 
 
 @builders(epcpm.canmodel.CanTable)
@@ -98,16 +80,6 @@ class CanTable:
 
         return TableResults(
             table_lines=self.table_lines(parameter_table=parameter_table),
-            active_curves_lines={
-                'get': self.active_curves(
-                    format_string=parameter_table.active_curve_getter,
-                    parameter_table=parameter_table,
-                ),
-                'set': self.active_curves(
-                    format_string=parameter_table.active_curve_setter,
-                    parameter_table=parameter_table,
-                ),
-            }
         )
 
     def table_lines(self, parameter_table):
@@ -133,35 +105,6 @@ class CanTable:
                 if len(new_lines) > 0:
                     lines.extend(new_lines)
                     lines.append('')
-
-        return lines
-
-    def active_curves(self, format_string, parameter_table):
-        lines = []
-
-        parameter_query = self.wrapped.tree_parent
-        active_curves = parameter_query.child_by_name('ActiveCurves')
-
-        for combination in parameter_table.curve_group_combinations:
-            curve_type = get_curve_type(''.join(x.name for x in combination))
-
-            interface_signal = active_curves.child_by_name(
-                (
-                        self.wrapped.name
-                        + ''.join(enumerator.name for enumerator in combination)
-                ),
-            )
-
-            full_path = '.'.join((
-                interface_signal.tree_parent.tree_parent.name,
-                interface_signal.tree_parent.name,
-                interface_signal.name,
-            ))
-
-            lines.append(format_string.format(
-                interface_signal=full_path,
-                curve_type=curve_type,
-            ))
 
         return lines
 

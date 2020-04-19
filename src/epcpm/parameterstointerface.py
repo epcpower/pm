@@ -27,6 +27,8 @@ sunspec_types = {
     'uint32': 'sunsU32',
     'int32': 'sunsS32',
     'string': 'PackedString',
+    'bitfield16': 'sunsU16',
+    'bitfield32': 'sunsU32',
 }
 
 

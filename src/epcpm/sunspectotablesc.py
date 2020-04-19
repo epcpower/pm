@@ -178,7 +178,7 @@ class DataPoint:
         table_element = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
         curve_parent = table_element.tree_parent.tree_parent.tree_parent
         table_element = curve_parent.descendent(
-            str(self.curve_index),
+            str(self.curve_index + 1),
             table_element.tree_parent.name,
             table_element.name,
         )
