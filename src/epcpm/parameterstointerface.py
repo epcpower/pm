@@ -1150,7 +1150,7 @@ class TableBaseStructures:
                 f'.sunspec_variable = {sunspec_variable_initializer},',
                 *maybe_sunspec_variable_length,
                 f'.zone = {curve_type if curve_type is not None else "0"},',
-                f'.curve = {curve_index},',
+                f'.curve = {str(int(curve_index - 1))},',
                 f'.point = {0 if point_index is None else point_index},',
                 *maybe_uuid,
             ],
