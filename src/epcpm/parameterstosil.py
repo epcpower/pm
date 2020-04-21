@@ -504,7 +504,7 @@ class TableArrayElement:
 
         indexes = {
             'curve_type': get_curve_type(''.join(self.layers[:2])),
-            'curve_index': int(self.layers[-2]),
+            'curve_index': int(self.layers[-2]) - 1,
             'point_index': int(table_element.name.lstrip('_').lstrip('0')) - 1,
         }
 
@@ -545,7 +545,7 @@ class TableArrayElement:
     def handle_group(self):
         table_element = self.wrapped
 
-        curve_index = int(self.layers[-2])
+        curve_index = int(self.layers[-2]) - 1
 
         parameter = table_element.original
 
