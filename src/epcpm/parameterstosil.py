@@ -296,6 +296,9 @@ class Parameter:
         if parameter.internal_type == 'void*':
             return []
 
+        if 'txRate' in parameter.name:
+            return []
+
         if parameter.setter_function is None:
             on_write = 'NULL'
         else:
