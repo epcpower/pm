@@ -4,89 +4,94 @@
 #
 #    python boots.py lock
 #
--e git+https://github.com/epcpower/sunspec-demo@19581317ae2fd136b5df229d824f81a17da52c58#egg=epcsunspecdemo
--e file:sub/epyqlib#egg=epyqlib
--e git+https://github.com/altendky/pycparser@b19d2b7cb78bccc89ef187c1c4eb5db0fdd3bbf9#egg=pycparser
--e git+https://github.com/pyinstaller/PyInstaller@46286a1f455d8e0837f7c2b9e1bbdff1ef858f0f#egg=PyInstaller
--e git+https://github.com/altendky/pysunspec@f197baa9c373ff93b13bff22a1ca0368aa89b305#egg=pysunspec
+--extra-index-url http://fstab.net/pypi/simple
+--trusted-host fstab.net
+
+-e git+https://github.com/epcpower/sunspec-demo@19581317ae2fd136b5df229d824f81a17da52c58#egg=epcsunspecdemo  # via -r D:\a\1\s\work\requirements\base.in, epyqlib
+-e file:sub/epyqlib#egg=epyqlib  # via -r D:\a\1\s\work\requirements\base.in
+-e git+https://github.com/altendky/pycparser@b19d2b7cb78bccc89ef187c1c4eb5db0fdd3bbf9#egg=pycparser  # via -r D:\a\1\s\work\requirements\base.in, cffi
+-e git+https://github.com/pyinstaller/PyInstaller@46286a1f455d8e0837f7c2b9e1bbdff1ef858f0f#egg=PyInstaller  # via -r D:\a\1\s\work\requirements\base.in
+-e git+https://github.com/altendky/pysunspec@f197baa9c373ff93b13bff22a1ca0368aa89b305#egg=pysunspec  # via -r D:\a\1\s\work\requirements\base.in, epcsunspecdemo
 aenum==2.2.3              # via python-can
-alqtendpy==0.0.4
+alqtendpy==0.0.4          # via epyqlib
 altendpy==0.0.21          # via alqtendpy
-altgraph==0.17
+altgraph==0.17            # via pyinstaller
 appdirs==1.4.3            # via virtualenv
-arrow==0.15.5
-attrs==19.3.0
+arrow==0.15.5             # via epyqlib
+attrs==19.3.0             # via -r D:\a\1\s\work\requirements\base.in, alqtendpy, altendpy, automat, canmatrix, epcsunspecdemo, graham, twisted
 automat==20.2.0           # via twisted
-bitstruct==8.9.0          # via canmatrix
-bleach==3.1.4             # via readme-renderer
-canmatrix==0.9.1
-certifi==2019.11.28       # via requests
+bitstruct==8.10.0         # via canmatrix, epyqlib
+bleach==3.1.5             # via readme-renderer
+canmatrix==0.9.1          # via -r D:\a\1\s\work\requirements\base.in, epyqlib
+certifi==2020.4.5.1       # via requests
 cffi==1.14.0              # via siphash-cffi
 chardet==3.0.4            # via requests
-click==7.0
+click==7.0                # via -r D:\a\1\s\work\requirements\base.in, alqtendpy, canmatrix, epcsunspecdemo, epyqlib, pip-tools, romp
 constantly==15.1.0        # via twisted
 distlib==0.3.0            # via virtualenv
 docutils==0.16            # via readme-renderer
 et-xmlfile==1.0.1         # via openpyxl
 filelock==3.0.12          # via virtualenv
 future==0.18.2            # via canmatrix, pefile
-gitdb==4.0.2              # via gitpython
-gitpython==3.1.0
-graham==0.1.11
+gitdb==4.0.4              # via gitpython
+gitpython==3.1.1          # via epyqlib
+graham==0.1.11            # via -r D:\a\1\s\work\requirements\base.in, epyqlib
 hyperlink==19.0.0         # via twisted
 idna==2.7                 # via hyperlink, requests
 importlib-metadata==1.6.0  # via keyring, pluggy, twine, virtualenv
 incremental==17.5.0       # via twisted
 jdcal==1.4.1              # via openpyxl
-jinja2==2.10.1
+jinja2==2.10.1            # via -r D:\a\1\s\work\requirements\base.in, altendpy
 keyring==21.2.0           # via twine
-lxml==4.3.0
+lxml==4.3.0               # via -r D:\a\1\s\work\requirements\base.in, python-docx, xmldiff
 markupsafe==1.1.1         # via jinja2
 marshmallow==2.21.0       # via graham
-natsort==7.0.1
-openpyxl==2.5.12
+natsort==7.0.1            # via epyqlib
+openpyxl==2.5.12          # via -r D:\a\1\s\work\requirements\base.in
+packaging==20.3           # via bleach
 pathlib2==2.3.5           # via canmatrix
-pefile==2019.4.18
-pint==0.11
-pip-tools==4.3.0
+pefile==2019.4.18         # via pyinstaller
+pint==0.11                # via epyqlib
+pip-tools==5.1.0          # via -r D:\a\1\s\work\requirements\pre.in
 pkginfo==1.5.0.1          # via twine
 pluggy==0.13.1            # via tox
 py==1.8.1                 # via tox
-pyelftools==0.26
+pyelftools==0.26          # via epyqlib
 pygments==2.6.1           # via readme-renderer
 pyhamcrest==2.0.2         # via twisted
-pyqt5-sip==12.7.1         # via pyqt5
-pyqt5==5.13.0
-pyserial==3.4
-python-can==3.3.2
+pyparsing==2.4.7          # via packaging
+pyqt5-sip==12.7.2         # via pyqt5
+pyqt5==5.13.0             # via -r D:\a\1\s\work\requirements\base.in, alqtendpy, epyqlib
+pyserial==3.4             # via -r D:\a\1\s\work\requirements\base.in, pysunspec
+python-can==3.3.2         # via epyqlib
 python-dateutil==2.8.1    # via arrow
-python-docx==0.8.10
-python-dotenv==0.12.0
-pywin32-ctypes==0.2.0     # via keyring
-qt5reactor==0.6
-qtawesome==0.7.0
+python-docx==0.8.10       # via epyqlib
+python-dotenv==0.13.0     # via epyqlib
+pywin32-ctypes==0.2.0     # via keyring, pyinstaller
+qt5reactor==0.6           # via epyqlib
+qtawesome==0.7.1          # via epyqlib
 qtpy==1.9.0               # via qtawesome
-readme-renderer==25.0     # via twine
+readme-renderer==26.0     # via twine
 requests-toolbelt==0.9.1  # via twine
-requests==2.20.0
-romp==2020.3
-siphash-cffi==0.1.3
-six==1.14.0               # via automat, bleach, pathlib2, pip-tools, python-dateutil, qtawesome, readme-renderer, virtualenv, xmldiff
-smmap==3.0.1              # via gitdb
-toolz==0.9.0
-tox==2.8.2
-tqdm==4.44.1              # via twine
-twine==3.1.1
-twisted==20.3.0           # via qt5reactor
+requests==2.20.0          # via -r D:\a\1\s\work\requirements\base.in, requests-toolbelt, romp, twine
+romp==2020.3              # via -r D:\a\1\s\work\requirements\pre.in
+siphash-cffi==0.1.3       # via epyqlib
+six==1.14.0               # via automat, bleach, packaging, pathlib2, pip-tools, python-dateutil, qtawesome, readme-renderer, virtualenv, xmldiff
+smmap==3.0.2              # via gitdb
+toolz==0.9.0              # via -r D:\a\1\s\work\requirements\base.in, epcsunspecdemo
+tox==2.8.2                # via -r D:\a\1\s\work\requirements\base.in
+tqdm==4.45.0              # via epcsunspecdemo, twine
+twine==3.1.1              # via -r D:\a\1\s\work\requirements\pre.in
+twisted==20.3.0           # via epyqlib, qt5reactor
 urllib3==1.24.3           # via requests
-virtualenv==20.0.15       # via tox
+virtualenv==20.0.18       # via tox
 webencodings==0.5.1       # via bleach
-wheel==0.33.6
+wheel==0.34.2             # via -r D:\a\1\s\work\requirements\pre.in
 windows-curses==2.1.0     # via python-can
 wrapt==1.12.1             # via python-can
-xmldiff==2.2
+xmldiff==2.2              # via -r D:\a\1\s\work\requirements\base.in
 zipp==3.1.0               # via importlib-metadata
-zope.interface==5.0.1     # via twisted
+zope.interface==5.1.0     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
