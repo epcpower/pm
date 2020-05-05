@@ -2,7 +2,6 @@ import attr
 import epyqlib.utils.general
 import epyqlib.pm.parametermodel
 
-import epcpm.cantotablesc
 import epcpm.sunspecmodel
 
 
@@ -35,6 +34,17 @@ def export(c_path, h_path, sunspec_model, skip_sunspec=False):
         destination=h_path,
         context=template_context,
     )
+
+
+# TODO: CAMPid 079549750417808543178043180
+def get_curve_type(combination_string):
+    # TODO: backmatching
+    return {
+        'LowRideThrough': 'IEEE1547_CURVE_TYPE_LRT',
+        'HighRideThrough': 'IEEE1547_CURVE_TYPE_HRT',
+        'LowTrip': 'IEEE1547_CURVE_TYPE_LTRIP',
+        'HighTrip': 'IEEE1547_CURVE_TYPE_HTRIP',
+    }.get(combination_string)
 
 
 @builders(epcpm.sunspecmodel.Root)
@@ -146,7 +156,7 @@ class TableRepeatingBlock:
             self.parameter_uuid_finder(uuid).name
             for uuid in self.wrapped.path[:-1]
         )
-        curve_type = epcpm.cantotablesc.get_curve_type(curve_group_string)
+        curve_type = get_curve_type(curve_group_string)
 
         for curve_index in range(self.wrapped.repeats):
             for point in self.wrapped.children:

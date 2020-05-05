@@ -8,7 +8,6 @@ import attr
 import graham
 
 import epcpm.cantosym
-import epcpm.cantotablesc
 import epcpm.parameterstohierarchy
 import epcpm.parameterstointerface
 import epcpm.parameterstosil
@@ -158,11 +157,6 @@ def full_export(
             set=False,
             item=False,
         )
-    )
-
-    epcpm.cantotablesc.export(
-        path=paths.tables_c,
-        can_model=project.models.can,
     )
 
     epcpm.sunspectotablesc.export(
