@@ -71,36 +71,9 @@ def export(
         include_uuid_in_item=include_uuid_in_item,
     )
 
-    if skip_sunspec:
-        model_ids = []
-    else:
-        model_ids = [
-            1,
-            17,
-            103,
-            120,
-            121,
-            122,
-            123,
-            126,
-            129,
-            130,
-            132,
-            134,
-            135,
-            136,
-            137,
-            138,
-            141,
-            142,
-            145,
-            *range(65000, 65010),
-            65534,
-        ]
-
     c_path.parent.mkdir(parents=True, exist_ok=True)
 
-    built_c, built_h = builder.gen()
+    built_c, built_h, model_ids = builder.gen()
 
     template_context = {
         'sunspec_interface_gen_headers': (
@@ -196,6 +169,7 @@ class Root:
 
         c = []
         h = []
+        sunspec_models = set()
 
         for child in self.wrapped.children:
             if not isinstance(
@@ -209,7 +183,7 @@ class Root:
             ):
                 continue
 
-            c_built, h_built = builders.wrap(
+            c_built, h_built, sunspec_models_built = builders.wrap(
                 wrapped=child,
                 can_root=self.can_root,
                 sunspec_root=self.sunspec_root,
@@ -223,8 +197,9 @@ class Root:
 
             c.extend(c_built)
             h.extend(h_built)
+            sunspec_models |= sunspec_models_built
 
-        return c, h
+        return c, h, sunspec_models
 
         # return itertools.chain.from_iterable(
         #     builders.wrap(
@@ -263,6 +238,8 @@ class Group:
     def gen(self):
         c = []
         h = []
+        sunspec_models = set()
+
         for child in self.wrapped.children:
             if not isinstance(
                     child,
@@ -275,7 +252,7 @@ class Group:
             ):
                 continue
 
-            c_built, h_built = builders.wrap(
+            c_built, h_built, sunspec_models_built = builders.wrap(
                 wrapped=child,
                 can_root=self.can_root,
                 sunspec_root=self.sunspec_root,
@@ -291,8 +268,9 @@ class Group:
 
             c.extend(c_built)
             h.extend(h_built)
+            sunspec_models |= sunspec_models_built
 
-        return c, h
+        return c, h, sunspec_models
         # return itertools.chain.from_iterable(
         #     result
         #     for result in (
@@ -380,8 +358,10 @@ class Parameter:
             and parameter.uses_interface_item()
         )
 
+        sunspec_models = set()
+
         if not uses_interface_item or all(x is None for x in interface_data):
-            return [[], []]
+            return [[], [], sunspec_models]
 
         scale_factor_variable = 'NULL'
         scale_factor_updater = 'NULL'
@@ -424,6 +404,8 @@ class Parameter:
                 maybe_model = maybe_model.tree_parent
 
             model = maybe_model
+
+            sunspec_models.add(model.id)
 
             # TODO: move this somewhere common in python code...
             sunspec_type = sunspec_types[
@@ -544,7 +526,7 @@ class Parameter:
             reject_from_inactive_interfaces=parameter.reject_from_inactive_interfaces,
         )
 
-        return result
+        return [*result, sunspec_models]
 
 
 @attr.s(frozen=True)
@@ -1322,6 +1304,7 @@ class Table:
                 '',
                 *item_code[1],
             ],
+            set(),
         ]
 
 
