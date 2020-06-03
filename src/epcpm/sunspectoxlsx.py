@@ -670,7 +670,23 @@ class Point:
             row.label = parameter.name
             row.name = parameter.abbreviation
             row.notes = '' if parameter.notes is None else parameter.notes
-            row.notes = f'{row.notes}  <uuid:{parameter.uuid}>'.strip()
+            to_tree = list(itertools.takewhile(
+                lambda node: not isinstance(node, epyqlib.pm.parametermodel.Table),
+                parameter.ancestors(),
+            ))
+            tree = to_tree[-1]
+            if isinstance(tree, epyqlib.pm.parametermodel.TableGroupElement):
+                # naturally sorted by traversal...  hopefully
+                all_of_them = tree.nodes_by_filter(
+                    filter=lambda node: node.original == parameter.original,
+                    collection=[],
+                )
+                uuids_string = ' '.join(
+                    (f'<uuid:{parameter.uuid}>' for parameter in all_of_them),
+                )
+                row.notes = f'{row.notes}  {uuids_string}'.strip()
+            else:
+                row.notes = f'{row.notes}  <uuid:{parameter.uuid}>'.strip()
 
             if row.units is None:
                 row.units = parameter.units
