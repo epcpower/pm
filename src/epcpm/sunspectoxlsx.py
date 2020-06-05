@@ -510,13 +510,54 @@ class DataPointBitfield:
     def gen(self):
         rows = []
 
-        for enumerator in self.wrapped.children:
-            builder = enumerator_builders.wrap(
-                wrapped=enumerator,
-                point=self.point,
-                parameter_uuid_finder=self.parameter_uuid_finder,
-            )
-            rows.append(builder.gen())
+        # 16 bits per register
+        total_bit_count = self.wrapped.size * 16
+        decimal_digits = len(str(total_bit_count - 1))
+
+        enumerators_by_bit = {
+            enumerator.bit_offset + i: [
+                enumerator,
+                i if enumerator.bit_length > 1 else None
+            ]
+            for enumerator in self.wrapped.children
+            for i in range(enumerator.bit_length)
+        }
+
+        member_parameter = self.parameter_uuid_finder(
+            self.wrapped.parameter_uuid,
+        )
+
+        for bit in range(total_bit_count):
+            enumerator, index = enumerators_by_bit.get(bit, [None, None])
+
+            if enumerator is None:
+                padded_bit_string = f'{bit:0{decimal_digits}}'
+                row = Fields(
+                    field_type=f'bitfield{total_bit_count}',
+                    value=bit,
+                    applicable_point=member_parameter.abbreviation,
+                    name=f'Rsvd{padded_bit_string}',
+                    label=f'Reserved - {padded_bit_string}',
+                )
+            else:
+                builder = enumerator_builders.wrap(
+                    wrapped=enumerator,
+                    point=self.point,
+                    parameter_uuid_finder=self.parameter_uuid_finder,
+                )
+                row = builder.gen()
+
+                if index is not None:
+                    padded_index_string = f'{index:0{decimal_digits}}'
+
+                    row = attr.evolve(
+                        row,
+                        name=f'{row.name}{padded_index_string}',
+                        label=f'{row.label} - {padded_index_string}',
+                        value=row.value + index,
+                    )
+
+            rows.append(row)
 
         return rows
 
