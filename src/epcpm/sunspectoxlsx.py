@@ -276,7 +276,25 @@ class Enumeration:
 
         enumeration = self.parameter_uuid_finder(enumeration_uuid)
 
-        for enumerator in enumeration.children:
+        enumerators_by_bit = {
+            enumerator.value: enumerator
+            for enumerator in enumeration.children
+        }
+
+        # 16 bits per register
+        total_bit_count = self.wrapped.size * 16
+        decimal_digits = len(str(total_bit_count - 1))
+
+        for bit in range(total_bit_count):
+            enumerator = enumerators_by_bit.get(bit)
+            if enumerator is None:
+                padded_bit_string = f'{bit:0{decimal_digits}}'
+                enumerator = epyqlib.pm.parametermodel.SunSpecEnumerator(
+                    label=f'Reserved - {padded_bit_string}',
+                    name=f'Rsvd{padded_bit_string}',
+                    value=bit,
+                )
+
             builder = enumerator_builders.wrap(
                 wrapped=enumerator,
                 point=self.point,
