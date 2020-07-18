@@ -478,6 +478,8 @@ class MultiplexedMessage:
 
             signal_access_levels = set()
 
+            multiplexer_is_read_only = all(self.parameter_uuid_finder(signal.parameter_uuid).read_only for signal in multiplexer.children)
+
             for signal in multiplexer.children:
                 if param_special(signal):
                     continue
@@ -503,6 +505,8 @@ class MultiplexedMessage:
                             access_level.name.casefold(),
                         ).strip()
                     )
+
+            first_new_signal_index = len(frame.signals)
 
             for signal in multiplexer.children:
                 signal = builders.wrap(
@@ -534,7 +538,12 @@ class MultiplexedMessage:
                 ).gen(
                     multiplex_id=multiplexer.identifier,
                 )
-                frame.signals.insert(0, matrix_signal)
+
+                if signal.name.startswith('ReadParam_') and multiplexer_is_read_only:
+                    matrix_signal.min = 1
+                    matrix_signal.max = None
+
+                frame.signals.insert(first_new_signal_index, matrix_signal)
 
         return frame
 
