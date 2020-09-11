@@ -32,7 +32,7 @@ def export(path, can_model, parameters_model):
     )
 
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open('w', newline='\n') as f:
+    with path.open('w', encoding='utf-8', newline='\n') as f:
         f.write(builder.gen())
 
 
