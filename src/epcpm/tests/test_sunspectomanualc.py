@@ -11,6 +11,7 @@ def parse(c):
     ast = parser.parse(c)
     return ast
 
+
 c = """
 void getSUNSPEC_MODEL1_DA (void) {
     sunspecInterface.model1.DA = modbusHandlerGetSlaveAddress();
@@ -21,6 +22,7 @@ void setSUNSPEC_MODEL1_DA (void) {
 }
 """
 
+
 def Type(name, type):
     return pycparser.c_ast.TypeDecl(
         declname=name,
@@ -29,6 +31,7 @@ def Type(name, type):
             names=(type,),
         ),
     )
+
 
 Decl = functools.partial(
     pycparser.c_ast.Decl,
@@ -42,7 +45,7 @@ Decl = functools.partial(
 
 TypeDecl = functools.partial(
     pycparser.c_ast.TypeDecl,
-    declname='',
+    declname="",
     quals=[],
 )
 
@@ -50,7 +53,7 @@ TypeDecl = functools.partial(
 def function(name):
     type_decl = Type(
         name=name,
-        type=['void'],
+        type=["void"],
     )
 
     param_list = pycparser.c_ast.ParamList(
@@ -59,7 +62,7 @@ def function(name):
                 name=None,
                 quals=[],
                 type=pycparser.c_ast.IdentifierType(
-                    names=['void'],
+                    names=["void"],
                 ),
             ),
         ],
@@ -90,5 +93,5 @@ def function(name):
 
 def test_():
     ast = parse(c)
-    ast.ext.append(function('myFunctionName'))
+    ast.ext.append(function("myFunctionName"))
     ast.show()

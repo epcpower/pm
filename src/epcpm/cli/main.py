@@ -22,10 +22,10 @@ def main():
     """Parameter manager"""
 
 
-main.add_command(epcpm.__main__._entry_point, name='gui')
+main.add_command(epcpm.__main__._entry_point, name="gui")
 
 
-@main.group(name='import')
+@main.group(name="import")
 def _import():
     """Import PM data from other formats"""
     pass
@@ -55,25 +55,25 @@ def export():
     pass
 
 
-export.add_command(epcpm.cli.exportdocx.cli, name='docx')
+export.add_command(epcpm.cli.exportdocx.cli, name="docx")
 
 
 @export.command()
 @epcpm.cli.utils.project_option(required=True)
 @epcpm.cli.utils.target_path_option(required=True)
-@click.option('--if-stale/--assume-stale', 'only_if_stale')
-@click.option('--skip-sunspec/--generate-sunspec', 'skip_sunspec')
+@click.option("--if-stale/--assume-stale", "only_if_stale")
+@click.option("--skip-sunspec/--generate-sunspec", "skip_sunspec")
 @click.option(
-    '--include-uuid-in-item/--exclude-uuid-from-item',
-    'include_uuid_in_item',
+    "--include-uuid-in-item/--exclude-uuid-from-item",
+    "include_uuid_in_item",
     default=False,
 )
 def build(
-        project,
-        target_path,
-        only_if_stale,
-        skip_sunspec,
-        include_uuid_in_item,
+    project,
+    target_path,
+    only_if_stale,
+    skip_sunspec,
+    include_uuid_in_item,
 ):
     """Export PM data to embedded project directory"""
     project = pathlib.Path(project)
@@ -83,19 +83,17 @@ def build(
 
     if only_if_stale:
         if not epcpm.importexport.is_stale(
-                project=project,
-                paths=paths,
-                skip_sunspec=skip_sunspec,
+            project=project,
+            paths=paths,
+            skip_sunspec=skip_sunspec,
         ):
             click.echo(
-                'Generated files appear to be up to date, skipping export',
+                "Generated files appear to be up to date, skipping export",
             )
 
             return
 
-        click.echo(
-            'Generated files appear to be out of date, starting export'
-        )
+        click.echo("Generated files appear to be out of date, starting export")
 
     loaded_project = epcpm.project.loadp(project)
 
@@ -109,7 +107,7 @@ def build(
     )
 
     click.echo()
-    click.echo('done')
+    click.echo("done")
 
 
 @main.group()
@@ -119,20 +117,20 @@ def validate():
 
 @validate.command()
 @click.option(
-    '--reference',
+    "--reference",
     type=click.Path(exists=True, file_okay=False, resolve_path=True),
     required=True,
 )
 @click.option(
-    '--subject',
+    "--subject",
     type=click.Path(exists=True, file_okay=False, resolve_path=True),
     required=True,
 )
 @click.option(
-    '--schema',
+    "--schema",
     type=click.Path(exists=True, dir_okay=False, resolve_path=True),
 )
-@click.option('--smdx-glob', default='smdx_*.xml')
+@click.option("--smdx-glob", default="smdx_*.xml")
 def batch(reference, schema, subject, smdx_glob):
     failed = False
 
@@ -140,7 +138,7 @@ def batch(reference, schema, subject, smdx_glob):
     subject_directory_path = pathlib.Path(subject)
 
     if schema is None:
-        schema = reference_directory_path/'smdx.xsd'
+        schema = reference_directory_path / "smdx.xsd"
     else:
         schema = pathlib.Path(schema)
 
@@ -153,20 +151,24 @@ def batch(reference, schema, subject, smdx_glob):
     schema = lxml.etree.fromstring(schema.read_bytes())
     schema = lxml.etree.XMLSchema(schema, attribute_defaults=True)
 
-    spacing = '\n\n'
-    present_spacing = ''
+    spacing = "\n\n"
+    present_spacing = ""
 
-    diff_indent = '        '
+    diff_indent = "        "
 
     for reference_path, subject_path in sorted(paired_paths.pairs.items()):
         click.echo(present_spacing, nl=False)
         present_spacing = spacing
 
-        click.echo(textwrap.dedent(f'''\
+        click.echo(
+            textwrap.dedent(
+                f"""\
         Cross validating: {subject_path.name}
                reference: {reference_path}
                  subject: {subject_path}
-        '''))
+        """
+            )
+        )
 
         reference = lxml.etree.fromstring(reference_path.read_bytes())
         subject = lxml.etree.fromstring(subject_path.read_bytes())
@@ -187,10 +189,14 @@ def batch(reference, schema, subject, smdx_glob):
         click.echo(present_spacing, nl=False)
         present_spacing = spacing
 
-        click.echo(textwrap.dedent(f'''\
+        click.echo(
+            textwrap.dedent(
+                f"""\
         Validating: {subject.name}
            subject: {subject}
-        '''))
+        """
+            )
+        )
 
         result = epcpm.smdx.validate_against_schema(
             subject=subject,
@@ -212,94 +218,98 @@ def transition(target_path):
     """Don't use this unless you know"""
     target_path = pathlib.Path(target_path)
 
-    click.echo('Working in: {}'.format(target_path))
+    click.echo("Working in: {}".format(target_path))
     value = click.prompt(
-        'This will wipe out changes in the above project path, continue? ',
-        prompt_suffix='',
+        "This will wipe out changes in the above project path, continue? ",
+        prompt_suffix="",
     )
 
-    if value != 'yep':
-        click.echo('Sorry, that response is not acceptable to continue.')
+    if value != "yep":
+        click.echo("Sorry, that response is not acceptable to continue.")
         return
 
-    c_project = target_path/'.cproject'
+    c_project = target_path / ".cproject"
 
-    library_path = target_path / 'embedded-library'
+    library_path = target_path / "embedded-library"
 
-    original_spreadsheet = library_path/'MODBUS_SunSpec-EPC.xls'
-    new_spreadsheet = original_spreadsheet.with_suffix('.xlsx')
+    original_spreadsheet = library_path / "MODBUS_SunSpec-EPC.xls"
+    new_spreadsheet = original_spreadsheet.with_suffix(".xlsx")
 
-    tables_py = library_path/'python'/'embeddedlibrary'/'tables.py'
-    sunspecparser_py = (
-        library_path/'python'/'embeddedlibrary'/'sunspecparser.py'
-    )
+    tables_py = library_path / "python" / "embeddedlibrary" / "tables.py"
+    sunspecparser_py = library_path / "python" / "embeddedlibrary" / "sunspecparser.py"
 
-    subprocess.run(['git', 'reset', '.'], check=True, cwd=library_path)
-    subprocess.run(['git', 'checkout', '--', '.'], check=True, cwd=library_path)
-    subprocess.run(['git', 'clean', '-fdx'], check=True, cwd=library_path)
+    subprocess.run(["git", "reset", "."], check=True, cwd=library_path)
+    subprocess.run(["git", "checkout", "--", "."], check=True, cwd=library_path)
+    subprocess.run(["git", "clean", "-fdx"], check=True, cwd=library_path)
     subprocess.run(
         [
-            'libreoffice',
-            '--convert-to', 'xlsx',
-            '--outdir', os.fspath(library_path),
-            os.fspath(original_spreadsheet)],
+            "libreoffice",
+            "--convert-to",
+            "xlsx",
+            "--outdir",
+            os.fspath(library_path),
+            os.fspath(original_spreadsheet),
+        ],
         check=True,
         cwd=library_path,
     )
     subprocess.run(
-        ['git', 'rm', os.fspath(tables_py)],
+        ["git", "rm", os.fspath(tables_py)],
         check=True,
         cwd=library_path,
     )
     subprocess.run(
-        ['git', 'rm', os.fspath(original_spreadsheet)],
+        ["git", "rm", os.fspath(original_spreadsheet)],
         check=True,
         cwd=library_path,
     )
     subprocess.run(
-        ['git', 'add', os.fspath(new_spreadsheet)],
+        ["git", "add", os.fspath(new_spreadsheet)],
         check=True,
         cwd=library_path,
     )
 
-    subprocess.run(['git', 'reset', '.'], check=True, cwd=target_path)
-    subprocess.run(['git', 'checkout', '--', '.'], check=True, cwd=target_path)
+    subprocess.run(["git", "reset", "."], check=True, cwd=target_path)
+    subprocess.run(["git", "checkout", "--", "."], check=True, cwd=target_path)
     subprocess.run(
-        ['git', 'clean', '-fdx', '--exclude', 'venv'],
+        ["git", "clean", "-fdx", "--exclude", "venv"],
         check=True,
         cwd=target_path,
     )
     subprocess.run(
-        ['python', os.fspath(target_path / 'create_venv.py'), 'ensure'],
+        ["python", os.fspath(target_path / "create_venv.py"), "ensure"],
         check=True,
         cwd=target_path,
     )
     subprocess.run(
-        [target_path/'venv'/'bin'/'sunspecparser', os.fspath(new_spreadsheet)],
+        [target_path / "venv" / "bin" / "sunspecparser", os.fspath(new_spreadsheet)],
         check=True,
-        cwd=library_path, # it expects to be in _some_ subdirectory and then ..
+        cwd=library_path,  # it expects to be in _some_ subdirectory and then ..
     )
     subprocess.run(
-        ['sed', '-i', r's/\.xls/\.xlsx/g', os.fspath(c_project)],
+        ["sed", "-i", r"s/\.xls/\.xlsx/g", os.fspath(c_project)],
         check=True,
         cwd=target_path,
     )
     subprocess.run(
-        ['git', 'add', os.fspath(c_project)],
+        ["git", "add", os.fspath(c_project)],
         check=True,
         cwd=target_path,
     )
 
     content = sunspecparser_py.read_text()
-    with sunspecparser_py.open('w', newline='\n') as f:
+    with sunspecparser_py.open("w", newline="\n") as f:
         for line in content.splitlines():
-            f.write(line + '\n')
+            f.write(line + "\n")
             if r"""'#include "faultHandler.h"\n'""" in line:
-                f.write(r"""            c_file.write('#include "sunspecInterface{:>05}.h"\n'.format(model))""" '\n')
-                f.write(r"""            c_file.write('#include "math.h"\n')""" '\n')
+                f.write(
+                    r"""            c_file.write('#include "sunspecInterface{:>05}.h"\n'.format(model))"""
+                    "\n"
+                )
+                f.write(r"""            c_file.write('#include "math.h"\n')""" "\n")
 
     subprocess.run(
-        ['git', 'add', os.fspath(sunspecparser_py)],
+        ["git", "add", os.fspath(sunspecparser_py)],
         check=True,
         cwd=library_path,
     )
@@ -311,13 +321,13 @@ def transition(target_path):
         paths=paths,
     )
 
-    pm_directory = target_path / 'interface' / 'pm'
+    pm_directory = target_path / "interface" / "pm"
     pm_directory.mkdir(exist_ok=True)
-    project.filename = pm_directory/'project.pmp'
+    project.filename = pm_directory / "project.pmp"
     project.save()
 
     subprocess.run(
-        ['git', 'add', os.fspath(pm_directory)],
+        ["git", "add", os.fspath(pm_directory)],
         check=True,
         cwd=target_path,
     )
@@ -329,7 +339,7 @@ def transition(target_path):
     )
 
     click.echo()
-    click.echo('done')
+    click.echo("done")
 
 
 @main.group()
@@ -339,8 +349,8 @@ def pmvs():
 
 @pmvs.command()
 @epcpm.cli.utils.project_option(required=True)
-@click.option('--input', type=click.File())
-@click.option('--output', type=click.Path(dir_okay=False))
+@click.option("--input", type=click.File())
+@click.option("--output", type=click.Path(dir_okay=False))
 def filter(project, input, output):
     """Export PM data to embedded project directory"""
     project = pathlib.Path(project)

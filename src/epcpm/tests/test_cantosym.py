@@ -48,7 +48,10 @@ here = pathlib.Path(__file__).parent
 
 def try_loading_multiplex():
     import io
-    f = io.BytesIO(textwrap.dedent('''\
+
+    f = io.BytesIO(
+        textwrap.dedent(
+            """\
     {SEND}
     
     [TestMultiplexedMessage]
@@ -62,25 +65,28 @@ def try_loading_multiplex():
     DLC=0
     Mux=MuxB 0,8 1
     Var=SignalB signed 0,0
-    ''').encode('utf-8'))
+    """
+        ).encode("utf-8")
+    )
     import canmatrix
-    matrix, = canmatrix.formats.load(
+
+    (matrix,) = canmatrix.formats.load(
         fileObject=f,
-        importType='sym',
+        importType="sym",
     ).values()
 
     print()
 
 
 def tidy_sym(s):
-    return '\n'.join(s.strip() for s in s.splitlines()).strip()
+    return "\n".join(s.strip() for s in s.splitlines()).strip()
 
 
 def test_multiplexed():
     root = epcpm.canmodel.Root()
 
     parameter_root = epyqlib.pm.parametermodel.Root(
-        uuid='5ad34154-f585-40bc-992a-0c9685cbdb26',
+        uuid="5ad34154-f585-40bc-992a-0c9685cbdb26",
     )
     model = epyqlib.attrsmodel.Model(
         root=parameter_root,
@@ -88,15 +94,15 @@ def test_multiplexed():
     )
     model.add_drop_sources(model)
     access_levels = epyqlib.pm.parametermodel.AccessLevels(
-        uuid='284090fd-6893-4800-92bc-035dbf25909c',
+        uuid="284090fd-6893-4800-92bc-035dbf25909c",
     )
     access_level = epyqlib.pm.parametermodel.AccessLevel(
         value=0,
-        uuid='40ced595-a5f3-41ee-9156-eb0ac343c9a5',
+        uuid="40ced595-a5f3-41ee-9156-eb0ac343c9a5",
     )
     access_levels.append_child(access_level)
     enumerations = epyqlib.pm.parametermodel.Enumerations(
-        uuid='af9bfcf3-1858-4fb9-b238-a7641bcffcd4',
+        uuid="af9bfcf3-1858-4fb9-b238-a7641bcffcd4",
     )
     enumerations.append_child(access_levels)
     parameter_root.append_child(enumerations)
@@ -108,12 +114,13 @@ def test_multiplexed():
     )
 
     multiplexed_message = epcpm.canmodel.MultiplexedMessage(
-        name='TestMultiplexedMessage',
-        identifier=0x1abeface,
+        name="TestMultiplexedMessage",
+        identifier=0x1ABEFACE,
     )
     root.append_child(multiplexed_message)
 
-    expected = textwrap.dedent('''\
+    expected = textwrap.dedent(
+        """\
     FormatVersion=5.0 // Do not edit this line!
     Title="canmatrix-Export"
     {ENUMS}
@@ -125,20 +132,21 @@ def test_multiplexed():
     ID=1ABEFACEh
     Type=Extended
     DLC=0
-    ''')
+    """
+    )
 
     # assert tidy_sym(builder.gen()) == tidy_sym(expected)
 
     multiplex_signal = epcpm.canmodel.Signal(
-        name='MultiplexerSignal',
+        name="MultiplexerSignal",
         bits=8,
-        uuid='c812b3be-c883-4828-8695-0f61db24fde3',
+        uuid="c812b3be-c883-4828-8695-0f61db24fde3",
     )
     multiplexed_message.append_child(multiplex_signal)
     common_signal = epcpm.canmodel.Signal(
-        name='CommonSignal',
+        name="CommonSignal",
         signed=True,
-        uuid='3ecc047e-e88c-4917-b22c-2751db6db705',
+        uuid="3ecc047e-e88c-4917-b22c-2751db6db705",
     )
     multiplexed_message.append_child(common_signal)
 
@@ -152,59 +160,63 @@ def test_multiplexed():
     # assert tidy_sym(builder.gen()) == tidy_sym(expected)
 
     parameter_a = epyqlib.pm.parametermodel.Parameter(
-        uuid='c56650d0-252d-4b88-a645-fecd23dda1b6',
+        uuid="c56650d0-252d-4b88-a645-fecd23dda1b6",
     )
     parameter_root.append_child(parameter_a)
 
     multiplexer_a = epcpm.canmodel.Multiplexer(
-        name='TestMultiplexerA',
+        name="TestMultiplexerA",
         identifier=1,
-        uuid='bc872648-94d2-4bee-8a4f-5654cac93d38',
+        uuid="bc872648-94d2-4bee-8a4f-5654cac93d38",
     )
     multiplexed_message.append_child(multiplexer_a)
     signal_a = epcpm.canmodel.Signal(
-        name='SignalA',
+        name="SignalA",
         signed=True,
         parameter_uuid=parameter_a.uuid,
-        uuid='cc5a8db2-b3da-4f2e-b8c6-83569b9c6824',
+        uuid="cc5a8db2-b3da-4f2e-b8c6-83569b9c6824",
     )
     multiplexer_a.append_child(signal_a)
 
-    expected += textwrap.dedent('''\
+    expected += textwrap.dedent(
+        """\
     Mux=TestMultiplexerA 0,8 1
     Var=CommonSignal signed 0,0 /d:0
     Var=SignalA signed 0,0 /d:0 /ln:"New Parameter"	// <rw:1:1>  <uuid:c56650d0-252d-4b88-a645-fecd23dda1b6>
-    ''')
+    """
+    )
 
     assert tidy_sym(builder.gen()) == tidy_sym(expected)
 
     parameter_b = epyqlib.pm.parametermodel.Parameter(
-        uuid='c6956fa5-15cc-48f4-a0a7-c4b691f14fec',
+        uuid="c6956fa5-15cc-48f4-a0a7-c4b691f14fec",
     )
     parameter_root.append_child(parameter_b)
 
     multiplexer_b = epcpm.canmodel.Multiplexer(
-        name='TestMultiplexerB',
+        name="TestMultiplexerB",
         identifier=2,
-        uuid='7efd7e89-71f8-400b-b11d-7f49642309f8',
+        uuid="7efd7e89-71f8-400b-b11d-7f49642309f8",
     )
     multiplexed_message.append_child(multiplexer_b)
     signal_b = epcpm.canmodel.Signal(
-        name='SignalB',
+        name="SignalB",
         signed=True,
         parameter_uuid=parameter_b.uuid,
-        uuid='b69c211b-0e0c-4ba1-947e-ea47a1baf11d',
+        uuid="b69c211b-0e0c-4ba1-947e-ea47a1baf11d",
     )
     multiplexer_b.append_child(signal_b)
 
-    expected += textwrap.dedent('''\
+    expected += textwrap.dedent(
+        """\
 
     [TestMultiplexedMessage]
     DLC=0
     Mux=TestMultiplexerB 0,8 2
     Var=CommonSignal signed 0,0 /d:0
     Var=SignalB signed 0,0 /d:0 /ln:"New Parameter"	// <rw:1:1>  <uuid:c6956fa5-15cc-48f4-a0a7-c4b691f14fec>
-    ''')
+    """
+    )
 
     assert tidy_sym(builder.gen()) == tidy_sym(expected)
 
@@ -227,16 +239,16 @@ def test_enumerations():
         access_levels=access_levels,
     )
 
-    on_off = epyqlib.pm.parametermodel.Enumeration(name='OnOff')
+    on_off = epyqlib.pm.parametermodel.Enumeration(name="OnOff")
     parameter_root.append_child(on_off)
-    off = epyqlib.pm.parametermodel.Enumerator(name='off', value=0)
-    on = epyqlib.pm.parametermodel.Enumerator(name='on', value=1)
+    off = epyqlib.pm.parametermodel.Enumerator(name="off", value=0)
+    on = epyqlib.pm.parametermodel.Enumerator(name="on", value=1)
 
     on_off.append_child(off)
     on_off.append_child(on)
 
     parameter = epyqlib.pm.parametermodel.Parameter(
-        uuid='29cf3408-043e-4573-a511-0c7638688663',
+        uuid="29cf3408-043e-4573-a511-0c7638688663",
     )
     parameter_root.append_child(parameter)
 
@@ -248,7 +260,8 @@ def test_enumerations():
     )
     message.append_child(signal)
 
-    expected = textwrap.dedent('''\
+    expected = textwrap.dedent(
+        """\
     FormatVersion=5.0 // Do not edit this line!
     Title="canmatrix-Export"
     {ENUMS}
@@ -261,7 +274,8 @@ def test_enumerations():
     Type=Extended
     DLC=0
     Var=NewSignal unsigned 0,0 /e:OnOff /d:0 /ln:"New Parameter"	// <rw:1:1>  <uuid:29cf3408-043e-4573-a511-0c7638688663>
-    ''')
+    """
+    )
 
     assert tidy_sym(builder.gen()) == tidy_sym(expected)
 
@@ -272,8 +286,8 @@ def test_access_level():
     can_root = project.models.can.root
 
     access_levels = epyqlib.pm.parametermodel.AccessLevels(
-        name='AccessLevel',
-        uuid='54bb11bb-a39d-4b30-a597-da3fbeda4d7a',
+        name="AccessLevel",
+        uuid="54bb11bb-a39d-4b30-a597-da3fbeda4d7a",
     )
 
     builder = epcpm.cantosym.builders.wrap(
@@ -284,60 +298,59 @@ def test_access_level():
     )
 
     user = epyqlib.pm.parametermodel.Enumerator(
-        name='user',
+        name="user",
         value=0,
-        uuid='b4c58cf9-3705-4e73-8e31-09f8da22ff61',
+        uuid="b4c58cf9-3705-4e73-8e31-09f8da22ff61",
     )
     factory = epyqlib.pm.parametermodel.Enumerator(
-        name='factory',
+        name="factory",
         value=1,
-        uuid='f5dc405f-a0ed-4590-9553-bf3f1efec23a',
+        uuid="f5dc405f-a0ed-4590-9553-bf3f1efec23a",
     )
 
     access_levels.append_child(user)
     access_levels.append_child(factory)
 
     enumerations = epyqlib.pm.parametermodel.Enumerations(
-        name='Enumerations',
-        uuid='1936c213-5230-454a-81f9-c8099046a19d',
+        name="Enumerations",
+        uuid="1936c213-5230-454a-81f9-c8099046a19d",
     )
     parameter_root.append_child(enumerations)
 
     enumerations.append_child(access_levels)
 
     parameter = epyqlib.pm.parametermodel.Parameter(
-        name='Factory Parameter',
+        name="Factory Parameter",
         access_level_uuid=factory.uuid,
-        uuid='40477147-cd0b-407a-9dc1-805d3205214b',
+        uuid="40477147-cd0b-407a-9dc1-805d3205214b",
     )
     parameter_root.append_child(parameter)
 
     access_level_parameter = epyqlib.pm.parametermodel.Parameter(
-        name='Access Parameter',
-        uuid='908f42e7-7632-47bc-a8c7-eb1eca4e277c',
+        name="Access Parameter",
+        uuid="908f42e7-7632-47bc-a8c7-eb1eca4e277c",
     )
     parameter_root.append_child(access_level_parameter)
 
-    message = epcpm.canmodel.Message(
-
-    )
+    message = epcpm.canmodel.Message()
     can_root.append_child(message)
     signal = epcpm.canmodel.Signal(
-        name='FactorySignal',
+        name="FactorySignal",
         parameter_uuid=parameter.uuid,
-        uuid='07047416-73e3-48bd-8c0c-85c1de078200',
+        uuid="07047416-73e3-48bd-8c0c-85c1de078200",
     )
     message.append_child(signal)
 
     access_level_signal = epcpm.canmodel.Signal(
-        name='AccessSignal',
+        name="AccessSignal",
         parameter_uuid=access_level_parameter.uuid,
         enumeration_uuid=access_levels.uuid,
-        uuid='4f62704f-6548-4f80-b7b7-702f214a394b',
+        uuid="4f62704f-6548-4f80-b7b7-702f214a394b",
     )
     message.append_child(access_level_signal)
 
-    expected = textwrap.dedent('''\
+    expected = textwrap.dedent(
+        """\
     FormatVersion=5.0 // Do not edit this line!
     Title="canmatrix-Export"
     {ENUMS}
@@ -351,20 +364,21 @@ def test_access_level():
     DLC=0
     Var=FactorySignal unsigned 0,0 /d:0 /ln:"Factory Parameter"	// <rw:1:1> <factory>  <uuid:40477147-cd0b-407a-9dc1-805d3205214b>
     Var=AccessSignal unsigned 0,0 /e:AccessLevel /d:0 /ln:"Access Parameter"	// <rw:1:1>  <uuid:908f42e7-7632-47bc-a8c7-eb1eca4e277c>
-    ''')
+    """
+    )
 
     assert tidy_sym(builder.gen()) == tidy_sym(expected)
 
 
 def test_table():
-    project = epcpm.project.loadp(here/'project'/'project.pmp')
-    can_table, = project.models.can.root.nodes_by_attribute(
-        attribute_value='First Table',
-        attribute_name='name',
+    project = epcpm.project.loadp(here / "project" / "project.pmp")
+    (can_table,) = project.models.can.root.nodes_by_attribute(
+        attribute_value="First Table",
+        attribute_name="name",
     )
-    access_levels, = project.models.parameters.root.nodes_by_attribute(
-        attribute_value='AccessLevel',
-        attribute_name='name',
+    (access_levels,) = project.models.parameters.root.nodes_by_attribute(
+        attribute_value="AccessLevel",
+        attribute_name="name",
     )
     parameter_table = project.models.parameters.node_from_uuid(
         can_table.table_uuid,
@@ -383,7 +397,8 @@ def test_table():
     result = builder.gen()
     print(result)
 
-    expected = textwrap.dedent('''\
+    expected = textwrap.dedent(
+        """\
     FormatVersion=5.0 // Do not edit this line!
     Title="canmatrix-Export"
     {ENUMS}
@@ -544,6 +559,7 @@ def test_table():
     Mux=First TableEO_1ET_3_ArrayTwo_B 0,8 1Ch	// <table>
     Var=AT_3 unsigned 16,16 /d:0 /ln:"AT_3"	// <rw:1:1>  <uuid:38edbaee-7580-41a8-82f0-9da8f494fb43>
     Var=AT_4 unsigned 32,16 /d:0 /ln:"AT_4"	// <rw:1:1>  <uuid:baed5be3-d32f-455b-aff4-4a353b28400b>
-    ''')
+    """
+    )
 
     assert tidy_sym(result) == tidy_sym(expected)

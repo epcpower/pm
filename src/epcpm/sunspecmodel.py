@@ -27,70 +27,46 @@ class TypeNotFoundError(Exception):
 
 def build_sunspec_types_enumeration():
     enumeration = epyqlib.pm.parametermodel.Enumeration(
-        name='SunSpecTypes',
-        uuid='00b90651-3e3b-4e28-a8c0-7339ae092200',
+        name="SunSpecTypes",
+        uuid="00b90651-3e3b-4e28-a8c0-7339ae092200",
     )
-    
+
     enumerators = [
         epyqlib.pm.parametermodel.Enumerator(
-            name='int16',
-            value=1,
-            uuid='2cf75e5a-ffc8-422a-bbc6-573d4206a7e1'
+            name="int16", value=1, uuid="2cf75e5a-ffc8-422a-bbc6-573d4206a7e1"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name='uint16',
-            value=1,
-            uuid='4f856a7e-20f4-43e2-86b1-cc7ee772f919'
+            name="uint16", value=1, uuid="4f856a7e-20f4-43e2-86b1-cc7ee772f919"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name='int32',
-            value=2,
-            uuid='4fec39a5-b702-4dbf-8ad1-95f5e01201b6'
+            name="int32", value=2, uuid="4fec39a5-b702-4dbf-8ad1-95f5e01201b6"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name='uint32',
-            value=2,
-            uuid='eb8cdc87-05e2-4593-994e-ab3363236168'
+            name="uint32", value=2, uuid="eb8cdc87-05e2-4593-994e-ab3363236168"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name='sunssf',
-            value=1,
-            uuid='02e70616-4986-4f3e-8ac4-98ac153e66f9'
+            name="sunssf", value=1, uuid="02e70616-4986-4f3e-8ac4-98ac153e66f9"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name='enum16',
-            value=1,
-            uuid='209aebc8-652f-47bf-9952-4c112ced2781'
+            name="enum16", value=1, uuid="209aebc8-652f-47bf-9952-4c112ced2781"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name='bitfield16',
-            value=1,
-            uuid='5d30a559-13fe-42b1-89df-35c3edc237f0'
+            name="bitfield16", value=1, uuid="5d30a559-13fe-42b1-89df-35c3edc237f0"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name='bitfield32',
-            value=2,
-            uuid='fc0ad957-2785-4762-b2fc-4db2cf785ca2'
+            name="bitfield32", value=2, uuid="fc0ad957-2785-4762-b2fc-4db2cf785ca2"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name='string',
-            value=0,
-            uuid='5460c860-4aad-476a-908c-83a364b781c9'
+            name="string", value=0, uuid="5460c860-4aad-476a-908c-83a364b781c9"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name='acc16',
-            value=1,
-            uuid='05830309-c61c-41d4-8c66-88ed25187575'
+            name="acc16", value=1, uuid="05830309-c61c-41d4-8c66-88ed25187575"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name='acc32',
-            value=2,
-            uuid='f9d30fa6-33b2-48a2-8b64-72a4f47c0bd4'
+            name="acc32", value=2, uuid="f9d30fa6-33b2-48a2-8b64-72a4f47c0bd4"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name='pad',
-            value=1,
-            uuid='f8090bab-cf12-476c-b96a-1c8bb9848bb5'
+            name="pad", value=1, uuid="f8090bab-cf12-476c-b96a-1c8bb9848bb5"
         ),
     ]
 
@@ -113,10 +89,10 @@ def create_size_attribute(default=0):
 def create_factor_uuid_attribute():
     return epyqlib.attrsmodel.attr_uuid(
         default=None,
-        human_name='Scale Factor',
+        human_name="Scale Factor",
         allow_none=True,
         data_display=name_from_uuid,
-        list_selection_path=('..', '..', 'Fixed Block'),
+        list_selection_path=("..", "..", "Fixed Block"),
         override_delegate=ScaleFactorDelegate,
     )
 
@@ -125,7 +101,7 @@ def create_parameter_uuid_attribute():
     return epyqlib.attrsmodel.attr_uuid(
         default=None,
         allow_none=True,
-        human_name='Parameter',
+        human_name="Parameter",
         data_display=name_from_uuid_and_parent,
         editable=False,
     )
@@ -154,7 +130,7 @@ def name_from_uuid_and_parent(node, value, model):
     except epyqlib.attrsmodel.NotFoundError:
         return str(value)
 
-    return '{} - {}'.format(target_node.tree_parent.name, target_node.name)
+    return "{} - {}".format(target_node.tree_parent.name, target_node.name)
 
 
 class ScaleFactorDelegate(QtWidgets.QStyledItemDelegate):
@@ -178,12 +154,12 @@ class ScaleFactorDelegate(QtWidgets.QStyledItemDelegate):
         points = []
         for pt in self.root.children:
             type_node = attrs_model.node_from_uuid(pt.type_uuid)
-            if type_node.name == 'sunssf':
+            if type_node.name == "sunssf":
                 points.append(pt)
 
         it = QtWidgets.QListWidgetItem(editor)
-        it.setText('')
-        it.setData(epyqlib.utils.qt.UserRoles.raw, '')
+        it.setText("")
+        it.setData(epyqlib.utils.qt.UserRoles.raw, "")
         it.setSelected(True)
         for p in points:
             it = QtWidgets.QListWidgetItem(editor)
@@ -205,7 +181,7 @@ class ScaleFactorDelegate(QtWidgets.QStyledItemDelegate):
         model.setData(index, datum)
 
 
-@graham.schemify(tag='data_point', register=True)
+@graham.schemify(tag="data_point", register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
@@ -227,22 +203,22 @@ class DataPoint(epyqlib.treenode.TreeNode):
     type_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,
         allow_none=True,
-        human_name='Type',
+        human_name="Type",
         data_display=epyqlib.attrsmodel.name_from_uuid,
-        list_selection_root='sunspec types',
+        list_selection_root="sunspec types",
     )
 
     offset = attr.ib(
         default=0,
         converter=int,
-    ) # this is somewhat redundant with the position in the list of data
-            # points but helpful for keeping things from incidentally floating
-            # around especially in custom models where we have no sunspec
-            # model to be validating against
-            # for now, yes, this is vaguely nondescript of address vs block offset
-    @QtCore.pyqtProperty('PyQt_PyObject')
+    )  # this is somewhat redundant with the position in the list of data
+    # points but helpful for keeping things from incidentally floating
+    # around especially in custom models where we have no sunspec
+    # model to be validating against
+    # for now, yes, this is vaguely nondescript of address vs block offset
+    @QtCore.pyqtProperty("PyQt_PyObject")
     def pyqtify_offset(self):
-        block_offset = getattr(self.tree_parent, 'block_offset', None)
+        block_offset = getattr(self.tree_parent, "block_offset", None)
 
         if block_offset is None:
             return None
@@ -270,11 +246,11 @@ class DataPoint(epyqlib.treenode.TreeNode):
     )
     epyqlib.attrsmodel.attrib(
         attribute=enumeration_uuid,
-        human_name='Enumeration',
+        human_name="Enumeration",
         data_display=epyqlib.attrsmodel.name_from_uuid,
         delegate=epyqlib.attrsmodel.RootDelegateCache(
-            list_selection_root='enumerations',
-        )
+            list_selection_root="enumerations",
+        ),
     )
 
     units = epyqlib.attrsmodel.create_str_or_none_attribute()
@@ -314,15 +290,14 @@ class DataPoint(epyqlib.treenode.TreeNode):
     # value  doesn't make sense here, this is interface definition, not a
     #       value set
 
-
     # ? point_id = attr.ib()
     # ? index = index
 
     # last access time?
     # time = time
 
-#     getter_code = attr.ib()
-#     setter_code = attr.ib()
+    #     getter_code = attr.ib()
+    #     setter_code = attr.ib()
     def __attrs_post_init__(self):
         super().__init__()
 
@@ -337,54 +312,50 @@ class DataPoint(epyqlib.treenode.TreeNode):
     @epyqlib.attrsmodel.check_children
     def check(self, result, models):
         if self.parameter_uuid is None:
-            result.append_child(epyqlib.checkresultmodel.Result(
-                node=self,
-                severity=epyqlib.checkresultmodel.ResultSeverity.error,
-                message='No parameter connected',
-            ))
+            result.append_child(
+                epyqlib.checkresultmodel.Result(
+                    node=self,
+                    severity=epyqlib.checkresultmodel.ResultSeverity.error,
+                    message="No parameter connected",
+                )
+            )
         else:
             root = self.find_root()
             parameter = root.model.node_from_uuid(self.parameter_uuid)
 
             if (
-                    parameter.tree_parent.name.startswith('SunSpec')
-                    and parameter.tree_parent.tree_parent.tree_parent is None
+                parameter.tree_parent.name.startswith("SunSpec")
+                and parameter.tree_parent.tree_parent.tree_parent is None
             ):
-                result.append_child(epyqlib.checkresultmodel.Result(
-                    node=self,
-                    severity=(
-                        epyqlib.checkresultmodel.ResultSeverity.information
-                    ),
-                    message=(
-                        'Connected to temporary SunSpec imported parameter'
-                    ),
-                ))
+                result.append_child(
+                    epyqlib.checkresultmodel.Result(
+                        node=self,
+                        severity=(epyqlib.checkresultmodel.ResultSeverity.information),
+                        message=("Connected to temporary SunSpec imported parameter"),
+                    )
+                )
 
             if not parameter.uses_interface_item():
-                result.append_child(epyqlib.checkresultmodel.Result(
-                    node=self,
-                    severity=(
-                        epyqlib.checkresultmodel.ResultSeverity.information
-                    ),
-                    message=(
-                        'Connected to old-style parameter'
-                    ),
-                ))
+                result.append_child(
+                    epyqlib.checkresultmodel.Result(
+                        node=self,
+                        severity=(epyqlib.checkresultmodel.ResultSeverity.information),
+                        message=("Connected to old-style parameter"),
+                    )
+                )
 
                 access_level = root.model.node_from_uuid(
                     parameter.access_level_uuid,
                 )
 
                 if access_level.value > 0:
-                    result.append_child(epyqlib.checkresultmodel.Result(
-                        node=self,
-                        severity=(
-                            epyqlib.checkresultmodel.ResultSeverity.warning
-                        ),
-                        message=(
-                            'Access level will not be enforced'
-                        ),
-                    ))
+                    result.append_child(
+                        epyqlib.checkresultmodel.Result(
+                            node=self,
+                            severity=(epyqlib.checkresultmodel.ResultSeverity.warning),
+                            message=("Access level will not be enforced"),
+                        )
+                    )
 
         return result
 
@@ -393,7 +364,7 @@ class DataPoint(epyqlib.treenode.TreeNode):
     internal_move = epyqlib.attrsmodel.default_internal_move
 
 
-@graham.schemify(tag='data_point_bitfield_member', register=True)
+@graham.schemify(tag="data_point_bitfield_member", register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
@@ -413,9 +384,9 @@ class DataPointBitfieldMember(epyqlib.treenode.TreeNode):
     type_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,
         allow_none=True,
-        human_name='Type',
+        human_name="Type",
         data_display=epyqlib.attrsmodel.name_from_uuid,
-        list_selection_root='sunspec types',
+        list_selection_root="sunspec types",
     )
 
     uuid = epyqlib.attrsmodel.attr_uuid()
@@ -439,7 +410,7 @@ class DataPointBitfieldMember(epyqlib.treenode.TreeNode):
     check = epyqlib.attrsmodel.check_just_children
 
 
-@graham.schemify(tag='data_point_bitfield', register=True)
+@graham.schemify(tag="data_point_bitfield", register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
@@ -449,9 +420,11 @@ class DataPointBitfield(epyqlib.treenode.TreeNode):
     children = attr.ib(
         factory=list,
         metadata=graham.create_metadata(
-            field=graham.fields.MixedList(fields=(
-                marshmallow.fields.Nested(graham.schema(DataPointBitfieldMember)),
-            )),
+            field=graham.fields.MixedList(
+                fields=(
+                    marshmallow.fields.Nested(graham.schema(DataPointBitfieldMember)),
+                )
+            ),
         ),
     )
 
@@ -459,9 +432,9 @@ class DataPointBitfield(epyqlib.treenode.TreeNode):
     type_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,
         allow_none=True,
-        human_name='Type',
+        human_name="Type",
         data_display=epyqlib.attrsmodel.name_from_uuid,
-        list_selection_root='sunspec types',
+        list_selection_root="sunspec types",
     )
 
     block_offset = attr.ib(
@@ -517,15 +490,14 @@ def check_block_offsets_and_length(self):
         except epyqlib.attrsmodel.NotFoundError:
             point_name = root.model.node_from_uuid(point.parameter_uuid).name
             raise TypeNotFoundError(
-                f'Point {point_name!r}'
-                f' has unknown type uuid {point.type_uuid!r}'
+                f"Point {point_name!r}" f" has unknown type uuid {point.type_uuid!r}"
             )
 
-        if type_.name != 'string' and point.size != type_.value:
+        if type_.name != "string" and point.size != type_.value:
             point_name = root.model.node_from_uuid(point.parameter_uuid).name
             raise MismatchedSizeAndTypeError(
-                f'Expected {type_.value} for {type_.name}'
-                f', is {point.size} for {point_name}'
+                f"Expected {type_.value} for {type_.name}"
+                f", is {point.size} for {point_name}"
             )
 
         length += point.size
@@ -533,13 +505,13 @@ def check_block_offsets_and_length(self):
     return length
 
 
-@graham.schemify(tag='sunspec_header_block', register=True)
+@graham.schemify(tag="sunspec_header_block", register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class HeaderBlock(epyqlib.treenode.TreeNode):
     name = attr.ib(
-        default='Header',
+        default="Header",
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(),
         ),
@@ -551,9 +523,9 @@ class HeaderBlock(epyqlib.treenode.TreeNode):
     children = attr.ib(
         factory=list,
         metadata=graham.create_metadata(
-            field=graham.fields.MixedList(fields=(
-                marshmallow.fields.Nested(graham.schema(DataPoint)),
-            )),
+            field=graham.fields.MixedList(
+                fields=(marshmallow.fields.Nested(graham.schema(DataPoint)),)
+            ),
         ),
     )
 
@@ -574,13 +546,13 @@ class HeaderBlock(epyqlib.treenode.TreeNode):
         parameters = [
             epyqlib.pm.parametermodel.Parameter(
                 name=model_id,
-                abbreviation='ID',
+                abbreviation="ID",
                 read_only=True,
             ),
             epyqlib.pm.parametermodel.Parameter(
-                name='',
-                abbreviation='L',
-                comment='Model Length',
+                name="",
+                abbreviation="L",
+                comment="Model Length",
                 read_only=True,
             ),
         ]
@@ -612,13 +584,13 @@ class HeaderBlock(epyqlib.treenode.TreeNode):
     check = epyqlib.attrsmodel.check_just_children
 
 
-@graham.schemify(tag='sunspec_fixed_block', register=True)
+@graham.schemify(tag="sunspec_fixed_block", register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class FixedBlock(epyqlib.treenode.TreeNode):
     name = attr.ib(
-        default='Fixed Block',
+        default="Fixed Block",
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(),
         ),
@@ -630,10 +602,12 @@ class FixedBlock(epyqlib.treenode.TreeNode):
     children = attr.ib(
         factory=list,
         metadata=graham.create_metadata(
-            field=graham.fields.MixedList(fields=(
-                marshmallow.fields.Nested(graham.schema(DataPoint)),
-                marshmallow.fields.Nested(graham.schema(DataPointBitfield)),
-            )),
+            field=graham.fields.MixedList(
+                fields=(
+                    marshmallow.fields.Nested(graham.schema(DataPoint)),
+                    marshmallow.fields.Nested(graham.schema(DataPointBitfield)),
+                )
+            ),
         ),
     )
 
@@ -679,16 +653,14 @@ class FixedBlock(epyqlib.treenode.TreeNode):
 
 
 @graham.schemify(
-    tag='sunspec_table_repeating_block_reference_data_point_reference',
+    tag="sunspec_table_repeating_block_reference_data_point_reference",
     register=True,
 )
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @epyqlib.utils.qt.pyqtify_passthrough_properties(
-    original='original',
-    field_names=(
-        'parameter_uuid',
-    ),
+    original="original",
+    field_names=("parameter_uuid",),
 )
 @attr.s(hash=False)
 class TableRepeatingBlockReferenceDataPointReference(epyqlib.treenode.TreeNode):
@@ -714,19 +686,17 @@ class TableRepeatingBlockReferenceDataPointReference(epyqlib.treenode.TreeNode):
     check = epyqlib.attrsmodel.check_just_children
 
 
-@graham.schemify(tag='sunspec_table_repeating_block', register=True)
+@graham.schemify(tag="sunspec_table_repeating_block", register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @epyqlib.utils.qt.pyqtify_passthrough_properties(
-    original='original',
-    field_names=(
-        'name',
-    ),
+    original="original",
+    field_names=("name",),
 )
 @attr.s(hash=False)
 class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
     name = attr.ib(
-        default='Table Repeating Block Reference',
+        default="Table Repeating Block Reference",
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(),
         ),
@@ -738,11 +708,15 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
     children = attr.ib(
         factory=list,
         metadata=graham.create_metadata(
-            field=graham.fields.MixedList(fields=(
-                marshmallow.fields.Nested(graham.schema(
-                    TableRepeatingBlockReferenceDataPointReference,
-                )),
-            )),
+            field=graham.fields.MixedList(
+                fields=(
+                    marshmallow.fields.Nested(
+                        graham.schema(
+                            TableRepeatingBlockReferenceDataPointReference,
+                        )
+                    ),
+                )
+            ),
         ),
     )
 
@@ -779,19 +753,17 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
     check = epyqlib.attrsmodel.check_just_children
 
 
-@graham.schemify(tag='sunspec_table_repeating_block', register=True)
+@graham.schemify(tag="sunspec_table_repeating_block", register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @epyqlib.utils.qt.pyqtify_passthrough_properties(
-    original='original',
-    field_names=(
-        'name',
-    ),
+    original="original",
+    field_names=("name",),
 )
 @attr.s(hash=False)
 class TableDataPointReference(epyqlib.treenode.TreeNode):
     name = attr.ib(
-        default='Table Data Point Reference',
+        default="Table Data Point Reference",
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(),
         ),
@@ -803,8 +775,7 @@ class TableDataPointReference(epyqlib.treenode.TreeNode):
     children = attr.ib(
         factory=list,
         metadata=graham.create_metadata(
-            field=graham.fields.MixedList(fields=(
-            )),
+            field=graham.fields.MixedList(fields=()),
         ),
     )
 
@@ -843,14 +814,14 @@ class TableDataPointReference(epyqlib.treenode.TreeNode):
     child_from = epyqlib.attrsmodel.default_child_from
 
 
-@graham.schemify(tag='table_model_reference', register=True)
+@graham.schemify(tag="table_model_reference", register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class TableRepeatingBlock(epyqlib.treenode.TreeNode):
     uuid = epyqlib.attrsmodel.attr_uuid()
     name = attr.ib(
-        default='Table Reference',
+        default="Table Reference",
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(),
         ),
@@ -861,9 +832,9 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
     children = attr.ib(
         factory=list,
         metadata=graham.create_metadata(
-            field=graham.fields.MixedList(fields=(
-                marshmallow.fields.Nested(graham.schema(DataPoint)),
-            )),
+            field=graham.fields.MixedList(
+                fields=(marshmallow.fields.Nested(graham.schema(DataPoint)),)
+            ),
         ),
     )
 
@@ -918,13 +889,13 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
     check = epyqlib.attrsmodel.check_just_children
 
 
-@graham.schemify(tag='table', register=True)
+@graham.schemify(tag="table", register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Table(epyqlib.treenode.TreeNode):
     name = attr.ib(
-        default='New Table',
+        default="New Table",
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(),
         ),
@@ -936,16 +907,18 @@ class Table(epyqlib.treenode.TreeNode):
     )
     epyqlib.attrsmodel.attrib(
         attribute=parameter_table_uuid,
-        human_name='Table UUID',
+        human_name="Table UUID",
     )
 
     children = attr.ib(
         default=attr.Factory(list),
         metadata=graham.create_metadata(
-            field=graham.fields.MixedList(fields=(
-                marshmallow.fields.Nested(graham.schema(TableRepeatingBlock)),
-                marshmallow.fields.Nested(graham.schema(DataPoint)),
-            )),
+            field=graham.fields.MixedList(
+                fields=(
+                    marshmallow.fields.Nested(graham.schema(TableRepeatingBlock)),
+                    marshmallow.fields.Nested(graham.schema(DataPoint)),
+                )
+            ),
         ),
     )
 
@@ -979,7 +952,7 @@ class Table(epyqlib.treenode.TreeNode):
     def update(self, table=None):
         old_nodes = self.recursively_remove_children()
         old_nodes_by_path = {
-            getattr(node, 'path', getattr(node, 'parameter_uuid', node.uuid)): node
+            getattr(node, "path", getattr(node, "parameter_uuid", node.uuid)): node
             for node in old_nodes
         }
 
@@ -1019,7 +992,7 @@ class Table(epyqlib.treenode.TreeNode):
         for combination in table.combinations:
             not_first_curve = any(
                 (
-                    layer.tree_parent.name == 'Curves'
+                    layer.tree_parent.name == "Curves"
                     and layer.name != layer.tree_parent.children[0].name
                 )
                 for layer in combination
@@ -1028,8 +1001,7 @@ class Table(epyqlib.treenode.TreeNode):
                 continue
 
             curve_enumeration_search = [
-                layer for layer in combination
-                if layer.tree_parent.name == 'Curves'
+                layer for layer in combination if layer.tree_parent.name == "Curves"
             ]
             if len(curve_enumeration_search) == 0:
                 curve_count = 0
@@ -1045,10 +1017,10 @@ class Table(epyqlib.treenode.TreeNode):
 
             if block_node is None:
                 block_node = TableRepeatingBlock(
-                    name=' - '.join(
+                    name=" - ".join(
                         item.name
                         for item in combination
-                        if item.tree_parent.name != 'Curves'
+                        if item.tree_parent.name != "Curves"
                     ),
                     path=base_path,
                 )
@@ -1057,9 +1029,9 @@ class Table(epyqlib.treenode.TreeNode):
 
             self.append_child(block_node)
 
-            in_tree, = table.group.nodes_by_attribute(
+            (in_tree,) = table.group.nodes_by_attribute(
                 attribute_value=tuple(node.uuid for node in combination),
-                attribute_name='path',
+                attribute_name="path",
             )
             # continue
 
@@ -1092,19 +1064,19 @@ class Table(epyqlib.treenode.TreeNode):
                 point_node.units = reference_data_point.units
                 point_node.type_uuid = reference_data_point.type_uuid
                 point_node.size = reference_data_point.size
-                point_node.enumeration_uuid = (
-                    reference_data_point.enumeration_uuid
-                )
+                point_node.enumeration_uuid = reference_data_point.enumeration_uuid
                 point_node.block_offset = block_offset
                 block_node.append_child(point_node)
                 block_offset += point_node.size
 
             array_elements = itertools.chain.from_iterable(
-                zip(*(
-                    array.children
-                    for array in in_tree.children
-                    if isinstance(array.original, epyqlib.pm.parametermodel.Array)
-                )),
+                zip(
+                    *(
+                        array.children
+                        for array in in_tree.children
+                        if isinstance(array.original, epyqlib.pm.parametermodel.Array)
+                    )
+                ),
             )
             for element in array_elements:
                 point_node = old_nodes_by_path.get(element.uuid)
@@ -1119,9 +1091,7 @@ class Table(epyqlib.treenode.TreeNode):
                 point_node.units = reference_data_point.units
                 point_node.type_uuid = reference_data_point.type_uuid
                 point_node.size = reference_data_point.size
-                point_node.enumeration_uuid = (
-                    reference_data_point.enumeration_uuid
-                )
+                point_node.enumeration_uuid = reference_data_point.enumeration_uuid
                 point_node.block_offset = block_offset
                 block_node.append_child(point_node)
                 block_offset += point_node.size
@@ -1140,9 +1110,7 @@ class Table(epyqlib.treenode.TreeNode):
                 point_node.units = reference_data_point.units
                 point_node.type_uuid = reference_data_point.type_uuid
                 point_node.size = reference_data_point.size
-                point_node.enumeration_uuid = (
-                    reference_data_point.enumeration_uuid
-                )
+                point_node.enumeration_uuid = reference_data_point.enumeration_uuid
                 point_node.block_offset = block_offset
                 block_node.append_child(point_node)
                 block_offset += point_node.size
@@ -1152,7 +1120,7 @@ class Table(epyqlib.treenode.TreeNode):
     check = epyqlib.attrsmodel.check_just_children
 
 
-@graham.schemify(tag='sunspec_model', register=True)
+@graham.schemify(tag="sunspec_model", register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
@@ -1163,15 +1131,15 @@ class Model(epyqlib.treenode.TreeNode):
         metadata=graham.create_metadata(
             field=marshmallow.fields.Integer(),
         ),
-    ) # 103
+    )  # 103
     length = attr.ib(
         default=0,
         converter=int,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Integer(),
         ),
-    ) # 50, in the spirit of over constraining like how
-                        # data points have their offset
+    )  # 50, in the spirit of over constraining like how
+    # data points have their offset
 
     # ?
     # self.model_id = '{}'.format(model_id)
@@ -1185,11 +1153,15 @@ class Model(epyqlib.treenode.TreeNode):
     children = attr.ib(
         factory=lambda: [HeaderBlock(), FixedBlock()],
         metadata=graham.create_metadata(
-            field=graham.fields.MixedList(fields=(
-                marshmallow.fields.Nested(graham.schema(HeaderBlock)),
-                marshmallow.fields.Nested(graham.schema(FixedBlock)),
-                marshmallow.fields.Nested(graham.schema(TableRepeatingBlockReference)),
-            )),
+            field=graham.fields.MixedList(
+                fields=(
+                    marshmallow.fields.Nested(graham.schema(HeaderBlock)),
+                    marshmallow.fields.Nested(graham.schema(FixedBlock)),
+                    marshmallow.fields.Nested(
+                        graham.schema(TableRepeatingBlockReference)
+                    ),
+                )
+            ),
         ),
     )
 
@@ -1216,12 +1188,8 @@ class Model(epyqlib.treenode.TreeNode):
         return reference
 
     def can_drop_on(self, node):
-        return (
-            isinstance(node, TableRepeatingBlock)
-            and not any(
-                isinstance(child, TableRepeatingBlockReference)
-                for child in self.children
-            )
+        return isinstance(node, TableRepeatingBlock) and not any(
+            isinstance(child, TableRepeatingBlockReference) for child in self.children
         )
 
     def can_delete(self, node=None):
@@ -1242,11 +1210,11 @@ class Model(epyqlib.treenode.TreeNode):
     check = epyqlib.attrsmodel.check_just_children
 
 
-#class Repeating...?
+# class Repeating...?
 
 
 Root = epyqlib.attrsmodel.Root(
-    default_name='SunSpec',
+    default_name="SunSpec",
     valid_types=(Model, Table),
 )
 
@@ -1276,57 +1244,57 @@ def merge(name, *types):
 columns = epyqlib.attrsmodel.columns(
     (
         merge(
-            'name',
+            "name",
             HeaderBlock,
             FixedBlock,
             Table,
             TableRepeatingBlock,
             TableRepeatingBlockReference,
         )
-        + merge('id', Model)
+        + merge("id", Model)
         + merge(
-            'parameter_uuid',
+            "parameter_uuid",
             DataPoint,
             TableRepeatingBlockReferenceDataPointReference,
             DataPointBitfield,
             DataPointBitfieldMember,
         )
     ),
-    merge('abbreviation', TableRepeatingBlock),
-    merge('not_implemented', DataPoint),
-    merge('length', Model) + merge('size', DataPoint, DataPointBitfield),
-    merge('repeats', TableRepeatingBlock),
-    merge('hand_coded_getter', DataPoint),
-    merge('hand_coded_setter', DataPoint),
+    merge("abbreviation", TableRepeatingBlock),
+    merge("not_implemented", DataPoint),
+    merge("length", Model) + merge("size", DataPoint, DataPointBitfield),
+    merge("repeats", TableRepeatingBlock),
+    merge("hand_coded_getter", DataPoint),
+    merge("hand_coded_setter", DataPoint),
     merge(
-        'factor_uuid',
+        "factor_uuid",
         DataPoint,
         TableRepeatingBlockReferenceDataPointReference,
     ),
-    merge('units', DataPoint),
-    merge('enumeration_uuid', DataPoint),
-    merge('type_uuid', DataPoint, DataPointBitfield, DataPointBitfieldMember),
-    merge('bit_length', DataPointBitfieldMember),
-    merge('bit_offset', DataPointBitfieldMember),
-    merge('parameter_table_uuid', Table),
-    merge('mandatory', DataPoint),
+    merge("units", DataPoint),
+    merge("enumeration_uuid", DataPoint),
+    merge("type_uuid", DataPoint, DataPointBitfield, DataPointBitfieldMember),
+    merge("bit_length", DataPointBitfieldMember),
+    merge("bit_offset", DataPointBitfieldMember),
+    merge("parameter_table_uuid", Table),
+    merge("mandatory", DataPoint),
     merge(
-        'offset',
+        "offset",
         DataPoint,
         HeaderBlock,
         FixedBlock,
         TableRepeatingBlockReference,
         TableRepeatingBlock,
     ),
-    merge('block_offset', DataPoint, DataPointBitfield),
-    merge('uuid', *types.types.values()),
+    merge("block_offset", DataPoint, DataPointBitfield),
+    merge("uuid", *types.types.values()),
 )
 
 
 # TODO: CAMPid 075454679961754906124539691347967
 @attr.s
 class ReferencedUuidNotifier:
-    changed = epyqlib.utils.qt.Signal('PyQt_PyObject')
+    changed = epyqlib.utils.qt.Signal("PyQt_PyObject")
 
     view = attr.ib(default=None)
     selection_model = attr.ib(default=None)
@@ -1362,7 +1330,7 @@ class ReferencedUuidNotifier:
         model = index.data(epyqlib.utils.qt.UserRoles.attrs_model)
         node = model.node_from_index(index)
 
-        parameter_uuid = getattr(node, 'parameter_uuid', None)
+        parameter_uuid = getattr(node, "parameter_uuid", None)
 
         if parameter_uuid is not None:
             self.changed.emit(parameter_uuid)

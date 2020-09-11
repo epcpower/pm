@@ -7,6 +7,7 @@ init:
 build_script:
   - git submodule update --init
   - python boots.py create --group test
+  - venv\\Scripts\\black --check --diff .
   - venv\\Scripts\\python -c "import sys; print(sys.version)"
   - venv\\Scripts\\pip freeze --all
   - venv\\Scripts\\genbuildinfo "src\\epcpm\\__build.py"

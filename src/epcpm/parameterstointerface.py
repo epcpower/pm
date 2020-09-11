@@ -21,14 +21,14 @@ builders = epyqlib.utils.general.TypeMap()
 
 # TODO: move this somewhere common in python code...
 sunspec_types = {
-    'uint16': 'sunsU16',
-    'enum16': 'sunsU16',
-    'int16': 'sunsS16',
-    'uint32': 'sunsU32',
-    'int32': 'sunsS32',
-    'string': 'PackedString',
-    'bitfield16': 'sunsU16',
-    'bitfield32': 'sunsU32',
+    "uint16": "sunsU16",
+    "enum16": "sunsU16",
+    "int16": "sunsS16",
+    "uint32": "sunsU32",
+    "int32": "sunsS32",
+    "string": "PackedString",
+    "bitfield16": "sunsU16",
+    "bitfield32": "sunsU32",
 }
 
 
@@ -36,28 +36,28 @@ def node_path_string(node):
     nodes = [node, *node.ancestors()][:-1]
     names = [node.name for node in reversed(nodes)]
 
-    return ' > '.join(names)
+    return " > ".join(names)
 
 
 class InvalidAccessLevelError(Exception):
     @classmethod
     def build(cls, value, parameter):
         message = (
-            f'Invalid access level specified for'
-            f' {parameter.name} ({parameter.uuid}): {value}'
+            f"Invalid access level specified for"
+            f" {parameter.name} ({parameter.uuid}): {value}"
         )
 
         return cls(message)
 
 
 def export(
-        c_path,
-        h_path,
-        parameters_model,
-        can_model,
-        sunspec_model,
-        skip_sunspec=False,
-        include_uuid_in_item=False,
+    c_path,
+    h_path,
+    parameters_model,
+    can_model,
+    sunspec_model,
+    skip_sunspec=False,
+    include_uuid_in_item=False,
 ):
     if skip_sunspec:
         sunspec_root = None
@@ -76,28 +76,24 @@ def export(
     built_c, built_h, model_ids = builder.gen()
 
     template_context = {
-        'sunspec_interface_gen_headers': (
-            f'sunspecInterfaceGen{id}.h'
-            for id in model_ids
+        "sunspec_interface_gen_headers": (
+            f"sunspecInterfaceGen{id}.h" for id in model_ids
         ),
-        'sunspec_interface_headers': (
-            f'sunspecInterface{id:05}.h'
-            for id in model_ids
-        ),
-        'interface_items': epcpm.c.format_nested_lists(
+        "sunspec_interface_headers": (f"sunspecInterface{id:05}.h" for id in model_ids),
+        "interface_items": epcpm.c.format_nested_lists(
             built_c,
         ).strip(),
-        'declarations': epcpm.c.format_nested_lists(built_h).strip(),
+        "declarations": epcpm.c.format_nested_lists(built_h).strip(),
     }
 
     epcpm.c.render(
-        source=c_path.with_suffix(f'{c_path.suffix}_pm'),
+        source=c_path.with_suffix(f"{c_path.suffix}_pm"),
         destination=c_path,
         context=template_context,
     )
 
     epcpm.c.render(
-        source=h_path.with_suffix(f'{h_path.suffix}_pm'),
+        source=h_path.with_suffix(f"{h_path.suffix}_pm"),
         destination=h_path,
         context=template_context,
     )
@@ -113,14 +109,14 @@ class Root:
 
     def gen(self):
         def can_node_wanted(node):
-            if getattr(node, 'parameter_uuid', None) is None:
+            if getattr(node, "parameter_uuid", None) is None:
                 return False
 
             uuids = [
-                #CCP Response
-                uuid.UUID('39315d58-1ddb-48b9-960c-96e724c89da1'),
-                #CCP
-                uuid.UUID('983bdc5d-8d4e-4107-a0a0-983f0ab101ce'),
+                # CCP Response
+                uuid.UUID("39315d58-1ddb-48b9-960c-96e724c89da1"),
+                # CCP
+                uuid.UUID("983bdc5d-8d4e-4107-a0a0-983f0ab101ce"),
             ]
             return not any(ancestor.uuid in uuids for ancestor in node.ancestors())
 
@@ -129,12 +125,11 @@ class Root:
         )
 
         parameter_uuid_to_can_node = {
-            node.parameter_uuid: node
-            for node in can_nodes_with_parameter_uuid
+            node.parameter_uuid: node for node in can_nodes_with_parameter_uuid
         }
 
         def sunspec_node_wanted(node):
-            if getattr(node, 'parameter_uuid', None) is None:
+            if getattr(node, "parameter_uuid", None) is None:
                 return False
 
             wanted_types = (
@@ -154,17 +149,15 @@ class Root:
             )
 
             parameter_uuid_to_sunspec_node = {
-                node.parameter_uuid: node
-                for node in sunspec_nodes_with_parameter_uuid
+                node.parameter_uuid: node for node in sunspec_nodes_with_parameter_uuid
             }
 
-        lengths_equal = (
-            len(can_nodes_with_parameter_uuid)
-            == len(parameter_uuid_to_can_node)
+        lengths_equal = len(can_nodes_with_parameter_uuid) == len(
+            parameter_uuid_to_can_node
         )
         if not lengths_equal:
             uuids = [u.parameter_uuid for u in can_nodes_with_parameter_uuid]
-            print('\n'.join(set(str(u) for u in uuids if uuids.count(u) > 1)))
+            print("\n".join(set(str(u) for u in uuids if uuids.count(u) > 1)))
             raise Exception()
 
         c = []
@@ -173,13 +166,13 @@ class Root:
 
         for child in self.wrapped.children:
             if not isinstance(
-                    child,
-                    (
-                        epyqlib.pm.parametermodel.Group,
-                        epyqlib.pm.parametermodel.Parameter,
-                        epyqlib.pm.parametermodel.Table,
-                        # epcpm.parametermodel.EnumeratedParameter,
-                    ),
+                child,
+                (
+                    epyqlib.pm.parametermodel.Group,
+                    epyqlib.pm.parametermodel.Parameter,
+                    epyqlib.pm.parametermodel.Table,
+                    # epcpm.parametermodel.EnumeratedParameter,
+                ),
             ):
                 continue
 
@@ -189,9 +182,7 @@ class Root:
                 sunspec_root=self.sunspec_root,
                 include_uuid_in_item=self.include_uuid_in_item,
                 parameter_uuid_to_can_node=parameter_uuid_to_can_node,
-                parameter_uuid_to_sunspec_node=(
-                    parameter_uuid_to_sunspec_node
-                ),
+                parameter_uuid_to_sunspec_node=(parameter_uuid_to_sunspec_node),
                 parameter_uuid_finder=self.wrapped.model.node_from_uuid,
             ).gen()
 
@@ -242,13 +233,13 @@ class Group:
 
         for child in self.wrapped.children:
             if not isinstance(
-                    child,
-                    (
-                        epyqlib.pm.parametermodel.Group,
-                        epyqlib.pm.parametermodel.Parameter,
-                        epyqlib.pm.parametermodel.Table,
-                        # epcpm.parametermodel.EnumeratedParameter,
-                    ),
+                child,
+                (
+                    epyqlib.pm.parametermodel.Group,
+                    epyqlib.pm.parametermodel.Parameter,
+                    epyqlib.pm.parametermodel.Table,
+                    # epcpm.parametermodel.EnumeratedParameter,
+                ),
             ):
                 continue
 
@@ -257,12 +248,8 @@ class Group:
                 can_root=self.can_root,
                 sunspec_root=self.sunspec_root,
                 include_uuid_in_item=self.include_uuid_in_item,
-                parameter_uuid_to_can_node=(
-                    self.parameter_uuid_to_can_node
-                ),
-                parameter_uuid_to_sunspec_node=(
-                    self.parameter_uuid_to_sunspec_node
-                ),
+                parameter_uuid_to_can_node=(self.parameter_uuid_to_can_node),
+                parameter_uuid_to_sunspec_node=(self.parameter_uuid_to_sunspec_node),
                 parameter_uuid_finder=self.parameter_uuid_finder,
             ).gen()
 
@@ -314,9 +301,9 @@ class DataPoint:
             maybe_model = maybe_model.tree_parent
 
         model = maybe_model
-        model_variable = f'sunspecInterface.model{model.id}'
+        model_variable = f"sunspecInterface.model{model.id}"
 
-        return f'&{model_variable}.{parameter.abbreviation}'
+        return f"&{model_variable}.{parameter.abbreviation}"
 
 
 @builders(epcpm.sunspecmodel.DataPointBitfieldMember)
@@ -328,8 +315,8 @@ class DataPointBitfieldMember:
     def interface_variable_name(self):
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
-        uuid_ = str(parameter.uuid).replace('-', '_')
-        return f'&interfaceItem_variable_{uuid_}'
+        uuid_ = str(parameter.uuid).replace("-", "_")
+        return f"&interfaceItem_variable_{uuid_}"
 
 
 @builders(epyqlib.pm.parametermodel.Parameter)
@@ -363,40 +350,40 @@ class Parameter:
         if not uses_interface_item or all(x is None for x in interface_data):
             return [[], [], sunspec_models]
 
-        scale_factor_variable = 'NULL'
-        scale_factor_updater = 'NULL'
+        scale_factor_variable = "NULL"
+        scale_factor_updater = "NULL"
 
         if parameter.getter_function is None:
-            getter_function = 'NULL'
+            getter_function = "NULL"
         else:
             getter_function = parameter.getter_function
 
         if parameter.setter_function is None:
-            setter_function = 'NULL'
+            setter_function = "NULL"
         else:
             setter_function = parameter.setter_function
 
         if parameter.internal_variable is not None:
-            var_or_func = 'variable'
+            var_or_func = "variable"
 
             variable_or_getter_setter = [
-                f'.variable = &{parameter.internal_variable},',
+                f".variable = &{parameter.internal_variable},",
             ]
         else:
-            var_or_func = 'functions'
+            var_or_func = "functions"
 
             variable_or_getter_setter = [
-                f'.getter = {getter_function},',
+                f".getter = {getter_function},",
             ]
 
-        variable_or_getter_setter.append(f'.setter = {setter_function},')
+        variable_or_getter_setter.append(f".setter = {setter_function},")
 
         if sunspec_point is None:
-            sunspec_variable = 'NULL'
-            sunspec_getter = 'NULL'
-            sunspec_setter = 'NULL'
-            hand_coded_sunspec_getter_function = 'NULL'
-            hand_coded_sunspec_setter_function = 'NULL'
+            sunspec_variable = "NULL"
+            sunspec_getter = "NULL"
+            sunspec_setter = "NULL"
+            hand_coded_sunspec_getter_function = "NULL"
+            hand_coded_sunspec_setter_function = "NULL"
         else:
             maybe_model = sunspec_point.tree_parent
 
@@ -426,22 +413,22 @@ class Parameter:
                 is_table=False,
             )
 
-            if getattr(sunspec_point, 'hand_coded_getter', False):
+            if getattr(sunspec_point, "hand_coded_getter", False):
                 hand_coded_sunspec_getter_function = (
-                    f'&{hand_coded_getter_function_name}'
+                    f"&{hand_coded_getter_function_name}"
                 )
             else:
-                hand_coded_sunspec_getter_function = 'NULL'
+                hand_coded_sunspec_getter_function = "NULL"
 
-            if getattr(sunspec_point, 'hand_coded_setter', False):
+            if getattr(sunspec_point, "hand_coded_setter", False):
                 hand_coded_sunspec_setter_function = (
-                    f'&{hand_coded_setter_function_name}'
+                    f"&{hand_coded_setter_function_name}"
                 )
             else:
-                hand_coded_sunspec_setter_function = 'NULL'
+                hand_coded_sunspec_setter_function = "NULL"
 
             # TODO: CAMPid 67549654267913467967436
-            if getattr(sunspec_point, 'factor_uuid', False):
+            if getattr(sunspec_point, "factor_uuid", False):
                 factor_point = self.sunspec_root.model.node_from_uuid(
                     sunspec_point.factor_uuid,
                 )
@@ -455,9 +442,9 @@ class Parameter:
                 )
                 scale_factor_variable = sunspec_factor_builder.interface_variable_name()
                 scale_factor_updater_name = (
-                    f'getSUNSPEC_MODEL{model.id}_{sunspec_scale_factor}'
+                    f"getSUNSPEC_MODEL{model.id}_{sunspec_scale_factor}"
                 )
-                scale_factor_updater = f'&{scale_factor_updater_name}'
+                scale_factor_updater = f"&{scale_factor_updater_name}"
 
             sunspec_point_builder = builders.wrap(
                 wrapped=sunspec_point,
@@ -467,23 +454,17 @@ class Parameter:
 
             # TODO: CAMPid 9675436715674367943196954756419543975314
             getter_setter_list = [
-                'InterfaceItem',
+                "InterfaceItem",
                 var_or_func,
                 types[parameter.internal_type].name,
                 sunspec_type,
             ]
 
-            sunspec_getter = '_'.join(
-                str(x)
-                for x in getter_setter_list + ['getter']
-            )
-            sunspec_setter = '_'.join(
-                str(x)
-                for x in getter_setter_list + ['setter']
-            )
+            sunspec_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
+            sunspec_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
 
         interface_item_type = (
-            f'InterfaceItem_{var_or_func}_{types[parameter.internal_type].name}'
+            f"InterfaceItem_{var_or_func}_{types[parameter.internal_type].name}"
         )
 
         can_getter, can_setter, can_variable = can_getter_setter_variable(
@@ -498,9 +479,9 @@ class Parameter:
         )
 
         if parameter.rejected_callback is None:
-            rejected_callback = 'NULL'
+            rejected_callback = "NULL"
         else:
-            rejected_callback = f'&{parameter.rejected_callback}'
+            rejected_callback = f"&{parameter.rejected_callback}"
 
         result = create_item(
             item_uuid=parameter.uuid,
@@ -522,7 +503,7 @@ class Parameter:
             sunspec_variable=sunspec_variable,
             variable_or_getter_setter=variable_or_getter_setter,
             rejected_callback=rejected_callback,
-            can_scale_factor=getattr(can_signal, 'factor', None),
+            can_scale_factor=getattr(can_signal, "factor", None),
             reject_from_inactive_interfaces=parameter.reject_from_inactive_interfaces,
         )
 
@@ -548,12 +529,12 @@ class FixedWidthType:
             minimum_code=fixed_width_limit_text(
                 bits=bits,
                 signed=signed,
-                limit='min',
+                limit="min",
             ),
             maximum_code=fixed_width_limit_text(
                 bits=bits,
                 signed=signed,
-                limit='max',
+                limit="max",
             ),
         )
 
@@ -569,69 +550,69 @@ class FloatingType:
     @classmethod
     def build(cls, bits):
         return cls(
-            name={32: 'float', 64: 'double'}[bits],
-            type={32: 'float', 64: 'double'}[bits],
+            name={32: "float", 64: "double"}[bits],
+            type={32: "float", 64: "double"}[bits],
             bits=bits,
-            minimum_code='(-INFINITY)',
-            maximum_code='(INFINITY)',
+            minimum_code="(-INFINITY)",
+            maximum_code="(INFINITY)",
         )
 
 
 @attr.s(frozen=True)
 class BooleanType:
-    name = attr.ib(default='bool')
-    type = attr.ib(default='bool')
+    name = attr.ib(default="bool")
+    type = attr.ib(default="bool")
     bits = attr.ib(default=2)
-    minimum_code = attr.ib(default='(false)')
-    maximum_code = attr.ib(default='(true)')
+    minimum_code = attr.ib(default="(false)")
+    maximum_code = attr.ib(default="(true)")
 
 
 @attr.s(frozen=True)
 class SizeType:
-    name = attr.ib(default='size_t')
-    type = attr.ib(default='size_t')
+    name = attr.ib(default="size_t")
+    type = attr.ib(default="size_t")
     bits = attr.ib(default=32)
-    minimum_code = attr.ib(default='(0)')
-    maximum_code = attr.ib(default='(SIZE_MAX)')
+    minimum_code = attr.ib(default="(0)")
+    maximum_code = attr.ib(default="(SIZE_MAX)")
 
 
 @attr.s(frozen=True)
 class VoidPointerType:
-    name = attr.ib(default='void_p')
-    type = attr.ib(default='void*')
-    minimum_code = attr.ib(default='((void *) 0)')
-    maximum_code = attr.ib(default='((void *) UINT32_C(0x240000))')
+    name = attr.ib(default="void_p")
+    type = attr.ib(default="void*")
+    minimum_code = attr.ib(default="((void *) 0)")
+    maximum_code = attr.ib(default="((void *) UINT32_C(0x240000))")
 
 
 @attr.s(frozen=True)
 class PackedStringType:
-    name = attr.ib(default='PackedString')
-    type = attr.ib(default='PackedString')
-    minimum_code = attr.ib(default='(0)')
-    maximum_code = attr.ib(default='(0)')
+    name = attr.ib(default="PackedString")
+    type = attr.ib(default="PackedString")
+    minimum_code = attr.ib(default="(0)")
+    maximum_code = attr.ib(default="(0)")
 
 
 def fixed_width_name(bits, signed):
     if signed:
-        u = ''
+        u = ""
     else:
-        u = 'u'
+        u = "u"
 
-    return f'{u}int{bits}_t'
+    return f"{u}int{bits}_t"
 
 
 def fixed_width_limit_text(bits, signed, limit):
-    limits = ('min', 'max')
+    limits = ("min", "max")
 
     if limit not in limits:
-        raise Exception(f'Requested limit not found in {list(limits)}: {limit:!r}')
+        raise Exception(f"Requested limit not found in {list(limits)}: {limit:!r}")
 
-    if not signed and limit == 'min':
-        return '(0U)'
+    if not signed and limit == "min":
+        return "(0U)"
 
-    u = '' if signed else 'U'
+    u = "" if signed else "U"
 
-    return f'({u}INT{bits}_{limit.upper()})'
+    return f"({u}INT{bits}_{limit.upper()})"
 
 
 types = {
@@ -645,10 +626,7 @@ types = {
             for bits in (8, 16, 32, 64)
             for signed in (False, True)
         ),
-        *(
-            FloatingType.build(bits=bits)
-            for bits in (32, 64)
-        ),
+        *(FloatingType.build(bits=bits) for bits in (32, 64)),
         BooleanType(),
         SizeType(),
         VoidPointerType(),
@@ -661,15 +639,15 @@ def create_meta_initializer_values(parameter):
     def create_literal(value, type):
         value *= decimal.Decimal(10) ** parameter.internal_scale_factor
 
-        suffix = ''
+        suffix = ""
 
-        if type == 'float':
-            suffix = 'f'
+        if type == "float":
+            suffix = "f"
             value = float(value)
-        elif type == 'bool':
+        elif type == "bool":
             value = str(bool(value)).lower()
-        elif type.startswith('uint'):
-            suffix = 'U'
+        elif type.startswith("uint"):
+            suffix = "U"
             value = int(round(value))
         else:
             value = int(round(value))
@@ -704,10 +682,10 @@ def create_meta_initializer_values(parameter):
         )
 
     meta_initializer_values = [
-        f'[Meta_UserDefault - 1] = {meta_default},',
-        f'[Meta_FactoryDefault - 1] = {meta_default},',
-        f'[Meta_Min - 1] = {meta_minimum},',
-        f'[Meta_Max - 1] = {meta_maximum}',
+        f"[Meta_UserDefault - 1] = {meta_default},",
+        f"[Meta_FactoryDefault - 1] = {meta_default},",
+        f"[Meta_Min - 1] = {meta_minimum},",
+        f"[Meta_Max - 1] = {meta_maximum}",
     ]
     return meta_initializer_values
 
@@ -723,16 +701,16 @@ def get_access_level_string(parameter, parameter_uuid_finder):
             parameter=parameter,
         ) from e
 
-    access_level = f'CAN_Enum_AccessLevel_{access_level.name}'
+    access_level = f"CAN_Enum_AccessLevel_{access_level.name}"
 
     return access_level
 
 
 def can_getter_setter_variable(can_signal, parameter, var_or_func_or_table):
     if can_signal is None:
-        can_variable = 'NULL'
-        can_getter = 'NULL'
-        can_setter = 'NULL'
+        can_variable = "NULL"
+        can_getter = "NULL"
+        can_setter = "NULL"
 
         return can_getter, can_setter, can_variable
 
@@ -742,60 +720,54 @@ def can_getter_setter_variable(can_signal, parameter, var_or_func_or_table):
     )
     if in_table:
         can_variable = (
-            f'&{can_signal.tree_parent.tree_parent.tree_parent.name}'
-            f'.{can_signal.tree_parent.tree_parent.name}'
-            f'{can_signal.tree_parent.name}'
-            f'.{can_signal.name}'
+            f"&{can_signal.tree_parent.tree_parent.tree_parent.name}"
+            f".{can_signal.tree_parent.tree_parent.name}"
+            f"{can_signal.tree_parent.name}"
+            f".{can_signal.name}"
         )
     else:
         can_variable = (
-            f'&{can_signal.tree_parent.tree_parent.name}'
-            f'.{can_signal.tree_parent.name}'
-            f'.{can_signal.name}'
+            f"&{can_signal.tree_parent.tree_parent.name}"
+            f".{can_signal.tree_parent.name}"
+            f".{can_signal.name}"
         )
 
     if can_signal.signed:
-        can_type = ''
+        can_type = ""
     else:
-        can_type = 'u'
+        can_type = "u"
 
-    can_type += 'int'
+    can_type += "int"
 
     if can_signal.bits <= 16:
-        can_type += '16'
+        can_type += "16"
     elif can_signal.bits <= 32:
-        can_type += '32'
+        can_type += "32"
     else:
-        raise Exception('ack')
+        raise Exception("ack")
 
-    can_type += '_t'
+    can_type += "_t"
 
     getter_setter_list = [
-        'InterfaceItem',
+        "InterfaceItem",
         var_or_func_or_table,
         types[parameter.internal_type].name,
-        'can',
+        "can",
         can_type,
     ]
 
-    can_getter = '_'.join(
-        str(x)
-        for x in getter_setter_list + ['getter']
-    )
-    can_setter = '_'.join(
-        str(x)
-        for x in getter_setter_list + ['setter']
-    )
+    can_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
+    can_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
 
     return can_getter, can_setter, can_variable
 
 
 # TODO: CAMPid 68945967541316743769675426795146379678431
 def breakdown_nested_array(s):
-    split = re.split(r'\[(.*?)\].', s)
+    split = re.split(r"\[(.*?)\].", s)
 
     array_layers = list(toolz.partition(2, split))
-    remainder, = split[2 * len(array_layers):]
+    (remainder,) = split[2 * len(array_layers) :]
 
     return array_layers, remainder
 
@@ -817,8 +789,8 @@ class NestedArrays:
 
     def index(self, indexes):
         try:
-            return '.'.join(
-                '{layer}[{index}]'.format(
+            return ".".join(
+                "{layer}[{index}]".format(
                     layer=layer,
                     index=index_format.format(**indexes),
                 )
@@ -830,7 +802,7 @@ class NestedArrays:
     def sizeof(self, layers):
         indexed = self.index(indexes={layer: 0 for layer in layers})
 
-        return f'sizeof({indexed})'
+        return f"sizeof({indexed})"
 
     # def sizeof(self, layers, remainder=False):
     #     indexed = self.index(indexes={layer: 0 for layer in layers})
@@ -856,93 +828,90 @@ class TableBaseStructures:
     h_code = attr.ib(factory=list)
 
     def ensure_common_structure(
-            self,
-            internal_type,
-            internal_name,
-            parameter,
-            remainder,
-            common_initializers,
-            meta_initializer,
-            setter,
+        self,
+        internal_type,
+        internal_name,
+        parameter,
+        remainder,
+        common_initializers,
+        meta_initializer,
+        setter,
     ):
         name = self.common_structure_names.get(parameter.uuid)
 
         if name is None:
             if len(self.h_code) > 0:
-                self.h_code.append('')
+                self.h_code.append("")
             if len(self.c_code) > 0:
-                self.c_code.append('')
+                self.c_code.append("")
 
-            formatted_uuid = str(parameter.uuid).replace('-', '_')
-            name = (
-                f'InterfaceItem_table_common_{internal_type}_{formatted_uuid}'
-            )
+            formatted_uuid = str(parameter.uuid).replace("-", "_")
+            name = f"InterfaceItem_table_common_{internal_type}_{formatted_uuid}"
 
             if remainder is None:
                 sizes = {}
-                full_base_variable = 'NULL'
+                full_base_variable = "NULL"
             else:
                 nested_array = self.array_nests[remainder]
 
                 layers = []
                 for layer in nested_array.array_layers:
-                    layer_format_name, = [
+                    (layer_format_name,) = [
                         list(field)[0][1]
                         for field in [string.Formatter().parse(layer[1])]
                     ]
                     layers.append(layer_format_name)
 
                 variable_base = nested_array.index(
-                    indexes={
-                        layer: 0
-                        for layer in layers
-                    },
+                    indexes={layer: 0 for layer in layers},
                 )
 
                 sizes = {
-                    layer: nested_array.sizeof(layers[:i + 1])
+                    layer: nested_array.sizeof(layers[: i + 1])
                     for i, layer in enumerate(layers)
                 }
 
-                full_base_variable_name = f'{variable_base}.{remainder}'
-                full_base_variable = f'&{full_base_variable_name}'
+                full_base_variable_name = f"{variable_base}.{remainder}"
+                full_base_variable = f"&{full_base_variable_name}"
 
-            if internal_type == 'PackedString':
+            if internal_type == "PackedString":
                 meta_entry = []
                 variable_base_length_entry = [
-                    f'.variable_base_length = sizeof({full_base_variable_name}),',
+                    f".variable_base_length = sizeof({full_base_variable_name}),",
                 ]
             else:
                 meta_entry = [
-                    f'.meta_values = {{',
+                    f".meta_values = {{",
                     meta_initializer,
-                    f'}},',
+                    f"}},",
                 ]
                 variable_base_length_entry = []
 
             self.common_structure_names[parameter.uuid] = name
             self.h_code.append(
-                f'extern InterfaceItem_table_common_{internal_name} {name};',
+                f"extern InterfaceItem_table_common_{internal_name} {name};",
             )
-            self.c_code.extend([
-                f'#pragma DATA_SECTION({name}, "Interface")',
-                f'// {node_path_string(parameter)}',
-                f'// {parameter.uuid}',
-                f'InterfaceItem_table_common_{internal_type} const {name} = {{',
+            self.c_code.extend(
                 [
-                    f'.common = {{',
-                    common_initializers,
-                    f'}},',
-                    f'.variable_base = {full_base_variable},',
-                    *variable_base_length_entry,
-                    f'.setter = {"NULL" if setter is None else setter},',
-                    f'.zone_size = {sizes.get("curve_type", 0)},',
-                    f'.curve_size = {sizes.get("curve_index", 0)},',
-                    f'.point_size = {sizes.get("point_index", 0)},',
-                    *meta_entry,
-                ],
-                f'}};',
-            ])
+                    f'#pragma DATA_SECTION({name}, "Interface")',
+                    f"// {node_path_string(parameter)}",
+                    f"// {parameter.uuid}",
+                    f"InterfaceItem_table_common_{internal_type} const {name} = {{",
+                    [
+                        f".common = {{",
+                        common_initializers,
+                        f"}},",
+                        f".variable_base = {full_base_variable},",
+                        *variable_base_length_entry,
+                        f'.setter = {"NULL" if setter is None else setter},',
+                        f'.zone_size = {sizes.get("curve_type", 0)},',
+                        f'.curve_size = {sizes.get("curve_index", 0)},',
+                        f'.point_size = {sizes.get("point_index", 0)},',
+                        *meta_entry,
+                    ],
+                    f"}};",
+                ]
+            )
 
         return name
 
@@ -963,11 +932,11 @@ class TableBaseStructures:
         if not uses_interface_item:
             return [[], []]
 
-        curve_type = get_curve_type(''.join(layers[:2]))
+        curve_type = get_curve_type("".join(layers[:2]))
 
         curve_index = int(layers[-2])
         try:
-            point_index = int(table_element.name.lstrip('_').lstrip('0')) - 1
+            point_index = int(table_element.name.lstrip("_").lstrip("0")) - 1
         except ValueError:
             point_index = None
 
@@ -981,7 +950,7 @@ class TableBaseStructures:
         can_getter, can_setter, can_variable = can_getter_setter_variable(
             can_signal,
             parameter,
-            var_or_func_or_table='table',
+            var_or_func_or_table="table",
         )
 
         if can_signal is None:
@@ -990,12 +959,12 @@ class TableBaseStructures:
             can_factor = can_signal.factor
 
         # TODO: CAMPid 954679654745154274579654265294624765247569765479
-        sunspec_getter = 'NULL'
-        sunspec_setter = 'NULL'
+        sunspec_getter = "NULL"
+        sunspec_setter = "NULL"
         sunspec_variable = None
-        scale_factor_variable = 'NULL'
-        scale_factor_updater = 'NULL'
-        sunspec_model_variable = 'NULL'
+        scale_factor_variable = "NULL"
+        scale_factor_updater = "NULL"
+        sunspec_model_variable = "NULL"
 
         if sunspec_point is not None:
             sunspec_type = sunspec_types[
@@ -1004,10 +973,10 @@ class TableBaseStructures:
 
             # TODO: CAMPid 9675436715674367943196954756419543975314
             getter_setter_list = [
-                'InterfaceItem',
-                'table',
+                "InterfaceItem",
+                "table",
                 types[parameter.internal_type].name,
-                'sunspec',
+                "sunspec",
                 sunspec_type,
             ]
 
@@ -1018,20 +987,18 @@ class TableBaseStructures:
 
             if node_in_model is not None:
                 model_id = node_in_model.tree_parent.tree_parent.id
-                sunspec_model_variable = f'sunspecInterface.model{model_id}'
+                sunspec_model_variable = f"sunspecInterface.model{model_id}"
                 abbreviation = table_element.abbreviation
                 sunspec_variable = (
-                    f'{sunspec_model_variable}'
-                    f'.Curve_{curve_index:>02}_{abbreviation}'
+                    f"{sunspec_model_variable}"
+                    f".Curve_{curve_index:>02}_{abbreviation}"
                 )
 
-                sunspec_getter = '_'.join(
-                    str(x)
-                    for x in getter_setter_list + ['getter']
+                sunspec_getter = "_".join(
+                    str(x) for x in getter_setter_list + ["getter"]
                 )
-                sunspec_setter = '_'.join(
-                    str(x)
-                    for x in getter_setter_list + ['setter']
+                sunspec_setter = "_".join(
+                    str(x) for x in getter_setter_list + ["setter"]
                 )
 
             # TODO: CAMPid 67549654267913467967436
@@ -1053,32 +1020,30 @@ class TableBaseStructures:
 
             if sunspec_scale_factor is not None:
                 scale_factor_variable = (
-                    f'&{sunspec_model_variable}.{sunspec_scale_factor}'
+                    f"&{sunspec_model_variable}.{sunspec_scale_factor}"
                 )
                 scale_factor_updater_name = (
-                    f'getSUNSPEC_MODEL{model_id}_{sunspec_scale_factor}'
+                    f"getSUNSPEC_MODEL{model_id}_{sunspec_scale_factor}"
                 )
-                scale_factor_updater = f'&{scale_factor_updater_name}'
+                scale_factor_updater = f"&{scale_factor_updater_name}"
 
         common_initializers = create_common_initializers(
             access_level=access_level,
             can_getter=can_getter,
             can_setter=can_setter,
             # not to be used so really hardcode NULL
-            can_variable='NULL',
-            hand_coded_sunspec_getter_function='NULL',
-            hand_coded_sunspec_setter_function='NULL',
+            can_variable="NULL",
+            hand_coded_sunspec_getter_function="NULL",
+            hand_coded_sunspec_setter_function="NULL",
             internal_scale=parameter.internal_scale_factor,
             scale_factor_updater=scale_factor_updater,
             scale_factor_variable=scale_factor_variable,
             sunspec_getter=sunspec_getter,
             sunspec_setter=sunspec_setter,
             # not to be used so really hardcode NULL
-            sunspec_variable='NULL',
+            sunspec_variable="NULL",
             can_scale_factor=can_factor,
-            reject_from_inactive_interfaces=(
-                parameter.reject_from_inactive_interfaces
-            ),
+            reject_from_inactive_interfaces=(parameter.reject_from_inactive_interfaces),
             uuid_=table_element.uuid,
             include_uuid_in_item=self.include_uuid_in_item,
         )
@@ -1101,48 +1066,48 @@ class TableBaseStructures:
         )
 
         interface_item_type = (
-            f'InterfaceItem_table_{types[parameter.internal_type].name}'
+            f"InterfaceItem_table_{types[parameter.internal_type].name}"
         )
 
-        item_uuid_string = str(table_element.uuid).replace('-', '_')
-        item_name = f'interfaceItem_{item_uuid_string}'
+        item_uuid_string = str(table_element.uuid).replace("-", "_")
+        item_name = f"interfaceItem_{item_uuid_string}"
 
         maybe_uuid = []
         if self.include_uuid_in_item:
-            maybe_uuid = [f'.uuid = {uuid_initializer(table_element.uuid)},']
+            maybe_uuid = [f".uuid = {uuid_initializer(table_element.uuid)},"]
 
         maybe_sunspec_variable_length = []
         if sunspec_variable is None:
-            sunspec_variable_initializer = 'NULL'
+            sunspec_variable_initializer = "NULL"
         else:
-            if parameter.internal_type == 'PackedString':
+            if parameter.internal_type == "PackedString":
                 maybe_sunspec_variable_length = [
-                    f'.sunspec_variable_length = sizeof({sunspec_variable}),',
+                    f".sunspec_variable_length = sizeof({sunspec_variable}),",
                 ]
-            sunspec_variable_initializer = f'&{sunspec_variable}'
+            sunspec_variable_initializer = f"&{sunspec_variable}"
 
         c = [
             f'#pragma DATA_SECTION({item_name}, "Interface")',
-            f'// {node_path_string(table_element)}',
-            f'// {table_element.uuid}',
-            f'{interface_item_type} const {item_name} = {{',
+            f"// {node_path_string(table_element)}",
+            f"// {table_element.uuid}",
+            f"{interface_item_type} const {item_name} = {{",
             [
-                f'.table_common = &{common_structure_name},',
-                f'.can_variable = {can_variable},',
-                f'.sunspec_variable = {sunspec_variable_initializer},',
+                f".table_common = &{common_structure_name},",
+                f".can_variable = {can_variable},",
+                f".sunspec_variable = {sunspec_variable_initializer},",
                 *maybe_sunspec_variable_length,
                 f'.zone = {curve_type if curve_type is not None else "0"},',
-                f'.curve = {str(int(curve_index - 1))},',
-                f'.point = {0 if point_index is None else point_index},',
+                f".curve = {str(int(curve_index - 1))},",
+                f".point = {0 if point_index is None else point_index},",
                 *maybe_uuid,
             ],
-            '};',
-            '',
+            "};",
+            "",
         ]
 
         return [
             c,
-            [f'extern {interface_item_type} const {item_name};'],
+            [f"extern {interface_item_type} const {item_name};"],
         ]
 
 
@@ -1159,7 +1124,7 @@ def get_sunspec_point_from_table_element(sunspec_point, table_element):
         node
         for node in sunspec_point.find_root().nodes_by_attribute(
             attribute_value=value,
-            attribute_name='parameter_uuid',
+            attribute_name="parameter_uuid",
             raise_=False,
         )
         if isinstance(
@@ -1188,7 +1153,7 @@ def get_sunspec_model_from_table_group_element(sunspec_point, table_element):
         node
         for node in sunspec_point.find_root().nodes_by_attribute(
             attribute_value=table_element.uuid,
-            attribute_name='parameter_uuid',
+            attribute_name="parameter_uuid",
             raise_=False,
         )
         if isinstance(node, epcpm.sunspecmodel.DataPoint)
@@ -1206,11 +1171,11 @@ def get_sunspec_model_from_table_group_element(sunspec_point, table_element):
     else:
         return None
 
-    model_repeating_block, = [
+    (model_repeating_block,) = [
         node
         for node in sunspec_point.find_root().nodes_by_attribute(
             attribute_value=node_in_model.tree_parent,
-            attribute_name='original',
+            attribute_name="original",
             raise_=False,
         )
         if isinstance(node, epcpm.sunspecmodel.TableRepeatingBlockReference)
@@ -1231,7 +1196,7 @@ class Table:
     parameter_uuid_finder = attr.ib()
 
     def gen(self):
-        group, = (
+        (group,) = (
             child
             for child in self.wrapped.children
             if isinstance(child, epyqlib.pm.parametermodel.TableGroupElement)
@@ -1249,11 +1214,13 @@ class Table:
             if isinstance(child, epyqlib.pm.parametermodel.Group)
         ]
 
-        non_arrays = list(itertools.chain.from_iterable(group.children for group in groups))
+        non_arrays = list(
+            itertools.chain.from_iterable(group.children for group in groups)
+        )
 
         # TODO: CAMPid 0795436754762451671643967431
         # TODO: get this from the ...  wherever we have it
-        axes = ['x', 'y', 'z']
+        axes = ["x", "y", "z"]
 
         array_nests = {
             name: NestedArrays.build(s=array.children[0].internal_variable)
@@ -1265,17 +1232,12 @@ class Table:
             for non_array in non_arrays
             if non_array.internal_variable is not None
         ]
-        non_array_nests = {
-            nest.remainder: nest
-            for nest in non_array_nests
-        }
+        non_array_nests = {nest.remainder: nest for nest in non_array_nests}
 
         table_base_structures = TableBaseStructures(
             array_nests={**array_nests, **non_array_nests},
             parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
-            parameter_uuid_to_sunspec_node=(
-                self.parameter_uuid_to_sunspec_node
-            ),
+            parameter_uuid_to_sunspec_node=(self.parameter_uuid_to_sunspec_node),
             parameter_uuid_finder=self.parameter_uuid_finder,
             include_uuid_in_item=self.include_uuid_in_item,
         )
@@ -1286,9 +1248,7 @@ class Table:
             sunspec_root=self.sunspec_root,
             table_base_structures=table_base_structures,
             parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
-            parameter_uuid_to_sunspec_node=(
-                self.parameter_uuid_to_sunspec_node
-            ),
+            parameter_uuid_to_sunspec_node=(self.parameter_uuid_to_sunspec_node),
             parameter_uuid_finder=self.parameter_uuid_finder,
             include_uuid_in_item=self.include_uuid_in_item,
         ).gen()
@@ -1296,12 +1256,12 @@ class Table:
         return [
             [
                 *table_base_structures.c_code,
-                '',
+                "",
                 *item_code[0],
             ],
             [
                 *table_base_structures.h_code,
-                '',
+                "",
                 *item_code[1],
             ],
             set(),
@@ -1341,9 +1301,7 @@ class TableGroupElement:
                 sunspec_root=self.sunspec_root,
                 table_base_structures=self.table_base_structures,
                 parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
-                parameter_uuid_to_sunspec_node=(
-                    self.parameter_uuid_to_sunspec_node
-                ),
+                parameter_uuid_to_sunspec_node=(self.parameter_uuid_to_sunspec_node),
                 parameter_uuid_finder=self.parameter_uuid_finder,
                 layers=layers,
                 include_uuid_in_item=self.include_uuid_in_item,
@@ -1360,10 +1318,10 @@ class TableGroupElement:
 def get_curve_type(combination_string):
     # TODO: backmatching
     return {
-        'LowRideThrough': 'IEEE1547_CURVE_TYPE_LRT',
-        'HighRideThrough': 'IEEE1547_CURVE_TYPE_HRT',
-        'LowTrip': 'IEEE1547_CURVE_TYPE_LTRIP',
-        'HighTrip': 'IEEE1547_CURVE_TYPE_HTRIP',
+        "LowRideThrough": "IEEE1547_CURVE_TYPE_LRT",
+        "HighRideThrough": "IEEE1547_CURVE_TYPE_HRT",
+        "LowTrip": "IEEE1547_CURVE_TYPE_LTRIP",
+        "HighTrip": "IEEE1547_CURVE_TYPE_HTRIP",
     }.get(combination_string)
 
 
@@ -1399,38 +1357,38 @@ class TableArrayElement:
 
 
 def create_item(
-        item_uuid,
-        include_uuid_in_item,
-        access_level,
-        can_getter,
-        can_setter,
-        can_variable,
-        hand_coded_sunspec_getter_function,
-        hand_coded_sunspec_setter_function,
-        interface_item_type,
-        internal_scale,
-        meta_initializer_values,
-        parameter,
-        scale_factor_updater,
-        scale_factor_variable,
-        sunspec_getter,
-        sunspec_setter,
-        sunspec_variable,
-        variable_or_getter_setter,
-        rejected_callback,
-        can_scale_factor,
-        reject_from_inactive_interfaces,
+    item_uuid,
+    include_uuid_in_item,
+    access_level,
+    can_getter,
+    can_setter,
+    can_variable,
+    hand_coded_sunspec_getter_function,
+    hand_coded_sunspec_setter_function,
+    interface_item_type,
+    internal_scale,
+    meta_initializer_values,
+    parameter,
+    scale_factor_updater,
+    scale_factor_variable,
+    sunspec_getter,
+    sunspec_setter,
+    sunspec_variable,
+    variable_or_getter_setter,
+    rejected_callback,
+    can_scale_factor,
+    reject_from_inactive_interfaces,
 ):
-    item_uuid_string = str(item_uuid).replace('-', '_')
-    item_name = f'interfaceItem_{item_uuid_string}'
+    item_uuid_string = str(item_uuid).replace("-", "_")
+    item_name = f"interfaceItem_{item_uuid_string}"
 
     if meta_initializer_values is None:
         meta_initializer = []
     else:
         meta_initializer = [
-            '.meta_values = {',
+            ".meta_values = {",
             meta_initializer_values,
-            '}',
+            "}",
         ]
 
     common_initializers = create_common_initializers(
@@ -1454,53 +1412,53 @@ def create_item(
 
     item = [
         f'#pragma DATA_SECTION({item_name}, "Interface")',
-        f'// {node_path_string(parameter)}',
-        f'// {item_uuid}',
-        f'{interface_item_type} const {item_name} = {{',
+        f"// {node_path_string(parameter)}",
+        f"// {item_uuid}",
+        f"{interface_item_type} const {item_name} = {{",
         [
-            '.common = {',
+            ".common = {",
             common_initializers,
-            '},',
+            "},",
             *variable_or_getter_setter,
-            f'.rejectedCallback = {rejected_callback},',
+            f".rejectedCallback = {rejected_callback},",
             *meta_initializer,
         ],
-        '};',
-        '',
+        "};",
+        "",
     ]
 
     return [
         item,
-        [f'extern {interface_item_type} const {item_name};'],
+        [f"extern {interface_item_type} const {item_name};"],
     ]
 
 
 def uuid_initializer(uuid_):
-    return '{{{}}}'.format(
-        ', '.join(
-            '0x{:02x}{:02x}'.format(high, low)
+    return "{{{}}}".format(
+        ", ".join(
+            "0x{:02x}{:02x}".format(high, low)
             for low, high in toolz.partition_all(2, uuid_.bytes)
         ),
     )
 
 
 def create_common_initializers(
-        access_level,
-        can_getter,
-        can_setter,
-        can_variable,
-        hand_coded_sunspec_getter_function,
-        hand_coded_sunspec_setter_function,
-        internal_scale,
-        scale_factor_updater,
-        scale_factor_variable,
-        sunspec_getter,
-        sunspec_setter,
-        sunspec_variable,
-        can_scale_factor,
-        reject_from_inactive_interfaces,
-        uuid_,
-        include_uuid_in_item,
+    access_level,
+    can_getter,
+    can_setter,
+    can_variable,
+    hand_coded_sunspec_getter_function,
+    hand_coded_sunspec_setter_function,
+    internal_scale,
+    scale_factor_updater,
+    scale_factor_variable,
+    sunspec_getter,
+    sunspec_setter,
+    sunspec_variable,
+    can_scale_factor,
+    reject_from_inactive_interfaces,
+    uuid_,
+    include_uuid_in_item,
 ):
     if can_scale_factor is None:
         # TODO: don't default here?
@@ -1508,39 +1466,37 @@ def create_common_initializers(
 
     maybe_uuid = []
     if include_uuid_in_item:
-        maybe_uuid = [f'.uuid = {uuid_initializer(uuid_)},']
+        maybe_uuid = [f".uuid = {uuid_initializer(uuid_)},"]
 
     reject_from_inactive_interfaces_literal = (
-        'true'
-        if reject_from_inactive_interfaces
-        else 'false'
+        "true" if reject_from_inactive_interfaces else "false"
     )
 
     common_initializers = [
-        f'.sunspecScaleFactor = {scale_factor_variable},',
-        f'.canScaleFactor = {float(can_scale_factor)}f,',
-        f'.scaleFactorUpdater = {scale_factor_updater},',
-        f'.internalScaleFactor = {internal_scale},',
-        f'.rejectFromInactiveInterface = {reject_from_inactive_interfaces_literal},',
-        f'.sunspec = {{',
+        f".sunspecScaleFactor = {scale_factor_variable},",
+        f".canScaleFactor = {float(can_scale_factor)}f,",
+        f".scaleFactorUpdater = {scale_factor_updater},",
+        f".internalScaleFactor = {internal_scale},",
+        f".rejectFromInactiveInterface = {reject_from_inactive_interfaces_literal},",
+        f".sunspec = {{",
         [
-            f'.variable = {sunspec_variable},',
-            f'.getter = {sunspec_getter},',
-            f'.setter = {sunspec_setter},',
-            f'.handGetter = {hand_coded_sunspec_getter_function},',
-            f'.handSetter = {hand_coded_sunspec_setter_function},',
+            f".variable = {sunspec_variable},",
+            f".getter = {sunspec_getter},",
+            f".setter = {sunspec_setter},",
+            f".handGetter = {hand_coded_sunspec_getter_function},",
+            f".handSetter = {hand_coded_sunspec_setter_function},",
         ],
-        f'}},',
-        f'.can = {{',
+        f"}},",
+        f".can = {{",
         [
-            f'.variable = {can_variable},',
-            f'.getter = {can_getter},',
-            f'.setter = {can_setter},',
-            f'.handGetter = NULL,',
-            f'.handSetter = NULL,',
+            f".variable = {can_variable},",
+            f".getter = {can_getter},",
+            f".setter = {can_setter},",
+            f".handGetter = NULL,",
+            f".handSetter = NULL,",
         ],
-        f'}},',
-        f'.access_level = {access_level},',
+        f"}},",
+        f".access_level = {access_level},",
         *maybe_uuid,
     ]
     return common_initializers

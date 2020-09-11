@@ -25,13 +25,11 @@ import epyqlib.attrsmodel
 
 
 def full_import(paths):
-    with open(paths.can, 'rb') as sym, open(paths.hierarchy) as hierarchy:
-        parameters_root, can_root, sunspec_root = (
-            epcpm.symtoproject.load_can_file(
-                can_file=sym,
-                file_type=str(pathlib.Path(sym.name).suffix[1:]),
-                parameter_hierarchy_file=hierarchy,
-            )
+    with open(paths.can, "rb") as sym, open(paths.hierarchy) as hierarchy:
+        parameters_root, can_root, sunspec_root = epcpm.symtoproject.load_can_file(
+            can_file=sym,
+            file_type=str(pathlib.Path(sym.name).suffix[1:]),
+            parameter_hierarchy_file=hierarchy,
         )
 
     project = epcpm.project.Project()
@@ -58,19 +56,17 @@ def full_import(paths):
     )
 
     sunspec_types = epcpm.sunspecmodel.build_sunspec_types_enumeration()
-    enumerations = (
-        project.models.parameters.list_selection_roots['enumerations']
-    )
+    enumerations = project.models.parameters.list_selection_roots["enumerations"]
     enumerations.append_child(sunspec_types)
 
     project.models.update_enumeration_roots()
 
     sunspec_models = []
-    prefix = 'smdx_'
-    suffix = '.xml'
+    prefix = "smdx_"
+    suffix = ".xml"
     for smdx_path in paths.smdx:
         models = epcpm.smdxtosunspec.import_models(
-            int(smdx_path.name[len(prefix):-len(suffix)]),
+            int(smdx_path.name[len(prefix) : -len(suffix)]),
             parameter_model=project.models.parameters,
             paths=[smdx_path.parent],
         )
@@ -92,7 +88,7 @@ def full_import(paths):
         parameter = project.models.sunspec.node_from_uuid(
             point.parameter_uuid,
         )
-        for direction in ('get', 'set'):
+        for direction in ("get", "set"):
             key = epcpm.smdxtosunspec.GetSetKey(
                 model=model.id,
                 name=parameter.abbreviation,
@@ -102,20 +98,20 @@ def full_import(paths):
             if accessor is not None:
                 setattr(point, direction, accessor)
 
-    project.paths['parameters'] = 'parameters.json'
-    project.paths['can'] = 'can.json'
-    project.paths['sunspec'] = 'sunspec.json'
+    project.paths["parameters"] = "parameters.json"
+    project.paths["can"] = "can.json"
+    project.paths["sunspec"] = "sunspec.json"
 
     return project
 
 
 def full_export(
-        project,
-        paths,
-        target_directory,
-        first_time=False,
-        skip_sunspec=False,
-        include_uuid_in_item=False,
+    project,
+    paths,
+    target_directory,
+    first_time=False,
+    skip_sunspec=False,
+    include_uuid_in_item=False,
 ):
     epcpm.cantosym.export(
         path=paths.can,
@@ -131,7 +127,7 @@ def full_export(
 
     epcpm.parameterstointerface.export(
         c_path=paths.interface_c,
-        h_path=paths.interface_c.with_suffix('.h'),
+        h_path=paths.interface_c.with_suffix(".h"),
         can_model=project.models.can,
         sunspec_model=project.models.sunspec,
         parameters_model=project.models.parameters,
@@ -152,29 +148,29 @@ def full_export(
         parameters_model=project.models.parameters,
         skip_sunspec=skip_sunspec,
         column_filter=attr.evolve(
-            epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True), 
+            epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True),
             get=False,
             set=False,
             item=False,
-        )
+        ),
     )
 
     epcpm.sunspectotablesc.export(
         c_path=paths.sunspec_tables_c,
-        h_path=paths.sunspec_tables_c.with_suffix('.h'),
+        h_path=paths.sunspec_tables_c.with_suffix(".h"),
         sunspec_model=project.models.sunspec,
         skip_sunspec=skip_sunspec,
     )
 
     epcpm.parameterstosil.export(
         c_path=paths.sil_c,
-        h_path=paths.sil_c.with_suffix('.h'),
+        h_path=paths.sil_c.with_suffix(".h"),
         parameters_model=project.models.parameters,
     )
 
     epcpm.sunspectobitfieldsc.export(
         c_path=paths.sunspec_bitfields_c,
-        h_path=paths.sunspec_bitfields_c.with_suffix('.h'),
+        h_path=paths.sunspec_bitfields_c.with_suffix(".h"),
         sunspec_model=project.models.sunspec,
         include_uuid_in_item=include_uuid_in_item,
     )
@@ -194,32 +190,32 @@ def full_export(
 
 
 def run_generation_scripts(base_path, skip_sunspec=False):
-    scripts = base_path/'venv'/'Scripts'
-    interface = base_path/'interface'
+    scripts = base_path / "venv" / "Scripts"
+    interface = base_path / "interface"
 
     subprocess.run(
         [
-            os.fspath(scripts/'generatestripcollect'),
-            os.fspath(interface/'EPC_DG_ID247_FACTORY.sym'),
-            '-o',
-            os.fspath(interface/'EPC_DG_ID247.sym'),
-            '--hierarchy',
-            os.fspath(interface/'EPC_DG_ID247_FACTORY.parameters.json'),
-            '--hierarchy-out',
-            os.fspath(interface/'EPC_DG_ID247.parameters.json'),
-            '--device-file',
-            os.fspath(interface/'devices.json'),
-            '--output-directory',
-            os.fspath(interface/'devices'),
+            os.fspath(scripts / "generatestripcollect"),
+            os.fspath(interface / "EPC_DG_ID247_FACTORY.sym"),
+            "-o",
+            os.fspath(interface / "EPC_DG_ID247.sym"),
+            "--hierarchy",
+            os.fspath(interface / "EPC_DG_ID247_FACTORY.parameters.json"),
+            "--hierarchy-out",
+            os.fspath(interface / "EPC_DG_ID247.parameters.json"),
+            "--device-file",
+            os.fspath(interface / "devices.json"),
+            "--output-directory",
+            os.fspath(interface / "devices"),
         ],
         check=True,
     )
 
-    emb_lib = base_path/'embedded-library'
+    emb_lib = base_path / "embedded-library"
     subprocess.run(
         [
-            os.fspath(scripts/'sunspecparser'),
-            os.fspath(emb_lib/'MODBUS_SunSpec-EPC.xlsx'),
+            os.fspath(scripts / "sunspecparser"),
+            os.fspath(emb_lib / "MODBUS_SunSpec-EPC.xlsx"),
         ],
         check=True,
     )
@@ -249,16 +245,10 @@ def is_stale(project, paths, skip_sunspec=False):
 
     source_paths = (
         project,
-        *(
-            project.parent / path
-            for path in attr.astuple(loaded_project.paths)
-        ),
+        *(project.parent / path for path in attr.astuple(loaded_project.paths)),
     )
 
-    source_modification_time = max(
-        path.stat().st_mtime
-        for path in source_paths
-    )
+    source_modification_time = max(path.stat().st_mtime for path in source_paths)
 
     if skip_sunspec:
         sunspec_models = []
@@ -267,20 +257,14 @@ def is_stale(project, paths, skip_sunspec=False):
             project.parent / loaded_project.paths.sunspec,
         )
 
-    smdx = tuple(
-        paths.sunspec_c/f'smdx_{model:05}.xml'
-        for model in sunspec_models
-    )
+    smdx = tuple(paths.sunspec_c / f"smdx_{model:05}.xml" for model in sunspec_models)
 
     sunspec_c_h = tuple(
-        paths.sunspec_c/f'sunspecInterfaceGen{model}.{extension}'
-        for model, extension in itertools.product(sunspec_models, ('c', 'h'))
+        paths.sunspec_c / f"sunspecInterfaceGen{model}.{extension}"
+        for model, extension in itertools.product(sunspec_models, ("c", "h"))
     )
 
-    sil_c_h = (
-        paths.sil_c,
-        paths.sil_c.with_suffix('.h')
-    )
+    sil_c_h = (paths.sil_c, paths.sil_c.with_suffix(".h"))
 
     destination_paths = [
         paths.can,
@@ -299,8 +283,6 @@ def is_stale(project, paths, skip_sunspec=False):
         for path in destination_paths
     )
 
-    destination_newer_by = (
-            destination_modification_time - source_modification_time
-    )
+    destination_newer_by = destination_modification_time - source_modification_time
 
     return destination_newer_by < 1

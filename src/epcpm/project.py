@@ -106,26 +106,20 @@ def _post_load(project):
     models.update_enumeration_roots()
 
 
-@graham.schemify(tag='models')
+@graham.schemify(tag="models")
 @attr.s
 class Models:
     parameters = attr.ib(
         default=None,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String()
-        ),
+        metadata=graham.create_metadata(field=marshmallow.fields.String()),
     )
     can = attr.ib(
         default=None,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String()
-        ),
+        metadata=graham.create_metadata(field=marshmallow.fields.String()),
     )
     sunspec = attr.ib(
         default=None,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String()
-        ),
+        metadata=graham.create_metadata(field=marshmallow.fields.String()),
     )
 
     @classmethod
@@ -160,35 +154,33 @@ class Models:
         enumerations_root = [
             child
             for child in self.parameters.root.children
-            if child.name == 'Enumerations'
+            if child.name == "Enumerations"
         ]
         if len(enumerations_root) == 0:
             enumerations_root = None
         else:
-            enumerations_root, = enumerations_root
-        self.parameters.list_selection_roots[
-            'enumerations'] = enumerations_root
+            (enumerations_root,) = enumerations_root
+        self.parameters.list_selection_roots["enumerations"] = enumerations_root
 
         if enumerations_root is None:
             access_level_root = None
         else:
-            access_level_root, = (
+            (access_level_root,) = (
                 child
                 for child in enumerations_root.children
-                if child.name == 'AccessLevel'
+                if child.name == "AccessLevel"
             )
-        self.parameters.list_selection_roots[
-            'access level'] = access_level_root
+        self.parameters.list_selection_roots["access level"] = access_level_root
 
         if enumerations_root is None:
             visibility_root = None
         else:
-            visibility_root, = (
+            (visibility_root,) = (
                 child
                 for child in enumerations_root.children
-                if child.name == 'CmmControlsVariant'
+                if child.name == "CmmControlsVariant"
             )
-        self.parameters.list_selection_roots['visibility'] = visibility_root
+        self.parameters.list_selection_roots["visibility"] = visibility_root
 
         if enumerations_root is None:
             sunspec_types_root = None
@@ -196,53 +188,35 @@ class Models:
             sunspec_types_root = [
                 child
                 for child in enumerations_root.children
-                if child.name == 'SunSpecTypes'
+                if child.name == "SunSpecTypes"
             ]
             if len(sunspec_types_root) == 1:
-                sunspec_types_root, = sunspec_types_root
+                (sunspec_types_root,) = sunspec_types_root
             else:
                 sunspec_types_root = None
-        self.parameters.list_selection_roots['sunspec types'] = (
-            sunspec_types_root
-        )
-        self.sunspec.list_selection_roots['sunspec types'] = (
-            sunspec_types_root
-        )
-        self.sunspec.list_selection_roots['enumerations'] = (
-            enumerations_root
-        )
+        self.parameters.list_selection_roots["sunspec types"] = sunspec_types_root
+        self.sunspec.list_selection_roots["sunspec types"] = sunspec_types_root
+        self.sunspec.list_selection_roots["enumerations"] = enumerations_root
 
-        self.can.list_selection_roots['enumerations'] = (
-            enumerations_root
-        )
+        self.can.list_selection_roots["enumerations"] = enumerations_root
         self.parameters.update_nodes()
         self.can.update_nodes()
         self.sunspec.update_nodes()
 
 
-@graham.schemify(tag='project')
+@graham.schemify(tag="project")
 @attr.s
 class Project:
     paths = attr.ib(
         default=attr.Factory(Models),
         metadata=graham.create_metadata(
             field=marshmallow.fields.Nested(graham.schema(Models)),
-        )
+        ),
     )
     filename = attr.ib(default=None)
     models = attr.ib(default=attr.Factory(Models))
-    filters = attr.ib(
-        default=(
-            ('Parameter Project', ['pmp']),
-            ('All Files', ['*'])
-        )
-    )
-    data_filters = attr.ib(
-        default=(
-            ('Dataset', ['json']),
-            ('All Files', ['*'])
-        )
-    )
+    filters = attr.ib(default=(("Parameter Project", ["pmp"]), ("All Files", ["*"])))
+    data_filters = attr.ib(default=(("Dataset", ["json"]), ("All Files", ["*"])))
 
     def save(self, parent=None):
         if self.filename is None:
@@ -250,7 +224,7 @@ class Project:
                 filters=self.filters,
                 parent=parent,
                 save=True,
-                caption='Save Project As',
+                caption="Save Project As",
             )
 
             if project_path is None:
@@ -270,33 +244,31 @@ class Project:
                     filters=self.data_filters,
                     parent=parent,
                     save=True,
-                    caption='Save {} As'.format(name.title()),
+                    caption="Save {} As".format(name.title()),
                 )
 
                 if new_path is None:
                     raise ProjectSaveCanceled()
 
-                paths[name] = (
-                    pathlib.Path(new_path).relative_to(project_directory)
-                )
+                paths[name] = pathlib.Path(new_path).relative_to(project_directory)
 
         self.paths = paths
 
-        with open(self.filename, 'w', newline='\n') as f:
+        with open(self.filename, "w", newline="\n") as f:
             s = graham.dumps(self, indent=4).data
             f.write(s)
 
-            if not s.endswith('\n'):
-                f.write('\n')
+            if not s.endswith("\n"):
+                f.write("\n")
 
         for path, model in zip(paths.values(), self.models.values()):
             s = graham.dumps(model.root, indent=4).data
 
-            with open(project_directory / path, 'w', newline='\n') as f:
+            with open(project_directory / path, "w", newline="\n") as f:
                 f.write(s)
 
-                if not s.endswith('\n'):
-                    f.write('\n')
+                if not s.endswith("\n"):
+                    f.write("\n")
 
 
 def load_model(project, path, root_type, columns, drop_sources=()):
@@ -318,12 +290,9 @@ def load_model(project, path, root_type, columns, drop_sources=()):
 
     def update(node, payload):
         for field in attr.fields(type(node)):
-            if (
-                field.metadata.get(graham.core.metadata_key) is None
-                or not isinstance(
-                    field.metadata.get(graham.core.metadata_key).field,
-                    epyqlib.attrsmodel.Reference,
-                )
+            if field.metadata.get(graham.core.metadata_key) is None or not isinstance(
+                field.metadata.get(graham.core.metadata_key).field,
+                epyqlib.attrsmodel.Reference,
             ):
                 continue
 

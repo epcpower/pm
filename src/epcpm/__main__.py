@@ -16,8 +16,8 @@ import epcpm.cli.utils
 
 
 # See file COPYING in this source tree
-__copyright__ = 'Copyright 2017, EPC Power Corp.'
-__license__ = 'GPLv2+'
+__copyright__ = "Copyright 2017, EPC Power Corp."
+__license__ = "GPLv2+"
 
 
 def main(project, verbosity, logger):
@@ -34,11 +34,14 @@ def main(project, verbosity, logger):
 
     QtCore.qInstallMessageHandler(epyqlib.utils.qt.message_handler)
 
-    app.setStyleSheet('QMessageBox {{ messagebox-text-interaction-flags: {}; }}'
-                      .format(QtCore.Qt.TextBrowserInteraction))
+    app.setStyleSheet(
+        "QMessageBox {{ messagebox-text-interaction-flags: {}; }}".format(
+            QtCore.Qt.TextBrowserInteraction
+        )
+    )
 
-    app.setOrganizationName('EPC Power Corp.')
-    app.setApplicationName('EPC Parameter Management')
+    app.setOrganizationName("EPC Power Corp.")
+    app.setApplicationName("EPC Parameter Management")
 
     if verbosity >= 1:
         logger.setLevel(logging.DEBUG)
@@ -51,8 +54,8 @@ def main(project, verbosity, logger):
                 logging.getLogger().setLevel(logging.DEBUG)
 
     window = epcpm.mainwindow.Window(
-        title='EPC Parameter Manager',
-        icon_path='icon.ico',
+        title="EPC Parameter Manager",
+        icon_path="icon.ico",
     )
 
     epyqlib.utils.qt.exception_message_box_register_parent(
@@ -71,26 +74,26 @@ def main(project, verbosity, logger):
 @click.command()
 @epcpm.cli.utils.project_option()
 @click.option(
-    '-v',
-    '--verbose',
-    'verbosity',
+    "-v",
+    "--verbose",
+    "verbosity",
     count=True,
-    help='Increase verbosity of output (up to three times)',
+    help="Increase verbosity of output (up to three times)",
 )
 def _entry_point(project, verbosity):
     """Parameter Manager GUI"""
 
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     stream_handler = logging.StreamHandler()
-    file_handler = logging.FileHandler('epcpm.log')
+    file_handler = logging.FileHandler("epcpm.log")
 
     for handler in (stream_handler, file_handler):
         handler.setFormatter(formatter)
         logger.addHandler(handler)
 
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s")
 
     sys.excepthook = epyqlib.utils.general.exception_logger
 
@@ -98,5 +101,5 @@ def _entry_point(project, verbosity):
 
 
 # for PyInstaller
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(_entry_point())

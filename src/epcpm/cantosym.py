@@ -17,13 +17,15 @@ builders = epyqlib.utils.general.TypeMap()
 
 def dehumanize_name(name):
     return name
+
+
 #     name = name.replace('-', '_')
 #     return epyqlib.utils.general.spaced_to_upper_camel(name)
 
 
 def export(path, can_model, parameters_model):
     finder = can_model.node_from_uuid
-    access_levels = parameters_model.list_selection_roots['access level']
+    access_levels = parameters_model.list_selection_roots["access level"]
     builder = epcpm.cantosym.builders.wrap(
         wrapped=can_model.root,
         access_levels=access_levels,
@@ -32,7 +34,7 @@ def export(path, can_model, parameters_model):
     )
 
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open('w', encoding='utf-8', newline='\n') as f:
+    with path.open("w", encoding="utf-8", newline="\n") as f:
         f.write(builder.gen())
 
 
@@ -49,16 +51,16 @@ class SignalOutsideMessageError(Exception):
 
             path.insert(0, parent)
 
-        path_string = ' : '.join(element.name for element in path)
+        path_string = " : ".join(element.name for element in path)
 
         message_range = [0, max(0, (message_length * 8) - 1)]
         signal_range = [signal.start_bit, signal.start_bit + signal.bits - 1]
 
         message = (
-              f'{path_string} spans bits'
-              f' [{signal_range[0]}, {signal_range[1]}]'
-              f' which is outside the range'
-              f' [{message_range[0]}, {message_range[1]}]'
+            f"{path_string} spans bits"
+            f" [{signal_range[0]}, {signal_range[1]}]"
+            f" which is outside the range"
+            f" [{message_range[0]}, {message_range[1]}]"
         )
 
         return cls(message)
@@ -76,13 +78,13 @@ class Root:
         matrix = canmatrix.canmatrix.CanMatrix()
         # TODO: this shouldn't need to be copied from:
         #           canmatrix.sym.load()
-        matrix.add_frame_defines("GenMsgCycleTime", 'INT 0 65535')
-        matrix.add_frame_defines("Receivable", 'BOOL False True')
-        matrix.add_frame_defines("Sendable", 'BOOL False True')
-        matrix.add_signal_defines("GenSigStartValue", 'FLOAT -3.4E+038 3.4E+038')
-        matrix.add_signal_defines("HexadecimalOutput", 'BOOL False True')
-        matrix.add_signal_defines("DisplayDecimalPlaces", 'INT 0 65535')
-        matrix.add_signal_defines("LongName", 'STR')
+        matrix.add_frame_defines("GenMsgCycleTime", "INT 0 65535")
+        matrix.add_frame_defines("Receivable", "BOOL False True")
+        matrix.add_frame_defines("Sendable", "BOOL False True")
+        matrix.add_signal_defines("GenSigStartValue", "FLOAT -3.4E+038 3.4E+038")
+        matrix.add_signal_defines("HexadecimalOutput", "BOOL False True")
+        matrix.add_signal_defines("DisplayDecimalPlaces", "INT 0 65535")
+        matrix.add_signal_defines("LongName", "STR")
 
         for child in self.wrapped.children:
             frame = builders.wrap(
@@ -105,8 +107,7 @@ class Root:
                 continue
 
             enumerators = collections.OrderedDict(
-                (e.value, dehumanize_name(e.name))
-                for e in enumeration.children
+                (e.value, dehumanize_name(e.name)) for e in enumeration.children
             )
 
             matrix.add_value_table(
@@ -114,10 +115,10 @@ class Root:
                 valueTable=enumerators,
             )
 
-        codec = 'utf-8'
+        codec = "utf-8"
 
         f = io.BytesIO()
-        canmatrix.formats.dump(matrix, f, 'sym', symExportEncoding=codec)
+        canmatrix.formats.dump(matrix, f, "sym", symExportEncoding=codec)
         f.seek(0)
 
         return f.read().decode(codec)
@@ -134,7 +135,7 @@ class Root:
                 (
                     epyqlib.pm.parametermodel.Enumeration,
                     epyqlib.pm.parametermodel.AccessLevels,
-                )
+                ),
             )
             if is_enumeration:
                 collected.append(node)
@@ -165,14 +166,12 @@ class Message:
             size=self.wrapped.length,
             comment=self.wrapped.comment,
             cycle_time=(
-                self.wrapped.cycle_time
-                if self.wrapped.cycle_time is not None
-                else 0
+                self.wrapped.cycle_time if self.wrapped.cycle_time is not None else 0
             ),
         )
 
-        frame.attributes['Receivable'] = str(self.wrapped.receivable)
-        frame.attributes['Sendable'] = str(self.wrapped.sendable)
+        frame.attributes["Receivable"] = str(self.wrapped.receivable)
+        frame.attributes["Sendable"] = str(self.wrapped.sendable)
 
         for child in self.wrapped.children:
             signal = builders.wrap(
@@ -193,21 +192,15 @@ class Signal:
     parameter_uuid_finder = attr.ib(default=None)
 
     def gen(
-            self,
-            multiplex_id=None,
-            multiplex_on_write=None,
-            skip_access_level=False,
-            skip_configuration=False,
+        self,
+        multiplex_id=None,
+        multiplex_on_write=None,
+        skip_access_level=False,
+        skip_configuration=False,
     ):
-        if (
-                self.message_length is not None
-                and (
-                    self.wrapped.start_bit < 0
-                    or (
-                        self.message_length * 8
-                        < self.wrapped.start_bit + self.wrapped.bits
-                    )
-                )
+        if self.message_length is not None and (
+            self.wrapped.start_bit < 0
+            or (self.message_length * 8 < self.wrapped.start_bit + self.wrapped.bits)
         ):
             raise SignalOutsideMessageError.build(
                 signal=self.wrapped,
@@ -226,93 +219,89 @@ class Signal:
 
             original_parameter = parameter
             if isinstance(
-                    parameter,
-                    epyqlib.pm.parametermodel.TableArrayElement,
+                parameter,
+                epyqlib.pm.parametermodel.TableArrayElement,
             ):
                 array_element = parameter.original
 
                 if isinstance(
-                        array_element,
-                        epyqlib.pm.parametermodel.Parameter,
+                    array_element,
+                    epyqlib.pm.parametermodel.Parameter,
                 ):
                     original_parameter = array_element
                 else:
                     original_parameter = array_element.tree_parent.children[0]
 
             if parameter.minimum is not None:
-                extras['min'] = parameter.minimum
+                extras["min"] = parameter.minimum
 
             if parameter.maximum is not None:
-                extras['max'] = parameter.maximum
+                extras["max"] = parameter.maximum
 
             if parameter.comment is not None:
                 comment = parameter.comment.strip()
                 if len(comment) > 0:
-                    extras['comment'] = comment
+                    extras["comment"] = comment
 
-            extras['comment'] = '{comment} <rw:{r}:{w}>'.format(
-                comment=extras.get('comment', ''),
+            extras["comment"] = "{comment} <rw:{r}:{w}>".format(
+                comment=extras.get("comment", ""),
                 r=1,
                 w=0 if parameter.read_only else 1,
             ).strip()
 
             handle_access_level = (
-                    not skip_access_level
-                    and parameter.access_level_uuid is not None
+                not skip_access_level and parameter.access_level_uuid is not None
             )
             if handle_access_level:
-                access_level = self.parameter_uuid_finder(
-                    parameter.access_level_uuid
-                )
+                access_level = self.parameter_uuid_finder(parameter.access_level_uuid)
                 if access_level != access_level.tree_parent.default():
-                    extras['comment'] = '{} <{}>'.format(
-                        extras.get('comment', ''),
+                    extras["comment"] = "{} <{}>".format(
+                        extras.get("comment", ""),
                         access_level.name.casefold(),
                     ).strip()
 
             handle_configuration = (
-                    not skip_configuration
-                    and parameter.visibility is not None
+                not skip_configuration and parameter.visibility is not None
             )
             if handle_configuration:
                 configurations = [
                     self.parameter_uuid_finder(u) for u in parameter.visibility
                 ]
                 imported_variants = epcpm.symtoproject.imported_variants
-                if all(v in configurations  for v in imported_variants):
-                    configurations = None #don't spam sym with variants
+                if all(v in configurations for v in imported_variants):
+                    configurations = None  # don't spam sym with variants
                 if configurations is not None:
                     for cfg in configurations:
                         if cfg is not None:
-                            extras['comment'] = '{} <{}>'.format(
-                                extras.get('comment', ''),
+                            extras["comment"] = "{} <{}>".format(
+                                extras.get("comment", ""),
                                 cfg.name,
                             ).strip()
 
             if parameter.nv_format is not None:
-                segments = ['nv']
+                segments = ["nv"]
 
-                nv_flags = ''
+                nv_flags = ""
                 if parameter.nv_cast:
-                    nv_flags += 'c'
+                    nv_flags += "c"
 
                 segments.append(nv_flags)
 
                 if parameter.nv_factor is not None:
-                    segments.append('f{}'.format(parameter.nv_factor))
+                    segments.append("f{}".format(parameter.nv_factor))
 
                 segments.append(parameter.nv_format)
 
-                extras['comment'] = '{}  <{}>'.format(
-                    extras.get('comment', ''),
-                    ':'.join(segments),
+                extras["comment"] = "{}  <{}>".format(
+                    extras.get("comment", ""),
+                    ":".join(segments),
                 ).strip()
             elif (
-                    isinstance(
-                        original_parameter,
-                        epyqlib.pm.parametermodel.Parameter,
-                    )
-                    and original_parameter.uses_interface_item()
+                isinstance(
+                    original_parameter,
+                    epyqlib.pm.parametermodel.Parameter,
+                )
+                and original_parameter.uses_interface_item()
             ):
                 is_table = False
                 ancestor = original_parameter.tree_parent
@@ -323,54 +312,56 @@ class Signal:
                     ancestor = ancestor.tree_parent
 
                 if is_table:
-                    getter = 'table_items_getMeta'
-                    setter = 'table_items_setMeta'
+                    getter = "table_items_getMeta"
+                    setter = "table_items_setMeta"
                 else:
-                    getter = 'items_getMeta'
-                    setter = 'items_setMeta'
+                    getter = "items_getMeta"
+                    setter = "items_setMeta"
 
                 if multiplex_on_write is None:
-                    multiplex_on_write = ''
+                    multiplex_on_write = ""
 
-                comment_format_interface_item_segments = ':'.join([
-                    'InterfaceItem',
-                    '{item}',
-                    '{getter}',
-                    '{setter}',
-                    '{multiplex_on_write}'
-                ])
-                comment_format = (
-                    f'{{comment}}  <{comment_format_interface_item_segments}>'
+                comment_format_interface_item_segments = ":".join(
+                    [
+                        "InterfaceItem",
+                        "{item}",
+                        "{getter}",
+                        "{setter}",
+                        "{multiplex_on_write}",
+                    ]
                 )
-                extras['comment'] = comment_format.format(
-                    comment=extras.get('comment', ''),
-                    item='interfaceItem_{}'.format(
-                        str(self.wrapped.parameter_uuid).replace('-', '_'),
+                comment_format = (
+                    f"{{comment}}  <{comment_format_interface_item_segments}>"
+                )
+                extras["comment"] = comment_format.format(
+                    comment=extras.get("comment", ""),
+                    item="interfaceItem_{}".format(
+                        str(self.wrapped.parameter_uuid).replace("-", "_"),
                     ),
                     getter=getter,
                     setter=setter,
                     multiplex_on_write=multiplex_on_write,
                 ).strip()
 
-            comment = extras.get('comment', '')
-            extras['comment'] = f'{comment}  <uuid:{parameter.uuid}>'.strip()
+            comment = extras.get("comment", "")
+            extras["comment"] = f"{comment}  <uuid:{parameter.uuid}>".strip()
 
             if parameter.units is not None:
-                extras['unit'] = parameter.units
+                extras["unit"] = parameter.units
 
             if self.wrapped.enumeration_uuid is not None:
                 enumeration = self.parameter_uuid_finder(
                     self.wrapped.enumeration_uuid,
                 )
 
-                extras['enumeration'] = dehumanize_name(enumeration.name)
-                extras['values'] = {v: k for k, v in enumeration.items()}
+                extras["enumeration"] = dehumanize_name(enumeration.name)
+                extras["values"] = {v: k for k, v in enumeration.items()}
 
             if parameter.default is not None:
                 initial_value = parameter.default
 
         if initial_value is not None:
-            extras['initial_value'] = initial_value
+            extras["initial_value"] = initial_value
 
         signal = canmatrix.canmatrix.Signal(
             name=dehumanize_name(self.wrapped.name),
@@ -387,11 +378,11 @@ class Signal:
         if parameter is not None:
             attributes = signal.attributes
 
-            attributes['LongName'] = parameter.name
-            attributes['HexadecimalOutput'] = parameter.display_hexadecimal
+            attributes["LongName"] = parameter.name
+            attributes["HexadecimalOutput"] = parameter.display_hexadecimal
 
             if parameter.decimal_places is not None:
-                attributes['DisplayDecimalPlaces'] = parameter.decimal_places
+                attributes["DisplayDecimalPlaces"] = parameter.decimal_places
 
         return signal
 
@@ -432,8 +423,8 @@ class MultiplexedMessage:
                 else 0
             ),
             attributes={
-                'Receivable': str(self.wrapped.receivable),
-                'Sendable': str(self.wrapped.sendable),
+                "Receivable": str(self.wrapped.receivable),
+                "Sendable": str(self.wrapped.sendable),
             },
         )
 
@@ -445,40 +436,37 @@ class MultiplexedMessage:
             message_length=None,
             parameter_uuid_finder=self.parameter_uuid_finder,
         ).gen(
-            multiplex_id='Multiplexor',
+            multiplex_id="Multiplexor",
         )
         frame.signals.append(mux_signal)
 
         for multiplexer in not_signals:
             if multiplexer.comment is not None:
-                mux_signal.comments[multiplexer.identifier] = (
-                    multiplexer.comment
-                )
+                mux_signal.comments[multiplexer.identifier] = multiplexer.comment
 
             # TODO: backmatching
             if multiplexer in table_multiplexers:
-                mux_signal.comments[multiplexer.identifier] = (
-                    '{} <{}>'.format(
-                        mux_signal.comments.get(multiplexer.identifier, ''),
-                        'table',
-                    ).strip()
-                )
+                mux_signal.comments[multiplexer.identifier] = "{} <{}>".format(
+                    mux_signal.comments.get(multiplexer.identifier, ""),
+                    "table",
+                ).strip()
 
             name = multiplexer.name
             if isinstance(multiplexer.tree_parent, epcpm.canmodel.CanTable):
                 name = multiplexer.tree_parent.name + name
-            frame.mux_names[multiplexer.identifier] = (
-                dehumanize_name(name)
-            )
+            frame.mux_names[multiplexer.identifier] = dehumanize_name(name)
 
             def param_special(signal):
                 folded = signal.name.casefold()
 
-                return folded.startswith('read param - ') or folded == 'meta'
+                return folded.startswith("read param - ") or folded == "meta"
 
             signal_access_levels = set()
 
-            multiplexer_is_read_only = all(self.parameter_uuid_finder(signal.parameter_uuid).read_only for signal in multiplexer.children)
+            multiplexer_is_read_only = all(
+                self.parameter_uuid_finder(signal.parameter_uuid).read_only
+                for signal in multiplexer.children
+            )
 
             for signal in multiplexer.children:
                 if param_special(signal):
@@ -499,12 +487,10 @@ class MultiplexedMessage:
             if all_access_levels_match:
                 access_level = signal_access_levels.pop()
                 if access_level != access_level.tree_parent.default():
-                    mux_signal.comments[multiplexer.identifier] = (
-                        '{} <{}>'.format(
-                            mux_signal.comments.get(multiplexer.identifier, ''),
-                            access_level.name.casefold(),
-                        ).strip()
-                    )
+                    mux_signal.comments[multiplexer.identifier] = "{} <{}>".format(
+                        mux_signal.comments.get(multiplexer.identifier, ""),
+                        access_level.name.casefold(),
+                    ).strip()
 
             first_new_signal_index = len(frame.signals)
 
@@ -539,7 +525,7 @@ class MultiplexedMessage:
                     multiplex_id=multiplexer.identifier,
                 )
 
-                if signal.name.startswith('ReadParam_') and multiplexer_is_read_only:
+                if signal.name.startswith("ReadParam_") and multiplexer_is_read_only:
                     matrix_signal.min = 1
                     matrix_signal.max = None
 
@@ -549,9 +535,9 @@ class MultiplexedMessage:
 
 
 def tweak_reply_signal(sig):
-    if sig.name.endswith('_command'):
-        sig.name = sig.name.replace('_command', '_status')
-        sig.attributes['LongName'] = sig.name
+    if sig.name.endswith("_command"):
+        sig.name = sig.name.replace("_command", "_status")
+        sig.attributes["LongName"] = sig.name
     return sig
 
 
@@ -568,7 +554,7 @@ class MultiplexedMessageClone:
             access_levels=self.access_levels,
             parameter_uuid_finder=self.parameter_uuid_finder,
         ).gen()
- 
+
         frame.name = self.wrapped.name
         frame.arbitration_id = canmatrix.canmatrix.ArbitrationId(
             id=self.wrapped.identifier,
@@ -577,13 +563,11 @@ class MultiplexedMessageClone:
             extended=self.wrapped.original.extended,
         )
         frame.comment = self.wrapped.comment
-        frame.attributes={
-            'Receivable': str(self.wrapped.receivable),
-            'Sendable': str(self.wrapped.sendable),
+        frame.attributes = {
+            "Receivable": str(self.wrapped.receivable),
+            "Sendable": str(self.wrapped.sendable),
         }
         for sig in frame.signals[:]:
             sig = tweak_reply_signal(sig)
 
         return frame
-
-

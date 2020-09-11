@@ -11,7 +11,7 @@ this = pathlib.Path(__file__).resolve()
 here = this.parent
 
 
-smdx_path = here/'sunspec'
+smdx_path = here / "sunspec"
 
 
 @pytest.fixture
@@ -25,13 +25,13 @@ def fresh_pathlist():
 
 
 def test_load():
-    project = epcpm.project.loadp(here/'project'/'project.pmp')
+    project = epcpm.project.loadp(here / "project" / "project.pmp")
 
     parameter_model = project.models.parameters
-    enumerations = parameter_model.list_selection_roots['enumerations']
+    enumerations = parameter_model.list_selection_roots["enumerations"]
     sunspec_types = epcpm.sunspecmodel.build_sunspec_types_enumeration()
     enumerations.append_child(sunspec_types)
-    parameter_model.list_selection_roots['sunspec types'] = sunspec_types
+    parameter_model.list_selection_roots["sunspec types"] = sunspec_types
 
     requested_models = [1, 17, 103, 65534]
 

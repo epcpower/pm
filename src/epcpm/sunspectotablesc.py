@@ -19,18 +19,18 @@ def export(c_path, h_path, sunspec_model, skip_sunspec=False):
     c_content, h_content = builder.gen()
 
     template_context = {
-        'definitions': c_content,
-        'declarations': h_content,
+        "definitions": c_content,
+        "declarations": h_content,
     }
 
     epcpm.c.render(
-        source=c_path.with_suffix(f'{c_path.suffix}_pm'),
+        source=c_path.with_suffix(f"{c_path.suffix}_pm"),
         destination=c_path,
         context=template_context,
     )
 
     epcpm.c.render(
-        source=h_path.with_suffix(f'{h_path.suffix}_pm'),
+        source=h_path.with_suffix(f"{h_path.suffix}_pm"),
         destination=h_path,
         context=template_context,
     )
@@ -40,10 +40,10 @@ def export(c_path, h_path, sunspec_model, skip_sunspec=False):
 def get_curve_type(combination_string):
     # TODO: backmatching
     return {
-        'LowRideThrough': 'IEEE1547_CURVE_TYPE_LRT',
-        'HighRideThrough': 'IEEE1547_CURVE_TYPE_HRT',
-        'LowTrip': 'IEEE1547_CURVE_TYPE_LTRIP',
-        'HighTrip': 'IEEE1547_CURVE_TYPE_HTRIP',
+        "LowRideThrough": "IEEE1547_CURVE_TYPE_LRT",
+        "HighRideThrough": "IEEE1547_CURVE_TYPE_HRT",
+        "LowTrip": "IEEE1547_CURVE_TYPE_LTRIP",
+        "HighTrip": "IEEE1547_CURVE_TYPE_HTRIP",
     }.get(combination_string)
 
 
@@ -74,7 +74,7 @@ class Root:
 
                 for lines, more_lines in zip(both_lines, builder.gen()):
                     lines.extend(more_lines)
-                    lines.append('')
+                    lines.append("")
 
             # active_curves = parameter_query.child_by_name('ActiveCurves')
             #
@@ -94,8 +94,7 @@ class Root:
             #     ])
 
         return tuple(
-            epyqlib.utils.general.format_nested_lists(lines)
-            for lines in both_lines
+            epyqlib.utils.general.format_nested_lists(lines) for lines in both_lines
         )
 
 
@@ -152,9 +151,8 @@ class TableRepeatingBlock:
     def gen(self):
         both_lines = [[], []]
 
-        curve_group_string = ''.join(
-            self.parameter_uuid_finder(uuid).name
-            for uuid in self.wrapped.path[:-1]
+        curve_group_string = "".join(
+            self.parameter_uuid_finder(uuid).name for uuid in self.wrapped.path[:-1]
         )
         curve_type = get_curve_type(curve_group_string)
 
@@ -170,7 +168,7 @@ class TableRepeatingBlock:
 
                 for lines, more_lines in zip(both_lines, builder.gen()):
                     lines.extend(more_lines)
-                    lines.append('')
+                    lines.append("")
 
         return both_lines
 
@@ -219,29 +217,29 @@ class DataPoint:
 
         if is_group:
             getter_setter = {
-                'get': array_or_group_element.can_getter,
-                'set': array_or_group_element.can_setter,
+                "get": array_or_group_element.can_getter,
+                "set": array_or_group_element.can_setter,
             }
         elif is_array:
             getter_setter = {
-                'get': parameter_table.can_getter,
-                'set': parameter_table.can_setter,
+                "get": parameter_table.can_getter,
+                "set": parameter_table.can_setter,
             }
 
-        if getter_setter['get'] is None:
-            getter_setter['get'] = ''
+        if getter_setter["get"] is None:
+            getter_setter["get"] = ""
 
-        if getter_setter['set'] is None:
-            getter_setter['set'] = ''
+        if getter_setter["set"] is None:
+            getter_setter["set"] = ""
 
         axis = table_element.tree_parent.axis
         if axis is None:
-            axis = '<no axis>'
+            axis = "<no axis>"
 
         interface_variable = (
-            f'sunspecInterface'
-            f'.model{self.model_id}'
-            f'.Curve_{self.curve_index + 1:02}_{table_element.abbreviation}'
+            f"sunspecInterface"
+            f".model{self.model_id}"
+            f".Curve_{self.curve_index + 1:02}_{table_element.abbreviation}"
         )
 
         both_lines = [[], []]
@@ -249,18 +247,18 @@ class DataPoint:
         for get_set, embedded in getter_setter.items():
             # TODO: CAMPid 075780541068182645821856068542023499
             converter = {
-                'uint32': {
-                    'get': 'sunspecUint32ToSSU32_returns',
-                    'set': 'sunspecSSU32ToUint32',
+                "uint32": {
+                    "get": "sunspecUint32ToSSU32_returns",
+                    "set": "sunspecSSU32ToUint32",
                 },
-                'int32': {
+                "int32": {
                     # TODO: add this to embedded?
                     # 'get': 'sunspecInt32ToSSS32',
-                    'set': 'sunspecSSS32ToInt32',
+                    "set": "sunspecSSS32ToInt32",
                 },
-                'uint64': {
-                    'get': 'sunspecUint64ToSSU64_returns',
-                    'set': 'sunspecSSU64ToUint64',
+                "uint64": {
+                    "get": "sunspecUint64ToSSU64_returns",
+                    "set": "sunspecSSU64ToUint64",
                 },
             }.get(self.parameter_uuid_finder(self.wrapped.type_uuid).name)
 
@@ -268,32 +266,36 @@ class DataPoint:
 
             if parameter.uses_interface_item():
                 # TODO: CAMPid 9685439641536675431653179671436
-                item_uuid_string = str(table_element.uuid).replace('-', '_')
-                item_name = f'interfaceItem_{item_uuid_string}'
+                item_uuid_string = str(table_element.uuid).replace("-", "_")
+                item_name = f"interfaceItem_{item_uuid_string}"
 
-                if True:#is_group:
-                    if get_set == 'get':
-                        body_lines.extend([
-                            f'{item_name}.table_common->common.sunspec.getter(',
+                if True:  # is_group:
+                    if get_set == "get":
+                        body_lines.extend(
                             [
-                                f'(InterfaceItem_void *) &{item_name},',
-                                f'Meta_Value',
-                            ],
-                            f');',
-                        ])
-                    elif get_set == 'set':
-                        body_lines.extend([
-                            f'{item_name}.table_common->common.sunspec.setter(',
+                                f"{item_name}.table_common->common.sunspec.getter(",
+                                [
+                                    f"(InterfaceItem_void *) &{item_name},",
+                                    f"Meta_Value",
+                                ],
+                                f");",
+                            ]
+                        )
+                    elif get_set == "set":
+                        body_lines.extend(
                             [
-                                f'(InterfaceItem_void *) &{item_name},',
-                                f'true,',
-                                f'Meta_Value',
-                            ],
-                            f');',
-                        ])
+                                f"{item_name}.table_common->common.sunspec.setter(",
+                                [
+                                    f"(InterfaceItem_void *) &{item_name},",
+                                    f"true,",
+                                    f"Meta_Value",
+                                ],
+                                f");",
+                            ]
+                        )
             elif converter is not None:
                 converter = converter[get_set]
-                if get_set == 'get':
+                if get_set == "get":
                     formatted = embedded.format(
                         curve_type=self.curve_type,
                         interface_signal=interface_variable,
@@ -303,54 +305,61 @@ class DataPoint:
                         curve_index=self.curve_index,
                     )
                     left, equals, right = (
-                        element.strip()
-                        for element in formatted.partition('=')
+                        element.strip() for element in formatted.partition("=")
                     )
 
-                    right = right.rstrip(';')
+                    right = right.rstrip(";")
 
-                    if equals != '=':
-                        raise Exception('do not yet know how to handle this')
+                    if equals != "=":
+                        raise Exception("do not yet know how to handle this")
 
                     body_lines.append(
-                        f'{left} = {converter}({right});',
+                        f"{left} = {converter}({right});",
                     )
-                elif get_set == 'set':
-                    body_lines.append(embedded.format(
+                elif get_set == "set":
+                    body_lines.append(
+                        embedded.format(
+                            curve_type=self.curve_type,
+                            interface_signal=f"{converter}(&{interface_variable})",
+                            point_index=table_element.index,
+                            axis=axis,
+                            upper_axis=axis.upper(),
+                            curve_index=self.curve_index,
+                        )
+                    )
+            else:
+                body_lines.append(
+                    embedded.format(
                         curve_type=self.curve_type,
-                        interface_signal=f'{converter}(&{interface_variable})',
+                        interface_signal=interface_variable,
                         point_index=table_element.index,
                         axis=axis,
                         upper_axis=axis.upper(),
                         curve_index=self.curve_index,
-                    ))
-            else:
-                body_lines.append(embedded.format(
-                    curve_type=self.curve_type,
-                    interface_signal=interface_variable,
-                    point_index=table_element.index,
-                    axis=axis,
-                    upper_axis=axis.upper(),
-                    curve_index=self.curve_index,
-                ))
+                    )
+                )
 
-            function_name = '_'.join([
-                f'{get_set}SunspecModel{self.model_id}',
-                'Curve',
-                f'{self.curve_index + 1:02}',
-                table_element.abbreviation,
-            ])
-            function_signature = f'void {function_name} (void)'
+            function_name = "_".join(
+                [
+                    f"{get_set}SunspecModel{self.model_id}",
+                    "Curve",
+                    f"{self.curve_index + 1:02}",
+                    table_element.abbreviation,
+                ]
+            )
+            function_signature = f"void {function_name} (void)"
 
-            both_lines[0].extend([
-                f'{function_signature} {{',
-                body_lines,
-                '}',
-                '',
-            ])
+            both_lines[0].extend(
+                [
+                    f"{function_signature} {{",
+                    body_lines,
+                    "}",
+                    "",
+                ]
+            )
 
             both_lines[1].append(
-                f'{function_signature};',
+                f"{function_signature};",
             )
 
         return both_lines

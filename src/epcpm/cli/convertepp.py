@@ -11,10 +11,10 @@ import epcpm.symtoproject
 
 
 @click.command()
-@click.option('--sym', type=click.File('rb'), required=True)
-@click.option('--hierarchy', type=click.File(), required=True)
-@click.option('--parameters', type=click.File())
-@click.option('--value-set', type=click.File('w'), required=True)
+@click.option("--sym", type=click.File("rb"), required=True)
+@click.option("--hierarchy", type=click.File(), required=True)
+@click.option("--parameters", type=click.File())
+@click.option("--value-set", type=click.File("w"), required=True)
 def cli(sym, hierarchy, parameters, value_set):
     value_set_file = value_set
 
@@ -41,10 +41,10 @@ def cli(sym, hierarchy, parameters, value_set):
         parameter_model=project_model.models.parameters,
     )
 
-    parameters_root, = (
+    (parameters_root,) = (
         node
         for node in value_set.parameter_model.root.children
-        if node.name == 'Parameters'
+        if node.name == "Parameters"
     )
 
     epyqlib.pm.valuesetmodel.copy_parameter_data(
@@ -56,8 +56,7 @@ def cli(sym, hierarchy, parameters, value_set):
     )
 
     value_set_parameters = {
-        parameter.name: parameter
-        for parameter in value_set.model.root.children
+        parameter.name: parameter for parameter in value_set.model.root.children
     }
 
     parameters = json.load(parameters)

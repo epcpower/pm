@@ -14,7 +14,9 @@ import epcpm.symtoproject
 
 @pytest.fixture
 def sym_file():
-    return io.BytesIO(textwrap.dedent('''\
+    return io.BytesIO(
+        textwrap.dedent(
+            """\
     FormatVersion=5.0 // Do not edit this line!
     Title="canmatrix-Export"
     
@@ -41,35 +43,35 @@ def sym_file():
     Mux=TestMux 0,14 0 
     Var=TestParam unsigned 14,2 /f:0.01  /min:0.01  /max:0.2 /p:2 /d:0.02
     Var=FactoryParam unsigned 14,2 /f:0.01  /min:0.01  /max:0.2 /p:2 /d:0.02  // before <factory> after
-    ''').encode('utf-8'))
+    """
+        ).encode("utf-8")
+    )
 
 
-other_group_name = 'Uncategorized Stuff'
+other_group_name = "Uncategorized Stuff"
 
 
 @pytest.fixture
 def hierarchy_file():
-    return io.StringIO(json.dumps({
-        'children': [
+    return io.StringIO(
+        json.dumps(
             {
-                'name': 'Test Group',
-                'children': [
-                    [
-                        "TestMux",
-                        "TestParam"
-                    ],
-                    [
-                        "TestMux",
-                        "FactoryParam"
-                    ]
+                "children": [
+                    {
+                        "name": "Test Group",
+                        "children": [
+                            ["TestMux", "TestParam"],
+                            ["TestMux", "FactoryParam"],
+                        ],
+                    },
+                    {
+                        "name": other_group_name,
+                        "unreferenced": True,
+                    },
                 ]
-            },
-            {
-                'name': other_group_name,
-                'unreferenced': True,
-            },
-        ]
-    }))
+            }
+        )
+    )
 
 
 @pytest.fixture
@@ -84,8 +86,8 @@ def test_other_group_name(hierarchy_file):
 
 def test_load_can_file():
     parameter_root, can_root, sunspec_root = epcpm.symtoproject.load_can_path(
-        epyqlib.tests.common.symbol_files['customer'],
-        epyqlib.tests.common.hierarchy_files['customer'],
+        epyqlib.tests.common.symbol_files["customer"],
+        epyqlib.tests.common.hierarchy_files["customer"],
     )
 
     assert isinstance(parameter_root, epyqlib.pm.parametermodel.Root)
@@ -94,19 +96,17 @@ def test_load_can_file():
 
 
 def test_only_one_parameter_per_query_response_pair(
-        sym_file,
-        empty_hierarchy_file,
+    sym_file,
+    empty_hierarchy_file,
 ):
     parameter_root, *_ = epcpm.symtoproject.load_can_file(
         can_file=sym_file,
-        file_type='sym',
+        file_type="sym",
         parameter_hierarchy_file=empty_hierarchy_file,
     )
 
     parameters = next(
-        node
-        for node in parameter_root.children
-        if node.name == 'Parameters'
+        node for node in parameter_root.children if node.name == "Parameters"
     )
 
     assert len(parameters.children[0].children) == 2
@@ -115,57 +115,46 @@ def test_only_one_parameter_per_query_response_pair(
 def test_access_level(sym_file, hierarchy_file):
     parameter_root, *_ = epcpm.symtoproject.load_can_file(
         can_file=sym_file,
-        file_type='sym',
+        file_type="sym",
         parameter_hierarchy_file=hierarchy_file,
     )
 
-    access_levels, = parameter_root.nodes_by_attribute(
-        attribute_name='name',
-        attribute_value='AccessLevel',
+    (access_levels,) = parameter_root.nodes_by_attribute(
+        attribute_name="name",
+        attribute_value="AccessLevel",
     )
 
-    regular_parameter, = parameter_root.nodes_by_attribute(
-        attribute_name='name',
-        attribute_value='TestParam',
+    (regular_parameter,) = parameter_root.nodes_by_attribute(
+        attribute_name="name",
+        attribute_value="TestParam",
     )
 
     assert regular_parameter.access_level_uuid == access_levels.default().uuid
 
-    factory_parameter, = parameter_root.nodes_by_attribute(
-        attribute_name='name',
-        attribute_value='FactoryParam',
+    (factory_parameter,) = parameter_root.nodes_by_attribute(
+        attribute_name="name",
+        attribute_value="FactoryParam",
     )
 
-    assert (
-        factory_parameter.access_level_uuid
-        == access_levels.by_name('factory').uuid
-    )
-    assert 'before  after' == factory_parameter.comment
+    assert factory_parameter.access_level_uuid == access_levels.by_name("factory").uuid
+    assert "before  after" == factory_parameter.comment
 
 
 def test_accurate_decimal(sym_file, hierarchy_file):
     parameter_root, *_ = epcpm.symtoproject.load_can_file(
         can_file=sym_file,
-        file_type='sym',
+        file_type="sym",
         parameter_hierarchy_file=hierarchy_file,
     )
 
     parameters = next(
-        node
-        for node in parameter_root.children
-        if node.name == 'Parameters'
+        node for node in parameter_root.children if node.name == "Parameters"
     )
 
-    test_group = next(
-        node
-        for node in parameters.children
-        if node.name == 'Test Group'
-    )
+    test_group = next(node for node in parameters.children if node.name == "Test Group")
 
     test_parameter = next(
-        node
-        for node in test_group.children
-        if node.name.endswith('TestParam')
+        node for node in test_group.children if node.name.endswith("TestParam")
     )
 
     # TODO: default is probably in wrong scaling
@@ -173,4 +162,4 @@ def test_accurate_decimal(sym_file, hierarchy_file):
     # assert test_parameter.default == decimal.Decimal('0.02')
 
     assert isinstance(test_parameter.minimum, decimal.Decimal)
-    assert test_parameter.minimum == decimal.Decimal('0.01')
+    assert test_parameter.minimum == decimal.Decimal("0.01")

@@ -8,7 +8,7 @@ from PyQt5 import QtWidgets
 import epcpm.importexportdialog_ui
 
 
-all_files_filter = ('All Files', ['*'])
+all_files_filter = ("All Files", ["*"])
 
 
 def path_or_none(s):
@@ -22,11 +22,7 @@ def path_or_none(s):
 
 
 def paths_or_none(x):
-    return [
-        pathlib.Path(path)
-        for path in x
-        if len(x) > 0
-    ]
+    return [pathlib.Path(path) for path in x if len(x) > 0]
 
 
 def import_dialog():
@@ -88,22 +84,22 @@ class ImportPaths:
 
 def paths_from_directory(directory):
     path = pathlib.Path(directory)
-    interface = path / 'interface'
-    embedded = path / 'embedded-library'
-    sunspec = embedded / 'system' / 'sunspec'
+    interface = path / "interface"
+    embedded = path / "embedded-library"
+    sunspec = embedded / "system" / "sunspec"
 
     return ImportPaths(
-        can=interface / 'EPC_DG_ID247_FACTORY.sym',
-        hierarchy=interface / 'EPC_DG_ID247_FACTORY.parameters.json',
-        tables_c=interface / 'canInterfaceGenTables.c',
-        sunspec_tables_c=sunspec / 'sunspecInterfaceGenTables.c',
-        sunspec_bitfields_c=sunspec / 'sunspecInterfaceBitfieldsGen.c',
-        spreadsheet=embedded / 'MODBUS_SunSpec-EPC.xlsx',
-        spreadsheet_user=embedded / 'EPCSunspec.xlsx',
-        smdx=sorted(sunspec.glob('smdx_*.xml')),
+        can=interface / "EPC_DG_ID247_FACTORY.sym",
+        hierarchy=interface / "EPC_DG_ID247_FACTORY.parameters.json",
+        tables_c=interface / "canInterfaceGenTables.c",
+        sunspec_tables_c=sunspec / "sunspecInterfaceGenTables.c",
+        sunspec_bitfields_c=sunspec / "sunspecInterfaceBitfieldsGen.c",
+        spreadsheet=embedded / "MODBUS_SunSpec-EPC.xlsx",
+        spreadsheet_user=embedded / "EPCSunspec.xlsx",
+        smdx=sorted(sunspec.glob("smdx_*.xml")),
         sunspec_c=sunspec,
-        sil_c=path / 'sil' / 'libEpcControlInterfaceGen.c',
-        interface_c=interface / 'interfaceGen.c',
+        sil_c=path / "sil" / "libEpcControlInterfaceGen.c",
+        interface_c=interface / "interfaceGen.c",
     )
 
 
@@ -203,7 +199,7 @@ class Dialog(QtWidgets.QDialog):
 
     def pick_can(self):
         filters = (
-            ('PEAK PCAN Symbol File', ['sym']),
+            ("PEAK PCAN Symbol File", ["sym"]),
             all_files_filter,
         )
 
@@ -215,7 +211,7 @@ class Dialog(QtWidgets.QDialog):
 
     def pick_hierarchy(self):
         filters = (
-            ('Parameter Hierarchy', ['json']),
+            ("Parameter Hierarchy", ["json"]),
             all_files_filter,
         )
 
@@ -227,7 +223,7 @@ class Dialog(QtWidgets.QDialog):
 
     def pick_tables_c(self):
         filters = (
-            ('Tables C', ['c']),
+            ("Tables C", ["c"]),
             all_files_filter,
         )
 
@@ -239,7 +235,7 @@ class Dialog(QtWidgets.QDialog):
 
     def pick_sunspec_tables_c(self):
         filters = (
-            ('SunSpec Tables C', ['c']),
+            ("SunSpec Tables C", ["c"]),
             all_files_filter,
         )
 
@@ -251,7 +247,7 @@ class Dialog(QtWidgets.QDialog):
 
     def pick_sunspec_bitfields_c(self):
         filters = (
-            ('SunSpec Bitfields C', ['c']),
+            ("SunSpec Bitfields C", ["c"]),
             all_files_filter,
         )
 
@@ -263,7 +259,7 @@ class Dialog(QtWidgets.QDialog):
 
     def pick_spreadsheet(self):
         filters = (
-            ('SunSpec Spreadsheet', ['xls']),
+            ("SunSpec Spreadsheet", ["xls"]),
             all_files_filter,
         )
 
@@ -275,7 +271,7 @@ class Dialog(QtWidgets.QDialog):
 
     def pick_spreadsheet_user(self):
         filters = (
-            ('SunSpec Spreadsheet', ['xls']),
+            ("SunSpec Spreadsheet", ["xls"]),
             all_files_filter,
         )
 
@@ -303,7 +299,7 @@ class Dialog(QtWidgets.QDialog):
 
     def pick_interface_c(self):
         filters = (
-            ('Tables C', ['c']),
+            ("Tables C", ["c"]),
             all_files_filter,
         )
 
@@ -315,7 +311,7 @@ class Dialog(QtWidgets.QDialog):
 
     def pick_smdx(self):
         filters = (
-            ('SunSpec SMDX', ['xml']),
+            ("SunSpec SMDX", ["xml"]),
             all_files_filter,
         )
 
@@ -381,5 +377,5 @@ def main():
     app.exec()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

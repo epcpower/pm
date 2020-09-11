@@ -15,13 +15,13 @@ import epcpm.canmodel
 import epcpm.project
 
 # See file COPYING in this source tree
-__copyright__ = 'Copyright 2017, EPC Power Corp.'
-__license__ = 'GPLv2+'
+__copyright__ = "Copyright 2017, EPC Power Corp."
+__license__ = "GPLv2+"
 
 
 here = pathlib.Path(__file__).parent
 
-with open(here/'project'/'can.json') as f:
+with open(here / "project" / "can.json") as f:
     serialized_sample = f.read()
 
 
@@ -37,10 +37,10 @@ class SampleModelFromFile:
 
     @classmethod
     def build(cls):
-        project = epcpm.project.loadp(here / 'project' / 'project.pmp')
-        can_table, = project.models.can.root.nodes_by_attribute(
-            attribute_value='First Table',
-            attribute_name='name',
+        project = epcpm.project.loadp(here / "project" / "project.pmp")
+        (can_table,) = project.models.can.root.nodes_by_attribute(
+            attribute_value="First Table",
+            attribute_name="name",
         )
         parameter_table = project.models.parameters.node_from_uuid(
             can_table.table_uuid,
@@ -69,7 +69,7 @@ def sample():
 
 
 def test_hex_field():
-    @graham.schemify(tag='test')
+    @graham.schemify(tag="test")
     @attr.s(hash=False)
     class Test:
         field = attr.ib(
@@ -105,7 +105,7 @@ TestAttrsModel = epyqlib.attrsmodel.build_tests(
 class SampleModel:
     root = attr.ib(
         factory=lambda: epcpm.canmodel.Root(
-            uuid='b92665a4-6deb-4faf-8747-3aa20cf0bcf2',
+            uuid="b92665a4-6deb-4faf-8747-3aa20cf0bcf2",
         ),
     )
     model = attr.ib(default=None)
@@ -124,12 +124,12 @@ class SampleModel:
 
     def fill(self):
         self.parameters_message = epcpm.canmodel.MultiplexedMessage(
-            uuid='e5228583-1e7f-4a8a-a529-bbd84b2d0fca',
+            uuid="e5228583-1e7f-4a8a-a529-bbd84b2d0fca",
         )
         self.root.append_child(self.parameters_message)
 
         self.parameters_multiplexer = epcpm.canmodel.Multiplexer(
-            uuid='70a1ab55-09eb-4617-b6a4-19ec821e7dfe',
+            uuid="70a1ab55-09eb-4617-b6a4-19ec821e7dfe",
         )
         self.parameters_message.append_child(self.parameters_multiplexer)
 
@@ -152,10 +152,10 @@ def test_table_update_unlinked():
         epcpm.canmodel.Multiplexer: 24,
     }
 
-    project = epcpm.project.loadp(here/'project'/'project.pmp')
-    can_table, = project.models.can.root.nodes_by_attribute(
-        attribute_value='First Table',
-        attribute_name='name',
+    project = epcpm.project.loadp(here / "project" / "project.pmp")
+    (can_table,) = project.models.can.root.nodes_by_attribute(
+        attribute_value="First Table",
+        attribute_name="name",
     )
     parameter_table = project.models.parameters.node_from_uuid(
         can_table.table_uuid,
@@ -213,16 +213,18 @@ def test_sample_dumps_consistently(sample):
 
 
 def test_add_enumerator_update_table(sample):
-    enumeration, = sample.parameter_root.nodes_by_attribute(
-        attribute_value='Enumeration Two',
-        attribute_name='name',
+    (enumeration,) = sample.parameter_root.nodes_by_attribute(
+        attribute_value="Enumeration Two",
+        attribute_name="name",
     )
 
-    enumeration.append_child(epyqlib.pm.parametermodel.Enumerator(
-        name='ET_New',
-        value=42,
-        uuid='173ba72c-bf2a-42a1-aab6-3e5fc49f10e7',
-    ))
+    enumeration.append_child(
+        epyqlib.pm.parametermodel.Enumerator(
+            name="ET_New",
+            value=42,
+            uuid="173ba72c-bf2a-42a1-aab6-3e5fc49f10e7",
+        )
+    )
 
     sample.parameter_table.update()
     sample.table.update()

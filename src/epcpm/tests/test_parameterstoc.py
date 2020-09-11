@@ -14,14 +14,15 @@ import epcpm.parameterstoc
 
 
 def disabled_test_exploration():
-    path = os.path.join(os.path.dirname(__file__), 'example_parameters.json')
+    path = os.path.join(os.path.dirname(__file__), "example_parameters.json")
 
     runner = click.testing.CliRunner()
     runner.isolated_filesystem()
     result = runner.invoke(
         epcpm.parameterstoc.cli,
         [
-            '--parameters', path,
+            "--parameters",
+            path,
         ],
     )
 
@@ -31,7 +32,7 @@ def disabled_test_exploration():
 
 
 def test_pycparser_exploration_parse():
-    sample = '''
+    sample = """
     typedef int int16_t;
     typedef int uint16_t;
 
@@ -50,7 +51,7 @@ def test_pycparser_exploration_parse():
     typedef struct StructName StructTypedefName;
     
     int16_t array[5];
-    '''
+    """
 
     parser = pycparser.CParser()
     ast = parser.parse(sample)
@@ -65,36 +66,41 @@ def test_pycparser_exploration_parse():
 def test_pycparser_exploration_wrapped():
     top_level = []
 
-    top_level.extend(epcpm.parameterstoc.enum(
-        name='EnumName',
-        enumerators=(
-            ('a', 1),
-            ('b', 2),
-        ),
-    ))
-
-    top_level.extend(epcpm.parameterstoc.struct(
-        name='StructName',
-        member_decls=(
-            epcpm.parameterstoc.Decl(
-                type=epcpm.parameterstoc.Type(
-                    name=name,
-                    type=type,
-                )
-            )
-            for type, name in (
-                ('int16_t', 'a'),
-                ('uint16_t', 'b'),
-            )
+    top_level.extend(
+        epcpm.parameterstoc.enum(
+            name="EnumName",
+            enumerators=(
+                ("a", 1),
+                ("b", 2),
+            ),
         )
-    ))
+    )
+
+    top_level.extend(
+        epcpm.parameterstoc.struct(
+            name="StructName",
+            member_decls=(
+                epcpm.parameterstoc.Decl(
+                    type=epcpm.parameterstoc.Type(
+                        name=name,
+                        type=type,
+                    )
+                )
+                for type, name in (
+                    ("int16_t", "a"),
+                    ("uint16_t", "b"),
+                )
+            ),
+        )
+    )
 
     ast = pycparser.c_ast.FileAST(top_level)
 
     generator = pycparser.c_generator.CGenerator()
 
     s = generator.visit(ast)
-    assert s == textwrap.dedent('''\
+    assert s == textwrap.dedent(
+        """\
     enum EnumName_e
     {
       a = 1,
@@ -107,26 +113,27 @@ def test_pycparser_exploration_wrapped():
       uint16_t b;
     };
     typedef struct StructName_s StructName_t;
-    ''')
+    """
+    )
 
 
 def test_single_layer_group_to_c():
     group = epyqlib.pm.parametermodel.Group(
-        name='Group Name',
+        name="Group Name",
     )
 
     children = [
         epyqlib.pm.parametermodel.Parameter(
-            name='Parameter A',
-            type_name='int16_t',
+            name="Parameter A",
+            type_name="int16_t",
         ),
         epyqlib.pm.parametermodel.Parameter(
-            name='Parameter B',
-            type_name='int16_t',
+            name="Parameter B",
+            type_name="int16_t",
         ),
         epyqlib.pm.parametermodel.Parameter(
-            name='Parameter C',
-            type_name='int16_t',
+            name="Parameter C",
+            type_name="int16_t",
         ),
     ]
 
@@ -139,7 +146,8 @@ def test_single_layer_group_to_c():
     generator = pycparser.c_generator.CGenerator()
     s = generator.visit(ast)
 
-    assert s == textwrap.dedent('''\
+    assert s == textwrap.dedent(
+        """\
         struct GroupName_s
         {
           int16_t parameterA;
@@ -147,22 +155,23 @@ def test_single_layer_group_to_c():
           int16_t parameterC;
         };
         typedef struct GroupName_s GroupName_t;
-        ''')
+        """
+    )
 
 
 def test_nested_group_to_c():
     inner_inner_group = epyqlib.pm.parametermodel.Group(
-        name='Inner Inner Group Name',
+        name="Inner Inner Group Name",
     )
 
     children = [
         epyqlib.pm.parametermodel.Parameter(
-            name='Parameter F',
-            type_name='int16_t',
+            name="Parameter F",
+            type_name="int16_t",
         ),
         epyqlib.pm.parametermodel.Parameter(
-            name='Parameter G',
-            type_name='int16_t',
+            name="Parameter G",
+            type_name="int16_t",
         ),
     ]
 
@@ -170,18 +179,18 @@ def test_nested_group_to_c():
         inner_inner_group.append_child(child)
 
     inner_group = epyqlib.pm.parametermodel.Group(
-        name='Inner Group Name',
+        name="Inner Group Name",
     )
 
     children = [
         epyqlib.pm.parametermodel.Parameter(
-            name='Parameter D',
-            type_name='int16_t',
+            name="Parameter D",
+            type_name="int16_t",
         ),
         inner_inner_group,
         epyqlib.pm.parametermodel.Parameter(
-            name='Parameter E',
-            type_name='int16_t',
+            name="Parameter E",
+            type_name="int16_t",
         ),
     ]
 
@@ -189,22 +198,22 @@ def test_nested_group_to_c():
         inner_group.append_child(child)
 
     outer_group = epyqlib.pm.parametermodel.Group(
-        name='Outer Group Name',
+        name="Outer Group Name",
     )
 
     children = [
         epyqlib.pm.parametermodel.Parameter(
-            name='Parameter A',
-            type_name='int16_t',
+            name="Parameter A",
+            type_name="int16_t",
         ),
         inner_group,
         epyqlib.pm.parametermodel.Parameter(
-            name='Parameter B',
-            type_name='int16_t',
+            name="Parameter B",
+            type_name="int16_t",
         ),
         epyqlib.pm.parametermodel.Parameter(
-            name='Parameter C',
-            type_name='int16_t',
+            name="Parameter C",
+            type_name="int16_t",
         ),
     ]
 
@@ -217,7 +226,8 @@ def test_nested_group_to_c():
     generator = pycparser.c_generator.CGenerator()
     s = generator.visit(ast)
 
-    assert s == textwrap.dedent('''\
+    assert s == textwrap.dedent(
+        """\
         struct InnerInnerGroupName_s
         {
           int16_t parameterF;
@@ -239,49 +249,50 @@ def test_nested_group_to_c():
           int16_t parameterC;
         };
         typedef struct OuterGroupName_s OuterGroupName_t;
-        ''')
+        """
+    )
 
 
 def test_datalogger_a():
-    data_logger = epyqlib.pm.parametermodel.Group(name='Data Logger')
+    data_logger = epyqlib.pm.parametermodel.Group(name="Data Logger")
 
-    chunks_array = epyqlib.pm.parametermodel.Array(name='Chunks')
+    chunks_array = epyqlib.pm.parametermodel.Array(name="Chunks")
     data_logger.append_child(chunks_array)
 
-    chunk = epyqlib.pm.parametermodel.Group(type_name='Chunk')
+    chunk = epyqlib.pm.parametermodel.Group(type_name="Chunk")
     chunks_array.append_child(chunk)
     chunks_array.length = 4
-    chunks_array.children[0].name = 'First'
-    chunks_array.children[1].name = 'Second'
-    chunks_array.children[2].name = 'Third'
-    chunks_array.children[3].name = 'Fourth'
+    chunks_array.children[0].name = "First"
+    chunks_array.children[1].name = "Second"
+    chunks_array.children[2].name = "Third"
+    chunks_array.children[3].name = "Fourth"
 
     address = epyqlib.pm.parametermodel.Parameter(
-        name='Address',
+        name="Address",
         default=0,
-        type_name='int16_t',
+        type_name="int16_t",
     )
     chunk.append_child(address)
     bytes_ = epyqlib.pm.parametermodel.Parameter(
-        name='Bytes',
+        name="Bytes",
         default=0,
-        type_name='int16_t',
+        type_name="int16_t",
     )
     chunk.append_child(bytes_)
 
     post_trigger_duration = epyqlib.pm.parametermodel.Parameter(
-        name='Post Trigger Duration',
+        name="Post Trigger Duration",
         default=500,
-        type_name='int16_t',
+        type_name="int16_t",
     )
     data_logger.append_child(post_trigger_duration)
 
-    group = epyqlib.pm.parametermodel.Group(name='Group')
+    group = epyqlib.pm.parametermodel.Group(name="Group")
     data_logger.append_child(group)
 
     param = epyqlib.pm.parametermodel.Parameter(
-        name='Param',
-        type_name='int16_t',
+        name="Param",
+        type_name="int16_t",
     )
     group.append_child(param)
 
@@ -291,7 +302,8 @@ def test_datalogger_a():
     generator = pycparser.c_generator.CGenerator()
     s = generator.visit(ast)
 
-    assert s == textwrap.dedent('''\
+    assert s == textwrap.dedent(
+        """\
     struct Chunk_s
     {
       int16_t address;
@@ -320,9 +332,11 @@ def test_datalogger_a():
       Group_t group;
     };
     typedef struct DataLogger_s DataLogger_t;
-    ''')
+    """
+    )
 
-data_logger_structures = '''\
+
+data_logger_structures = """\
 typedef struct
 {
     void*	address;
@@ -350,14 +364,14 @@ typedef struct
     .postTriggerDuration_ms = 500, \
     __VA_ARGS__ \
 }
-'''
+"""
 
 
 def test_basic_parameter_array():
-    array = epyqlib.pm.parametermodel.Array(name='Array Name')
+    array = epyqlib.pm.parametermodel.Array(name="Array Name")
     parameter = epyqlib.pm.parametermodel.Parameter(
-        name='Parameter Name',
-        type_name='int16_t',
+        name="Parameter Name",
+        type_name="int16_t",
     )
 
     array.append_child(parameter)
@@ -372,7 +386,8 @@ def test_basic_parameter_array():
     generator = pycparser.c_generator.CGenerator()
     s = generator.visit(ast)
 
-    assert s == textwrap.dedent('''\
+    assert s == textwrap.dedent(
+        """\
     enum ArrayName_e
     {
       ArrayName_ParameterName = 0,
@@ -384,15 +399,16 @@ def test_basic_parameter_array():
     };
     typedef enum ArrayName_e ArrayName_et;
     typedef int16_t ArrayName_t[ArrayName_Count];
-    ''')
+    """
+    )
 
 
 def test_grouped_parameter_array():
-    group = epyqlib.pm.parametermodel.Group(name='Group Name')
-    array = epyqlib.pm.parametermodel.Array(name='Array Name')
+    group = epyqlib.pm.parametermodel.Group(name="Group Name")
+    array = epyqlib.pm.parametermodel.Array(name="Array Name")
     parameter = epyqlib.pm.parametermodel.Parameter(
-        name='Parameter Name',
-        type_name='int16_t',
+        name="Parameter Name",
+        type_name="int16_t",
     )
 
     group.append_child(array)
@@ -408,7 +424,8 @@ def test_grouped_parameter_array():
     generator = pycparser.c_generator.CGenerator()
     s = generator.visit(ast)
 
-    assert s == textwrap.dedent('''\
+    assert s == textwrap.dedent(
+        """\
     enum ArrayName_e
     {
       ArrayName_ParameterName = 0,
@@ -425,15 +442,16 @@ def test_grouped_parameter_array():
       ArrayName_t arrayName;
     };
     typedef struct GroupName_s GroupName_t;
-    ''')
+    """
+    )
 
 
 def test_grouped_parameter_array_no_enum():
-    array = epyqlib.pm.parametermodel.Array(name='Array Name')
+    array = epyqlib.pm.parametermodel.Array(name="Array Name")
     array.named_enumerators = False
     parameter = epyqlib.pm.parametermodel.Parameter(
-        name='Parameter Name',
-        type_name='int16_t',
+        name="Parameter Name",
+        type_name="int16_t",
     )
 
     array.append_child(parameter)
@@ -448,48 +466,50 @@ def test_grouped_parameter_array_no_enum():
     generator = pycparser.c_generator.CGenerator()
     s = generator.visit(ast)
 
-    assert s == textwrap.dedent('''\
+    assert s == textwrap.dedent(
+        """\
     enum ArrayName_e
     {
       ArrayName_Count = 5
     };
     typedef enum ArrayName_e ArrayName_et;
     typedef int16_t ArrayName_t[ArrayName_Count];
-    ''')
+    """
+    )
 
 
 def test_line_monitor_params():
     line_monitoring = epyqlib.pm.parametermodel.Group(
-        name='Line Monitoring',
+        name="Line Monitoring",
     )
 
     frequency_limits = epyqlib.pm.parametermodel.Array(
-        name='Frequency Limits',
+        name="Frequency Limits",
     )
     line_monitoring.append_child(frequency_limits)
 
     frequency_limit = epyqlib.pm.parametermodel.Group(
-        name='First',
-        type_name='Frequency Limit',
+        name="First",
+        type_name="Frequency Limit",
     )
     frequency_limits.append_child(frequency_limit)
 
     frequency = epyqlib.pm.parametermodel.Parameter(
-        name='Frequency',
-        type_name='_iq',
+        name="Frequency",
+        type_name="_iq",
     )
     frequency_limit.append_child(frequency)
 
     clearing_time = epyqlib.pm.parametermodel.Parameter(
-        name='Clearing Time',
-        type_name='_iq',
+        name="Clearing Time",
+        type_name="_iq",
     )
     frequency_limit.append_child(clearing_time)
 
     frequency_limits.length = 4
-    frequency_limits.children[1].name = 'Second'
-    frequency_limits.children[2].name = 'Third'
-    frequency_limits.children[3].name = 'Fourth'
+    frequency_limits.children[1].name = "Second"
+    frequency_limits.children[2].name = "Third"
+    frequency_limits.children[3].name = "Fourth"
 
     builder = epcpm.parameterstoc.builders.wrap(line_monitoring)
 
@@ -497,7 +517,8 @@ def test_line_monitor_params():
     generator = pycparser.c_generator.CGenerator()
     s = generator.visit(ast)
 
-    assert s == textwrap.dedent('''\
+    assert s == textwrap.dedent(
+        """\
     struct FrequencyLimit_s
     {
       _iq frequency;
@@ -519,14 +540,15 @@ def test_line_monitor_params():
       FrequencyLimits_t frequencyLimits;
     };
     typedef struct LineMonitoring_s LineMonitoring_t;
-    ''')
+    """
+    )
 
 
 def test_root():
     root = epyqlib.pm.parametermodel.Root()
-    group = epyqlib.pm.parametermodel.Group(name='Group')
-    p1 = epyqlib.pm.parametermodel.Parameter(name='red', type_name='RedType')
-    p2 = epyqlib.pm.parametermodel.Parameter(name='blue', type_name='BlueType')
+    group = epyqlib.pm.parametermodel.Group(name="Group")
+    p1 = epyqlib.pm.parametermodel.Parameter(name="red", type_name="RedType")
+    p2 = epyqlib.pm.parametermodel.Parameter(name="blue", type_name="BlueType")
 
     root.append_child(group)
     group.append_child(p1)
@@ -538,18 +560,22 @@ def test_root():
     generator = pycparser.c_generator.CGenerator()
     s = generator.visit(ast)
 
-    assert s == textwrap.dedent('''\
+    assert s == textwrap.dedent(
+        """\
     struct Group_s
     {
       RedType red;
     };
     typedef struct Group_s Group_t;
-    ''')
+    """
+    )
 
     ast = pycparser.c_ast.FileAST(builder.instantiation())
     s = generator.visit(ast)
 
-    assert s == textwrap.dedent('''\
+    assert s == textwrap.dedent(
+        """\
     Group_t group;
     BlueType blue;
-    ''')
+    """
+    )

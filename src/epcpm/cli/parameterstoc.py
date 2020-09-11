@@ -10,8 +10,8 @@ import epcpm.parameterstoc
 
 
 @click.command()
-@click.option('--parameters', type=click.File(), required=True)
-@click.option('--declaration/--instantiation', default=True)
+@click.option("--parameters", type=click.File(), required=True)
+@click.option("--declaration/--instantiation", default=True)
 def cli(parameters, declaration):
     root_schema = graham.schema(epyqlib.pm.parametermodel.Root)
     root = root_schema.loads(parameters.read()).data

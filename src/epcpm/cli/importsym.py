@@ -21,25 +21,25 @@ def relative_path(target, reference):
 
 
 @click.command()
-@click.option('--sym', type=click.File('rb'), required=True)
-@click.option('--hierarchy', type=click.File(), required=True)
-@click.option('--project', type=click.File('w'), required=True)
-@click.option('--parameters', type=click.File('w'), required=True)
-@click.option('--can', type=click.File('w'), required=True)
-@click.option('--sunspec', type=click.File('w'), required=True)
-@click.option('--epyq-value-set', type=click.File('w'))
-@click.option('--add-tables/--no-add-tables', default=False)
-@click.option('--add-sunspec-types/--no-add-sunspec-types', default=False)
+@click.option("--sym", type=click.File("rb"), required=True)
+@click.option("--hierarchy", type=click.File(), required=True)
+@click.option("--project", type=click.File("w"), required=True)
+@click.option("--parameters", type=click.File("w"), required=True)
+@click.option("--can", type=click.File("w"), required=True)
+@click.option("--sunspec", type=click.File("w"), required=True)
+@click.option("--epyq-value-set", type=click.File("w"))
+@click.option("--add-tables/--no-add-tables", default=False)
+@click.option("--add-sunspec-types/--no-add-sunspec-types", default=False)
 def cli(
-        sym,
-        hierarchy,
-        project,
-        parameters,
-        can,
-        sunspec,
-        epyq_value_set,
-        add_tables,
-        add_sunspec_types,
+    sym,
+    hierarchy,
+    project,
+    parameters,
+    can,
+    sunspec,
+    epyq_value_set,
+    add_tables,
+    add_sunspec_types,
 ):
     parameters_root, can_root, sunspec_root = epcpm.symtoproject.load_can_file(
         can_file=sym,
@@ -74,7 +74,7 @@ def cli(
 
     if add_sunspec_types:
         parameter_root = project_model.models.parameters.root
-        enumerations = parameter_root.child_by_name('Enumerations')
+        enumerations = parameter_root.child_by_name("Enumerations")
         enumerations.append_child(
             epcpm.sunspecmodel.build_sunspec_types_enumeration(),
         )
@@ -97,10 +97,10 @@ def cli(
             parameter_model=project_model.models.parameters,
         )
 
-        parameters_root, = [
+        (parameters_root,) = [
             node
             for node in value_set.parameter_model.root.children
-            if node.name == 'Parameters'
+            if node.name == "Parameters"
         ]
 
         epyqlib.pm.valuesetmodel.copy_parameter_data(

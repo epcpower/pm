@@ -31,14 +31,16 @@ class Root:
         for member in self.wrapped.children:
             builder = builders.wrap(member)
 
-            decls.append(Decl(
-                type=Type(
-                    name=epyqlib.utils.general.spaced_to_lower_camel(
-                        member.name,
-                    ),
-                    type=builder.type_name(),
+            decls.append(
+                Decl(
+                    type=Type(
+                        name=epyqlib.utils.general.spaced_to_lower_camel(
+                            member.name,
+                        ),
+                        type=builder.type_name(),
+                    )
                 )
-            ))
+            )
 
         return decls
 
@@ -55,7 +57,7 @@ class Parameter:
         type_name = self.wrapped.type_name
 
         if type_name is None:
-            return 'void'
+            return "void"
 
         return type_name
 
@@ -72,14 +74,16 @@ class Group:
         for member in self.wrapped.children:
             builder = builders.wrap(member)
 
-            member_decls.append(Decl(
-                type=Type(
-                    name=epyqlib.utils.general.spaced_to_lower_camel(
-                        member.name,
-                    ),
-                    type=builder.type_name(),
+            member_decls.append(
+                Decl(
+                    type=Type(
+                        name=epyqlib.utils.general.spaced_to_lower_camel(
+                            member.name,
+                        ),
+                        type=builder.type_name(),
+                    )
                 )
-            ))
+            )
 
             definitions.extend(builder.definition())
 
@@ -95,7 +99,7 @@ class Group:
         name = self.wrapped.type_name
         if name is None:
             name = self.wrapped.name
-        return epyqlib.utils.general.spaced_to_upper_camel(name) + '_t'
+        return epyqlib.utils.general.spaced_to_upper_camel(name) + "_t"
 
 
 @builders(epyqlib.pm.parametermodel.Array)
@@ -109,18 +113,20 @@ class Array:
 
         values = []
         if self.wrapped.named_enumerators:
-            values.extend(enumerate(
-                epyqlib.utils.general.spaced_to_upper_camel(child.name)
-                for child in self.wrapped.children
-            ))
+            values.extend(
+                enumerate(
+                    epyqlib.utils.general.spaced_to_upper_camel(child.name)
+                    for child in self.wrapped.children
+                )
+            )
 
-        values.append((len(self.wrapped.children), 'Count'))
+        values.append((len(self.wrapped.children), "Count"))
 
         enum_definitions = enum(
             name=self.base_type_name(),
             enumerators=[
                 (
-                    '{base}_{name}'.format(
+                    "{base}_{name}".format(
                         base=self.base_type_name(),
                         name=name,
                     ),
@@ -146,11 +152,11 @@ class Array:
         return epyqlib.utils.general.spaced_to_upper_camel(self.wrapped.name)
 
     def type_name(self):
-        return self.base_type_name() + '_t'
+        return self.base_type_name() + "_t"
 
 
 def int_literal(value):
-    return pycparser.c_ast.Constant(type='int', value=str(value))
+    return pycparser.c_ast.Constant(type="int", value=str(value))
 
 
 def Type(name, type):
@@ -180,16 +186,16 @@ ArrayDecl = functools.partial(
 
 TypeDecl = functools.partial(
     pycparser.c_ast.TypeDecl,
-    declname='',
+    declname="",
     quals=[],
 )
 
 
 def typedef(target, name):
     return pycparser.c_ast.Typedef(
-        name='',
+        name="",
         quals=[],
-        storage=['typedef'],
+        storage=["typedef"],
         type=pycparser.c_ast.TypeDecl(
             declname=name,
             quals=[],
@@ -202,7 +208,7 @@ def array_typedef(target, name, length):
     return pycparser.c_ast.Typedef(
         name=name,
         quals=[],
-        storage=['typedef'],
+        storage=["typedef"],
         type=ArrayDecl(
             dim=length,
             type=TypeDecl(
@@ -216,26 +222,22 @@ def array_typedef(target, name, length):
 
 
 def enum(name, enumerators=()):
-    enum_name = '{name}_e'.format(name=name)
-    typedef_name = '{name}_et'.format(name=name)
+    enum_name = "{name}_e".format(name=name)
+    typedef_name = "{name}_et".format(name=name)
 
-    enumerators = pycparser.c_ast.EnumeratorList(enumerators=tuple(
-        pycparser.c_ast.Enumerator(name=name, value=int_literal(value))
-        for name, value in enumerators
-    ))
-
-    enumeration = pycparser.c_ast.Enum(
-        name=enum_name,
-        values=enumerators
+    enumerators = pycparser.c_ast.EnumeratorList(
+        enumerators=tuple(
+            pycparser.c_ast.Enumerator(name=name, value=int_literal(value))
+            for name, value in enumerators
+        )
     )
+
+    enumeration = pycparser.c_ast.Enum(name=enum_name, values=enumerators)
 
     declaration = Decl(type=enumeration)
 
     typedef_ = typedef(
-        target=pycparser.c_ast.Enum(
-            name=enum_name,
-            values=None
-        ),
+        target=pycparser.c_ast.Enum(name=enum_name, values=None),
         name=typedef_name,
     )
 
@@ -243,8 +245,8 @@ def enum(name, enumerators=()):
 
 
 def struct(name, member_decls=()):
-    struct_name = f'{name}_s'
-    typedef_name = f'{name}_t'
+    struct_name = f"{name}_s"
+    typedef_name = f"{name}_t"
 
     struct = pycparser.c_ast.Struct(
         name=struct_name,
@@ -278,5 +280,5 @@ def array(type, name, length):
         type=ArrayDecl(
             type=Type(name, type),
             dim=int_literal(length),
-        )
+        ),
     )

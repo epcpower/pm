@@ -8,7 +8,7 @@ import epcpm.cli.parameterstoc
 
 
 parameters_path = (
-    pathlib.Path(__file__).parents[0] / 'test_parameterstoc_parameters.json'
+    pathlib.Path(__file__).parents[0] / "test_parameterstoc_parameters.json"
 )
 
 
@@ -17,18 +17,21 @@ def test_declaration():
     result = runner.invoke(
         epcpm.cli.parameterstoc.cli,
         [
-            '--parameters', parameters_path,
+            "--parameters",
+            parameters_path,
         ],
         catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert result.output == textwrap.dedent('''\
+    assert result.output == textwrap.dedent(
+        """\
     struct GreenType_s
     {
       RedType red;
     };
     typedef struct GreenType_s GreenType_t;
-    ''')
+    """
+    )
 
 
 def test_instantiation():
@@ -36,13 +39,16 @@ def test_instantiation():
     result = runner.invoke(
         epcpm.cli.parameterstoc.cli,
         [
-            '--parameters', parameters_path,
-            '--instantiation',
+            "--parameters",
+            parameters_path,
+            "--instantiation",
         ],
         catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert result.output == textwrap.dedent('''\
+    assert result.output == textwrap.dedent(
+        """\
     GreenType_t green;
     BlueType blue;
-    ''')
+    """
+    )

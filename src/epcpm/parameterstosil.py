@@ -14,10 +14,10 @@ builders = epyqlib.utils.general.TypeMap()
 
 # TODO: get rid of this or get it somewhere else (pm exclude-from-SIL bool?)
 def ignore_item(item):
-    if 'sunspec' in item.variable.casefold():
+    if "sunspec" in item.variable.casefold():
         return True
 
-    if 'unused placeholder' in item.variable:
+    if "unused placeholder" in item.variable:
         return True
 
     return False
@@ -47,19 +47,19 @@ def export(c_path, h_path, parameters_model):
     built, items = builder.gen()
 
     template_context = {
-        'item_count': len(items),
-        'initializers': epcpm.c.format_nested_lists(built.c).rstrip(),
-        'declarations': epcpm.c.format_nested_lists(built.h).rstrip(),
+        "item_count": len(items),
+        "initializers": epcpm.c.format_nested_lists(built.c).rstrip(),
+        "declarations": epcpm.c.format_nested_lists(built.h).rstrip(),
     }
 
     epcpm.c.render(
-        source=c_path.with_suffix(f'{c_path.suffix}_pm'),
+        source=c_path.with_suffix(f"{c_path.suffix}_pm"),
         destination=c_path,
         context=template_context,
     )
 
     epcpm.c.render(
-        source=h_path.with_suffix(f'{h_path.suffix}_pm'),
+        source=h_path.with_suffix(f"{h_path.suffix}_pm"),
         destination=h_path,
         context=template_context,
     )
@@ -69,19 +69,17 @@ def collect_items(parameters_root):
     all_items = []
 
     parameters = next(
-        node
-        for node in parameters_root.children
-        if node.name == 'Parameters'
+        node for node in parameters_root.children if node.name == "Parameters"
     )
 
     for child in parameters.children:
         if not isinstance(
-                child,
-                (
-                        epyqlib.pm.parametermodel.Group,
-                        epyqlib.pm.parametermodel.Parameter,
-                        epyqlib.pm.parametermodel.Table,
-                ),
+            child,
+            (
+                epyqlib.pm.parametermodel.Group,
+                epyqlib.pm.parametermodel.Parameter,
+                epyqlib.pm.parametermodel.Table,
+            ),
         ):
             continue
 
@@ -114,32 +112,36 @@ class Root:
 
         everything = CHContents()
 
-        everything.c.extend([
+        everything.c.extend(
+            [
                 contents.c,
-        ])
+            ]
+        )
 
-        everything.h.extend([
-            # 'typedef enum SetterTypes {',
-            # [
-            #     f'setter_{type},'
-            #     for type in types
-            # ],
-            # '} SetterTypes;',
-            # '',
-            # *[
-            #     f'typedef void (*SetterPointer_{type})({type});'
-            #     for type in types
-            # ],
-            # '',
-            # 'typedef union Setter {',
-            # [
-            #     f'SetterPointer_{type} {type}_;'
-            #     for type in types
-            # ],
-            # '} Setter;',
-            # '',
-            f'extern Item SIL_interfaceItems[{len(items)}];',
-        ])
+        everything.h.extend(
+            [
+                # 'typedef enum SetterTypes {',
+                # [
+                #     f'setter_{type},'
+                #     for type in types
+                # ],
+                # '} SetterTypes;',
+                # '',
+                # *[
+                #     f'typedef void (*SetterPointer_{type})({type});'
+                #     for type in types
+                # ],
+                # '',
+                # 'typedef union Setter {',
+                # [
+                #     f'SetterPointer_{type} {type}_;'
+                #     for type in types
+                # ],
+                # '} Setter;',
+                # '',
+                f"extern Item SIL_interfaceItems[{len(items)}];",
+            ]
+        )
 
         return everything, items
 
@@ -157,12 +159,12 @@ class Group:
 
         for child in self.wrapped.children:
             if not isinstance(
-                    child,
-                    (
-                        epyqlib.pm.parametermodel.Group,
-                        epyqlib.pm.parametermodel.Parameter,
-                        epyqlib.pm.parametermodel.Table,
-                    ),
+                child,
+                (
+                    epyqlib.pm.parametermodel.Group,
+                    epyqlib.pm.parametermodel.Parameter,
+                    epyqlib.pm.parametermodel.Table,
+                ),
             ):
                 continue
 
@@ -196,17 +198,17 @@ class Item:
         initializers = self.create_subinitializers()
 
         if index is not None:
-            index_text = f'[{index}] = '
+            index_text = f"[{index}] = "
         else:
-            index_text = ''
+            index_text = ""
 
-        path = ' > '.join(self.path)
-        path_comment = f' // {path}'
+        path = " > ".join(self.path)
+        path_comment = f" // {path}"
 
         item_initializer = [
-            f'{index_text}{{{path_comment}',
+            f"{index_text}{{{path_comment}",
             initializers,
-            '},',
+            "},",
         ]
 
         return item_initializer
@@ -216,18 +218,18 @@ class Item:
             table_info_initializer = []
         else:
             table_info_initializer = self.table_info.create_initializer(
-                designator='.tableInfo',
+                designator=".tableInfo",
             )
 
-        is_table = 'true' if self.is_table else 'false'
+        is_table = "true" if self.is_table else "false"
 
         initializers = [
             f'.uuid = "{self.uuid}",',
-            f'.setterType = setter_{self.type},',
-            f'.setter = {{ .{self.type}_ = {self.on_write} }},',
-            f'.variable = {{ .{self.type}_ = {self.variable} }},',
-            f'.internalScale = {self.internal_scale},',
-            f'.isTable = {is_table},',
+            f".setterType = setter_{self.type},",
+            f".setter = {{ .{self.type}_ = {self.on_write} }},",
+            f".variable = {{ .{self.type}_ = {self.variable} }},",
+            f".internalScale = {self.internal_scale},",
+            f".isTable = {is_table},",
             *table_info_initializer,
         ]
 
@@ -247,14 +249,14 @@ class TableInfo:
         initializers = self.create_subinitializers()
 
         if designator is not None:
-            designator_text = f'{designator} = '
+            designator_text = f"{designator} = "
         else:
-            designator_text = ''
+            designator_text = ""
 
         item_initializer = [
-            f'{designator_text}{{',
+            f"{designator_text}{{",
             initializers,
-            '},',
+            "},",
         ]
 
         return item_initializer
@@ -263,14 +265,16 @@ class TableInfo:
         initializers = []
 
         if self.zone is not None:
-            initializers.append(f'.zone = {self.zone},')
+            initializers.append(f".zone = {self.zone},")
 
-        initializers.extend([
-            f'.curve = {self.curve},',
-            f'.index = {self.index},',
-            # TODO: ugh, again with tables being all the same type internally
-            f'.setter = {{ .int16_t_ = {self.setter} }},',
-        ])
+        initializers.extend(
+            [
+                f".curve = {self.curve},",
+                f".index = {self.index},",
+                # TODO: ugh, again with tables being all the same type internally
+                f".setter = {{ .int16_t_ = {self.setter} }},",
+            ]
+        )
 
         return initializers
 
@@ -286,28 +290,26 @@ class Parameter:
     def gen(self):
         parameter = self.wrapped
 
-        supported_item_type = (
-            parameter.uses_interface_item()
-        )
+        supported_item_type = parameter.uses_interface_item()
 
         if not supported_item_type:
             return []
 
-        if parameter.internal_type == 'void*':
+        if parameter.internal_type == "void*":
             return []
 
-        if 'txRate' in parameter.name:
+        if "txRate" in parameter.name:
             return []
 
         if parameter.setter_function is None:
-            on_write = 'NULL'
+            on_write = "NULL"
         else:
-            on_write = f'&{parameter.setter_function}'
+            on_write = f"&{parameter.setter_function}"
 
         if parameter.internal_variable is None:
-            variable = 'NULL'
+            variable = "NULL"
         else:
-            variable = f'&{parameter.internal_variable}'
+            variable = f"&{parameter.internal_variable}"
 
         item = Item(
             uuid=parameter.uuid,
@@ -326,10 +328,10 @@ class Parameter:
 
 # TODO: CAMPid 68945967541316743769675426795146379678431
 def breakdown_nested_array(s):
-    split = re.split(r'\[(.*?)\].', s)
+    split = re.split(r"\[(.*?)\].", s)
 
     array_layers = list(toolz.partition(2, split))
-    remainder, = split[2 * len(array_layers):]
+    (remainder,) = split[2 * len(array_layers) :]
 
     return array_layers, remainder
 
@@ -338,10 +340,10 @@ def breakdown_nested_array(s):
 def get_curve_type(combination_string):
     # TODO: backmatching
     return {
-        'LowRideThrough': 'IEEE1547_CURVE_TYPE_LRT',
-        'HighRideThrough': 'IEEE1547_CURVE_TYPE_HRT',
-        'LowTrip': 'IEEE1547_CURVE_TYPE_LTRIP',
-        'HighTrip': 'IEEE1547_CURVE_TYPE_HTRIP',
+        "LowRideThrough": "IEEE1547_CURVE_TYPE_LRT",
+        "HighRideThrough": "IEEE1547_CURVE_TYPE_HRT",
+        "LowTrip": "IEEE1547_CURVE_TYPE_LTRIP",
+        "HighTrip": "IEEE1547_CURVE_TYPE_HTRIP",
     }.get(combination_string)
 
 
@@ -362,8 +364,8 @@ class NestedArrays:
 
     def index(self, indexes):
         try:
-            return '.'.join(
-                '{layer}[{index}]'.format(
+            return ".".join(
+                "{layer}[{index}]".format(
                     layer=layer,
                     index=index_format.format(**indexes),
                 )
@@ -375,18 +377,18 @@ class NestedArrays:
     def sizeof(self, layers):
         indexed = self.index(indexes={layer: 0 for layer in layers})
 
-        return f'sizeof({indexed})'
+        return f"sizeof({indexed})"
 
     def full(self, indexes):
         variable_base = self.index(indexes)
-        variable = f'{variable_base}.{self.remainder}'
+        variable = f"{variable_base}.{self.remainder}"
 
         return variable
 
 
 # TODO: CAMPid 0795436754762451671643967431
 # TODO: get this from the ...  wherever we have it
-axes = ['x', 'y', 'z']
+axes = ["x", "y", "z"]
 
 
 @builders(epyqlib.pm.parametermodel.Table)
@@ -398,7 +400,7 @@ class Table:
     parameter_uuid_finder = attr.ib()
 
     def gen(self):
-        group, = (
+        (group,) = (
             child
             for child in self.wrapped.children
             if isinstance(child, epyqlib.pm.parametermodel.TableGroupElement)
@@ -506,9 +508,9 @@ class TableArrayElement:
             parameter = array_element.tree_parent.children[0]
 
         indexes = {
-            'curve_type': get_curve_type(''.join(self.layers[:2])),
-            'curve_index': int(self.layers[-2]) - 1,
-            'point_index': int(table_element.name.lstrip('_').lstrip('0')) - 1,
+            "curve_type": get_curve_type("".join(self.layers[:2])),
+            "curve_index": int(self.layers[-2]) - 1,
+            "point_index": int(table_element.name.lstrip("_").lstrip("0")) - 1,
         }
 
         axis = axes[self.table.arrays.index(parameter.tree_parent)]
@@ -516,18 +518,18 @@ class TableArrayElement:
         # This cast covers the fact that all table points are internally
         # int16_t despite some being used as uint16_t.
         # TODO: verify compatible size at least?
-        variable = f'({parameter.internal_type} *) &{variable}'
+        variable = f"({parameter.internal_type} *) &{variable}"
 
         if parameter.setter_function is None:
             # TODO: should Item do this?
-            table_on_write = 'NULL'
+            table_on_write = "NULL"
         else:
             table_on_write = parameter.setter_function.format(upper_axis=axis.upper())
 
         table_info = TableInfo(
-            zone=indexes['curve_type'],
-            curve=indexes['curve_index'],
-            index=indexes['point_index'],
+            zone=indexes["curve_type"],
+            curve=indexes["curve_index"],
+            index=indexes["point_index"],
             setter=table_on_write,
             type=parameter.internal_type,
         )
@@ -537,7 +539,7 @@ class TableArrayElement:
                 uuid=table_element.uuid,
                 variable=variable,
                 type=parameter.internal_type,
-                on_write='NULL',
+                on_write="NULL",
                 internal_scale=parameter.internal_scale_factor,
                 is_table=True,
                 table_info=table_info,
@@ -552,7 +554,7 @@ class TableArrayElement:
 
         parameter = table_element.original
 
-        if parameter.internal_type == 'PackedString':
+        if parameter.internal_type == "PackedString":
             return []
 
         if parameter.internal_variable is None:
@@ -560,11 +562,11 @@ class TableArrayElement:
 
         if parameter.setter_function is None:
             # TODO: i think it's reasonable for Item to handle this?
-            setter_function = 'NULL'
+            setter_function = "NULL"
         else:
-            setter_function = '&' + parameter.setter_function
+            setter_function = "&" + parameter.setter_function
 
-        curve_type = get_curve_type(''.join(self.layers[:2]))
+        curve_type = get_curve_type("".join(self.layers[:2]))
 
         internal_variable = parameter.internal_variable.format(
             curve_type=curve_type,
@@ -573,7 +575,7 @@ class TableArrayElement:
 
         item = Item(
             uuid=table_element.uuid,
-            variable=f'&{internal_variable}',
+            variable=f"&{internal_variable}",
             type=parameter.internal_type,
             on_write=setter_function,
             internal_scale=parameter.internal_scale_factor,

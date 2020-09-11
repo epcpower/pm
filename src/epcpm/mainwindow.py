@@ -33,8 +33,8 @@ import epcpm.mainwindow_ui
 
 
 # See file COPYING in this source tree
-__copyright__ = 'Copyright 2019, EPC Power Corp.'
-__license__ = 'GPLv2+'
+__copyright__ = "Copyright 2019, EPC Power Corp."
+__license__ = "GPLv2+"
 
 
 @attr.s
@@ -50,7 +50,7 @@ class ModelView:
 
 class Window:
     def __init__(self, title, icon_path):
-        logging.debug('Working directory: {}'.format(os.getcwd()))
+        logging.debug("Working directory: {}".format(os.getcwd()))
 
         self.main_window = QtWidgets.QMainWindow()
         self.ui = epcpm.mainwindow_ui.Ui_MainWindow()
@@ -98,43 +98,37 @@ class Window:
 
         self.main_window.setWindowTitle(title)
 
-        logging.debug('Loading icon from: {}'.format(icon_path))
-        self.main_window.setWindowIcon(QtGui.QIcon(str(pathlib.Path(
-            pathlib.Path(__file__).parents[0],
-            icon_path,
-        ))))
+        logging.debug("Loading icon from: {}".format(icon_path))
+        self.main_window.setWindowIcon(
+            QtGui.QIcon(
+                str(
+                    pathlib.Path(
+                        pathlib.Path(__file__).parents[0],
+                        icon_path,
+                    )
+                )
+            )
+        )
 
-        self.project_filters = [
-            ('Parameter Project', ['pmp']),
-            ('All Files', ['*'])
-        ]
+        self.project_filters = [("Parameter Project", ["pmp"]), ("All Files", ["*"])]
 
-        self.data_filters = [
-            ('JSON', ['json']),
-            ('All Files', ['*'])
-        ]
+        self.data_filters = [("JSON", ["json"]), ("All Files", ["*"])]
         self.hierarchy_filters = self.data_filters
 
-        self.can_filters = [
-            ('CAN Symbols', ['sym']),
-            ('All Files', ['*'])
-        ]
+        self.can_filters = [("CAN Symbols", ["sym"]), ("All Files", ["*"])]
 
-        self.smdx_filters = [
-            ('SunSpec SMDX', ['xml']),
-            ('All Files', ['*'])
-        ]
+        self.smdx_filters = [("SunSpec SMDX", ["xml"]), ("All Files", ["*"])]
 
         self.view_models = {}
 
         self.uuid_notifiers = {
-            'can': epcpm.canmodel.ReferencedUuidNotifier(),
-            'sunspec': epcpm.sunspecmodel.ReferencedUuidNotifier(),
-            'check_result': epyqlib.checkresultmodel.ReferencedUuidNotifier(),
+            "can": epcpm.canmodel.ReferencedUuidNotifier(),
+            "sunspec": epcpm.sunspecmodel.ReferencedUuidNotifier(),
+            "check_result": epyqlib.checkresultmodel.ReferencedUuidNotifier(),
         }
-        self.uuid_notifiers['can'].changed.connect(self.can_uuid_changed)
-        self.uuid_notifiers['sunspec'].changed.connect(self.can_uuid_changed)
-        self.uuid_notifiers['check_result'].changed.connect(
+        self.uuid_notifiers["can"].changed.connect(self.can_uuid_changed)
+        self.uuid_notifiers["sunspec"].changed.connect(self.can_uuid_changed)
+        self.uuid_notifiers["check_result"].changed.connect(
             self.check_result_uuid_changed,
         )
 
@@ -148,22 +142,22 @@ class Window:
             (
                 self.ui.parameter_view,
                 self.ui.parameter_search_box,
-                epyqlib.pm.parametermodel.columns.index_of('Name'),
+                epyqlib.pm.parametermodel.columns.index_of("Name"),
             ),
             (
                 self.ui.can_view,
                 self.ui.can_search_box,
-                epcpm.canmodel.columns.index_of('Name'),
+                epcpm.canmodel.columns.index_of("Name"),
             ),
             (
                 self.ui.sunspec_view,
                 self.ui.sunspec_search_box,
-                epcpm.sunspecmodel.columns.index_of('Name'),
+                epcpm.sunspecmodel.columns.index_of("Name"),
             ),
             (
                 self.ui.value_set_view,
                 self.ui.value_set_search_box,
-                epyqlib.pm.valuesetmodel.columns.index_of('Name'),
+                epyqlib.pm.valuesetmodel.columns.index_of("Name"),
             ),
         )
 
@@ -175,10 +169,10 @@ class Window:
         ),
 
     def set_title(self, detail=None):
-        title = 'Parameter Manager v{}'.format(epcpm.__version__)
+        title = "Parameter Manager v{}".format(epcpm.__version__)
 
         if detail is not None:
-            title = ' - '.join((title, detail))
+            title = " - ".join((title, detail))
 
         self.main_window.setWindowTitle(title)
 
@@ -231,19 +225,17 @@ class Window:
         hierarchy_path = epyqlib.utils.qt.file_dialog(
             filters=self.hierarchy_filters,
             parent=self.main_window,
-            caption='Open Parameter Hierarchy',
+            caption="Open Parameter Hierarchy",
         )
 
         if hierarchy_path is None:
             return
 
-        with open(sym_path, 'rb') as sym, open(hierarchy_path) as hierarchy:
-            parameters_root, can_root, sunspec_root = (
-                epcpm.symtoproject.load_can_file(
-                    can_file=sym,
-                    file_type=str(pathlib.Path(sym.name).suffix[1:]),
-                    parameter_hierarchy_file=hierarchy,
-                )
+        with open(sym_path, "rb") as sym, open(hierarchy_path) as hierarchy:
+            parameters_root, can_root, sunspec_root = epcpm.symtoproject.load_can_file(
+                can_file=sym,
+                file_type=str(pathlib.Path(sym.name).suffix[1:]),
+                parameter_hierarchy_file=hierarchy,
             )
 
         project = epcpm.project.Project()
@@ -281,16 +273,16 @@ class Window:
 
         for smdx_path in selected:
             id = int(
-                smdx_path.name.partition('smdx_')[2].rpartition('.xml')[0],
+                smdx_path.name.partition("smdx_")[2].rpartition(".xml")[0],
             )
 
             model = epcpm.smdxtosunspec.import_model(
                 model_id=id,
-                parameter_model=self.view_models['parameters'].model,
+                parameter_model=self.view_models["parameters"].model,
                 paths=[smdx_path.parent],
             )
 
-            self.view_models['sunspec'].model.root.append_child(model)
+            self.view_models["sunspec"].model.root.append_child(model)
 
     def full_import(self):
         dialog = epcpm.importexportdialog.import_dialog()
@@ -303,8 +295,8 @@ class Window:
 
         QtWidgets.QMessageBox.information(
             self.main_window,
-            'Import Complete',
-            'Import complete.',
+            "Import Complete",
+            "Import complete.",
         )
 
     def full_export(self):
@@ -330,8 +322,8 @@ class Window:
 
         QtWidgets.QMessageBox.information(
             self.main_window,
-            'Export Complete',
-            'Export complete.',
+            "Export Complete",
+            "Export complete.",
         )
 
     def open_project(self, filename=None, project=None):
@@ -348,9 +340,7 @@ class Window:
         model_views.parameters = ModelView(
             view=self.ui.parameter_view,
             types=epyqlib.pm.parametermodel.types,
-            extras=collections.OrderedDict((
-                ('Generate code...', self.generate_code),
-            )),
+            extras=collections.OrderedDict((("Generate code...", self.generate_code),)),
         )
 
         model_views.can = ModelView(
@@ -388,9 +378,7 @@ class Window:
 
             self.set_model(name=name, view_model=model_view)
             view.collapseAll()
-            column_count = (
-                model_view.model.model.columnCount(QtCore.QModelIndex())
-            )
+            column_count = model_view.model.model.columnCount(QtCore.QModelIndex())
             for i in range(column_count):
                 view.resizeColumnToContents(i)
 
@@ -400,21 +388,17 @@ class Window:
                 QtWidgets.QHeaderView.ResizeToContents,
             )
 
-            view.setContextMenuPolicy(
-                QtCore.Qt.CustomContextMenu)
-            m = functools.partial(
-                self.context_menu,
-                view_model=model_view
-            )
+            view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+            m = functools.partial(self.context_menu, view_model=model_view)
 
             with contextlib.suppress(TypeError):
                 view.customContextMenuRequested.disconnect()
 
             view.customContextMenuRequested.connect(m)
 
-        self.uuid_notifiers['can'].set_view(self.ui.can_view)
-        self.uuid_notifiers['sunspec'].set_view(self.ui.sunspec_view)
-        self.uuid_notifiers['check_result'].set_view(self.ui.check_result_view)
+        self.uuid_notifiers["can"].set_view(self.ui.can_view)
+        self.uuid_notifiers["sunspec"].set_view(self.ui.sunspec_view)
+        self.uuid_notifiers["check_result"].set_view(self.ui.check_result_view)
 
         return
 
@@ -432,7 +416,7 @@ class Window:
         self.project = project
 
     def new_value_set(self):
-        parameters = self.view_models.get('parameters')
+        parameters = self.view_models.get("parameters")
         if parameters is not None:
             parameters = parameters.model
 
@@ -440,48 +424,48 @@ class Window:
             parameter_model=parameters,
         )
 
-        human_names = QtWidgets.QMessageBox.question(
-            self.main_window,
-            'Humanized Names',
-            'Use humanized names in new value set?',
-            buttons=(
-                QtWidgets.QMessageBox.Yes
-                | QtWidgets.QMessageBox.No
-            ),
-            defaultButton=QtWidgets.QMessageBox.Yes,
-        ) == QtWidgets.QMessageBox.Yes
+        human_names = (
+            QtWidgets.QMessageBox.question(
+                self.main_window,
+                "Humanized Names",
+                "Use humanized names in new value set?",
+                buttons=(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No),
+                defaultButton=QtWidgets.QMessageBox.Yes,
+            )
+            == QtWidgets.QMessageBox.Yes
+        )
 
-        only_parameters = QtWidgets.QMessageBox.question(
-            self.main_window,
-            'Only Parameters',
-            'Only include parameters group in new value set?',
-            buttons=(
-                QtWidgets.QMessageBox.Yes
-                | QtWidgets.QMessageBox.No
-            ),
-            defaultButton=QtWidgets.QMessageBox.No,
-        ) == QtWidgets.QMessageBox.Yes
+        only_parameters = (
+            QtWidgets.QMessageBox.question(
+                self.main_window,
+                "Only Parameters",
+                "Only include parameters group in new value set?",
+                buttons=(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No),
+                defaultButton=QtWidgets.QMessageBox.No,
+            )
+            == QtWidgets.QMessageBox.Yes
+        )
 
-        calculate_unspecified_min_max = QtWidgets.QMessageBox.question(
-            self.main_window,
-            'Calculate Unspecified',
-            (
-                'Calculate unspecified minimum And maximum values from '
-                'symbol ranges?'
-            ),
-            buttons=(
-                QtWidgets.QMessageBox.Yes
-                | QtWidgets.QMessageBox.No
-            ),
-            defaultButton=QtWidgets.QMessageBox.No,
-        ) == QtWidgets.QMessageBox.Yes
+        calculate_unspecified_min_max = (
+            QtWidgets.QMessageBox.question(
+                self.main_window,
+                "Calculate Unspecified",
+                (
+                    "Calculate unspecified minimum And maximum values from "
+                    "symbol ranges?"
+                ),
+                buttons=(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No),
+                defaultButton=QtWidgets.QMessageBox.No,
+            )
+            == QtWidgets.QMessageBox.Yes
+        )
 
         base_node = None
         if only_parameters:
-            base_node, = [
+            (base_node,) = [
                 node
                 for node in value_set.parameter_model.root.children
-                if node.name == 'Parameters'
+                if node.name == "Parameters"
             ]
 
         epyqlib.pm.valuesetmodel.copy_parameter_data(
@@ -489,7 +473,7 @@ class Window:
             human_names=human_names,
             base_node=base_node,
             calculate_unspecified_min_max=calculate_unspecified_min_max,
-            can_root=self.view_models.get('can').model.root,
+            can_root=self.view_models.get("can").model.root,
         )
 
         self.set_active_value_set(value_set)
@@ -512,7 +496,7 @@ class Window:
         view.setDragEnabled(True)
         view.setAcceptDrops(True)
 
-        self.set_model(name='value_set', view_model=model_view)
+        self.set_model(name="value_set", view_model=model_view)
         view.expandAll()
 
     def open_value_set_from_dialog(self):
@@ -563,17 +547,16 @@ class Window:
         # self.check_view.show()
 
         drop_source_model_names = [
-            'parameters',
-            'can',
-            'sunspec',
+            "parameters",
+            "can",
+            "sunspec",
         ]
 
         model = epyqlib.attrsmodel.Model(
             root=root,
             columns=epyqlib.checkresultmodel.columns,
             drop_sources=[
-                self.view_models[name].model
-                for name in drop_source_model_names
+                self.view_models[name].model for name in drop_source_model_names
             ],
         )
         self.set_active_check_result(model)
@@ -595,7 +578,7 @@ class Window:
         view.setDragEnabled(False)
         view.setAcceptDrops(False)
 
-        self.set_model(name='check_result', view_model=model_view)
+        self.set_model(name="check_result", view_model=model_view)
         view.expandAll()
 
     def context_menu(self, position, view_model):
@@ -611,27 +594,27 @@ class Window:
 
         node_type = type(node)
         type_label = menu.addAction(
-            '{}.{}'.format(node_type.__module__, node_type.__name__),
+            "{}.{}".format(node_type.__module__, node_type.__name__),
         )
         type_label.setDisabled(True)
 
         menu.addSeparator()
 
-        add_submenu = menu.addMenu('Add')
+        add_submenu = menu.addMenu("Add")
 
         addable_types = node.addable_types()
         actions = {
-            add_submenu.addAction('Add {}'.format(name)): t
+            add_submenu.addAction("Add {}".format(name)): t
             for name, t in addable_types.items()
         }
         add_submenu.setDisabled(len(actions) == 0)
 
-        update = menu.addAction('Update')
-        update.setEnabled(hasattr(node, 'update'))
+        update = menu.addAction("Update")
+        update.setEnabled(hasattr(node, "update"))
 
         menu.addSeparator()
 
-        delete = menu.addAction('&Delete')
+        delete = menu.addAction("&Delete")
         delete.setEnabled(node.can_delete())
 
         menu.addSeparator()
@@ -644,17 +627,15 @@ class Window:
         if len(extra_actions) > 0:
             menu.addSeparator()
 
-        expand_tree = menu.addAction('Expand Tree')
+        expand_tree = menu.addAction("Expand Tree")
         expand_tree.setEnabled(index_is_valid)
-        expand_all = menu.addAction('Expand All')
+        expand_all = menu.addAction("Expand All")
         menu.addSeparator()
-        collapse_tree = menu.addAction('Collapse Tree')
+        collapse_tree = menu.addAction("Collapse Tree")
         collapse_tree.setEnabled(index_is_valid)
-        collapse_all = menu.addAction('Collapse All')
+        collapse_all = menu.addAction("Collapse All")
 
-        action = menu.exec(
-            view.viewport().mapToGlobal(position)
-        )
+        action = menu.exec(view.viewport().mapToGlobal(position))
 
         if action is not None:
             extra = extra_actions.get(action)
@@ -704,26 +685,23 @@ class Window:
         )
 
     def generate_symbol_file(self):
-        finder = self.view_models['can'].model.node_from_uuid
+        finder = self.view_models["can"].model.node_from_uuid
         access_levels = self.project.models.parameters.list_selection_roots[
-            'access level'
+            "access level"
         ]
         builder = epcpm.cantosym.builders.wrap(
-            wrapped=self.view_models['can'].model.root,
+            wrapped=self.view_models["can"].model.root,
             access_levels=access_levels,
             parameter_uuid_finder=finder,
-            parameter_model=self.view_models['parameters'].model,
+            parameter_model=self.view_models["parameters"].model,
         )
 
         epyqlib.utils.qt.dialog(
             parent=self.main_window,
             message=builder.gen(),
             modal=False,
-            save_filters=(
-                ('CAN Symbols', ['sym']),
-                ('All Files', ['*'])
-            ),
-            save_caption='Save CAN Symbols',
+            save_filters=(("CAN Symbols", ["sym"]), ("All Files", ["*"])),
+            save_caption="Save CAN Symbols",
         )
 
     def selection_changed(self, selected, deselected):
@@ -731,7 +709,7 @@ class Window:
 
     # TODO: CAMPid 0795409054128050124650546086
     def can_uuid_changed(self, uuid):
-        view_model = self.view_models['parameters']
+        view_model = self.view_models["parameters"]
         model = view_model.model
         view = view_model.view
 
@@ -758,7 +736,7 @@ class Window:
 
     # TODO: CAMPid 0795409054128050124650546086
     def check_result_uuid_changed(self, uuid):
-        view_model = self.view_models['check_result']
+        view_model = self.view_models["check_result"]
         model = view_model.model
         view = view_model.view
 
@@ -791,15 +769,15 @@ class Window:
         message = [
             __copyright__,
             __license__,
-            f'Version Tag: {epcpm.__version_tag__}',
-            f'Commit SHA: {epcpm.__sha__}',
-            f'Build Tag: {epcpm.__build_tag__}',
+            f"Version Tag: {epcpm.__version_tag__}",
+            f"Commit SHA: {epcpm.__sha__}",
+            f"Build Tag: {epcpm.__build_tag__}",
         ]
 
-        message = '\n'.join(message)
+        message = "\n".join(message)
 
         epyqlib.utils.qt.dialog(
             parent=self.main_window,
-            title='About',
+            title="About",
             message=message,
         )

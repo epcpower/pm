@@ -15,8 +15,8 @@ import epyqlib.utils.general
 import epyqlib.utils.qt
 
 # See file COPYING in this source tree
-__copyright__ = 'Copyright 2017, EPC Power Corp.'
-__license__ = 'GPLv2+'
+__copyright__ = "Copyright 2017, EPC Power Corp."
+__license__ = "GPLv2+"
 
 
 class ConsistencyError(Exception):
@@ -34,8 +34,8 @@ def based_int(v):
     return int(v)
 
 
-def hex_upper(_, value, width=8, prefix='0x', model=None):
-    return f'{prefix}{value:0{width}X}'
+def hex_upper(_, value, width=8, prefix="0x", model=None):
+    return f"{prefix}{value:0{width}X}"
 
 
 class HexadecimalIntegerField(marshmallow.fields.Field):
@@ -60,13 +60,13 @@ def create_child_signal_from(node):
     return Signal(name=name, parameter_uuid=node.uuid)
 
 
-@graham.schemify(tag='signal')
+@graham.schemify(tag="signal")
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Signal(epyqlib.treenode.TreeNode):
     name = epyqlib.attrsmodel.create_code_identifier_string_attribute(
-        default='NewSignal',
+        default="NewSignal",
     )
     bits = epyqlib.attrsmodel.create_integer_attribute(default=0)
     signed = attr.ib(
@@ -91,7 +91,7 @@ class Signal(epyqlib.treenode.TreeNode):
     )
     epyqlib.attrsmodel.attrib(
         attribute=parameter_uuid,
-        human_name='Parameter UUID',
+        human_name="Parameter UUID",
     )
 
     enumeration_uuid = epyqlib.attrsmodel.attr_uuid(
@@ -100,11 +100,11 @@ class Signal(epyqlib.treenode.TreeNode):
     )
     epyqlib.attrsmodel.attrib(
         attribute=enumeration_uuid,
-        human_name='Enumeration',
+        human_name="Enumeration",
         data_display=epyqlib.attrsmodel.name_from_uuid,
         delegate=epyqlib.attrsmodel.RootDelegateCache(
-            list_selection_root='enumerations',
-        )
+            list_selection_root="enumerations",
+        ),
     )
 
     path = attr.ib(
@@ -160,15 +160,17 @@ class Signal(epyqlib.treenode.TreeNode):
 
         if self.bits < 1:
             results.append(
-                f'Bit length should be greater than zero: {self.bits}',
+                f"Bit length should be greater than zero: {self.bits}",
             )
 
         for r in results:
-            result.append_child(epyqlib.checkresultmodel.Result(
-                node=self,
-                severity=epyqlib.checkresultmodel.ResultSeverity.warning,
-                message=r,
-            ))
+            result.append_child(
+                epyqlib.checkresultmodel.Result(
+                    node=self,
+                    severity=epyqlib.checkresultmodel.ResultSeverity.warning,
+                    message=r,
+                )
+            )
 
         return result
 
@@ -179,17 +181,17 @@ class Signal(epyqlib.treenode.TreeNode):
     internal_move = epyqlib.attrsmodel.default_internal_move
 
 
-@graham.schemify(tag='message')
+@graham.schemify(tag="message")
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Message(epyqlib.treenode.TreeNode):
     name = epyqlib.attrsmodel.create_code_identifier_string_attribute(
-        default='NewMessage',
+        default="NewMessage",
     )
 
     identifier = attr.ib(
-        default=0x1fffffff,
+        default=0x1FFFFFFF,
         converter=based_int,
         metadata=graham.create_metadata(
             field=HexadecimalIntegerField(),
@@ -239,9 +241,9 @@ class Message(epyqlib.treenode.TreeNode):
     children = attr.ib(
         default=attr.Factory(list),
         metadata=graham.create_metadata(
-            field=graham.fields.MixedList(fields=(
-                marshmallow.fields.Nested(graham.schema(Signal)),
-            )),
+            field=graham.fields.MixedList(
+                fields=(marshmallow.fields.Nested(graham.schema(Signal)),)
+            ),
         ),
     )
     uuid = epyqlib.attrsmodel.attr_uuid()
@@ -283,20 +285,20 @@ class Message(epyqlib.treenode.TreeNode):
     check = epyqlib.attrsmodel.check_just_children
 
 
-@graham.schemify(tag='multiplexer')
+@graham.schemify(tag="multiplexer")
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Multiplexer(epyqlib.treenode.TreeNode):
     name = epyqlib.attrsmodel.create_code_identifier_string_attribute(
-        default='NewMultiplexer',
+        default="NewMultiplexer",
     )
     identifier = attr.ib(
         default=None,
         converter=epyqlib.attrsmodel.to_int_or_none,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Integer(allow_none=True),
-        )
+        ),
     )
     length = epyqlib.attrsmodel.create_integer_attribute(default=0)
     cycle_time = attr.ib(
@@ -317,9 +319,9 @@ class Multiplexer(epyqlib.treenode.TreeNode):
     children = attr.ib(
         default=attr.Factory(list),
         metadata=graham.create_metadata(
-            field=graham.fields.MixedList(fields=(
-                marshmallow.fields.Nested(graham.schema(Signal)),
-            )),
+            field=graham.fields.MixedList(
+                fields=(marshmallow.fields.Nested(graham.schema(Signal)),)
+            ),
         ),
     )
 
@@ -393,25 +395,29 @@ class Multiplexer(epyqlib.treenode.TreeNode):
             if other.identifier != self.identifier:
                 continue
 
-            result.append_child(epyqlib.checkresultmodel.Result(
-                node=other,
-                severity=epyqlib.checkresultmodel.ResultSeverity.error,
-                message=f'MUX ID {self.identifier} is in use by {other.name}',
-            ))
+            result.append_child(
+                epyqlib.checkresultmodel.Result(
+                    node=other,
+                    severity=epyqlib.checkresultmodel.ResultSeverity.error,
+                    message=f"MUX ID {self.identifier} is in use by {other.name}",
+                )
+            )
 
         x = set()
         for signal in self.children:
-            parameter = models['parameters'].node_from_uuid(
+            parameter = models["parameters"].node_from_uuid(
                 u=signal.parameter_uuid,
             )
             x.add(parameter.uses_interface_item())
 
         if len(x) > 1:
-            result.append_child(epyqlib.checkresultmodel.Result(
-                node=self,
-                severity=epyqlib.checkresultmodel.ResultSeverity.error,
-                message=f'uses both new-style interface items and old',
-            ))
+            result.append_child(
+                epyqlib.checkresultmodel.Result(
+                    node=self,
+                    severity=epyqlib.checkresultmodel.ResultSeverity.error,
+                    message=f"uses both new-style interface items and old",
+                )
+            )
 
         return result
 
@@ -422,17 +428,17 @@ class Multiplexer(epyqlib.treenode.TreeNode):
     internal_move = epyqlib.attrsmodel.default_internal_move
 
 
-@graham.schemify(tag='multiplexed_message')
+@graham.schemify(tag="multiplexed_message")
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class MultiplexedMessage(epyqlib.treenode.TreeNode):
     name = epyqlib.attrsmodel.create_code_identifier_string_attribute(
-        default='NewMultiplexedMessage',
+        default="NewMultiplexedMessage",
     )
 
     identifier = attr.ib(
-        default=0x1fffffff,
+        default=0x1FFFFFFF,
         converter=based_int,
         metadata=graham.create_metadata(
             field=HexadecimalIntegerField(),
@@ -475,11 +481,13 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
     children = attr.ib(
         default=attr.Factory(list),
         metadata=graham.create_metadata(
-            field=graham.fields.MixedList(fields=(
-                marshmallow.fields.Nested(graham.schema(Signal)),
-                marshmallow.fields.Nested(graham.schema(Multiplexer)),
-                marshmallow.fields.Nested('CanTable'),
-            )),
+            field=graham.fields.MixedList(
+                fields=(
+                    marshmallow.fields.Nested(graham.schema(Signal)),
+                    marshmallow.fields.Nested(graham.schema(Multiplexer)),
+                    marshmallow.fields.Nested("CanTable"),
+                )
+            ),
         ),
     )
     uuid = epyqlib.attrsmodel.attr_uuid()
@@ -531,30 +539,31 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
         return node
 
     def multiplexer_id_nodes(self):
-        return list(itertools.chain.from_iterable(
-            child.multiplexer_id_nodes()
-            for child in self.children
-        ))
+        return list(
+            itertools.chain.from_iterable(
+                child.multiplexer_id_nodes() for child in self.children
+            )
+        )
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
     check = epyqlib.attrsmodel.check_just_children
 
 
-@graham.schemify(tag='multiplexed_message_clone')
+@graham.schemify(tag="multiplexed_message_clone")
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class MultiplexedMessageClone(epyqlib.treenode.TreeNode):
     name = attr.ib(
-        default='New Multiplexed Message Clone',
+        default="New Multiplexed Message Clone",
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(),
         ),
     )
 
     identifier = attr.ib(
-        default=0x1fffffff,
+        default=0x1FFFFFFF,
         converter=based_int,
         metadata=graham.create_metadata(
             field=HexadecimalIntegerField(),
@@ -599,8 +608,7 @@ class MultiplexedMessageClone(epyqlib.treenode.TreeNode):
     children = attr.ib(
         default=attr.Factory(list),
         metadata=graham.create_metadata(
-            field=graham.fields.MixedList(fields=(
-            )),
+            field=graham.fields.MixedList(fields=()),
         ),
     )
     uuid = epyqlib.attrsmodel.attr_uuid()
@@ -638,13 +646,13 @@ class MultiplexedMessageClone(epyqlib.treenode.TreeNode):
     check = epyqlib.attrsmodel.check_just_children
 
 
-@graham.schemify(tag='table', register=True)
+@graham.schemify(tag="table", register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class CanTable(epyqlib.treenode.TreeNode):
     name = attr.ib(
-        default='New Table',
+        default="New Table",
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(),
         ),
@@ -670,16 +678,18 @@ class CanTable(epyqlib.treenode.TreeNode):
     )
     epyqlib.attrsmodel.attrib(
         attribute=table_uuid,
-        human_name='Table UUID',
+        human_name="Table UUID",
     )
 
     children = attr.ib(
         default=attr.Factory(list),
         metadata=graham.create_metadata(
-            field=graham.fields.MixedList(fields=(
-                marshmallow.fields.Nested(graham.schema(Multiplexer)),
-                marshmallow.fields.Nested(graham.schema(Signal)),
-            )),
+            field=graham.fields.MixedList(
+                fields=(
+                    marshmallow.fields.Nested(graham.schema(Multiplexer)),
+                    marshmallow.fields.Nested(graham.schema(Signal)),
+                )
+            ),
         ),
     )
 
@@ -696,12 +706,8 @@ class CanTable(epyqlib.treenode.TreeNode):
         return {}
 
     def can_drop_on(self, node):
-        return (
-            isinstance(node, epyqlib.pm.parametermodel.Table)
-            or (
-                isinstance(node, Signal)
-                and node.tree_parent is self
-            )
+        return isinstance(node, epyqlib.pm.parametermodel.Table) or (
+            isinstance(node, Signal) and node.tree_parent is self
         )
 
     def can_delete(self, node=None):
@@ -718,9 +724,7 @@ class CanTable(epyqlib.treenode.TreeNode):
         }
 
         existing_signal_order = [
-            node
-            for node in self.children
-            if isinstance(node, Signal)
+            node for node in self.children if isinstance(node, Signal)
         ]
 
         for signal in array_uuid_to_signal.values():
@@ -810,49 +814,73 @@ class CanTable(epyqlib.treenode.TreeNode):
 
         # TODO: backmatching
         leaves = table.group.leaves()
-        if table.uuid == uuid.UUID('ed3bf0c2-9eed-4203-929b-d85f2e7300c5'): # Frequency
+        if table.uuid == uuid.UUID("ed3bf0c2-9eed-4203-929b-d85f2e7300c5"):  # Frequency
             leaves = my_sorted(
                 leaves,
                 (
-                    (1, ('RideThrough', 'Trip')),
-                    (0, ('Low', 'High')),
-                    (2, ('1', '2', '3', '4')),
-                    (3, ('Before', 'seconds', 'hertz', 'After')),
+                    (1, ("RideThrough", "Trip")),
+                    (0, ("Low", "High")),
+                    (2, ("1", "2", "3", "4")),
+                    (3, ("Before", "seconds", "hertz", "After")),
                 ),
             )
-        elif table.uuid == uuid.UUID('b148f2a8-6605-4aac-a235-9c66581c213b'):  # Voltage
+        elif table.uuid == uuid.UUID("b148f2a8-6605-4aac-a235-9c66581c213b"):  # Voltage
             leaves = my_sorted(
                 leaves,
                 (
-                    (1, ('RideThrough', 'Trip')),
-                    (0, ('Low', 'High')),
-                    (2, ('1', '2', '3', '4')),
-                    (3, ('Before', 'seconds', 'percent', 'After')),
+                    (1, ("RideThrough", "Trip")),
+                    (0, ("Low", "High")),
+                    (2, ("1", "2", "3", "4")),
+                    (3, ("Before", "seconds", "percent", "After")),
                 ),
             )
-        elif table.uuid == uuid.UUID('b1c598b8-1a56-42eb-94b8-85c3b434d7a7'):  # VoltVar
+        elif table.uuid == uuid.UUID("b1c598b8-1a56-42eb-94b8-85c3b434d7a7"):  # VoltVar
             leaves = my_sorted(
                 leaves,
                 (
-                    (0, ('1', '2', '3', '4')),
-                    (1, ('Before', 'Settings', 'percent_nominal_volts',
-                         'percent_nominal_var', 'After')),
+                    (0, ("1", "2", "3", "4")),
+                    (
+                        1,
+                        (
+                            "Before",
+                            "Settings",
+                            "percent_nominal_volts",
+                            "percent_nominal_var",
+                            "After",
+                        ),
+                    ),
                 ),
             )
-        elif table.uuid == uuid.UUID('6ea3bd0d-3799-4d2d-8998-a45dc80eb0bd'):  # HertzWatts  (was incorrectly HertzWatts instead of HzWatts that would never have been reached)
+        elif table.uuid == uuid.UUID(
+            "6ea3bd0d-3799-4d2d-8998-a45dc80eb0bd"
+        ):  # HertzWatts  (was incorrectly HertzWatts instead of HzWatts that would never have been reached)
             leaves = my_sorted(
                 leaves,
                 (
-                    (0, ('1', '2', '3', '4')),
-                    (1, ('Before', 'Settings', 'hertz', 'percent_nominal_pwr', 'After')),
+                    (0, ("1", "2", "3", "4")),
+                    (
+                        1,
+                        ("Before", "Settings", "hertz", "percent_nominal_pwr", "After"),
+                    ),
                 ),
             )
-        elif table.uuid == uuid.UUID('3e435024-5cad-4af0-81f8-dac56fbcc629'):  # VoltWatts  (was incorrectly HertzWatts duplicate that would never have been reached)
+        elif table.uuid == uuid.UUID(
+            "3e435024-5cad-4af0-81f8-dac56fbcc629"
+        ):  # VoltWatts  (was incorrectly HertzWatts duplicate that would never have been reached)
             leaves = my_sorted(
                 leaves,
                 (
-                    (0, ('1', '2', '3', '4')),
-                    (1, ('Before', 'Settings', 'percent_nominal_volts', 'percent_nominal_pwr', 'After')),
+                    (0, ("1", "2", "3", "4")),
+                    (
+                        1,
+                        (
+                            "Before",
+                            "Settings",
+                            "percent_nominal_volts",
+                            "percent_nominal_pwr",
+                            "After",
+                        ),
+                    ),
                 ),
             )
 
@@ -878,8 +906,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                 signal = array_uuid_to_signal[leaf_group[0].path[-1]]
                 is_group = True
                 orderer = epyqlib.utils.general.Orderer.build(
-                    ordered=manually_ordered,
-                    key=lambda item: item.original
+                    ordered=manually_ordered, key=lambda item: item.original
                 )
                 leaf_group = sorted(leaf_group, key=orderer)
             else:
@@ -894,17 +921,15 @@ class CanTable(epyqlib.treenode.TreeNode):
                         nodes.append(parent)
                         parent = parent.tree_parent
 
-                    s = '/'.join(node.name for node in reversed(nodes))
-                    message = (
-                        f'{s} has no arrays or groups, these are required'
-                    )
+                    s = "/".join(node.name for node in reversed(nodes))
+                    message = f"{s} has no arrays or groups, these are required"
                     if PyQt5.QtCore.QCoreApplication.instance() is None:
                         print(message)
                     else:
                         epyqlib.utils.qt.dialog(
                             # parent=_parent,
                             parent=None,
-                            title='Table Error',
+                            title="Table Error",
                             message=message,
                             icon=QtWidgets.QMessageBox.Warning,
                         )
@@ -934,22 +959,23 @@ class CanTable(epyqlib.treenode.TreeNode):
                         continue
 
                     # TODO: backmatching
-                    if node.tree_parent.name != 'Curves' and isinstance(node, epyqlib.pm.parametermodel.Enumerator):
+                    if node.tree_parent.name != "Curves" and isinstance(
+                        node, epyqlib.pm.parametermodel.Enumerator
+                    ):
                         enumerators.append(node.name)
                         continue
 
                     other.append(node.name)
 
-                path_string = '_'.join([
-                    ''.join(name for name in enumerators),
-                    *other,
-                    *([letter] if len(chunks) > 1 else []),
-                ])
-                multiplexer_path = chunk[0].path[:-1]
-                multiplexer_path_children = tuple(
-                    element.path[-1]
-                    for element in chunk
+                path_string = "_".join(
+                    [
+                        "".join(name for name in enumerators),
+                        *other,
+                        *([letter] if len(chunks) > 1 else []),
+                    ]
                 )
+                multiplexer_path = chunk[0].path[:-1]
+                multiplexer_path_children = tuple(element.path[-1] for element in chunk)
                 multiplexer = old_by_path.get(
                     (*multiplexer_path, multiplexer_path_children)
                 )
@@ -991,11 +1017,10 @@ class CanTable(epyqlib.treenode.TreeNode):
                                     nodes.append(parent)
                                     parent = parent.tree_parent
 
-                                s = '/'.join(
-                                    node.name for node in reversed(nodes))
+                                s = "/".join(node.name for node in reversed(nodes))
                                 message = (
-                                    f'{s} has bit length of {reference_signal.bits}'
-                                    f', must be nonzero'
+                                    f"{s} has bit length of {reference_signal.bits}"
+                                    f", must be nonzero"
                                 )
                                 if PyQt5.QtCore.QCoreApplication.instance() is None:
                                     print(message)
@@ -1003,7 +1028,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                                     epyqlib.utils.qt.dialog(
                                         # parent=_parent,
                                         parent=None,
-                                        title='Table Error',
+                                        title="Table Error",
                                         message=message,
                                         icon=QtWidgets.QMessageBox.Warning,
                                     )
@@ -1015,7 +1040,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                 # TODO: backmatching
                 if not is_group:
                     start_bit = 64 - per_message * signal.bits
-                    if signal.name == 'Settings':
+                    if signal.name == "Settings":
                         start_bit = 64 - len(stripped_chunk) * signal.bits
                 else:
                     total_bits = sum(
@@ -1038,9 +1063,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                             name=array_element.name,
                             # TODO: backmatching
                             start_bit=(
-                                start_bit
-                                if array_element.name != 'YScale'
-                                else 16
+                                start_bit if array_element.name != "YScale" else 16
                             ),
                             bits=reference_signal.bits,
                             factor=reference_signal.factor,
@@ -1053,9 +1076,7 @@ class CanTable(epyqlib.treenode.TreeNode):
                         new_signal.name = array_element.name
                         # TODO: backmatching
                         new_signal.start_bit = (
-                            start_bit
-                            if array_element.name != 'YScale'
-                            else 16
+                            start_bit if array_element.name != "YScale" else 16
                         )
                         new_signal.bits = reference_signal.bits
                         new_signal.factor = reference_signal.factor
@@ -1077,13 +1098,14 @@ class CanTable(epyqlib.treenode.TreeNode):
         if isinstance(node, Signal):
             return node
 
-        raise Exception('unexpected')
+        raise Exception("unexpected")
 
     def multiplexer_id_nodes(self):
-        return list(itertools.chain.from_iterable(
-            child.multiplexer_id_nodes()
-            for child in self.children
-        ))
+        return list(
+            itertools.chain.from_iterable(
+                child.multiplexer_id_nodes() for child in self.children
+            )
+        )
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
@@ -1091,7 +1113,7 @@ class CanTable(epyqlib.treenode.TreeNode):
 
 
 Root = epyqlib.attrsmodel.Root(
-    default_name='CAN',
+    default_name="CAN",
     valid_types=(
         Message,
         MultiplexedMessage,
@@ -1119,64 +1141,54 @@ def merge(name, *types):
 
 
 columns = epyqlib.attrsmodel.columns(
-    merge('name', *types.types.values()),
+    merge("name", *types.types.values()),
     merge(
-        'identifier',
+        "identifier",
         Message,
         MultiplexedMessage,
         MultiplexedMessageClone,
         Multiplexer,
     ),
-    merge('multiplexer_range_first', CanTable),
-    merge('multiplexer_range_last', CanTable),
-    (
-        merge('length', Message, Multiplexer, MultiplexedMessage)
-        + merge('bits', Signal)
+    merge("multiplexer_range_first", CanTable),
+    merge("multiplexer_range_last", CanTable),
+    (merge("length", Message, Multiplexer, MultiplexedMessage) + merge("bits", Signal)),
+    merge("extended", Message, MultiplexedMessage),
+    merge("enumeration_uuid", Signal),
+    merge("cycle_time", Message, Multiplexer),
+    merge("table_uuid", CanTable),
+    merge("signed", Signal),
+    merge("factor", Signal),
+    merge(
+        "sendable",
+        Message,
+        MultiplexedMessage,
+        MultiplexedMessageClone,
     ),
-    merge('extended', Message, MultiplexedMessage),
-
-    merge('enumeration_uuid', Signal),
-
-    merge('cycle_time', Message, Multiplexer),
-
-    merge('table_uuid', CanTable),
-
-    merge('signed', Signal),
-    merge('factor', Signal),
-
     merge(
-        'sendable', 
-        Message, 
-        MultiplexedMessage, 
-        MultiplexedMessageClone,
-        ),
-    merge(
-        'receivable', 
-        Message, 
+        "receivable",
+        Message,
         MultiplexedMessage,
         MultiplexedMessageClone,
-        ),
-    merge('start_bit', Signal),
-    merge('on_write', Multiplexer),
+    ),
+    merge("start_bit", Signal),
+    merge("on_write", Multiplexer),
     merge(
-        'comment', 
-        Message, 
-        Multiplexer, 
+        "comment",
+        Message,
+        Multiplexer,
         MultiplexedMessage,
         MultiplexedMessageClone,
-        ),
-
-    merge('original', MultiplexedMessageClone),
-
-    merge('parameter_uuid', Signal),
-    merge('uuid', *types.types.values()),
+    ),
+    merge("original", MultiplexedMessageClone),
+    merge("parameter_uuid", Signal),
+    merge("uuid", *types.types.values()),
 )
 
 
 # TODO: CAMPid 075454679961754906124539691347967
 @attr.s
 class ReferencedUuidNotifier(PyQt5.QtCore.QObject):
-    changed = PyQt5.QtCore.pyqtSignal('PyQt_PyObject')
+    changed = PyQt5.QtCore.pyqtSignal("PyQt_PyObject")
 
     view = attr.ib(default=None)
     selection_model = attr.ib(default=None)

@@ -29,7 +29,7 @@ def gen(self, first=0):
             parameter_uuid_finder=self.parameter_uuid_finder,
         )
         lines.extend(builder.gen())
-        lines.append('')
+        lines.append("")
 
     return lines
 
@@ -47,7 +47,7 @@ class Root:
                 wrapped=member,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
-            path = self.path/f'sunspecInterface{member.id:05}.c'
+            path = self.path / f"sunspecInterface{member.id:05}.c"
             lines = [
                 '#include "faultHandler.h"',
                 '#include "measurementd.h"',
@@ -56,16 +56,16 @@ class Root:
                 # '#include "hardware.h"',
                 # '#include "modbusHandler.h"',
                 # '#include "uart.h"',
-                '',
+                "",
                 '#include "sunspecInterfaceGen.h"',
-                '#include "{}"'.format(path.with_suffix('.h').name),
+                '#include "{}"'.format(path.with_suffix(".h").name),
                 f'#include "sunspecModel{member.id}.h"',
-                '',
-                '',
+                "",
+                "",
             ]
             lines.extend(builder.gen())
-            with path.open('w', newline='\n') as f:
-                f.write(epcpm.c.format_nested_lists(lines).strip() + '\n')
+            with path.open("w", newline="\n") as f:
+                f.write(epcpm.c.format_nested_lists(lines).strip() + "\n")
 
 
 @builders(epcpm.sunspecmodel.Model)
@@ -101,35 +101,37 @@ class DataPoint:
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
         get_name = epcpm.sunspectoxlsx.getter_setter_name(
-            get_set='get',
+            get_set="get",
             point=self.wrapped,
             parameter=parameter,
         )
 
         set_name = epcpm.sunspectoxlsx.getter_setter_name(
-            get_set='set',
+            get_set="set",
             point=self.wrapped,
             parameter=parameter,
         )
 
         lines = []
 
-        lines.extend([
-            f'void {get_name}(void) {{',
-            *(
-                [self.wrapped.get.splitlines()]
-                if self.wrapped.get is not None
-                else []
-            ),
-            '}',
-            '',
-            f'void {set_name}(void) {{',
-            *(
-                [self.wrapped.set.splitlines()]
-                if self.wrapped.set is not None
-                else []
-            ),
-            '}',
-        ])
+        lines.extend(
+            [
+                f"void {get_name}(void) {{",
+                *(
+                    [self.wrapped.get.splitlines()]
+                    if self.wrapped.get is not None
+                    else []
+                ),
+                "}",
+                "",
+                f"void {set_name}(void) {{",
+                *(
+                    [self.wrapped.set.splitlines()]
+                    if self.wrapped.set is not None
+                    else []
+                ),
+                "}",
+            ]
+        )
 
         return lines

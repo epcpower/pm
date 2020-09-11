@@ -47,19 +47,19 @@ class Root:
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
             lines = builder.gen()
-            path = self.path/f'sunspecInterface{member.id:05}.h'
-            inc_guard = f'SUNSPEC_INTERFACE{member.id:05}_H'
+            path = self.path / f"sunspecInterface{member.id:05}.h"
+            inc_guard = f"SUNSPEC_INTERFACE{member.id:05}_H"
             lines = [
-                f'#ifndef {inc_guard}',
-                f'#define {inc_guard}',
-                '',
+                f"#ifndef {inc_guard}",
+                f"#define {inc_guard}",
+                "",
                 *lines,
-                '',
-                f'#endif //{inc_guard}'
+                "",
+                f"#endif //{inc_guard}",
             ]
 
-            with path.open('w', newline='\n') as f:
-                f.write(epcpm.c.format_nested_lists(lines).strip() + '\n')
+            with path.open("w", newline="\n") as f:
+                f.write(epcpm.c.format_nested_lists(lines).strip() + "\n")
 
 
 @builders(epcpm.sunspecmodel.Model)
@@ -95,21 +95,21 @@ class DataPoint:
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
         get_name = epcpm.sunspectoxlsx.getter_setter_name(
-            get_set='get',
+            get_set="get",
             point=self.wrapped,
             parameter=parameter,
         )
 
         set_name = epcpm.sunspectoxlsx.getter_setter_name(
-            get_set='set',
+            get_set="set",
             point=self.wrapped,
             parameter=parameter,
         )
 
         lines = []
 
-        lines.append(f'void {get_name}(void);')
-        lines.append(f'void {set_name}(void);')
+        lines.append(f"void {get_name}(void);")
+        lines.append(f"void {set_name}(void);")
 
         return lines
 
@@ -121,15 +121,15 @@ class DataPointBitfield:
     parameter_uuid_finder = attr.ib()
 
     def gen(self):
-        #TODO: CAMPid 07954360685417610543064316843160
+        # TODO: CAMPid 07954360685417610543064316843160
 
-        name_uuid = str(self.wrapped.uuid).replace('-', '_')
+        name_uuid = str(self.wrapped.uuid).replace("-", "_")
         members = self.wrapped.children
-        array_name = f'sunspecBitfieldItems_{name_uuid}'
+        array_name = f"sunspecBitfieldItems_{name_uuid}"
 
         lines = [
-            f'InterfaceItem_BitfieldMember {array_name} [{len(members)}];',
-            f'InterfaceItem_Bitfield sunspecBitfieldItems_{name_uuid};',
+            f"InterfaceItem_BitfieldMember {array_name} [{len(members)}];",
+            f"InterfaceItem_Bitfield sunspecBitfieldItems_{name_uuid};",
         ]
 
         return lines

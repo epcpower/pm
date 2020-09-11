@@ -10,7 +10,9 @@ import sunspec.core.device
 import epcpm.sunspecmodel
 
 
-def epc_point_from_pysunspec_point(point, parameter_model, parameter_uuid, scale_factors=None):
+def epc_point_from_pysunspec_point(
+    point, parameter_model, parameter_uuid, scale_factors=None
+):
     if scale_factors is not None and point.point_type.sf is not None:
         scale_factor_uuid = scale_factors[point.point_type.sf].uuid
     else:
@@ -18,7 +20,7 @@ def epc_point_from_pysunspec_point(point, parameter_model, parameter_uuid, scale
 
     sunspec_type_uuid = point.point_type.type
     if sunspec_type_uuid is not None:
-        root = parameter_model.list_selection_roots['sunspec types']
+        root = parameter_model.list_selection_roots["sunspec types"]
         sunspec_type_uuid = root.child_by_name(sunspec_type_uuid).uuid
 
     return epcpm.sunspecmodel.DataPoint(
@@ -28,7 +30,7 @@ def epc_point_from_pysunspec_point(point, parameter_model, parameter_uuid, scale
         # enumeration_uuid=,
         block_offset=point.point_type.offset,
         size=point.point_type.len,
-        mandatory=point.point_type.mandatory == 'true',
+        mandatory=point.point_type.mandatory == "true",
         # uuid=,
     )
 
@@ -40,7 +42,7 @@ def epc_parameter_from_pysunspec_point(point):
         notes=point.point_type.notes,
         units=point.point_type.units,
         comment=point.point_type.description,
-        read_only='w' not in point.point_type.access,
+        read_only="w" not in point.point_type.access,
     )
 
     return parameter
@@ -69,7 +71,7 @@ def fresh_smdx_path(*paths):
 
 def none_to_empty_string(value):
     if value is None:
-        return ''
+        return ""
 
     return value
 
@@ -107,7 +109,7 @@ def import_model(model_id, parameter_model, paths=()):
     scale_factors = {}
 
     group = epyqlib.pm.parametermodel.Group(
-        name='SunSpec Model {}'.format(model.id),
+        name="SunSpec Model {}".format(model.id),
     )
     parameter_model.root.append_child(group)
 
@@ -116,10 +118,10 @@ def import_model(model_id, parameter_model, paths=()):
         length=model.len,
     )
 
-    types = parameter_model.list_selection_roots['sunspec types']
+    types = parameter_model.list_selection_roots["sunspec types"]
     parameters = our_model.children[0].add_data_points(
         model_id=model.model_type.label,
-        uint16_uuid=types.child_by_name('uint16').uuid,
+        uint16_uuid=types.child_by_name("uint16").uuid,
     )
 
     for parameter in parameters:
@@ -149,19 +151,21 @@ def import_model(model_id, parameter_model, paths=()):
 
         imported_points.append(epc_point)
 
-        if point.point_type.type.startswith(('enum', 'bitfield')):
-            enumeration = tuple(sorted(
-                Symbol.from_sunspec(symbol=symbol, type_=point.point_type.type)
-                for symbol in point.point_type.symbols
-            ))
+        if point.point_type.type.startswith(("enum", "bitfield")):
+            enumeration = tuple(
+                sorted(
+                    Symbol.from_sunspec(symbol=symbol, type_=point.point_type.type)
+                    for symbol in point.point_type.symbols
+                )
+            )
             enumerations[enumeration].append(epc_point)
 
-    enumerations_root = parameter_model.list_selection_roots['enumerations']
+    enumerations_root = parameter_model.list_selection_roots["enumerations"]
     for enumeration, points in enumerations.items():
         parameter = parameter_model.node_from_uuid(points[0].parameter_uuid)
         # TODO: just using the first point?  hmm
         epc_enumeration = epyqlib.pm.parametermodel.Enumeration(
-            name='SunSpec{}'.format(parameter.name),
+            name="SunSpec{}".format(parameter.name),
         )
 
         points[0].enumeration_uuid = epc_enumeration.uuid
@@ -216,19 +220,16 @@ def import_get_set(path):
 
         iter_rows = iter(sheet.rows)
 
-        column_indexes = {
-            cell.value: i
-            for i, cell in enumerate(next(iter_rows))
-        }
+        column_indexes = {cell.value: i for i, cell in enumerate(next(iter_rows))}
 
         for row in iter_rows:
-            for get_set in ('get', 'set'):
+            for get_set in ("get", "set"):
                 value = row[column_indexes[get_set]].value
 
-                if value in (None, ''):
+                if value in (None, ""):
                     continue
 
-                name = row[column_indexes['Name']].value
+                name = row[column_indexes["Name"]].value
                 key = GetSetKey(
                     model=model,
                     name=name,

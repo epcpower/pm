@@ -39,7 +39,7 @@ def gen(self, first=0):
         for ch_lines, ch_new_lines in zip(lines, new_lines):
             if len(ch_new_lines) > 0:
                 ch_lines.extend(ch_new_lines)
-                ch_lines.append('')
+                ch_lines.append("")
 
     return lines
 
@@ -60,19 +60,19 @@ class Root:
             '#include "interfaceStructures_generated.h"',
             '#include "sunspecInterfaceGen.h"',
             '#include "sunspecInterfaceFunctions_generated.h"',
-            '',
-            '',
+            "",
+            "",
         ]
 
-        include_guard = self.h_path.name.replace('.', '_').upper()
+        include_guard = self.h_path.name.replace(".", "_").upper()
 
         h_lines = [
-            f'#ifndef {include_guard}',
-            f'#define {include_guard}',
-            f'',
+            f"#ifndef {include_guard}",
+            f"#define {include_guard}",
+            f"",
             f'#include "interface.h"',
-            f'',
-            f'',
+            f"",
+            f"",
         ]
 
         for member in self.wrapped.children:
@@ -88,13 +88,13 @@ class Root:
             c_lines.extend(more_c_lines)
             h_lines.extend(more_h_lines)
 
-        h_lines.append('#endif')
+        h_lines.append("#endif")
 
-        with self.c_path.open('w', newline='\n') as f:
-            f.write(epcpm.c.format_nested_lists(c_lines).strip() + '\n')
+        with self.c_path.open("w", newline="\n") as f:
+            f.write(epcpm.c.format_nested_lists(c_lines).strip() + "\n")
 
-        with self.h_path.open('w', newline='\n') as f:
-            f.write(epcpm.c.format_nested_lists(h_lines).strip() + '\n')
+        with self.h_path.open("w", newline="\n") as f:
+            f.write(epcpm.c.format_nested_lists(h_lines).strip() + "\n")
 
 
 @builders(epcpm.sunspecmodel.Model)
@@ -127,80 +127,84 @@ class DataPointBitfield:
     include_uuid_in_item = attr.ib()
 
     def gen(self):
-        #TODO: CAMPid 07954360685417610543064316843160
+        # TODO: CAMPid 07954360685417610543064316843160
 
         bits_per_modbus_register = 16
         bit_length = bits_per_modbus_register * self.wrapped.size
 
-        name_uuid = str(self.wrapped.parameter_uuid).replace('-', '_')
+        name_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
 
         members = self.wrapped.children
 
-        array_name = f'sunspecBitfieldItems_{name_uuid}'
+        array_name = f"sunspecBitfieldItems_{name_uuid}"
         model = self.wrapped.tree_parent.tree_parent.id
 
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
         c_lines = []
         h_lines = []
-        
+
         for member in members:
-            member_name_uuid = str(member.parameter_uuid).replace('-', '_')
-            variable_name = f'interfaceItem_variable_{member_name_uuid}'
+            member_name_uuid = str(member.parameter_uuid).replace("-", "_")
+            variable_name = f"interfaceItem_variable_{member_name_uuid}"
             variable_type = epcpm.parameterstointerface.sunspec_types[
                 self.parameter_uuid_finder(member.type_uuid).name
             ]
 
             h_lines.append(
-                f'extern {variable_type} {variable_name};',
+                f"extern {variable_type} {variable_name};",
             )
 
             # TODO: initializer that doesn't assume int16_t
             c_lines.append(
-                f'{variable_type} {variable_name} = 0;',
+                f"{variable_type} {variable_name} = 0;",
             )
 
-        c_lines.append('')
-        h_lines.append('')
+        c_lines.append("")
+        h_lines.append("")
 
-        c_lines.extend([
-            f'InterfaceItem_BitfieldMember {array_name}[{len(members)}] = {{',
+        c_lines.extend(
             [
+                f"InterfaceItem_BitfieldMember {array_name}[{len(members)}] = {{",
                 [
-                    f'[{i}] = {{',
                     [
-                        f'.offset = {member.bit_offset},',
-                        f'.length = {member.bit_length},',
-                        f'.item = &interfaceItem_{str(member.parameter_uuid).replace("-", "_")},',
-                    ],
-                    f'}},',
-                ]
-                for i, member in enumerate(members)
-            ],
-            f'}};',
-            f'',
-            f'InterfaceItem_Bitfield interfaceItem_{name_uuid} = {{',
-            [
-                f'.common = {{',
-                [   # TODO: generate a real complete common initializer
-                    f'.sunspec = {{',
-                    [
-                        f'.getter = InterfaceItem_bitfield_{bit_length}_getter,',
-                        f'.setter = InterfaceItem_bitfield_{bit_length}_setter,',
-                        f'.variable = &sunspecInterface.model{model:05}.{parameter.abbreviation},',
-                    ],
-                    f'}},',
+                        f"[{i}] = {{",
+                        [
+                            f".offset = {member.bit_offset},",
+                            f".length = {member.bit_length},",
+                            f'.item = &interfaceItem_{str(member.parameter_uuid).replace("-", "_")},',
+                        ],
+                        f"}},",
+                    ]
+                    for i, member in enumerate(members)
                 ],
-                f'}},',
-                f'.members = {array_name},',
-                f'.membersCount = {len(members)},',
-            ],
-            f'}};',
-        ])
+                f"}};",
+                f"",
+                f"InterfaceItem_Bitfield interfaceItem_{name_uuid} = {{",
+                [
+                    f".common = {{",
+                    [  # TODO: generate a real complete common initializer
+                        f".sunspec = {{",
+                        [
+                            f".getter = InterfaceItem_bitfield_{bit_length}_getter,",
+                            f".setter = InterfaceItem_bitfield_{bit_length}_setter,",
+                            f".variable = &sunspecInterface.model{model:05}.{parameter.abbreviation},",
+                        ],
+                        f"}},",
+                    ],
+                    f"}},",
+                    f".members = {array_name},",
+                    f".membersCount = {len(members)},",
+                ],
+                f"}};",
+            ]
+        )
 
-        h_lines.extend([
-            f'extern InterfaceItem_BitfieldMember {array_name}[{len(members)}];',
-            f'extern InterfaceItem_Bitfield interfaceItem_{name_uuid};',
-        ])
+        h_lines.extend(
+            [
+                f"extern InterfaceItem_BitfieldMember {array_name}[{len(members)}];",
+                f"extern InterfaceItem_Bitfield interfaceItem_{name_uuid};",
+            ]
+        )
 
         return c_lines, h_lines
