@@ -39,10 +39,10 @@ Windows
 
 - Install `Python 3.7`_
 - Install `Git`_
-- ``git clone https://github.com/altendky/st``
-- ``cd st``
+- ``git clone https://github.com/altendky/pm``
+- ``cd pm``
 - ``git submodule update --init``
-- ``py create_venv.py ensure``
+- ``py boots.py ensure``
 
   - Run with any recent Python, the proper Python version will be selected
 
@@ -63,10 +63,10 @@ Linux
   - pyenv_ to get Python versions
 
 - Install git
-- ``git clone https://github.com/altendky/st``
-- ``cd st``
+- ``git clone https://github.com/altendky/pm``
+- ``cd pm``
 - ``git submodule update --init``
-- ``python create_venv.py ensure``
+- ``python boots.py ensure``
 
   - Run with any recent Python, the proper Python version will be selected
 
