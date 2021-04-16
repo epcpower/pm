@@ -40,6 +40,10 @@ Windows
 - Install `Python 3.7`_
 - Install `Git`_
 - ``git clone https://github.com/altendky/pm``
+- Install `Build Tools for Visual Studio 2019`_
+
+  - Select "C++ build tools" option
+
 - ``cd pm``
 - ``git submodule update --init``
 - ``py boots.py ensure``
@@ -54,6 +58,7 @@ To launch PM run ``venv\Scripts\epcpm.exe``.
 
 .. _`Python 3.7`: https://www.python.org/downloads/
 .. _`Git`: https://git-scm.com/download
+.. _`Build Tools for Visual Studio 2019`: https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019
 
 Linux
 =====
