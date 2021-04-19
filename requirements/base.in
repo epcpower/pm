@@ -1,5 +1,8 @@
 --requirement pre.in
 
+--extra-index-url http://fstab.net/pypi/simple
+--trusted-host fstab.net
+
 attrs==20.2.0
 click==7.1.2
 epyqlib==2020.1.4
