@@ -25,6 +25,7 @@ import epcpm.parameterstoc
 import epcpm.parameterstohierarchy
 import epcpm.project
 import epcpm.smdxtosunspec
+import epcpm.staticmodbusmodel
 import epcpm.sunspecmodel
 import epcpm.sunspectoxlsx
 import epcpm.symtoproject
@@ -124,10 +125,12 @@ class Window:
         self.uuid_notifiers = {
             "can": epcpm.canmodel.ReferencedUuidNotifier(),
             "sunspec": epcpm.sunspecmodel.ReferencedUuidNotifier(),
+            "staticmodbus": epcpm.staticmodbusmodel.ReferencedUuidNotifier(),
             "check_result": epyqlib.checkresultmodel.ReferencedUuidNotifier(),
         }
         self.uuid_notifiers["can"].changed.connect(self.can_uuid_changed)
         self.uuid_notifiers["sunspec"].changed.connect(self.can_uuid_changed)
+        self.uuid_notifiers["staticmodbus"].changed.connect(self.can_uuid_changed)
         self.uuid_notifiers["check_result"].changed.connect(
             self.check_result_uuid_changed,
         )
@@ -153,6 +156,11 @@ class Window:
                 self.ui.sunspec_view,
                 self.ui.sunspec_search_box,
                 epcpm.sunspecmodel.columns.index_of("Name"),
+            ),
+            (
+                self.ui.static_modbus_view,
+                self.ui.static_modbus_search_box,
+                epcpm.staticmodbusmodel.columns.index_of("Name"),
             ),
             (
                 self.ui.value_set_view,
@@ -251,6 +259,10 @@ class Window:
         project.models.sunspec = epyqlib.attrsmodel.Model(
             root=sunspec_root,
             columns=epcpm.sunspecmodel.columns,
+        )
+        project.models.static_modbus = epyqlib.attrsmodel.Model(
+            root=static_modbus_root,
+            columns=epcpm.staticmodbusmodel.columns,
         )
 
         epcpm.project._post_load(project)
@@ -351,6 +363,11 @@ class Window:
         model_views.sunspec = ModelView(
             view=self.ui.sunspec_view,
             types=epcpm.sunspecmodel.types,
+        )
+
+        model_views.staticmodbus = ModelView(
+            view=self.ui.static_modbus_view,
+            types=epcpm.staticmodbusmodel.types,
         )
 
         for notifier in self.uuid_notifiers.values():

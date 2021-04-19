@@ -95,6 +95,21 @@ def _post_load(project):
                 drop_sources=(models.parameters,),
             )
 
+    if models.staticmodbus is None:
+        if project.paths.staticmodbus is None:
+            models.staticmodbus = epyqlib.attrsmodel.Model(
+                root=epcpm.staticmodbusmodel.Root(),
+                columns=epcpm.staticmodbusmodel.columns,
+            )
+        else:
+            models.staticmodbus = load_model(
+                project=project,
+                path=project.paths.staticmodbus,
+                root_type=epcpm.staticmodbusmodel.Root,
+                columns=epcpm.staticmodbusmodel.columns,
+                drop_sources=(models.parameters,),
+            )
+
     models.parameters.droppable_from.add(models.parameters)
 
     models.can.droppable_from.add(models.parameters)
@@ -121,6 +136,10 @@ class Models:
         default=None,
         metadata=graham.create_metadata(field=marshmallow.fields.String()),
     )
+    staticmodbus = attr.ib(
+        default=None,
+        metadata=graham.create_metadata(field=marshmallow.fields.String()),
+    )
 
     @classmethod
     def __iter__(cls):
@@ -130,6 +149,7 @@ class Models:
         self.parameters = value
         self.can = value
         self.sunspec = value
+        self.staticmodbus = value
 
     def items(self):
         return attr.asdict(self, recurse=False).items()
@@ -198,10 +218,15 @@ class Models:
         self.sunspec.list_selection_roots["sunspec types"] = sunspec_types_root
         self.sunspec.list_selection_roots["enumerations"] = enumerations_root
 
+        # TODO: These will probably go away?
+        self.staticmodbus.list_selection_roots["sunspec types"] = sunspec_types_root
+        self.staticmodbus.list_selection_roots["enumerations"] = enumerations_root
+
         self.can.list_selection_roots["enumerations"] = enumerations_root
         self.parameters.update_nodes()
         self.can.update_nodes()
         self.sunspec.update_nodes()
+        self.staticmodbus.update_nodes()
 
 
 @graham.schemify(tag="project")
