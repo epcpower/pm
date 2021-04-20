@@ -4,6 +4,7 @@
         "_type": "models",
         "parameters": "parameters.json",
         "can": "can.json",
+        "staticmodbus": "staticmodbus.json",
         "sunspec": "sunspec.json"
     }
 }
