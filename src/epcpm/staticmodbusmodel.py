@@ -331,7 +331,9 @@ class DataPoint(epyqlib.treenode.TreeNode):
                     epyqlib.checkresultmodel.Result(
                         node=self,
                         severity=(epyqlib.checkresultmodel.ResultSeverity.information),
-                        message=("Connected to temporary Static Modbus imported parameter"),
+                        message=(
+                            "Connected to temporary Static Modbus imported parameter"
+                        ),
                     )
                 )
 
