@@ -25,7 +25,7 @@ class TypeNotFoundError(Exception):
     pass
 
 
-def build_statismodbus_types_enumeration():
+def build_staticmodbus_types_enumeration():
     enumeration = epyqlib.pm.parametermodel.Enumeration(
         name="StaticModbusTypes",
         uuid="00b90651-3e3b-4e28-a8c0-7339ae092200",
@@ -189,12 +189,12 @@ class DataPoint(epyqlib.treenode.TreeNode):
     factor_uuid = create_factor_uuid_attribute()
     parameter_uuid = create_parameter_uuid_attribute()
 
-    hand_coded_getter = epyqlib.attrsmodel.create_checkbox_attribute(
-        default=False,
-    )
-    hand_coded_setter = epyqlib.attrsmodel.create_checkbox_attribute(
-        default=False,
-    )
+    # hand_coded_getter = epyqlib.attrsmodel.create_checkbox_attribute(
+    #     default=False,
+    # )
+    # hand_coded_setter = epyqlib.attrsmodel.create_checkbox_attribute(
+    #     default=False,
+    # )
 
     not_implemented = epyqlib.attrsmodel.create_checkbox_attribute(
         default=False,
@@ -208,35 +208,35 @@ class DataPoint(epyqlib.treenode.TreeNode):
         list_selection_root="staticmodbus types",
     )
 
-    offset = attr.ib(
-        default=0,
-        converter=int,
-    )  # this is somewhat redundant with the position in the list of data
-    # points but helpful for keeping things from incidentally floating
-    # around especially in custom models where we have no sunspec
-    # model to be validating against
-    # for now, yes, this is vaguely nondescript of address vs block offset
-    @QtCore.pyqtProperty("PyQt_PyObject")
-    def pyqtify_offset(self):
-        block_offset = getattr(self.tree_parent, "block_offset", None)
+    # offset = attr.ib(
+    #     default=0,
+    #     converter=int,
+    # )  # this is somewhat redundant with the position in the list of data
+    # # points but helpful for keeping things from incidentally floating
+    # # around especially in custom models where we have no sunspec
+    # # model to be validating against
+    # # for now, yes, this is vaguely nondescript of address vs block offset
+    # @QtCore.pyqtProperty("PyQt_PyObject")
+    # def pyqtify_offset(self):
+    #     block_offset = getattr(self.tree_parent, "block_offset", None)
+    #
+    #     if block_offset is None:
+    #         return None
+    #
+    #     return block_offset + self.block_offset
+    #
+    # # TODO: shouldn't this be read only?
+    # @pyqtify_offset.setter
+    # def pyqtify_offset(self, value):
+    #     pass
 
-        if block_offset is None:
-            return None
-
-        return block_offset + self.block_offset
-
-    # TODO: shouldn't this be read only?
-    @pyqtify_offset.setter
-    def pyqtify_offset(self, value):
-        pass
-
-    block_offset = attr.ib(
-        default=0,
-        converter=int,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.Integer(),
-        ),
-    )
+    # block_offset = attr.ib(
+    #     default=0,
+    #     converter=int,
+    #     metadata=graham.create_metadata(
+    #         field=marshmallow.fields.Integer(),
+    #     ),
+    # )
 
     size = create_size_attribute()
 
@@ -278,13 +278,13 @@ class DataPoint(epyqlib.treenode.TreeNode):
         no_column=True,
     )
 
-    mandatory = attr.ib(
-        default=True,
-        converter=epyqlib.attrsmodel.two_state_checkbox,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.Boolean(),
-        ),
-    )
+    # mandatory = attr.ib(
+    #     default=True,
+    #     converter=epyqlib.attrsmodel.two_state_checkbox,
+    #     metadata=graham.create_metadata(
+    #         field=marshmallow.fields.Boolean(),
+    #     ),
+    # )
 
     uuid = epyqlib.attrsmodel.attr_uuid()
     # value  doesn't make sense here, this is interface definition, not a
@@ -439,13 +439,13 @@ class DataPointBitfield(epyqlib.treenode.TreeNode):
         list_selection_root="staticmodbus types",
     )
 
-    block_offset = attr.ib(
-        default=0,
-        converter=int,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.Integer(),
-        ),
-    )
+    # block_offset = attr.ib(
+    #     default=0,
+    #     converter=int,
+    #     metadata=graham.create_metadata(
+    #         field=marshmallow.fields.Integer(),
+    #     ),
+    # )
 
     size = create_size_attribute()
 
@@ -518,10 +518,10 @@ class HeaderBlock(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.String(),
         ),
     )
-    offset = attr.ib(
-        default=0,
-        converter=int,
-    )
+    # offset = attr.ib(
+    #     default=0,
+    #     converter=int,
+    # )
     children = attr.ib(
         factory=list,
         metadata=graham.create_metadata(
@@ -560,18 +560,18 @@ class HeaderBlock(epyqlib.treenode.TreeNode):
         ]
         points = [
             DataPoint(
-                block_offset=0,
+                # block_offset=0,
                 size=1,
                 type_uuid=uint16_uuid,
                 parameter_uuid=parameters[0].uuid,
-                mandatory=True,
+                # mandatory=True,
             ),
             DataPoint(
-                block_offset=1,
+                # block_offset=1,
                 size=1,
                 type_uuid=uint16_uuid,
                 parameter_uuid=parameters[1].uuid,
-                mandatory=True,
+                # mandatory=True,
             ),
         ]
 
@@ -597,10 +597,10 @@ class FixedBlock(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.String(),
         ),
     )
-    offset = attr.ib(
-        default=2,
-        converter=int,
-    )
+    # offset = attr.ib(
+    #     default=2,
+    #     converter=int,
+    # )
     children = attr.ib(
         factory=list,
         metadata=graham.create_metadata(
@@ -703,10 +703,10 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.String(),
         ),
     )
-    offset = attr.ib(
-        default=2,
-        converter=int,
-    )
+    # offset = attr.ib(
+    #     default=2,
+    #     converter=int,
+    # )
     children = attr.ib(
         factory=list,
         metadata=graham.create_metadata(
@@ -840,10 +840,10 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
         ),
     )
 
-    offset = attr.ib(
-        default=2,
-        converter=int,
-    )
+    # offset = attr.ib(
+    #     default=2,
+    #     converter=int,
+    # )
 
     repeats = attr.ib(
         default=0,
@@ -1037,7 +1037,7 @@ class Table(epyqlib.treenode.TreeNode):
             )
             # continue
 
-            block_offset = 0
+            # block_offset = 0
 
             group_elements = [[], []]
             group_of_groups = group_elements[0]
@@ -1062,14 +1062,14 @@ class Table(epyqlib.treenode.TreeNode):
                     point_node = DataPoint(
                         parameter_uuid=element.uuid,
                     )
-                point_node.mandatory = reference_data_point.mandatory
+                # point_node.mandatory = reference_data_point.mandatory
                 point_node.units = reference_data_point.units
                 point_node.type_uuid = reference_data_point.type_uuid
                 point_node.size = reference_data_point.size
                 point_node.enumeration_uuid = reference_data_point.enumeration_uuid
-                point_node.block_offset = block_offset
+                # point_node.block_offset = block_offset
                 block_node.append_child(point_node)
-                block_offset += point_node.size
+                # block_offset += point_node.size
 
             array_elements = itertools.chain.from_iterable(
                 zip(
@@ -1089,14 +1089,14 @@ class Table(epyqlib.treenode.TreeNode):
                     point_node = DataPoint(
                         parameter_uuid=element.uuid,
                     )
-                point_node.mandatory = reference_data_point.mandatory
+                # point_node.mandatory = reference_data_point.mandatory
                 point_node.units = reference_data_point.units
                 point_node.type_uuid = reference_data_point.type_uuid
                 point_node.size = reference_data_point.size
                 point_node.enumeration_uuid = reference_data_point.enumeration_uuid
-                point_node.block_offset = block_offset
+                # point_node.block_offset = block_offset
                 block_node.append_child(point_node)
-                block_offset += point_node.size
+                # block_offset += point_node.size
 
             # TODO: CAMPid 143707880547014313476753071297360068134
             for element in group_elements[1]:
@@ -1108,14 +1108,14 @@ class Table(epyqlib.treenode.TreeNode):
                     point_node = DataPoint(
                         parameter_uuid=element.uuid,
                     )
-                point_node.mandatory = reference_data_point.mandatory
+                # point_node.mandatory = reference_data_point.mandatory
                 point_node.units = reference_data_point.units
                 point_node.type_uuid = reference_data_point.type_uuid
                 point_node.size = reference_data_point.size
                 point_node.enumeration_uuid = reference_data_point.enumeration_uuid
-                point_node.block_offset = block_offset
+                # point_node.block_offset = block_offset
                 block_node.append_child(point_node)
-                block_offset += point_node.size
+                # block_offset += point_node.size
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
@@ -1266,8 +1266,8 @@ columns = epyqlib.attrsmodel.columns(
     merge("not_implemented", DataPoint),
     merge("length", Model) + merge("size", DataPoint, DataPointBitfield),
     merge("repeats", TableRepeatingBlock),
-    merge("hand_coded_getter", DataPoint),
-    merge("hand_coded_setter", DataPoint),
+    # merge("hand_coded_getter", DataPoint),
+    # merge("hand_coded_setter", DataPoint),
     merge(
         "factor_uuid",
         DataPoint,
@@ -1279,16 +1279,16 @@ columns = epyqlib.attrsmodel.columns(
     merge("bit_length", DataPointBitfieldMember),
     merge("bit_offset", DataPointBitfieldMember),
     merge("parameter_table_uuid", Table),
-    merge("mandatory", DataPoint),
-    merge(
-        "offset",
-        DataPoint,
-        HeaderBlock,
-        FixedBlock,
-        TableRepeatingBlockReference,
-        TableRepeatingBlock,
-    ),
-    merge("block_offset", DataPoint, DataPointBitfield),
+    # merge("mandatory", DataPoint),
+    # merge(
+    #     "offset",
+    #     DataPoint,
+    #     HeaderBlock,
+    #     FixedBlock,
+    #     TableRepeatingBlockReference,
+    #     TableRepeatingBlock,
+    # ),
+    # merge("block_offset", DataPoint, DataPointBitfield),
     merge("uuid", *types.types.values()),
 )
 

@@ -97,7 +97,7 @@ def _post_load(project):
             )
 
     if models.staticmodbus is None:
-        if project.paths.staticmodbus is None:
+        if project.paths.staticmodbus is None or len(project.paths.staticmodbus) == 0:
             models.staticmodbus = epyqlib.attrsmodel.Model(
                 root=epcpm.staticmodbusmodel.Root(),
                 columns=epcpm.staticmodbusmodel.columns,
