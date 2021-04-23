@@ -1127,13 +1127,20 @@ class Table(epyqlib.treenode.TreeNode):
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class Model(epyqlib.treenode.TreeNode):
-    id = attr.ib(
+    name = attr.ib(
         default=0,
-        converter=int,
+        converter=str,
         metadata=graham.create_metadata(
-            field=marshmallow.fields.Integer(),
+            field=marshmallow.fields.String(),
         ),
-    )  # 103
+    )
+    # id = attr.ib(
+    #     default=0,
+    #     converter=int,
+    #     metadata=graham.create_metadata(
+    #         field=marshmallow.fields.Integer(),
+    #     ),
+    # )  # 103
     length = attr.ib(
         default=0,
         converter=int,
@@ -1157,8 +1164,9 @@ class Model(epyqlib.treenode.TreeNode):
         metadata=graham.create_metadata(
             field=graham.fields.MixedList(
                 fields=(
-                    marshmallow.fields.Nested(graham.schema(HeaderBlock)),
-                    marshmallow.fields.Nested(graham.schema(FixedBlock)),
+                    # marshmallow.fields.Nested(graham.schema(HeaderBlock)),
+                    # marshmallow.fields.Nested(graham.schema(FixedBlock)),
+                    marshmallow.fields.Nested(graham.schema(DataPoint)),
                     marshmallow.fields.Nested(
                         graham.schema(TableRepeatingBlockReference)
                     ),
@@ -1253,7 +1261,8 @@ columns = epyqlib.attrsmodel.columns(
             TableRepeatingBlock,
             TableRepeatingBlockReference,
         )
-        + merge("id", Model)
+        + merge("name", Model)
+        # + merge("id", Model)
         + merge(
             "parameter_uuid",
             DataPoint,
