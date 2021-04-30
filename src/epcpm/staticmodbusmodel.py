@@ -507,151 +507,151 @@ def check_block_offsets_and_length(self):
     return length
 
 
-@graham.schemify(tag="staticmodbus_header_block", register=True)
-@epyqlib.attrsmodel.ify()
-@epyqlib.utils.qt.pyqtify()
-@attr.s(hash=False)
-class HeaderBlock(epyqlib.treenode.TreeNode):
-    name = attr.ib(
-        default="Header",
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
-        ),
-    )
-    # offset = attr.ib(
-    #     default=0,
-    #     converter=int,
-    # )
-    children = attr.ib(
-        factory=list,
-        metadata=graham.create_metadata(
-            field=graham.fields.MixedList(
-                fields=(marshmallow.fields.Nested(graham.schema(DataPoint)),)
-            ),
-        ),
-    )
-
-    uuid = epyqlib.attrsmodel.attr_uuid()
-
-    def __attrs_post_init__(self):
-        super().__init__()
-
-    def can_drop_on(self, node):
-        return False
-
-    def can_delete(self, node=None):
-        return False
-
-    check_offsets_and_length = check_block_offsets_and_length
-
-    def add_data_points(self, uint16_uuid, model_id):
-        parameters = [
-            epyqlib.pm.parametermodel.Parameter(
-                name=model_id,
-                abbreviation="ID",
-                read_only=True,
-            ),
-            epyqlib.pm.parametermodel.Parameter(
-                name="",
-                abbreviation="L",
-                comment="Model Length",
-                read_only=True,
-            ),
-        ]
-        points = [
-            DataPoint(
-                # block_offset=0,
-                size=1,
-                type_uuid=uint16_uuid,
-                parameter_uuid=parameters[0].uuid,
-                # mandatory=True,
-            ),
-            DataPoint(
-                # block_offset=1,
-                size=1,
-                type_uuid=uint16_uuid,
-                parameter_uuid=parameters[1].uuid,
-                # mandatory=True,
-            ),
-        ]
-
-        for point in points:
-            self.append_child(point)
-
-        return parameters
-
-    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
-    child_from = epyqlib.attrsmodel.default_child_from
-    internal_move = epyqlib.attrsmodel.default_internal_move
-    check = epyqlib.attrsmodel.check_just_children
-
-
-@graham.schemify(tag="staticmodbus_fixed_block", register=True)
-@epyqlib.attrsmodel.ify()
-@epyqlib.utils.qt.pyqtify()
-@attr.s(hash=False)
-class FixedBlock(epyqlib.treenode.TreeNode):
-    name = attr.ib(
-        default="Fixed Block",
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
-        ),
-    )
-    # offset = attr.ib(
-    #     default=2,
-    #     converter=int,
-    # )
-    children = attr.ib(
-        factory=list,
-        metadata=graham.create_metadata(
-            field=graham.fields.MixedList(
-                fields=(
-                    marshmallow.fields.Nested(graham.schema(DataPoint)),
-                    marshmallow.fields.Nested(graham.schema(DataPointBitfield)),
-                )
-            ),
-        ),
-    )
-
-    uuid = epyqlib.attrsmodel.attr_uuid()
-
-    def __attrs_post_init__(self):
-        super().__init__()
-        self.pyqt_signals.child_added_complete.connect(self.update)
-        self.pyqt_signals.child_removed_complete.connect(self.update)
-
-    def can_drop_on(self, node):
-        return isinstance(
-            node,
-            (
-                epyqlib.pm.parametermodel.Parameter,
-                DataPoint,
-                DataPointBitfield,
-            ),
-        )
-
-    def can_delete(self, node=None):
-        if node is None:
-            return self.tree_parent.can_delete(node=self)
-
-        return isinstance(node, (DataPoint, DataPointBitfield))
-
-    def child_from(self, node):
-        if isinstance(node, epyqlib.pm.parametermodel.Parameter):
-            return DataPoint(parameter_uuid=node.uuid)
-
-        return node
-
-    def update(self):
-        block_offset = 0
-        for pt in self.children:
-            pt.block_offset = block_offset
-            block_offset = block_offset + pt.size
-
-    check_offsets_and_length = check_block_offsets_and_length
-    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
-    internal_move = epyqlib.attrsmodel.default_internal_move
-    check = epyqlib.attrsmodel.check_just_children
+# @graham.schemify(tag="staticmodbus_header_block", register=True)
+# @epyqlib.attrsmodel.ify()
+# @epyqlib.utils.qt.pyqtify()
+# @attr.s(hash=False)
+# class HeaderBlock(epyqlib.treenode.TreeNode):
+#     name = attr.ib(
+#         default="Header",
+#         metadata=graham.create_metadata(
+#             field=marshmallow.fields.String(),
+#         ),
+#     )
+#     # offset = attr.ib(
+#     #     default=0,
+#     #     converter=int,
+#     # )
+#     children = attr.ib(
+#         factory=list,
+#         metadata=graham.create_metadata(
+#             field=graham.fields.MixedList(
+#                 fields=(marshmallow.fields.Nested(graham.schema(DataPoint)),)
+#             ),
+#         ),
+#     )
+#
+#     uuid = epyqlib.attrsmodel.attr_uuid()
+#
+#     def __attrs_post_init__(self):
+#         super().__init__()
+#
+#     def can_drop_on(self, node):
+#         return False
+#
+#     def can_delete(self, node=None):
+#         return False
+#
+#     check_offsets_and_length = check_block_offsets_and_length
+#
+#     def add_data_points(self, uint16_uuid, model_id):
+#         parameters = [
+#             epyqlib.pm.parametermodel.Parameter(
+#                 name=model_id,
+#                 abbreviation="ID",
+#                 read_only=True,
+#             ),
+#             epyqlib.pm.parametermodel.Parameter(
+#                 name="",
+#                 abbreviation="L",
+#                 comment="Model Length",
+#                 read_only=True,
+#             ),
+#         ]
+#         points = [
+#             DataPoint(
+#                 # block_offset=0,
+#                 size=1,
+#                 type_uuid=uint16_uuid,
+#                 parameter_uuid=parameters[0].uuid,
+#                 # mandatory=True,
+#             ),
+#             DataPoint(
+#                 # block_offset=1,
+#                 size=1,
+#                 type_uuid=uint16_uuid,
+#                 parameter_uuid=parameters[1].uuid,
+#                 # mandatory=True,
+#             ),
+#         ]
+#
+#         for point in points:
+#             self.append_child(point)
+#
+#         return parameters
+#
+#     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+#     child_from = epyqlib.attrsmodel.default_child_from
+#     internal_move = epyqlib.attrsmodel.default_internal_move
+#     check = epyqlib.attrsmodel.check_just_children
+#
+#
+# @graham.schemify(tag="staticmodbus_fixed_block", register=True)
+# @epyqlib.attrsmodel.ify()
+# @epyqlib.utils.qt.pyqtify()
+# @attr.s(hash=False)
+# class FixedBlock(epyqlib.treenode.TreeNode):
+#     name = attr.ib(
+#         default="Fixed Block",
+#         metadata=graham.create_metadata(
+#             field=marshmallow.fields.String(),
+#         ),
+#     )
+#     # offset = attr.ib(
+#     #     default=2,
+#     #     converter=int,
+#     # )
+#     children = attr.ib(
+#         factory=list,
+#         metadata=graham.create_metadata(
+#             field=graham.fields.MixedList(
+#                 fields=(
+#                     marshmallow.fields.Nested(graham.schema(DataPoint)),
+#                     marshmallow.fields.Nested(graham.schema(DataPointBitfield)),
+#                 )
+#             ),
+#         ),
+#     )
+#
+#     uuid = epyqlib.attrsmodel.attr_uuid()
+#
+#     def __attrs_post_init__(self):
+#         super().__init__()
+#         self.pyqt_signals.child_added_complete.connect(self.update)
+#         self.pyqt_signals.child_removed_complete.connect(self.update)
+#
+#     def can_drop_on(self, node):
+#         return isinstance(
+#             node,
+#             (
+#                 epyqlib.pm.parametermodel.Parameter,
+#                 DataPoint,
+#                 DataPointBitfield,
+#             ),
+#         )
+#
+#     def can_delete(self, node=None):
+#         if node is None:
+#             return self.tree_parent.can_delete(node=self)
+#
+#         return isinstance(node, (DataPoint, DataPointBitfield))
+#
+#     def child_from(self, node):
+#         if isinstance(node, epyqlib.pm.parametermodel.Parameter):
+#             return DataPoint(parameter_uuid=node.uuid)
+#
+#         return node
+#
+#     def update(self):
+#         block_offset = 0
+#         for pt in self.children:
+#             pt.block_offset = block_offset
+#             block_offset = block_offset + pt.size
+#
+#     check_offsets_and_length = check_block_offsets_and_length
+#     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+#     internal_move = epyqlib.attrsmodel.default_internal_move
+#     check = epyqlib.attrsmodel.check_just_children
 
 
 @graham.schemify(
@@ -1122,102 +1122,102 @@ class Table(epyqlib.treenode.TreeNode):
     check = epyqlib.attrsmodel.check_just_children
 
 
-@graham.schemify(tag="staticmodbus_model", register=True)
-@epyqlib.attrsmodel.ify()
-@epyqlib.utils.qt.pyqtify()
-@attr.s(hash=False)
-class Model(epyqlib.treenode.TreeNode):
-    name = attr.ib(
-        default=0,
-        converter=str,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
-        ),
-    )
-    # id = attr.ib(
-    #     default=0,
-    #     converter=int,
-    #     metadata=graham.create_metadata(
-    #         field=marshmallow.fields.Integer(),
-    #     ),
-    # )  # 103
-    length = attr.ib(
-        default=0,
-        converter=int,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.Integer(),
-        ),
-    )  # 50, in the spirit of over constraining like how
-    # data points have their offset
-
-    # ?
-    # self.model_id = '{}'.format(model_id)
-    # self.namespace = namespace
-    # self.index = index
-
-    # special children
-    # header: id and length
-
-    # self.point_data = []
-    children = attr.ib(
-        factory=lambda: [HeaderBlock(), FixedBlock()],
-        metadata=graham.create_metadata(
-            field=graham.fields.MixedList(
-                fields=(
-                    # marshmallow.fields.Nested(graham.schema(HeaderBlock)),
-                    # marshmallow.fields.Nested(graham.schema(FixedBlock)),
-                    marshmallow.fields.Nested(graham.schema(DataPoint)),
-                    marshmallow.fields.Nested(
-                        graham.schema(TableRepeatingBlockReference)
-                    ),
-                )
-            ),
-        ),
-    )
-
-    uuid = epyqlib.attrsmodel.attr_uuid()
-
-    def __attrs_post_init__(self):
-        super().__init__()
-
-    def remove_old_on_drop(self, node):
-        return False
-
-    def child_from(self, node):
-        reference = TableRepeatingBlockReference(original=node)
-        for child in node.tree_parent.children:
-            if not isinstance(child, DataPoint):
-                continue
-
-            reference.append_child(
-                TableRepeatingBlockReferenceDataPointReference(
-                    original=child,
-                ),
-            )
-
-        return reference
-
-    def can_drop_on(self, node):
-        return isinstance(node, TableRepeatingBlock) and not any(
-            isinstance(child, TableRepeatingBlockReference) for child in self.children
-        )
-
-    def can_delete(self, node=None):
-        if node is None:
-            return self.tree_parent.can_delete(node=self)
-
-        return not isinstance(node, (HeaderBlock, FixedBlock))
-
-    def check_offsets_and_length(self):
-        length = 0
-
-        for block in self.children:
-            length += block.check_offsets_and_length()
-
-        return length
-
-    internal_move = epyqlib.attrsmodel.default_internal_move
-    check = epyqlib.attrsmodel.check_just_children
+# @graham.schemify(tag="staticmodbus_model", register=True)
+# @epyqlib.attrsmodel.ify()
+# @epyqlib.utils.qt.pyqtify()
+# @attr.s(hash=False)
+# class Model(epyqlib.treenode.TreeNode):
+#     name = attr.ib(
+#         default=0,
+#         converter=str,
+#         metadata=graham.create_metadata(
+#             field=marshmallow.fields.String(),
+#         ),
+#     )
+#     # id = attr.ib(
+#     #     default=0,
+#     #     converter=int,
+#     #     metadata=graham.create_metadata(
+#     #         field=marshmallow.fields.Integer(),
+#     #     ),
+#     # )  # 103
+#     length = attr.ib(
+#         default=0,
+#         converter=int,
+#         metadata=graham.create_metadata(
+#             field=marshmallow.fields.Integer(),
+#         ),
+#     )  # 50, in the spirit of over constraining like how
+#     # data points have their offset
+#
+#     # ?
+#     # self.model_id = '{}'.format(model_id)
+#     # self.namespace = namespace
+#     # self.index = index
+#
+#     # special children
+#     # header: id and length
+#
+#     # self.point_data = []
+#     children = attr.ib(
+#         factory=lambda: [HeaderBlock(), FixedBlock()],
+#         metadata=graham.create_metadata(
+#             field=graham.fields.MixedList(
+#                 fields=(
+#                     # marshmallow.fields.Nested(graham.schema(HeaderBlock)),
+#                     # marshmallow.fields.Nested(graham.schema(FixedBlock)),
+#                     marshmallow.fields.Nested(graham.schema(DataPoint)),
+#                     marshmallow.fields.Nested(
+#                         graham.schema(TableRepeatingBlockReference)
+#                     ),
+#                 )
+#             ),
+#         ),
+#     )
+#
+#     uuid = epyqlib.attrsmodel.attr_uuid()
+#
+#     def __attrs_post_init__(self):
+#         super().__init__()
+#
+#     def remove_old_on_drop(self, node):
+#         return False
+#
+#     def child_from(self, node):
+#         reference = TableRepeatingBlockReference(original=node)
+#         for child in node.tree_parent.children:
+#             if not isinstance(child, DataPoint):
+#                 continue
+#
+#             reference.append_child(
+#                 TableRepeatingBlockReferenceDataPointReference(
+#                     original=child,
+#                 ),
+#             )
+#
+#         return reference
+#
+#     def can_drop_on(self, node):
+#         return isinstance(node, TableRepeatingBlock) and not any(
+#             isinstance(child, TableRepeatingBlockReference) for child in self.children
+#         )
+#
+#     def can_delete(self, node=None):
+#         if node is None:
+#             return self.tree_parent.can_delete(node=self)
+#
+#         return not isinstance(node, (HeaderBlock, FixedBlock))
+#
+#     def check_offsets_and_length(self):
+#         length = 0
+#
+#         for block in self.children:
+#             length += block.check_offsets_and_length()
+#
+#         return length
+#
+#     internal_move = epyqlib.attrsmodel.default_internal_move
+#     check = epyqlib.attrsmodel.check_just_children
 
 
 # class Repeating...?
@@ -1225,19 +1225,20 @@ class Model(epyqlib.treenode.TreeNode):
 
 Root = epyqlib.attrsmodel.Root(
     default_name="Static Modbus",
-    valid_types=(Model, Table),
+    valid_types=(DataPoint, Table),
+    # valid_types=(Model, Table),
 )
 
 
 types = epyqlib.attrsmodel.Types(
     types=(
         Root,
-        Model,
+        # Model,
         DataPoint,
         DataPointBitfield,
         DataPointBitfieldMember,
-        HeaderBlock,
-        FixedBlock,
+        # HeaderBlock,
+        # FixedBlock,
         Table,
         TableRepeatingBlock,
         TableRepeatingBlockReference,
@@ -1255,13 +1256,13 @@ columns = epyqlib.attrsmodel.columns(
     (
         merge(
             "name",
-            HeaderBlock,
-            FixedBlock,
+            # HeaderBlock,
+            # FixedBlock,
             Table,
             TableRepeatingBlock,
             TableRepeatingBlockReference,
         )
-        + merge("name", Model)
+        # + merge("name", Model)
         # + merge("id", Model)
         + merge(
             "parameter_uuid",
@@ -1273,7 +1274,8 @@ columns = epyqlib.attrsmodel.columns(
     ),
     merge("abbreviation", TableRepeatingBlock),
     merge("not_implemented", DataPoint),
-    merge("length", Model) + merge("size", DataPoint, DataPointBitfield),
+    merge("size", DataPoint, DataPointBitfield),
+    # merge("length", Model) + merge("size", DataPoint, DataPointBitfield),
     merge("repeats", TableRepeatingBlock),
     # merge("hand_coded_getter", DataPoint),
     # merge("hand_coded_setter", DataPoint),

@@ -101,6 +101,7 @@ def _post_load(project):
             models.staticmodbus = epyqlib.attrsmodel.Model(
                 root=epcpm.staticmodbusmodel.Root(),
                 columns=epcpm.staticmodbusmodel.columns,
+                drop_sources=(models.parameters,),
             )
         else:
             models.staticmodbus = load_model(
