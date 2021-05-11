@@ -29,6 +29,7 @@ sunspec_types = {
     "string": "PackedString",
     "bitfield16": "sunsU16",
     "bitfield32": "sunsU32",
+    "UartName" : "UartName",
 }
 
 
@@ -591,6 +592,12 @@ class PackedStringType:
     minimum_code = attr.ib(default="(0)")
     maximum_code = attr.ib(default="(0)")
 
+@attr.s(frozen=True)
+class UartNameType:
+    name = attr.ib(default="UartName")
+    type = attr.ib(default="UartName")
+    minimum_code = attr.ib(default="(0)")
+    maximum_code = attr.ib(default="(0)")
 
 def fixed_width_name(bits, signed):
     if signed:
@@ -631,6 +638,7 @@ types = {
         SizeType(),
         VoidPointerType(),
         PackedStringType(),
+        UartNameType(),
     )
 }
 
