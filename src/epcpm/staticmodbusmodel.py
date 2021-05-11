@@ -92,7 +92,8 @@ def create_factor_uuid_attribute():
         human_name="Scale Factor",
         allow_none=True,
         data_display=name_from_uuid,
-        list_selection_path=("..", "..", "Fixed Block"),
+        list_selection_path=("/"),
+        # list_selection_path=("..", "..", "Fixed Block"),
         override_delegate=ScaleFactorDelegate,
     )
 
