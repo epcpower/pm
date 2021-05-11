@@ -322,7 +322,6 @@ class DataPoint(epyqlib.treenode.TreeNode):
         else:
             root = self.find_root()
             parameter = root.model.node_from_uuid(self.parameter_uuid)
-
             if (
                 parameter.tree_parent.name.startswith("SunSpec")
                 and parameter.tree_parent.tree_parent.tree_parent is None
@@ -335,7 +334,25 @@ class DataPoint(epyqlib.treenode.TreeNode):
                     )
                 )
 
-            if not parameter.uses_interface_item():
+            if not parameter.uses_interface_item() and not self.not_implemented:
+                #ancestors = parameter.tree_parent.ancestors()
+                print("-------------------------------")
+                #print("uuid = " + str(self.uuid))
+                print("self.not_implemented = " + str(self.not_implemented))
+
+                print("old parameter = " + str(parameter))
+                for ancestors in parameter.ancestors():
+                    print("ancestors = " + str(ancestors.name))
+                print("-------------------------------")
+
+                #print("old parameter abbv= " + str(parameter.abbreviation))
+                #print("old parameter internal_variable= " + str(parameter.internal_variable))
+                #print("old parameter getter_function= " + str(parameter.getter_function))
+                #print("old parameter setter_function= " + str(parameter.setter_function))
+                #print("old parameter can_getter= " + str(parameter.can_getter))
+
+                #print("old parameter = " + str(vars(parameter)))
+                #print("self = " + str(self))
                 result.append_child(
                     epyqlib.checkresultmodel.Result(
                         node=self,
@@ -343,6 +360,23 @@ class DataPoint(epyqlib.treenode.TreeNode):
                         message=("Connected to old-style parameter"),
                     )
                 )
+
+            # if parameter.old_variable():
+            #     print("2old parameter = " + str(parameter))
+
+            #     print("2old parameter abbv= " + str(parameter.abbreviation))
+            #     print("2old parameter can_getter= " + str(parameter.can_getter))
+            #     print("2old parameter can_setter= " + str(parameter.can_setter))
+                
+            #     #print("old parameter = " + str(vars(parameter)))
+            #     #print("self = " + str(self))
+            #     result.append_child(
+            #         epyqlib.checkresultmodel.Result(
+            #             node=self,
+            #             severity=(epyqlib.checkresultmodel.ResultSeverity.information),
+            #             message=("Anker Connected to old-style parameter"),
+            #         )
+            #     )
 
                 access_level = root.model.node_from_uuid(
                     parameter.access_level_uuid,
