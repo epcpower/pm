@@ -293,7 +293,7 @@ class DataPoint:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
 
-    def interface_variable_name(self):
+    def interface_variable_name(self, reference=True):
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
         maybe_model = self.wrapped.tree_parent
@@ -304,8 +304,10 @@ class DataPoint:
         model = maybe_model
         model_variable = f"sunspecInterface.model{model.id}"
 
-        return f"&{model_variable}.{parameter.abbreviation}"
-
+        if reference == True:
+            return f"&{model_variable}.{parameter.abbreviation}"
+        else:
+            return f"{model_variable}.{parameter.abbreviation}"
 
 @builders(epcpm.sunspecmodel.DataPointBitfieldMember)
 @attr.s
@@ -313,12 +315,14 @@ class DataPointBitfieldMember:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
 
-    def interface_variable_name(self):
+    def interface_variable_name(self, reference=True):
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
         uuid_ = str(parameter.uuid).replace("-", "_")
-        return f"&interfaceItem_variable_{uuid_}"
-
+        if reference == True:
+            return f"&interfaceItem_variable_{uuid_}"
+        else:
+            return f"interfaceItem_variable_{uuid_}"
 
 @builders(epyqlib.pm.parametermodel.Parameter)
 @attr.s
@@ -381,6 +385,7 @@ class Parameter:
 
         if sunspec_point is None:
             sunspec_variable = "NULL"
+            sunspec_variable_noref = "NULL"
             sunspec_getter = "NULL"
             sunspec_setter = "NULL"
             hand_coded_sunspec_getter_function = "NULL"
@@ -452,6 +457,8 @@ class Parameter:
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
             sunspec_variable = sunspec_point_builder.interface_variable_name()
+            sunspec_variable_noref = sunspec_point_builder.interface_variable_name(reference=False)
+
 
             # TODO: CAMPid 9675436715674367943196954756419543975314
             getter_setter_list = [
@@ -502,6 +509,7 @@ class Parameter:
             sunspec_getter=sunspec_getter,
             sunspec_setter=sunspec_setter,
             sunspec_variable=sunspec_variable,
+            sunspec_variable_noref=sunspec_variable_noref,
             variable_or_getter_setter=variable_or_getter_setter,
             rejected_callback=rejected_callback,
             can_scale_factor=getattr(can_signal, "factor", None),
@@ -1382,6 +1390,7 @@ def create_item(
     sunspec_getter,
     sunspec_setter,
     sunspec_variable,
+    sunspec_variable_noref,
     variable_or_getter_setter,
     rejected_callback,
     can_scale_factor,
@@ -1418,6 +1427,11 @@ def create_item(
         include_uuid_in_item=include_uuid_in_item,
     )
 
+    maybe_sunspec_variable_length = []
+    if parameter.internal_type == "UartName":
+        maybe_sunspec_variable_length = [f".sunspec_variable_length = LENGTHOF({sunspec_variable_noref}),"] #LENGTHOF(SunspecVar)
+
+
     item = [
         f'#pragma DATA_SECTION({item_name}, "Interface")',
         f"// {node_path_string(parameter)}",
@@ -1429,6 +1443,7 @@ def create_item(
             "},",
             *variable_or_getter_setter,
             f".rejectedCallback = {rejected_callback},",
+            *maybe_sunspec_variable_length,
             *meta_initializer,
         ],
         "};",
