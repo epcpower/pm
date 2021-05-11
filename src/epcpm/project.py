@@ -221,7 +221,7 @@ class Models:
         self.sunspec.list_selection_roots["enumerations"] = enumerations_root
 
         # TODO: These will probably go away?
-        self.staticmodbus.list_selection_roots["sunspec types"] = sunspec_types_root
+        self.staticmodbus.list_selection_roots["staticmodbus types"] = sunspec_types_root
         self.staticmodbus.list_selection_roots["enumerations"] = enumerations_root
 
         self.can.list_selection_roots["enumerations"] = enumerations_root
