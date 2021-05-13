@@ -293,6 +293,7 @@ class DataPoint:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
 
+    #By Default will return reference to the variable unless reference parameter == false.
     def interface_variable_name(self, reference=True):
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
@@ -1429,7 +1430,7 @@ def create_item(
 
     maybe_sunspec_variable_length = []
     if parameter.internal_type == "UartName":
-        maybe_sunspec_variable_length = [f".sunspec_variable_length = LENGTHOF({sunspec_variable_noref}),"] #LENGTHOF(SunspecVar)
+        maybe_sunspec_variable_length = [f".sunspec_variable_length = LENGTHOF({sunspec_variable_noref}),"]
 
 
     item = [
