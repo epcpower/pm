@@ -1226,7 +1226,13 @@ class Table(epyqlib.treenode.TreeNode):
 
 Root = epyqlib.attrsmodel.Root(
     default_name="Static Modbus",
-    valid_types=(DataPoint, Table),
+    valid_types=(
+        DataPoint,
+        Table,
+        TableRepeatingBlockReferenceDataPointReference,
+        DataPointBitfield,
+        DataPointBitfieldMember,
+    ),
     # valid_types=(Model, Table),
 )
 
