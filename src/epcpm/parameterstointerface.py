@@ -376,6 +376,11 @@ class Parameter:
                 f".getter = {getter_function},",
             ]
 
+        if parameter.read_only is None:
+            read_only = "NULL"
+        else:
+            read_only = parameter.read_only
+
         variable_or_getter_setter.append(f".setter = {setter_function},")
 
         if sunspec_point is None:
@@ -461,7 +466,11 @@ class Parameter:
             ]
 
             sunspec_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
-            sunspec_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
+            if read_only != True:
+                sunspec_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
+            else:
+                sunspec_setter = "NULL"
+
 
         interface_item_type = (
             f"InterfaceItem_{var_or_func}_{types[parameter.internal_type].name}"
@@ -487,6 +496,7 @@ class Parameter:
             item_uuid=parameter.uuid,
             include_uuid_in_item=self.include_uuid_in_item,
             access_level=access_level,
+            read_only=read_only,
             can_getter=can_getter,
             can_setter=can_setter,
             can_variable=can_variable,
@@ -1029,6 +1039,7 @@ class TableBaseStructures:
 
         common_initializers = create_common_initializers(
             access_level=access_level,
+            read_only="NULL",
             can_getter=can_getter,
             can_setter=can_setter,
             # not to be used so really hardcode NULL
@@ -1360,6 +1371,7 @@ def create_item(
     item_uuid,
     include_uuid_in_item,
     access_level,
+    read_only,
     can_getter,
     can_setter,
     can_variable,
@@ -1393,6 +1405,7 @@ def create_item(
 
     common_initializers = create_common_initializers(
         access_level=access_level,
+        read_only=read_only,
         can_getter=can_getter,
         can_setter=can_setter,
         can_variable=can_variable,
@@ -1444,6 +1457,7 @@ def uuid_initializer(uuid_):
 
 def create_common_initializers(
     access_level,
+    read_only,
     can_getter,
     can_setter,
     can_variable,
@@ -1497,6 +1511,7 @@ def create_common_initializers(
         ],
         f"}},",
         f".access_level = {access_level},",
+        f".read_only = {read_only},",        
         *maybe_uuid,
     ]
     return common_initializers
