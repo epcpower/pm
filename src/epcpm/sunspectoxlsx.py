@@ -130,6 +130,7 @@ class Root:
     skip_sunspec = attr.ib(default=False)
     parameter_uuid_finder = attr.ib(default=None)
     parameter_model = attr.ib(default=None)
+    sort_models = attr.ib(default=True)
 
     def gen(self):
         workbook = openpyxl.Workbook()
@@ -140,13 +141,16 @@ class Root:
         workbook.create_sheet("Index")
 
         if not self.skip_sunspec:
-            children = sorted(
-                self.wrapped.children,
-                key=lambda child: (
-                    0 if isinstance(child, epcpm.sunspecmodel.Model) else 1,
-                    getattr(child, "id", math.inf),
-                ),
-            )
+            if self.sort_models:
+                children = sorted(
+                    self.wrapped.children,
+                    key=lambda child: (
+                        0 if isinstance(child, epcpm.sunspecmodel.Model) else 1,
+                        getattr(child, "id", math.inf),
+                    ),
+                )
+            else:
+                children = list(self.wrapped.children)
 
             model_offset = 2  # account for starting 'SunS'
             for model in children:
