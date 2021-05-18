@@ -130,7 +130,7 @@ class Root:
     skip_sunspec = attr.ib(default=False)
     parameter_uuid_finder = attr.ib(default=None)
     parameter_model = attr.ib(default=None)
-    sort_models = attr.ib(default=True)
+    sort_models = attr.ib(default=False)
 
     def gen(self):
         workbook = openpyxl.Workbook()
