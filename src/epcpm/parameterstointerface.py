@@ -366,12 +366,6 @@ class Parameter:
         else:
             setter_function = parameter.setter_function
 
-        maybe_sunspec_variable_length = []
-        if parameter.internal_type == "UartName":
-            maybe_sunspec_variable_length = [
-                f".sunspec_variable_length = LENGTHOF({sunspec_variable}),"
-            ]
-
         if parameter.internal_variable is not None:
             var_or_func = "variable"
 
@@ -460,6 +454,13 @@ class Parameter:
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
             sunspec_variable = sunspec_point_builder.interface_variable_name()
+
+            maybe_sunspec_variable_length = []
+            if parameter.internal_type == "UartName":
+                maybe_sunspec_variable_length = [
+                    f".sunspec_variable_length = LENGTHOF({sunspec_variable}),"
+                ]
+
 
             # TODO: CAMPid 9675436715674367943196954756419543975314
             getter_setter_list = [
