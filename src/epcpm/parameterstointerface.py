@@ -29,7 +29,7 @@ sunspec_types = {
     "string": "PackedString",
     "bitfield16": "sunsU16",
     "bitfield32": "sunsU32",
-    "UartName" : "UartName",
+    "UartName": "UartName",
 }
 
 
@@ -293,7 +293,7 @@ class DataPoint:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
 
-    #By Default will return reference to the variable unless reference parameter == false.
+    # By Default will return reference to the variable unless reference parameter == false.
     def interface_variable_name(self):
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
@@ -307,6 +307,7 @@ class DataPoint:
 
         return f"{model_variable}.{parameter.abbreviation}"
 
+
 @builders(epcpm.sunspecmodel.DataPointBitfieldMember)
 @attr.s
 class DataPointBitfieldMember:
@@ -319,6 +320,7 @@ class DataPointBitfieldMember:
         uuid_ = str(parameter.uuid).replace("-", "_")
 
         return f"interfaceItem_variable_{uuid_}"
+
 
 @builders(epyqlib.pm.parametermodel.Parameter)
 @attr.s
@@ -366,7 +368,9 @@ class Parameter:
 
         maybe_sunspec_variable_length = []
         if parameter.internal_type == "UartName":
-            maybe_sunspec_variable_length = [f".sunspec_variable_length = LENGTHOF({sunspec_variable}),"]
+            maybe_sunspec_variable_length = [
+                f".sunspec_variable_length = LENGTHOF({sunspec_variable}),"
+            ]
 
         if parameter.internal_variable is not None:
             var_or_func = "variable"
@@ -456,7 +460,6 @@ class Parameter:
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
             sunspec_variable = sunspec_point_builder.interface_variable_name()
-
 
             # TODO: CAMPid 9675436715674367943196954756419543975314
             getter_setter_list = [
@@ -598,12 +601,14 @@ class PackedStringType:
     minimum_code = attr.ib(default="(0)")
     maximum_code = attr.ib(default="(0)")
 
+
 @attr.s(frozen=True)
 class UartNameType:
     name = attr.ib(default="UartName")
     type = attr.ib(default="UartName")
     minimum_code = attr.ib(default="(0)")
     maximum_code = attr.ib(default="(0)")
+
 
 def fixed_width_name(bits, signed):
     if signed:
@@ -1425,7 +1430,6 @@ def create_item(
         include_uuid_in_item=include_uuid_in_item,
     )
 
-
     item = [
         f'#pragma DATA_SECTION({item_name}, "Interface")',
         f"// {node_path_string(parameter)}",
@@ -1491,10 +1495,10 @@ def create_common_initializers(
 
     scale_factor_variable_ref = "NULL"
     if scale_factor_variable is not "NULL":
-            scale_factor_variable_ref = "&" + scale_factor_variable
+        scale_factor_variable_ref = "&" + scale_factor_variable
     sunspec_variable_ref = "NULL"
     if sunspec_variable is not "NULL":
-            sunspec_variable_ref = "&" + sunspec_variable
+        sunspec_variable_ref = "&" + sunspec_variable
 
     common_initializers = [
         f".sunspecScaleFactor = {scale_factor_variable_ref},",
