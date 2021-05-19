@@ -353,6 +353,7 @@ class Parameter:
         if not uses_interface_item or all(x is None for x in interface_data):
             return [[], [], sunspec_models]
 
+        maybe_sunspec_variable_length = []
         scale_factor_variable = "NULL"
         scale_factor_updater = "NULL"
 
@@ -455,12 +456,11 @@ class Parameter:
             )
             sunspec_variable = sunspec_point_builder.interface_variable_name()
 
-            maybe_sunspec_variable_length = []
+            
             if parameter.internal_type == "UartName":
                 maybe_sunspec_variable_length = [
                     f".sunspec_variable_length = LENGTHOF({sunspec_variable}),"
                 ]
-
 
             # TODO: CAMPid 9675436715674367943196954756419543975314
             getter_setter_list = [
