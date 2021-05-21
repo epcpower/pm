@@ -425,7 +425,9 @@ class FunctionDataBitfield(epyqlib.treenode.TreeNode):
         metadata=graham.create_metadata(
             field=graham.fields.MixedList(
                 fields=(
-                    marshmallow.fields.Nested(graham.schema(FunctionDataBitfieldMember)),
+                    marshmallow.fields.Nested(
+                        graham.schema(FunctionDataBitfieldMember)
+                    ),
                 )
             ),
         ),
