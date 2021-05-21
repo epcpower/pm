@@ -293,7 +293,6 @@ class DataPoint:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
 
-    # By Default will return reference to the variable unless reference parameter == false.
     def interface_variable_name(self):
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
@@ -318,7 +317,6 @@ class DataPointBitfieldMember:
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
         uuid_ = str(parameter.uuid).replace("-", "_")
-
         return f"interfaceItem_variable_{uuid_}"
 
 
@@ -1495,10 +1493,10 @@ def create_common_initializers(
     )
 
     scale_factor_variable_ref = "NULL"
-    if scale_factor_variable is not "NULL":
+    if scale_factor_variable != "NULL":
         scale_factor_variable_ref = "&" + scale_factor_variable
     sunspec_variable_ref = "NULL"
-    if sunspec_variable is not "NULL":
+    if sunspec_variable != "NULL":
         sunspec_variable_ref = "&" + sunspec_variable
 
     common_initializers = [
