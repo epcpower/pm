@@ -182,11 +182,11 @@ class ScaleFactorDelegate(QtWidgets.QStyledItemDelegate):
         model.setData(index, datum)
 
 
-@graham.schemify(tag="data_point", register=True)
+@graham.schemify(tag="function_data", register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
-class DataPoint(epyqlib.treenode.TreeNode):
+class FunctionData(epyqlib.treenode.TreeNode):
     factor_uuid = create_factor_uuid_attribute()
     parameter_uuid = create_parameter_uuid_attribute()
 
@@ -367,11 +367,11 @@ class DataPoint(epyqlib.treenode.TreeNode):
     internal_move = epyqlib.attrsmodel.default_internal_move
 
 
-@graham.schemify(tag="data_point_bitfield_member", register=True)
+@graham.schemify(tag="function_data_bitfield_member", register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
-class DataPointBitfieldMember(epyqlib.treenode.TreeNode):
+class FunctionDataBitfieldMember(epyqlib.treenode.TreeNode):
     parameter_uuid = create_parameter_uuid_attribute()
 
     bit_offset = attr.ib(
@@ -413,11 +413,11 @@ class DataPointBitfieldMember(epyqlib.treenode.TreeNode):
     check = epyqlib.attrsmodel.check_just_children
 
 
-@graham.schemify(tag="data_point_bitfield", register=True)
+@graham.schemify(tag="function_data_bitfield", register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
-class DataPointBitfield(epyqlib.treenode.TreeNode):
+class FunctionDataBitfield(epyqlib.treenode.TreeNode):
     parameter_uuid = create_parameter_uuid_attribute()
 
     children = attr.ib(
@@ -425,7 +425,7 @@ class DataPointBitfield(epyqlib.treenode.TreeNode):
         metadata=graham.create_metadata(
             field=graham.fields.MixedList(
                 fields=(
-                    marshmallow.fields.Nested(graham.schema(DataPointBitfieldMember)),
+                    marshmallow.fields.Nested(graham.schema(FunctionDataBitfieldMember)),
                 )
             ),
         ),
@@ -459,7 +459,7 @@ class DataPointBitfield(epyqlib.treenode.TreeNode):
         return isinstance(
             node,
             (
-                DataPointBitfieldMember,
+                FunctionDataBitfieldMember,
                 epyqlib.pm.parametermodel.Parameter,
             ),
         )
@@ -527,7 +527,7 @@ def check_block_offsets_and_length(self):
 #         factory=list,
 #         metadata=graham.create_metadata(
 #             field=graham.fields.MixedList(
-#                 fields=(marshmallow.fields.Nested(graham.schema(DataPoint)),)
+#                 fields=(marshmallow.fields.Nested(graham.schema(FunctionData)),)
 #             ),
 #         ),
 #     )
@@ -560,14 +560,14 @@ def check_block_offsets_and_length(self):
 #             ),
 #         ]
 #         points = [
-#             DataPoint(
+#             FunctionData(
 #                 # block_offset=0,
 #                 size=1,
 #                 type_uuid=uint16_uuid,
 #                 parameter_uuid=parameters[0].uuid,
 #                 # mandatory=True,
 #             ),
-#             DataPoint(
+#             FunctionData(
 #                 # block_offset=1,
 #                 size=1,
 #                 type_uuid=uint16_uuid,
@@ -607,8 +607,8 @@ def check_block_offsets_and_length(self):
 #         metadata=graham.create_metadata(
 #             field=graham.fields.MixedList(
 #                 fields=(
-#                     marshmallow.fields.Nested(graham.schema(DataPoint)),
-#                     marshmallow.fields.Nested(graham.schema(DataPointBitfield)),
+#                     marshmallow.fields.Nested(graham.schema(FunctionData)),
+#                     marshmallow.fields.Nested(graham.schema(FunctionDataBitfield)),
 #                 )
 #             ),
 #         ),
@@ -626,8 +626,8 @@ def check_block_offsets_and_length(self):
 #             node,
 #             (
 #                 epyqlib.pm.parametermodel.Parameter,
-#                 DataPoint,
-#                 DataPointBitfield,
+#                 FunctionData,
+#                 FunctionDataBitfield,
 #             ),
 #         )
 #
@@ -635,11 +635,11 @@ def check_block_offsets_and_length(self):
 #         if node is None:
 #             return self.tree_parent.can_delete(node=self)
 #
-#         return isinstance(node, (DataPoint, DataPointBitfield))
+#         return isinstance(node, (FunctionData, FunctionDataBitfield))
 #
 #     def child_from(self, node):
 #         if isinstance(node, epyqlib.pm.parametermodel.Parameter):
-#             return DataPoint(parameter_uuid=node.uuid)
+#             return FunctionData(parameter_uuid=node.uuid)
 #
 #         return node
 #
@@ -656,7 +656,7 @@ def check_block_offsets_and_length(self):
 
 
 @graham.schemify(
-    tag="staticmodbus_table_repeating_block_reference_data_point_reference",
+    tag="staticmodbus_table_repeating_block_reference_function_data_reference",
     register=True,
 )
 @epyqlib.attrsmodel.ify()
@@ -666,7 +666,7 @@ def check_block_offsets_and_length(self):
     field_names=("parameter_uuid",),
 )
 @attr.s(hash=False)
-class TableRepeatingBlockReferenceDataPointReference(epyqlib.treenode.TreeNode):
+class TableRepeatingBlockReferenceFunctionDataReference(epyqlib.treenode.TreeNode):
     parameter_uuid = create_parameter_uuid_attribute()
 
     factor_uuid = create_factor_uuid_attribute()
@@ -715,7 +715,7 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
                 fields=(
                     marshmallow.fields.Nested(
                         graham.schema(
-                            TableRepeatingBlockReferenceDataPointReference,
+                            TableRepeatingBlockReferenceFunctionDataReference,
                         )
                     ),
                 )
@@ -764,7 +764,7 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
     field_names=("name",),
 )
 @attr.s(hash=False)
-class TableDataPointReference(epyqlib.treenode.TreeNode):
+class FunctionDataReference(epyqlib.treenode.TreeNode):
     name = attr.ib(
         default="Table Data Point Reference",
         metadata=graham.create_metadata(
@@ -836,7 +836,7 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
         factory=list,
         metadata=graham.create_metadata(
             field=graham.fields.MixedList(
-                fields=(marshmallow.fields.Nested(graham.schema(DataPoint)),)
+                fields=(marshmallow.fields.Nested(graham.schema(FunctionData)),)
             ),
         ),
     )
@@ -919,7 +919,7 @@ class Table(epyqlib.treenode.TreeNode):
             field=graham.fields.MixedList(
                 fields=(
                     marshmallow.fields.Nested(graham.schema(TableRepeatingBlock)),
-                    marshmallow.fields.Nested(graham.schema(DataPoint)),
+                    marshmallow.fields.Nested(graham.schema(FunctionData)),
                 )
             ),
         ),
@@ -970,27 +970,27 @@ class Table(epyqlib.treenode.TreeNode):
         elif table.uuid != self.table_uuid:
             raise ConsistencyError()
 
-        master_array_data_points_by_uuid = {}
+        master_array_function_data_by_uuid = {}
 
         for section in table.arrays_and_groups:
             if isinstance(section, epyqlib.pm.parametermodel.Array):
                 array_element = section.children[0]
                 node = old_nodes_by_path.get(array_element.uuid)
                 if node is None:
-                    node = DataPoint(
+                    node = FunctionData(
                         parameter_uuid=array_element.uuid,
                     )
                 self.append_child(node)
-                master_array_data_points_by_uuid[array_element.uuid] = node
+                master_array_function_data_by_uuid[array_element.uuid] = node
             elif isinstance(section, epyqlib.pm.parametermodel.Group):
                 for element in section.children:
                     node = old_nodes_by_path.get(element.uuid)
                     if node is None:
-                        node = DataPoint(
+                        node = FunctionData(
                             parameter_uuid=element.uuid,
                         )
                     self.append_child(node)
-                    master_array_data_points_by_uuid[element.uuid] = node
+                    master_array_function_data_by_uuid[element.uuid] = node
 
         for combination in table.combinations:
             not_first_curve = any(
@@ -1056,18 +1056,18 @@ class Table(epyqlib.treenode.TreeNode):
             # TODO: CAMPid 143707880547014313476753071297360068134
             for element in group_elements[0]:
                 point_node = old_nodes_by_path.get(element.uuid)
-                reference_data_point = master_array_data_points_by_uuid[
+                reference_function_data = master_array_function_data_by_uuid[
                     element.original.uuid
                 ]
                 if point_node is None:
-                    point_node = DataPoint(
+                    point_node = FunctionData(
                         parameter_uuid=element.uuid,
                     )
-                # point_node.mandatory = reference_data_point.mandatory
-                point_node.units = reference_data_point.units
-                point_node.type_uuid = reference_data_point.type_uuid
-                point_node.size = reference_data_point.size
-                point_node.enumeration_uuid = reference_data_point.enumeration_uuid
+                # point_node.mandatory = reference_function_data.mandatory
+                point_node.units = reference_function_data.units
+                point_node.type_uuid = reference_function_data.type_uuid
+                point_node.size = reference_function_data.size
+                point_node.enumeration_uuid = reference_function_data.enumeration_uuid
                 # point_node.block_offset = block_offset
                 block_node.append_child(point_node)
                 # block_offset += point_node.size
@@ -1083,18 +1083,18 @@ class Table(epyqlib.treenode.TreeNode):
             )
             for element in array_elements:
                 point_node = old_nodes_by_path.get(element.uuid)
-                reference_data_point = master_array_data_points_by_uuid[
+                reference_function_data = master_array_function_data_by_uuid[
                     element.tree_parent.children[0].original.uuid
                 ]
                 if point_node is None:
-                    point_node = DataPoint(
+                    point_node = FunctionData(
                         parameter_uuid=element.uuid,
                     )
-                # point_node.mandatory = reference_data_point.mandatory
-                point_node.units = reference_data_point.units
-                point_node.type_uuid = reference_data_point.type_uuid
-                point_node.size = reference_data_point.size
-                point_node.enumeration_uuid = reference_data_point.enumeration_uuid
+                # point_node.mandatory = reference_function_data.mandatory
+                point_node.units = reference_function_data.units
+                point_node.type_uuid = reference_function_data.type_uuid
+                point_node.size = reference_function_data.size
+                point_node.enumeration_uuid = reference_function_data.enumeration_uuid
                 # point_node.block_offset = block_offset
                 block_node.append_child(point_node)
                 # block_offset += point_node.size
@@ -1102,18 +1102,18 @@ class Table(epyqlib.treenode.TreeNode):
             # TODO: CAMPid 143707880547014313476753071297360068134
             for element in group_elements[1]:
                 point_node = old_nodes_by_path.get(element.uuid)
-                reference_data_point = master_array_data_points_by_uuid[
+                reference_function_data = master_array_function_data_by_uuid[
                     element.original.uuid
                 ]
                 if point_node is None:
-                    point_node = DataPoint(
+                    point_node = FunctionData(
                         parameter_uuid=element.uuid,
                     )
-                # point_node.mandatory = reference_data_point.mandatory
-                point_node.units = reference_data_point.units
-                point_node.type_uuid = reference_data_point.type_uuid
-                point_node.size = reference_data_point.size
-                point_node.enumeration_uuid = reference_data_point.enumeration_uuid
+                # point_node.mandatory = reference_function_data.mandatory
+                point_node.units = reference_function_data.units
+                point_node.type_uuid = reference_function_data.type_uuid
+                point_node.size = reference_function_data.size
+                point_node.enumeration_uuid = reference_function_data.enumeration_uuid
                 # point_node.block_offset = block_offset
                 block_node.append_child(point_node)
                 # block_offset += point_node.size
@@ -1167,7 +1167,7 @@ class Table(epyqlib.treenode.TreeNode):
 #                 fields=(
 #                     # marshmallow.fields.Nested(graham.schema(HeaderBlock)),
 #                     # marshmallow.fields.Nested(graham.schema(FixedBlock)),
-#                     marshmallow.fields.Nested(graham.schema(DataPoint)),
+#                     marshmallow.fields.Nested(graham.schema(FunctionData)),
 #                     marshmallow.fields.Nested(
 #                         graham.schema(TableRepeatingBlockReference)
 #                     ),
@@ -1187,11 +1187,11 @@ class Table(epyqlib.treenode.TreeNode):
 #     def child_from(self, node):
 #         reference = TableRepeatingBlockReference(original=node)
 #         for child in node.tree_parent.children:
-#             if not isinstance(child, DataPoint):
+#             if not isinstance(child, FunctionData):
 #                 continue
 #
 #             reference.append_child(
-#                 TableRepeatingBlockReferenceDataPointReference(
+#                 TableRepeatingBlockReferenceFunctionDataReference(
 #                     original=child,
 #                 ),
 #             )
@@ -1227,11 +1227,11 @@ class Table(epyqlib.treenode.TreeNode):
 Root = epyqlib.attrsmodel.Root(
     default_name="Static Modbus",
     valid_types=(
-        DataPoint,
+        FunctionData,
         Table,
-        TableRepeatingBlockReferenceDataPointReference,
-        DataPointBitfield,
-        DataPointBitfieldMember,
+        TableRepeatingBlockReferenceFunctionDataReference,
+        FunctionDataBitfield,
+        FunctionDataBitfieldMember,
     ),
     # valid_types=(Model, Table),
 )
@@ -1241,15 +1241,15 @@ types = epyqlib.attrsmodel.Types(
     types=(
         Root,
         # Model,
-        DataPoint,
-        DataPointBitfield,
-        DataPointBitfieldMember,
+        FunctionData,
+        FunctionDataBitfield,
+        FunctionDataBitfieldMember,
         # HeaderBlock,
         # FixedBlock,
         Table,
         TableRepeatingBlock,
         TableRepeatingBlockReference,
-        TableRepeatingBlockReferenceDataPointReference,
+        TableRepeatingBlockReferenceFunctionDataReference,
     ),
 )
 
@@ -1273,40 +1273,40 @@ columns = epyqlib.attrsmodel.columns(
         # + merge("id", Model)
         + merge(
             "parameter_uuid",
-            DataPoint,
-            TableRepeatingBlockReferenceDataPointReference,
-            DataPointBitfield,
-            DataPointBitfieldMember,
+            FunctionData,
+            TableRepeatingBlockReferenceFunctionDataReference,
+            FunctionDataBitfield,
+            FunctionDataBitfieldMember,
         )
     ),
     merge("abbreviation", TableRepeatingBlock),
-    merge("not_implemented", DataPoint),
-    merge("size", DataPoint, DataPointBitfield),
-    # merge("length", Model) + merge("size", DataPoint, DataPointBitfield),
+    merge("not_implemented", FunctionData),
+    merge("size", FunctionData, FunctionDataBitfield),
+    # merge("length", Model) + merge("size", FunctionData, FunctionDataBitfield),
     merge("repeats", TableRepeatingBlock),
-    # merge("hand_coded_getter", DataPoint),
-    # merge("hand_coded_setter", DataPoint),
+    # merge("hand_coded_getter", FunctionData),
+    # merge("hand_coded_setter", FunctionData),
     merge(
         "factor_uuid",
-        DataPoint,
-        TableRepeatingBlockReferenceDataPointReference,
+        FunctionData,
+        TableRepeatingBlockReferenceFunctionDataReference,
     ),
-    merge("units", DataPoint),
-    merge("enumeration_uuid", DataPoint),
-    merge("type_uuid", DataPoint, DataPointBitfield, DataPointBitfieldMember),
-    merge("bit_length", DataPointBitfieldMember),
-    merge("bit_offset", DataPointBitfieldMember),
+    merge("units", FunctionData),
+    merge("enumeration_uuid", FunctionData),
+    merge("type_uuid", FunctionData, FunctionDataBitfield, FunctionDataBitfieldMember),
+    merge("bit_length", FunctionDataBitfieldMember),
+    merge("bit_offset", FunctionDataBitfieldMember),
     merge("parameter_table_uuid", Table),
-    # merge("mandatory", DataPoint),
+    # merge("mandatory", FunctionData),
     # merge(
     #     "offset",
-    #     DataPoint,
+    #     FunctionData,
     #     HeaderBlock,
     #     FixedBlock,
     #     TableRepeatingBlockReference,
     #     TableRepeatingBlock,
     # ),
-    # merge("block_offset", DataPoint, DataPointBitfield),
+    # merge("block_offset", FunctionData, FunctionDataBitfield),
     merge("uuid", *types.types.values()),
 )
 

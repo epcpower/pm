@@ -71,7 +71,7 @@ def count_types(sequence):
 def test_table_update_unlinked():
     expected_counts = {
         epcpm.staticmodbusmodel.TableRepeatingBlock: 8,
-        epcpm.staticmodbusmodel.DataPoint: 2,
+        epcpm.staticmodbusmodel.FunctionData: 2,
     }
 
     project = epcpm.project.loadp(here / "project" / "project.pmp")
