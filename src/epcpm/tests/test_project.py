@@ -16,8 +16,8 @@ reference_string = textwrap.dedent(
         "_type": "models",
         "parameters": "parameters.json",
         "can": "can.json",
-        "staticmodbus": "staticmodbus.json",
-        "sunspec": "sunspec.json"
+        "sunspec": "sunspec.json",
+        "staticmodbus": "staticmodbus.json"
     }
 }"""
 )
@@ -25,8 +25,8 @@ reference_string = textwrap.dedent(
 reference_project = epcpm.project.Project()
 reference_project.paths.parameters = "parameters.json"
 reference_project.paths.can = "can.json"
-reference_project.paths.staticmodbus = "staticmodbus.json"
 reference_project.paths.sunspec = "sunspec.json"
+reference_project.paths.staticmodbus = "staticmodbus.json"
 
 
 def test_save():
@@ -42,7 +42,7 @@ def test_load():
 def test_model_iterable():
     model = epcpm.project.Models()
 
-    assert tuple(model) == ("parameters", "can", "staticmodbus", "sunspec")
+    assert tuple(model) == ("parameters", "can", "sunspec", "staticmodbus")
 
 
 def test_model_set_all():
@@ -61,8 +61,8 @@ def test_model_items():
     expected = (
         ("parameters", None),
         ("can", None),
-        ("staticmodbus", None),
         ("sunspec", None),
+        ("staticmodbus", None),
     )
 
     assert tuple(model.items()) == expected
@@ -74,7 +74,7 @@ def test_model_values():
     for name in model:
         model[name] = name + "_"
 
-    assert tuple(model.values()) == ("parameters_", "can_", "staticmodbus_", "sunspec_")
+    assert tuple(model.values()) == ("parameters_", "can_", "sunspec_", "staticmodbus_")
 
 
 def test_model_getitem():

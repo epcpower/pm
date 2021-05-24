@@ -25,8 +25,8 @@ import epcpm.parameterstoc
 import epcpm.parameterstohierarchy
 import epcpm.project
 import epcpm.smdxtosunspec
-import epcpm.staticmodbusmodel
 import epcpm.sunspecmodel
+import epcpm.staticmodbusmodel
 import epcpm.sunspectoxlsx
 import epcpm.symtoproject
 

@@ -8,8 +8,8 @@ import epyqlib.pm.parametermodel
 import epyqlib.utils.qt
 
 import epcpm.canmodel
-import epcpm.staticmodbusmodel
 import epcpm.sunspecmodel
+import epcpm.staticmodbusmodel
 
 
 class ProjectSaveCanceled(Exception):
@@ -134,11 +134,11 @@ class Models:
         default=None,
         metadata=graham.create_metadata(field=marshmallow.fields.String()),
     )
-    staticmodbus = attr.ib(
+    sunspec = attr.ib(
         default=None,
         metadata=graham.create_metadata(field=marshmallow.fields.String()),
     )
-    sunspec = attr.ib(
+    staticmodbus = attr.ib(
         default=None,
         metadata=graham.create_metadata(field=marshmallow.fields.String()),
     )
@@ -150,8 +150,8 @@ class Models:
     def set_all(self, value):
         self.parameters = value
         self.can = value
-        self.staticmodbus = value
         self.sunspec = value
+        self.staticmodbus = value
 
     def items(self):
         return attr.asdict(self, recurse=False).items()
@@ -228,8 +228,8 @@ class Models:
         self.can.list_selection_roots["enumerations"] = enumerations_root
         self.parameters.update_nodes()
         self.can.update_nodes()
-        self.staticmodbus.update_nodes()
         self.sunspec.update_nodes()
+        self.staticmodbus.update_nodes()
 
 
 @graham.schemify(tag="project")
