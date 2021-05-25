@@ -262,28 +262,28 @@ class FunctionData(epyqlib.treenode.TreeNode):
 
     units = epyqlib.attrsmodel.create_str_or_none_attribute()
 
-    get = attr.ib(
-        default=None,
-        converter=epyqlib.attrsmodel.to_str_or_none,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(allow_none=True),
-        ),
-    )
-    epyqlib.attrsmodel.attrib(
-        attribute=get,
-        no_column=True,
-    )
-    set = attr.ib(
-        default=None,
-        converter=epyqlib.attrsmodel.to_str_or_none,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(allow_none=True),
-        ),
-    )
-    epyqlib.attrsmodel.attrib(
-        attribute=set,
-        no_column=True,
-    )
+    # get = attr.ib(
+    #     default=None,
+    #     converter=epyqlib.attrsmodel.to_str_or_none,
+    #     metadata=graham.create_metadata(
+    #         field=marshmallow.fields.String(allow_none=True),
+    #     ),
+    # )
+    # epyqlib.attrsmodel.attrib(
+    #     attribute=get,
+    #     no_column=True,
+    # )
+    # set = attr.ib(
+    #     default=None,
+    #     converter=epyqlib.attrsmodel.to_str_or_none,
+    #     metadata=graham.create_metadata(
+    #         field=marshmallow.fields.String(allow_none=True),
+    #     ),
+    # )
+    # epyqlib.attrsmodel.attrib(
+    #     attribute=set,
+    #     no_column=True,
+    # )
 
     # mandatory = attr.ib(
     #     default=True,
