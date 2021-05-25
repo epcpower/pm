@@ -15,7 +15,10 @@ def map_type_uuid(input, sunspec_types, staticmodbus_types):
             for staticmodbus_type in staticmodbus_types.children:
                 if sunspec_type.name == staticmodbus_type.name:
                     return str(staticmodbus_type.uuid)
-                elif sunspec_type.name == "sunssf" and staticmodbus_type.name == "staticmodbussf":
+                elif (
+                    sunspec_type.name == "sunssf"
+                    and staticmodbus_type.name == "staticmodbussf"
+                ):
                     # Special case for scale factor, which isn't the same name.
                     return str(staticmodbus_type.uuid)
     raise ValueError("Error: failure to map type")
@@ -103,9 +106,13 @@ def parse_sunspec_model(sunspec_model, sunspec_types, staticmodbus_types):
     found_data = []
     for child in sunspec_model["children"]:
         if child["_type"] == "sunspec_header_block":
-            found_child_data = parse_sunspec_header_block(child, sunspec_types, staticmodbus_types)
+            found_child_data = parse_sunspec_header_block(
+                child, sunspec_types, staticmodbus_types
+            )
         elif child["_type"] == "sunspec_fixed_block":
-            found_child_data = parse_sunspec_fixed_block(child, sunspec_types, staticmodbus_types)
+            found_child_data = parse_sunspec_fixed_block(
+                child, sunspec_types, staticmodbus_types
+            )
         elif child["_type"] == "sunspec_table_repeating_block":
             found_child_data = parse_sunspec_table_repeating_block(child)
         else:
@@ -127,7 +134,9 @@ def parse_table(table, sunspec_types, staticmodbus_types):
                     ref_child["_type"] = replace_data_point_with_function_data(
                         ref_child["_type"]
                     )
-                    ref_child["type_uuid"] = map_type_uuid(ref_child, sunspec_types, staticmodbus_types)
+                    ref_child["type_uuid"] = map_type_uuid(
+                        ref_child, sunspec_types, staticmodbus_types
+                    )
 
 
 @click.command()
@@ -152,7 +161,9 @@ def sunspec_to_staticmodbus_generator(
         if input_sunspec_json["_type"] == "root":
             for root_child in input_sunspec_json["children"]:
                 if root_child["_type"] == "sunspec_model":
-                    found_data = parse_sunspec_model(root_child, sunspec_types, staticmodbus_types)
+                    found_data = parse_sunspec_model(
+                        root_child, sunspec_types, staticmodbus_types
+                    )
                     data["children"].extend(found_data)
                 elif root_child["_type"] == "table":
                     parse_table(root_child, sunspec_types, staticmodbus_types)
