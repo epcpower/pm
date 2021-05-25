@@ -28,45 +28,51 @@ class TypeNotFoundError(Exception):
 def build_staticmodbus_types_enumeration():
     enumeration = epyqlib.pm.parametermodel.Enumeration(
         name="StaticModbusTypes",
-        uuid="00b90651-3e3b-4e28-a8c0-7339ae092200",
+        uuid="5a768d49-565d-4ffd-9c4d-f937d29f18bf",
     )
 
     enumerators = [
         epyqlib.pm.parametermodel.Enumerator(
-            name="int16", value=1, uuid="2cf75e5a-ffc8-422a-bbc6-573d4206a7e1"
+            name="int16", value=1, uuid="ead5f606-8846-4dfb-bd30-d50100f29389"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name="uint16", value=1, uuid="4f856a7e-20f4-43e2-86b1-cc7ee772f919"
+            name="uint16", value=1, uuid="ff23a077-3d9c-4dc2-be8a-51a077058d14"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name="int32", value=2, uuid="4fec39a5-b702-4dbf-8ad1-95f5e01201b6"
+            name="int32", value=2, uuid="f93514e2-f173-46f9-a8c2-1a4cd15c6904"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name="uint32", value=2, uuid="eb8cdc87-05e2-4593-994e-ab3363236168"
+            name="uint32", value=2, uuid="5ef749cd-ea55-44c9-85d7-1d574c350a84"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name="sunssf", value=1, uuid="02e70616-4986-4f3e-8ac4-98ac153e66f9"
+            name="staticmodbussf", value=1, uuid="2b2c843b-4f80-4822-a806-1e3cc4342ee3"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name="enum16", value=1, uuid="209aebc8-652f-47bf-9952-4c112ced2781"
+            name="enum16", value=1, uuid="45e7fe5e-dcb5-4a43-8455-861be6b45cbc"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name="bitfield16", value=1, uuid="5d30a559-13fe-42b1-89df-35c3edc237f0"
+            name="bitfield16", value=1, uuid="7d02a033-0295-417f-bc5c-838e798f938d"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name="bitfield32", value=2, uuid="fc0ad957-2785-4762-b2fc-4db2cf785ca2"
+            name="bitfield32", value=2, uuid="47755118-41dc-48ab-8e20-00f9f80d1096"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name="string", value=0, uuid="5460c860-4aad-476a-908c-83a364b781c9"
+            name="string", value=0, uuid="fa216e96-9fea-4240-a876-1d1ed7d67c0c"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name="acc16", value=1, uuid="05830309-c61c-41d4-8c66-88ed25187575"
+            name="acc16", value=1, uuid="952b419d-828d-4949-8e08-8cbd5fee6b62"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name="acc32", value=2, uuid="f9d30fa6-33b2-48a2-8b64-72a4f47c0bd4"
+            name="acc32", value=2, uuid="2a948a8d-e766-4ab1-88b9-16f7c32cfe9e"
         ),
         epyqlib.pm.parametermodel.Enumerator(
-            name="pad", value=1, uuid="f8090bab-cf12-476c-b96a-1c8bb9848bb5"
+            name="acc64", value=4, uuid="1c98382d-11b6-4ee8-9447-3834f6f103fb"
+        ),
+        epyqlib.pm.parametermodel.Enumerator(
+            name="count", value=1, uuid="0c40dc3d-77be-481d-a3f4-784a89e0cf84"
+        ),
+        epyqlib.pm.parametermodel.Enumerator(
+            name="pad", value=1, uuid="ed0c4a1e-777a-4423-bccc-3a4ac0a3f5be"
         ),
     ]
 

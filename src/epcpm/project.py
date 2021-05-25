@@ -206,6 +206,7 @@ class Models:
 
         if enumerations_root is None:
             sunspec_types_root = None
+            staticmodbus_types_root = None
         else:
             sunspec_types_root = [
                 child
@@ -216,13 +217,24 @@ class Models:
                 (sunspec_types_root,) = sunspec_types_root
             else:
                 sunspec_types_root = None
+
+            staticmodbus_types_root = [
+                child
+                for child in enumerations_root.children
+                if child.name == "StaticModbusTypes"
+            ]
+            if len(staticmodbus_types_root) == 1:
+                (staticmodbus_types_root,) = staticmodbus_types_root
+            else:
+                staticmodbus_types_root = None
+
         self.parameters.list_selection_roots["sunspec types"] = sunspec_types_root
         self.sunspec.list_selection_roots["sunspec types"] = sunspec_types_root
         self.sunspec.list_selection_roots["enumerations"] = enumerations_root
 
         self.staticmodbus.list_selection_roots[
             "staticmodbus types"
-        ] = sunspec_types_root
+        ] = staticmodbus_types_root
         self.staticmodbus.list_selection_roots["enumerations"] = enumerations_root
 
         self.can.list_selection_roots["enumerations"] = enumerations_root

@@ -66,6 +66,12 @@ def build_sunspec_types_enumeration():
             name="acc32", value=2, uuid="f9d30fa6-33b2-48a2-8b64-72a4f47c0bd4"
         ),
         epyqlib.pm.parametermodel.Enumerator(
+            name="acc64", value=2, uuid="7ba30a78-a76d-4ce7-bb32-08e9410b14b9"
+        ),
+        epyqlib.pm.parametermodel.Enumerator(
+            name="count", value=2, uuid="d5d00207-d2c4-413f-88eb-e44946350007"
+        ),
+        epyqlib.pm.parametermodel.Enumerator(
             name="pad", value=1, uuid="f8090bab-cf12-476c-b96a-1c8bb9848bb5"
         ),
     ]
