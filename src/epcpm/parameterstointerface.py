@@ -24,11 +24,17 @@ sunspec_types = {
     "uint16": "sunsU16",
     "enum16": "sunsU16",
     "int16": "sunsS16",
+    "sunssf": "sunssf",
     "uint32": "sunsU32",
     "int32": "sunsS32",
     "string": "PackedString",
     "bitfield16": "sunsU16",
     "bitfield32": "sunsU32",
+    #acc16
+    #acc32
+    #acc64
+    #count
+    #pad
 }
 
 
@@ -363,12 +369,25 @@ class Parameter:
         else:
             setter_function = parameter.setter_function
 
+        if parameter.constant is None:
+            constant = "NULL"
+            #print("constant is none")
+        else:
+            constant = parameter.constant
+            print("constant is NOT none")
+
         if parameter.internal_variable is not None:
             var_or_func = "variable"
 
             variable_or_getter_setter = [
                 f".variable = &{parameter.internal_variable},",
             ]
+    #    elif parameter.constant is not None:
+    #        print("ASDASDASDASDASDDSA")
+    #        var_or_func = "constant"
+    #        variable_or_getter_setter = [
+    #            f".constant = {constant},",
+    #        ]
         else:
             var_or_func = "functions"
 
