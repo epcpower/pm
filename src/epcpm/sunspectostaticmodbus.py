@@ -1,7 +1,12 @@
 import click
 import json
+import uuid
 import epcpm.sunspecmodel
 import epcpm.staticmodbusmodel
+
+
+def generate_uuid():
+    return str(uuid.uuid4())
 
 
 def replace_data_point_with_function_data(input):
@@ -30,6 +35,7 @@ def parse_data_point_bitfield(data_point_bitfield):
         if child["_type"] == "data_point_bitfield_member":
             print(f"data_point_bitfield_member UUID: {child['uuid']}")
             child["_type"] = replace_data_point_with_function_data(child["_type"])
+            child["uuid"] = generate_uuid()
             found_data.append(child)
         else:
             print(
@@ -46,6 +52,7 @@ def parse_sunspec_header_block(sunspec_header_block, sunspec_types, staticmodbus
             print(f"data_point UUID: {child['uuid']}")
             child["_type"] = replace_data_point_with_function_data(child["_type"])
             child["type_uuid"] = map_type_uuid(child, sunspec_types, staticmodbus_types)
+            child["uuid"] = generate_uuid()
             found_data.append(child)
         else:
             print(
@@ -62,6 +69,7 @@ def parse_sunspec_fixed_block(sunspec_fixed_block, sunspec_types, staticmodbus_t
             print(f"data_point UUID: {child['uuid']}")
             child["_type"] = replace_data_point_with_function_data(child["_type"])
             child["type_uuid"] = map_type_uuid(child, sunspec_types, staticmodbus_types)
+            child["uuid"] = generate_uuid()
             found_data.append(child)
         elif child["_type"] == "data_point_bitfield":
             found_child_data = parse_data_point_bitfield(child)
@@ -93,6 +101,7 @@ def parse_sunspec_table_repeating_block(sunspec_table_repeating_block):
             child[
                 "_type"
             ] = "staticmodbus_table_repeating_block_reference_function_data_reference"
+            child["uuid"] = generate_uuid()
             found_data.append(child)
         else:
             print(
@@ -128,6 +137,7 @@ def parse_table(table, sunspec_types, staticmodbus_types):
         if child["_type"] == "data_point":
             child["_type"] = replace_data_point_with_function_data(child["_type"])
             child["type_uuid"] = map_type_uuid(child, sunspec_types, staticmodbus_types)
+            child["uuid"] = generate_uuid()
         elif child["_type"] == "table_model_reference":
             for ref_child in child["children"]:
                 if ref_child["_type"] == "data_point":
@@ -137,6 +147,9 @@ def parse_table(table, sunspec_types, staticmodbus_types):
                     ref_child["type_uuid"] = map_type_uuid(
                         ref_child, sunspec_types, staticmodbus_types
                     )
+                    ref_child["uuid"] = generate_uuid()
+            child["uuid"] = generate_uuid()
+    table["uuid"] = generate_uuid()
 
 
 @click.command()
@@ -154,7 +167,7 @@ def sunspec_to_staticmodbus_generator(
         "_type": "root",
         "name": "Static Modbus",
         "children": [],
-        "uuid": "7cb2d0b2-acd9-4e7f-b785-23f667d4a4df",
+        "uuid": generate_uuid(),
     }
     with open(input_sunspec_filename, "r") as input_sunspec_fp:
         input_sunspec_json = json.load(input_sunspec_fp)
