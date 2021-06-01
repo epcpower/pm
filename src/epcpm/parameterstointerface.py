@@ -377,19 +377,18 @@ class Parameter:
             print("constant is NOT none")
 
         if parameter.internal_variable is not None:
-            var_or_func = "variable"
+            interface_type = "variable"
 
             variable_or_getter_setter = [
                 f".variable = &{parameter.internal_variable},",
             ]
-    #    elif parameter.constant is not None:
-    #        print("ASDASDASDASDASDDSA")
-    #        var_or_func = "constant"
-    #        variable_or_getter_setter = [
-    #            f".constant = {constant},",
-    #        ]
+        elif parameter.constant is not None:
+            interface_type = "constant"
+            variable_or_getter_setter = [
+                f".constant = {constant},",
+            ]
         else:
-            var_or_func = "functions"
+            interface_type = "functions"
 
             variable_or_getter_setter = [
                 f".getter = {getter_function},",
@@ -474,22 +473,27 @@ class Parameter:
             # TODO: CAMPid 9675436715674367943196954756419543975314
             getter_setter_list = [
                 "InterfaceItem",
-                var_or_func,
+                interface_type,
                 types[parameter.internal_type].name,
                 sunspec_type,
             ]
-
             sunspec_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
-            sunspec_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
+
+            if(interface_type != "constant"):
+                sunspec_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
+            #Constant is ReadOnly, doesnt need a setter
+            else:
+                sunspec_setter = "NULL"
+
 
         interface_item_type = (
-            f"InterfaceItem_{var_or_func}_{types[parameter.internal_type].name}"
+            f"InterfaceItem_{interface_type}_{types[parameter.internal_type].name}"
         )
 
         can_getter, can_setter, can_variable = can_getter_setter_variable(
             can_signal=can_signal,
             parameter=parameter,
-            var_or_func_or_table=var_or_func,
+            interface_type=interface_type,
         )
 
         access_level = get_access_level_string(
@@ -610,6 +614,12 @@ class PackedStringType:
     minimum_code = attr.ib(default="(0)")
     maximum_code = attr.ib(default="(0)")
 
+@attr.s(frozen=True)
+class SunspecScaleFactorType:
+    name = attr.ib(default="sunssf")
+    type = attr.ib(default="sunssf")
+    minimum_code = attr.ib(default="(0)")
+    maximum_code = attr.ib(default="(0)")
 
 def fixed_width_name(bits, signed):
     if signed:
@@ -650,6 +660,7 @@ types = {
         SizeType(),
         VoidPointerType(),
         PackedStringType(),
+        SunspecScaleFactorType(),
     )
 }
 
@@ -725,7 +736,7 @@ def get_access_level_string(parameter, parameter_uuid_finder):
     return access_level
 
 
-def can_getter_setter_variable(can_signal, parameter, var_or_func_or_table):
+def can_getter_setter_variable(can_signal, parameter, interface_type):
     if can_signal is None:
         can_variable = "NULL"
         can_getter = "NULL"
@@ -769,7 +780,7 @@ def can_getter_setter_variable(can_signal, parameter, var_or_func_or_table):
 
     getter_setter_list = [
         "InterfaceItem",
-        var_or_func_or_table,
+        interface_type,
         types[parameter.internal_type].name,
         "can",
         can_type,
@@ -969,7 +980,7 @@ class TableBaseStructures:
         can_getter, can_setter, can_variable = can_getter_setter_variable(
             can_signal,
             parameter,
-            var_or_func_or_table="table",
+            interface_type="table",
         )
 
         if can_signal is None:
