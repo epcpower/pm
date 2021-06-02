@@ -124,7 +124,7 @@ def name_from_uuid(node, value, model):
     except epyqlib.attrsmodel.NotFoundError:
         return str(value)
 
-    return model.node_from_uuid(target_node.parameter_uuid).abbreviation
+    # return model.node_from_uuid(target_node.parameter_uuid).abbreviation
 
 
 # TODO: CAMPid 8695426542167924656654271657917491654
@@ -171,7 +171,7 @@ class ScaleFactorDelegate(QtWidgets.QStyledItemDelegate):
         for p in points:
             it = QtWidgets.QListWidgetItem(editor)
             param = attrs_model.node_from_uuid(p.parameter_uuid)
-            it.setText(param.abbreviation)
+            # it.setText(param.abbreviation)
             it.setData(epyqlib.utils.qt.UserRoles.raw, p.uuid)
             if p.uuid == raw:
                 it.setSelected(True)
@@ -840,7 +840,7 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
         ),
     )
 
-    abbreviation = epyqlib.pm.parametermodel.create_abbreviation_attribute()
+    # abbreviation = epyqlib.pm.parametermodel.create_abbreviation_attribute()
 
     children = attr.ib(
         factory=list,
@@ -1289,7 +1289,7 @@ columns = epyqlib.attrsmodel.columns(
             FunctionDataBitfieldMember,
         )
     ),
-    merge("abbreviation", TableRepeatingBlock),
+    # merge("abbreviation", TableRepeatingBlock),
     merge("not_implemented", FunctionData),
     merge("size", FunctionData, FunctionDataBitfield),
     # merge("length", Model) + merge("size", FunctionData, FunctionDataBitfield),
