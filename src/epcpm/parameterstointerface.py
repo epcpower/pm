@@ -460,11 +460,19 @@ class Parameter:
                 sunspec_type,
             ]
 
-            sunspec_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
+            indexed_str = ""
+            if parameter.getter_index is not None:
+                indexed_str = "indexed_"
+
+            sunspec_getter = "_".join(str(x) for x in getter_setter_list + [indexed_str + "getter"])
             sunspec_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
 
+        indexed_getter_str = ""
+        if parameter.getter_index is not None:
+            indexed_getter_str = "indexed_getter_"
+
         interface_item_type = (
-            f"InterfaceItem_{var_or_func}_{types[parameter.internal_type].name}"
+            f"InterfaceItem_{var_or_func}_{indexed_getter_str}{types[parameter.internal_type].name}"
         )
 
         can_getter, can_setter, can_variable = can_getter_setter_variable(
@@ -1038,6 +1046,7 @@ class TableBaseStructures:
             internal_scale=parameter.internal_scale_factor,
             scale_factor_updater=scale_factor_updater,
             scale_factor_variable=scale_factor_variable,
+            getter_index=parameter.getter_index,
             sunspec_getter=sunspec_getter,
             sunspec_setter=sunspec_setter,
             # not to be used so really hardcode NULL
@@ -1401,6 +1410,7 @@ def create_item(
         internal_scale=internal_scale,
         scale_factor_updater=scale_factor_updater,
         scale_factor_variable=scale_factor_variable,
+        getter_index=parameter.getter_index,
         sunspec_getter=sunspec_getter,
         sunspec_setter=sunspec_setter,
         sunspec_variable=sunspec_variable,
@@ -1452,6 +1462,7 @@ def create_common_initializers(
     internal_scale,
     scale_factor_updater,
     scale_factor_variable,
+    getter_index,
     sunspec_getter,
     sunspec_setter,
     sunspec_variable,
@@ -1463,7 +1474,10 @@ def create_common_initializers(
     if can_scale_factor is None:
         # TODO: don't default here?
         can_scale_factor = 1
-
+    
+    if getter_index is None:
+        getter_index = -1
+    
     maybe_uuid = []
     if include_uuid_in_item:
         maybe_uuid = [f".uuid = {uuid_initializer(uuid_)},"]
@@ -1477,6 +1491,7 @@ def create_common_initializers(
         f".canScaleFactor = {float(can_scale_factor)}f,",
         f".scaleFactorUpdater = {scale_factor_updater},",
         f".internalScaleFactor = {internal_scale},",
+        f".getter_index = {getter_index},",
         f".rejectFromInactiveInterface = {reject_from_inactive_interfaces_literal},",
         f".sunspec = {{",
         [
