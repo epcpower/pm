@@ -491,30 +491,31 @@ class FunctionDataBitfield(epyqlib.treenode.TreeNode):
     check = epyqlib.attrsmodel.check_just_children
 
 
-def check_block_offsets_and_length(self):
-    length = 0
-
-    root = self.find_root()
-
-    for point in self.children:
-        try:
-            type_ = root.model.node_from_uuid(point.type_uuid)
-        except epyqlib.attrsmodel.NotFoundError:
-            point_name = root.model.node_from_uuid(point.parameter_uuid).name
-            raise TypeNotFoundError(
-                f"Point {point_name!r}" f" has unknown type uuid {point.type_uuid!r}"
-            )
-
-        if type_.name != "string" and point.size != type_.value:
-            point_name = root.model.node_from_uuid(point.parameter_uuid).name
-            raise MismatchedSizeAndTypeError(
-                f"Expected {type_.value} for {type_.name}"
-                f", is {point.size} for {point_name}"
-            )
-
-        length += point.size
-
-    return length
+# Not clear if this functionality will be used in the future.
+# def check_block_offsets_and_length(self):
+#     length = 0
+#
+#     root = self.find_root()
+#
+#     for point in self.children:
+#         try:
+#             type_ = root.model.node_from_uuid(point.type_uuid)
+#         except epyqlib.attrsmodel.NotFoundError:
+#             point_name = root.model.node_from_uuid(point.parameter_uuid).name
+#             raise TypeNotFoundError(
+#                 f"Point {point_name!r}" f" has unknown type uuid {point.type_uuid!r}"
+#             )
+#
+#         if type_.name != "string" and point.size != type_.value:
+#             point_name = root.model.node_from_uuid(point.parameter_uuid).name
+#             raise MismatchedSizeAndTypeError(
+#                 f"Expected {type_.value} for {type_.name}"
+#                 f", is {point.size} for {point_name}"
+#             )
+#
+#         length += point.size
+#
+#     return length
 
 
 # @graham.schemify(tag="staticmodbus_header_block", register=True)
@@ -756,8 +757,8 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
 
         return False
 
-    def check_offsets_and_length(self):
-        return self.original.check_block_offsets_and_length()
+    # def check_offsets_and_length(self):
+    #     return self.original.check_block_offsets_and_length()
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
@@ -821,7 +822,7 @@ class FunctionDataReference(epyqlib.treenode.TreeNode):
     def can_delete(self, node=None):
         return False
 
-    check_offsets_and_length = check_block_offsets_and_length
+    # check_offsets_and_length = check_block_offsets_and_length
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
 
@@ -892,8 +893,8 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
 
         return False
 
-    def check_block_offsets_and_length(self):
-        return self.repeats * check_block_offsets_and_length(self)
+    # def check_block_offsets_and_length(self):
+    #     return self.repeats * check_block_offsets_and_length(self)
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
