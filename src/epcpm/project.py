@@ -9,6 +9,7 @@ import epyqlib.utils.qt
 
 import epcpm.canmodel
 import epcpm.sunspecmodel
+import epcpm.staticmodbusmodel
 
 
 class ProjectSaveCanceled(Exception):
@@ -95,6 +96,22 @@ def _post_load(project):
                 drop_sources=(models.parameters,),
             )
 
+    if models.staticmodbus is None:
+        if project.paths.staticmodbus is None or len(project.paths.staticmodbus) == 0:
+            models.staticmodbus = epyqlib.attrsmodel.Model(
+                root=epcpm.staticmodbusmodel.Root(),
+                columns=epcpm.staticmodbusmodel.columns,
+                drop_sources=(models.parameters,),
+            )
+        else:
+            models.staticmodbus = load_model(
+                project=project,
+                path=project.paths.staticmodbus,
+                root_type=epcpm.staticmodbusmodel.Root,
+                columns=epcpm.staticmodbusmodel.columns,
+                drop_sources=(models.parameters,),
+            )
+
     models.parameters.droppable_from.add(models.parameters)
 
     models.can.droppable_from.add(models.parameters)
@@ -121,6 +138,10 @@ class Models:
         default=None,
         metadata=graham.create_metadata(field=marshmallow.fields.String()),
     )
+    staticmodbus = attr.ib(
+        default=None,
+        metadata=graham.create_metadata(field=marshmallow.fields.String()),
+    )
 
     @classmethod
     def __iter__(cls):
@@ -130,6 +151,7 @@ class Models:
         self.parameters = value
         self.can = value
         self.sunspec = value
+        self.staticmodbus = value
 
     def items(self):
         return attr.asdict(self, recurse=False).items()
@@ -184,6 +206,7 @@ class Models:
 
         if enumerations_root is None:
             sunspec_types_root = None
+            staticmodbus_types_root = None
         else:
             sunspec_types_root = [
                 child
@@ -194,14 +217,31 @@ class Models:
                 (sunspec_types_root,) = sunspec_types_root
             else:
                 sunspec_types_root = None
+
+            staticmodbus_types_root = [
+                child
+                for child in enumerations_root.children
+                if child.name == "StaticModbusTypes"
+            ]
+            if len(staticmodbus_types_root) == 1:
+                (staticmodbus_types_root,) = staticmodbus_types_root
+            else:
+                staticmodbus_types_root = None
+
         self.parameters.list_selection_roots["sunspec types"] = sunspec_types_root
         self.sunspec.list_selection_roots["sunspec types"] = sunspec_types_root
         self.sunspec.list_selection_roots["enumerations"] = enumerations_root
+
+        self.staticmodbus.list_selection_roots[
+            "staticmodbus types"
+        ] = staticmodbus_types_root
+        self.staticmodbus.list_selection_roots["enumerations"] = enumerations_root
 
         self.can.list_selection_roots["enumerations"] = enumerations_root
         self.parameters.update_nodes()
         self.can.update_nodes()
         self.sunspec.update_nodes()
+        self.staticmodbus.update_nodes()
 
 
 @graham.schemify(tag="project")
