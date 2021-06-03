@@ -59,11 +59,11 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tab_2">
+       <widget class="QWidget" name="tab_3">
         <attribute name="title">
          <string>SunSpec</string>
         </attribute>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
           <layout class="QGridLayout" name="gridLayout_3">
            <item row="1" column="0">
@@ -76,7 +76,24 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tab">
+       <widget class="QWidget" name="tab_5">
+        <attribute name="title">
+         <string>Static Modbus</string>
+        </attribute>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <layout class="QGridLayout" name="gridLayout_5">
+           <item row="1" column="0">
+            <widget class="QTreeView" name="static_modbus_view"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="SearchBox" name="static_modbus_search_box" native="true"/>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab_4">
         <attribute name="title">
          <string>Value Set</string>
         </attribute>
