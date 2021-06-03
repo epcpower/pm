@@ -14,7 +14,6 @@ import epcpm.parameterstosil
 import epcpm.project
 import epcpm.smdxtosunspec
 import epcpm.sunspecmodel
-import epcpm.sunspecmodel
 import epcpm.sunspectobitfieldsc
 import epcpm.sunspectotablesc
 import epcpm.sunspectomanualc
@@ -130,6 +129,7 @@ def full_export(
         h_path=paths.interface_c.with_suffix(".h"),
         can_model=project.models.can,
         sunspec_model=project.models.sunspec,
+        staticmodbus_model=project.models.staticmodbus,
         parameters_model=project.models.parameters,
         skip_sunspec=skip_sunspec,
         include_uuid_in_item=include_uuid_in_item,
