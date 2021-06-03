@@ -397,8 +397,10 @@ class Parameter:
             variable_or_getter_setter = [
                 f".getter = {getter_function},",
             ]
-            variable_or_getter_setter.append(f".setter = {setter_function},")
-
+        
+        if parameter.getter_index is not None:
+            variable_or_getter_setter.append(f".getter_index = {parameter.getter_index},")
+        
             if parameter.rejected_callback is None:
                 rejected_callback = [
                     f".rejectedCallback = NULL,",
@@ -1113,7 +1115,6 @@ class TableBaseStructures:
             internal_scale=parameter.internal_scale_factor,
             scale_factor_updater=scale_factor_updater,
             scale_factor_variable=scale_factor_variable,
-            getter_index=parameter.getter_index,
             sunspec_getter=sunspec_getter,
             sunspec_setter=sunspec_setter,
             # not to be used so really hardcode NULL
@@ -1480,7 +1481,6 @@ def create_item(
         internal_scale=internal_scale,
         scale_factor_updater=scale_factor_updater,
         scale_factor_variable=scale_factor_variable,
-        getter_index=parameter.getter_index,
         sunspec_getter=sunspec_getter,
         sunspec_setter=sunspec_setter,
         sunspec_variable=sunspec_variable,
@@ -1533,7 +1533,6 @@ def create_common_initializers(
     internal_scale,
     scale_factor_updater,
     scale_factor_variable,
-    getter_index,
     sunspec_getter,
     sunspec_setter,
     sunspec_variable,
@@ -1545,9 +1544,6 @@ def create_common_initializers(
     if can_scale_factor is None:
         # TODO: don't default here?
         can_scale_factor = 1
-    
-    if getter_index is None:
-        getter_index = -1
     
     maybe_uuid = []
     if include_uuid_in_item:
@@ -1569,7 +1565,6 @@ def create_common_initializers(
         f".canScaleFactor = {float(can_scale_factor)}f,",
         f".scaleFactorUpdater = {scale_factor_updater},",
         f".internalScaleFactor = {internal_scale},",
-        f".getter_index = {getter_index},",
         f".rejectFromInactiveInterface = {reject_from_inactive_interfaces_literal},",
         f".sunspec = {{",
         [
