@@ -1,6 +1,7 @@
 import click
 import json
 import uuid
+
 import epcpm.sunspecmodel
 import epcpm.staticmodbusmodel
 
@@ -153,14 +154,18 @@ def parse_table(table, sunspec_types, staticmodbus_types):
 
 
 @click.command()
-@click.option("--input_sunspec_filename")
-@click.option("--output_staticmodbus_filename")
-def sunspec_to_staticmodbus_generator(
-    input_sunspec_filename, output_staticmodbus_filename
-):
-    # The purpose of this script is to take as input the sunspec JSON file and
-    # output a comparable static modbus JSON file.
-    # It is most likely one time use code.
+@click.option(
+    "--input-sunspec-filename",
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
+    required=True,
+)
+@click.option(
+    "--output-staticmodbus-filename",
+    type=click.Path(dir_okay=False, resolve_path=True),
+    required=True,
+)
+def cli(input_sunspec_filename, output_staticmodbus_filename):
+    """SunSpec JSON file to static modbus JSON file"""
     sunspec_types = epcpm.sunspecmodel.build_sunspec_types_enumeration()
     staticmodbus_types = epcpm.staticmodbusmodel.build_staticmodbus_types_enumeration()
     data = {
@@ -188,7 +193,3 @@ def sunspec_to_staticmodbus_generator(
         output_staticmodbus_filename, "w", encoding="utf-8"
     ) as output_staticmodbus_fp:
         json.dump(data, output_staticmodbus_fp, ensure_ascii=False, indent=4)
-
-
-if __name__ == "__main__":
-    sunspec_to_staticmodbus_generator()
