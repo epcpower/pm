@@ -91,8 +91,15 @@ def parse_sunspec_fixed_block(sunspec_fixed_block, sunspec_types, staticmodbus_t
     return found_data
 
 
-def parse_sunspec_table_repeating_block(sunspec_table_repeating_block):
-    found_data = []
+def parse_sunspec_table_repeating_block(sunspec_table_repeating_block, uuid_map):
+    replace_original = uuid_map[sunspec_table_repeating_block["original"]]
+    staticmodbus_trb = {
+        "_type": "staticmodbus_table_repeating_block",
+        "name": sunspec_table_repeating_block["name"],
+        "children": [],
+        "original": replace_original,
+        "uuid": generate_uuid(),
+    }
     for child in sunspec_table_repeating_block["children"]:
         if (
             child["_type"]
@@ -103,16 +110,17 @@ def parse_sunspec_table_repeating_block(sunspec_table_repeating_block):
                 "_type"
             ] = "staticmodbus_table_repeating_block_reference_function_data_reference"
             child["uuid"] = generate_uuid()
-            found_data.append(child)
+            child["original"] = uuid_map[child["original"]]
+            staticmodbus_trb["children"].append(child)
         else:
             print(
                 f"Encountered non data_point in sunspec_table_repeating_block: {child['_type']}"
             )
 
-    return found_data
+    return [staticmodbus_trb]
 
 
-def parse_sunspec_model(sunspec_model, sunspec_types, staticmodbus_types):
+def parse_sunspec_model(sunspec_model, sunspec_types, staticmodbus_types, uuid_map):
     found_data = []
     for child in sunspec_model["children"]:
         if child["_type"] == "sunspec_header_block":
@@ -124,7 +132,7 @@ def parse_sunspec_model(sunspec_model, sunspec_types, staticmodbus_types):
                 child, sunspec_types, staticmodbus_types
             )
         elif child["_type"] == "sunspec_table_repeating_block":
-            found_child_data = parse_sunspec_table_repeating_block(child)
+            found_child_data = parse_sunspec_table_repeating_block(child, uuid_map)
         else:
             print(f"ERROR: unexpected sunspec_model child: {child['_type']}")
         found_data.extend(found_child_data)
@@ -132,13 +140,13 @@ def parse_sunspec_model(sunspec_model, sunspec_types, staticmodbus_types):
     return found_data
 
 
-def parse_table(table, sunspec_types, staticmodbus_types):
+def parse_table(table, sunspec_types, staticmodbus_types, uuid_map):
     # Only replace data_point with function_data for all children.
     for child in table["children"]:
         if child["_type"] == "data_point":
             child["_type"] = replace_data_point_with_function_data(child["_type"])
             child["type_uuid"] = map_type_uuid(child, sunspec_types, staticmodbus_types)
-            child["uuid"] = generate_uuid()
+            child["uuid"] = uuid_map[child["uuid"]]
         elif child["_type"] == "table_model_reference":
             for ref_child in child["children"]:
                 if ref_child["_type"] == "data_point":
@@ -149,8 +157,16 @@ def parse_table(table, sunspec_types, staticmodbus_types):
                         ref_child, sunspec_types, staticmodbus_types
                     )
                     ref_child["uuid"] = generate_uuid()
-            child["uuid"] = generate_uuid()
+            child["uuid"] = uuid_map[child["uuid"]]
     table["uuid"] = generate_uuid()
+
+
+def generate_uuid_mapping_for_table(table):
+    uuid_map_for_table = dict()
+    for child in table["children"]:
+        if child["_type"] == "data_point" or child["_type"] == "table_model_reference":
+            uuid_map_for_table.setdefault(child["uuid"], generate_uuid())
+    return uuid_map_for_table
 
 
 @click.command()
@@ -177,14 +193,22 @@ def cli(input_sunspec_filename, output_staticmodbus_filename):
     with open(input_sunspec_filename, "r") as input_sunspec_fp:
         input_sunspec_json = json.load(input_sunspec_fp)
         if input_sunspec_json["_type"] == "root":
+            # Generate new uuid's for table references, which are used in transformation below.
+            uuid_map = dict()
+            for root_child in input_sunspec_json["children"]:
+                if root_child["_type"] == "table":
+                    uuid_map_for_table = generate_uuid_mapping_for_table(root_child)
+                    uuid_map.update(uuid_map_for_table)
+
+            # Transform from sunspec to staticmodbus.
             for root_child in input_sunspec_json["children"]:
                 if root_child["_type"] == "sunspec_model":
                     found_data = parse_sunspec_model(
-                        root_child, sunspec_types, staticmodbus_types
+                        root_child, sunspec_types, staticmodbus_types, uuid_map
                     )
                     data["children"].extend(found_data)
                 elif root_child["_type"] == "table":
-                    parse_table(root_child, sunspec_types, staticmodbus_types)
+                    parse_table(root_child, sunspec_types, staticmodbus_types, uuid_map)
                     data["children"].append(root_child)
                 else:
                     print(f"ERROR: unexpected root child: {root_child['_type']}")

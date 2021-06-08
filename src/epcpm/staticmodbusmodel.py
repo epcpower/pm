@@ -766,65 +766,65 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
     check = epyqlib.attrsmodel.check_just_children
 
 
-@graham.schemify(tag="staticmodbus_table_repeating_block", register=True)
-@epyqlib.attrsmodel.ify()
-@epyqlib.utils.qt.pyqtify()
-@epyqlib.utils.qt.pyqtify_passthrough_properties(
-    original="original",
-    field_names=("name",),
-)
-@attr.s(hash=False)
-class FunctionDataReference(epyqlib.treenode.TreeNode):
-    name = attr.ib(
-        default="Table Data Point Reference",
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
-        ),
-    )
-    offset = attr.ib(
-        default=2,
-        converter=int,
-    )
-    children = attr.ib(
-        factory=list,
-        metadata=graham.create_metadata(
-            field=graham.fields.MixedList(fields=()),
-        ),
-    )
-
-    original = attr.ib(
-        default=None,
-        metadata=graham.create_metadata(
-            field=epyqlib.attrsmodel.Reference(allow_none=True),
-        ),
-    )
-    epyqlib.attrsmodel.attrib(
-        attribute=original,
-        no_column=True,
-    )
-
-    uuid = epyqlib.attrsmodel.attr_uuid()
-
-    def __attrs_post_init__(self):
-        super().__init__()
-
-    @classmethod
-    def all_addable_types(cls):
-        return epyqlib.attrsmodel.create_addable_types(())
-
-    @staticmethod
-    def addable_types():
-        return {}
-
-    def can_drop_on(self, node):
-        return False
-
-    def can_delete(self, node=None):
-        return False
-
-    # check_offsets_and_length = check_block_offsets_and_length
-    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
-    child_from = epyqlib.attrsmodel.default_child_from
+# @graham.schemify(tag="staticmodbus_table_repeating_block", register=True)
+# @epyqlib.attrsmodel.ify()
+# @epyqlib.utils.qt.pyqtify()
+# @epyqlib.utils.qt.pyqtify_passthrough_properties(
+#     original="original",
+#     field_names=("name",),
+# )
+# @attr.s(hash=False)
+# class FunctionDataReference(epyqlib.treenode.TreeNode):
+#     name = attr.ib(
+#         default="Table Data Point Reference",
+#         metadata=graham.create_metadata(
+#             field=marshmallow.fields.String(),
+#         ),
+#     )
+#     offset = attr.ib(
+#         default=2,
+#         converter=int,
+#     )
+#     children = attr.ib(
+#         factory=list,
+#         metadata=graham.create_metadata(
+#             field=graham.fields.MixedList(fields=()),
+#         ),
+#     )
+#
+#     original = attr.ib(
+#         default=None,
+#         metadata=graham.create_metadata(
+#             field=epyqlib.attrsmodel.Reference(allow_none=True),
+#         ),
+#     )
+#     epyqlib.attrsmodel.attrib(
+#         attribute=original,
+#         no_column=True,
+#     )
+#
+#     uuid = epyqlib.attrsmodel.attr_uuid()
+#
+#     def __attrs_post_init__(self):
+#         super().__init__()
+#
+#     @classmethod
+#     def all_addable_types(cls):
+#         return epyqlib.attrsmodel.create_addable_types(())
+#
+#     @staticmethod
+#     def addable_types():
+#         return {}
+#
+#     def can_drop_on(self, node):
+#         return False
+#
+#     def can_delete(self, node=None):
+#         return False
+#
+#     # check_offsets_and_length = check_block_offsets_and_length
+#     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+#     child_from = epyqlib.attrsmodel.default_child_from
 
 
 @graham.schemify(tag="table_model_reference", register=True)
@@ -1239,7 +1239,7 @@ Root = epyqlib.attrsmodel.Root(
     valid_types=(
         FunctionData,
         Table,
-        TableRepeatingBlockReferenceFunctionDataReference,
+        TableRepeatingBlockReference,
         FunctionDataBitfield,
         FunctionDataBitfieldMember,
     ),
