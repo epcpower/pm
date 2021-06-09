@@ -30,10 +30,14 @@ def map_type_uuid(input, sunspec_types, staticmodbus_types):
     raise ValueError("Error: failure to map type")
 
 
-def parse_sunspec_data_point(data_point, sunspec_types, staticmodbus_types, uuid_map=None):
+def parse_sunspec_data_point(
+    data_point, sunspec_types, staticmodbus_types, uuid_map=None
+):
     print(f"data_point UUID: {data_point['uuid']}")
     data_point["_type"] = replace_data_point_with_function_data(data_point["_type"])
-    data_point["type_uuid"] = map_type_uuid(data_point, sunspec_types, staticmodbus_types)
+    data_point["type_uuid"] = map_type_uuid(
+        data_point, sunspec_types, staticmodbus_types
+    )
     if uuid_map is not None:
         data_point["uuid"] = uuid_map[data_point["uuid"]]
     else:
@@ -68,7 +72,9 @@ def parse_sunspec_header_block(sunspec_header_block, sunspec_types, staticmodbus
     found_data = []
     for child in sunspec_header_block["children"]:
         if child["_type"] == "data_point":
-            found_data.append(parse_sunspec_data_point(child, sunspec_types, staticmodbus_types))
+            found_data.append(
+                parse_sunspec_data_point(child, sunspec_types, staticmodbus_types)
+            )
         else:
             print(
                 f"Encountered non data_point in sunspec_header_block: {child['_type']}"
@@ -81,7 +87,9 @@ def parse_sunspec_fixed_block(sunspec_fixed_block, sunspec_types, staticmodbus_t
     found_data = []
     for child in sunspec_fixed_block["children"]:
         if child["_type"] == "data_point":
-            found_data.append(parse_sunspec_data_point(child, sunspec_types, staticmodbus_types))
+            found_data.append(
+                parse_sunspec_data_point(child, sunspec_types, staticmodbus_types)
+            )
         elif child["_type"] == "data_point_bitfield":
             child["_type"] = replace_data_point_with_function_data(child["_type"])
             del child["block_offset"]
@@ -148,11 +156,15 @@ def parse_table(table, sunspec_types, staticmodbus_types, uuid_map):
     # Only replace data_point with function_data for all children.
     for child in table["children"]:
         if child["_type"] == "data_point":
-            child = parse_sunspec_data_point(child, sunspec_types, staticmodbus_types, uuid_map=uuid_map)
+            child = parse_sunspec_data_point(
+                child, sunspec_types, staticmodbus_types, uuid_map=uuid_map
+            )
         elif child["_type"] == "table_model_reference":
             for ref_child in child["children"]:
                 if ref_child["_type"] == "data_point":
-                    ref_child = parse_sunspec_data_point(ref_child, sunspec_types, staticmodbus_types)
+                    ref_child = parse_sunspec_data_point(
+                        ref_child, sunspec_types, staticmodbus_types
+                    )
             child["uuid"] = uuid_map[child["uuid"]]
             del child["abbreviation"]
     table["uuid"] = generate_uuid()
