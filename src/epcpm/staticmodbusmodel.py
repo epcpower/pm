@@ -1241,7 +1241,7 @@ Root = epyqlib.attrsmodel.Root(
         Table,
         TableRepeatingBlockReference,
         FunctionDataBitfield,
-        FunctionDataBitfieldMember,
+        # FunctionDataBitfieldMember,
     ),
     # valid_types=(Model, Table),
 )
