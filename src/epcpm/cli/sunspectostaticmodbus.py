@@ -31,17 +31,35 @@ def map_type_uuid(input, sunspec_types, staticmodbus_types):
 
 
 def parse_sunspec_data_point(
-    data_point, sunspec_types, staticmodbus_types, uuid_map=None
+    data_point,
+    sunspec_types,
+    staticmodbus_types,
+    table_ref_uuid_map=None,
+    scale_factor_uuid_map=None,
 ):
     print(f"data_point UUID: {data_point['uuid']}")
     data_point["_type"] = replace_data_point_with_function_data(data_point["_type"])
     data_point["type_uuid"] = map_type_uuid(
         data_point, sunspec_types, staticmodbus_types
     )
-    if uuid_map is not None:
-        data_point["uuid"] = uuid_map[data_point["uuid"]]
+
+    if table_ref_uuid_map is not None:
+        # UUID comes from table reference.
+        data_point["uuid"] = table_ref_uuid_map[data_point["uuid"]]
+    elif scale_factor_uuid_map is not None:
+        if data_point["factor_uuid"] is not None:
+            # Scale Factor UUID comes from scale factor map.
+            data_point["factor_uuid"] = scale_factor_uuid_map[data_point["factor_uuid"]]
+        if data_point["uuid"] in scale_factor_uuid_map:
+            # UUID comes from scale factor map.
+            data_point["uuid"] = scale_factor_uuid_map[data_point["uuid"]]
+        else:
+            # UUID generated normally.
+            data_point["uuid"] = generate_uuid()
     else:
+        # UUID generated normally.
         data_point["uuid"] = generate_uuid()
+
     del data_point["hand_coded_getter"]
     del data_point["hand_coded_setter"]
     del data_point["block_offset"]
@@ -83,12 +101,19 @@ def parse_sunspec_header_block(sunspec_header_block, sunspec_types, staticmodbus
     return found_data
 
 
-def parse_sunspec_fixed_block(sunspec_fixed_block, sunspec_types, staticmodbus_types):
+def parse_sunspec_fixed_block(
+    sunspec_fixed_block, sunspec_types, staticmodbus_types, scale_factor_uuid_map
+):
     found_data = []
     for child in sunspec_fixed_block["children"]:
         if child["_type"] == "data_point":
             found_data.append(
-                parse_sunspec_data_point(child, sunspec_types, staticmodbus_types)
+                parse_sunspec_data_point(
+                    child,
+                    sunspec_types,
+                    staticmodbus_types,
+                    scale_factor_uuid_map=scale_factor_uuid_map,
+                )
             )
         elif child["_type"] == "data_point_bitfield":
             child["_type"] = replace_data_point_with_function_data(child["_type"])
@@ -103,8 +128,11 @@ def parse_sunspec_fixed_block(sunspec_fixed_block, sunspec_types, staticmodbus_t
     return found_data
 
 
-def parse_sunspec_table_repeating_block(sunspec_table_repeating_block, uuid_map):
-    replace_original = uuid_map[sunspec_table_repeating_block["original"]]
+def parse_sunspec_table_repeating_block(
+    sunspec_table_repeating_block, table_ref_uuid_map, scale_factor_uuid_map
+):
+    # Original UUID comes from table reference.
+    replace_original = table_ref_uuid_map[sunspec_table_repeating_block["original"]]
     staticmodbus_trb = {
         "_type": "staticmodbus_table_repeating_block",
         "name": sunspec_table_repeating_block["name"],
@@ -121,8 +149,22 @@ def parse_sunspec_table_repeating_block(sunspec_table_repeating_block, uuid_map)
             child[
                 "_type"
             ] = "staticmodbus_table_repeating_block_reference_function_data_reference"
-            child["uuid"] = generate_uuid()
-            child["original"] = uuid_map[child["original"]]
+
+            if scale_factor_uuid_map is not None:
+                if child["factor_uuid"] is not None:
+                    # Scale Factor UUID comes from scale factor map.
+                    child["factor_uuid"] = scale_factor_uuid_map[child["factor_uuid"]]
+                if child["uuid"] in scale_factor_uuid_map:
+                    # UUID comes from scale factor map.
+                    child["uuid"] = scale_factor_uuid_map[child["uuid"]]
+                else:
+                    # UUID generated normally.
+                    child["uuid"] = generate_uuid()
+            else:
+                # UUID generated normally.
+                child["uuid"] = generate_uuid()
+
+            child["original"] = table_ref_uuid_map[child["original"]]
             staticmodbus_trb["children"].append(child)
         else:
             print(
@@ -132,7 +174,13 @@ def parse_sunspec_table_repeating_block(sunspec_table_repeating_block, uuid_map)
     return [staticmodbus_trb]
 
 
-def parse_sunspec_model(sunspec_model, sunspec_types, staticmodbus_types, uuid_map):
+def parse_sunspec_model(
+    sunspec_model,
+    sunspec_types,
+    staticmodbus_types,
+    table_ref_uuid_map,
+    scale_factor_uuid_map,
+):
     found_data = []
     for child in sunspec_model["children"]:
         if child["_type"] == "sunspec_header_block":
@@ -141,10 +189,12 @@ def parse_sunspec_model(sunspec_model, sunspec_types, staticmodbus_types, uuid_m
             )
         elif child["_type"] == "sunspec_fixed_block":
             found_child_data = parse_sunspec_fixed_block(
-                child, sunspec_types, staticmodbus_types
+                child, sunspec_types, staticmodbus_types, scale_factor_uuid_map
             )
         elif child["_type"] == "sunspec_table_repeating_block":
-            found_child_data = parse_sunspec_table_repeating_block(child, uuid_map)
+            found_child_data = parse_sunspec_table_repeating_block(
+                child, table_ref_uuid_map, scale_factor_uuid_map
+            )
         else:
             print(f"ERROR: unexpected sunspec_model child: {child['_type']}")
         found_data.extend(found_child_data)
@@ -152,12 +202,15 @@ def parse_sunspec_model(sunspec_model, sunspec_types, staticmodbus_types, uuid_m
     return found_data
 
 
-def parse_table(table, sunspec_types, staticmodbus_types, uuid_map):
+def parse_table(table, sunspec_types, staticmodbus_types, table_ref_uuid_map):
     # Only replace data_point with function_data for all children.
     for child in table["children"]:
         if child["_type"] == "data_point":
             child = parse_sunspec_data_point(
-                child, sunspec_types, staticmodbus_types, uuid_map=uuid_map
+                child,
+                sunspec_types,
+                staticmodbus_types,
+                table_ref_uuid_map=table_ref_uuid_map,
             )
         elif child["_type"] == "table_model_reference":
             for ref_child in child["children"]:
@@ -165,18 +218,42 @@ def parse_table(table, sunspec_types, staticmodbus_types, uuid_map):
                     ref_child = parse_sunspec_data_point(
                         ref_child, sunspec_types, staticmodbus_types
                     )
-            child["uuid"] = uuid_map[child["uuid"]]
+            child["uuid"] = table_ref_uuid_map[child["uuid"]]
             del child["abbreviation"]
     table["uuid"] = generate_uuid()
 
 
-def generate_uuid_mapping_for_table(table):
-    uuid_map_for_table = dict()
+def generate_uuid_mapping_for_table_ref(table):
+    uuid_map_for_table_ref = dict()
     for child in table["children"]:
         if child["_type"] == "data_point" or child["_type"] == "table_model_reference":
-            uuid_map_for_table.setdefault(child["uuid"], generate_uuid())
+            uuid_map_for_table_ref.setdefault(child["uuid"], generate_uuid())
 
-    return uuid_map_for_table
+    return uuid_map_for_table_ref
+
+
+def generate_uuid_mapping_for_scale_factor(input_json, sunspec_types):
+    for sunspec_type in sunspec_types.children:
+        if sunspec_type.name == "sunssf":
+            sunssf_type_uuid = sunspec_type.uuid
+    return _generate_uuid_mapping_for_scale_factor(input_json, str(sunssf_type_uuid))
+
+
+def _generate_uuid_mapping_for_scale_factor(input_json, sunssf_type_uuid_str):
+    uuid_map_for_sf = dict()
+    for child in input_json:
+        if (
+            child["_type"] == "data_point"
+            and child["type_uuid"] == sunssf_type_uuid_str
+        ):
+            uuid_map_for_sf.setdefault(child["uuid"], generate_uuid())
+        elif "children" in child:
+            uuid_map_for_sf_in = _generate_uuid_mapping_for_scale_factor(
+                child["children"], sunssf_type_uuid_str
+            )
+            uuid_map_for_sf.update(uuid_map_for_sf_in)
+
+    return uuid_map_for_sf
 
 
 @click.command()
@@ -204,21 +281,37 @@ def cli(input_sunspec_filename, output_staticmodbus_filename):
         input_sunspec_json = json.load(input_sunspec_fp)
         if input_sunspec_json["_type"] == "root":
             # Generate new uuid's for table references, which are used in transformation below.
-            uuid_map = dict()
+            table_ref_uuid_map = dict()
             for root_child in input_sunspec_json["children"]:
                 if root_child["_type"] == "table":
-                    uuid_map_for_table = generate_uuid_mapping_for_table(root_child)
-                    uuid_map.update(uuid_map_for_table)
+                    uuid_map_for_table_ref = generate_uuid_mapping_for_table_ref(
+                        root_child
+                    )
+                    table_ref_uuid_map.update(uuid_map_for_table_ref)
+
+            # Generate new uuid's for scale factors, which are used in transformation below.
+            scale_factor_uuid_map = generate_uuid_mapping_for_scale_factor(
+                input_sunspec_json["children"], sunspec_types
+            )
 
             # Transform from sunspec to staticmodbus.
             for root_child in input_sunspec_json["children"]:
                 if root_child["_type"] == "sunspec_model":
                     found_data = parse_sunspec_model(
-                        root_child, sunspec_types, staticmodbus_types, uuid_map
+                        root_child,
+                        sunspec_types,
+                        staticmodbus_types,
+                        table_ref_uuid_map,
+                        scale_factor_uuid_map,
                     )
                     data["children"].extend(found_data)
                 elif root_child["_type"] == "table":
-                    parse_table(root_child, sunspec_types, staticmodbus_types, uuid_map)
+                    parse_table(
+                        root_child,
+                        sunspec_types,
+                        staticmodbus_types,
+                        table_ref_uuid_map,
+                    )
                     data["children"].append(root_child)
                 else:
                     print(f"ERROR: unexpected root child: {root_child['_type']}")

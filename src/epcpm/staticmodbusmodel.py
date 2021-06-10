@@ -124,7 +124,7 @@ def name_from_uuid(node, value, model):
     except epyqlib.attrsmodel.NotFoundError:
         return str(value)
 
-    # return model.node_from_uuid(target_node.parameter_uuid).abbreviation
+    return model.node_from_uuid(target_node.parameter_uuid).abbreviation
 
 
 # TODO: CAMPid 8695426542167924656654271657917491654
@@ -160,9 +160,10 @@ class ScaleFactorDelegate(QtWidgets.QStyledItemDelegate):
 
         points = []
         for pt in self.root.children:
-            type_node = attrs_model.node_from_uuid(pt.type_uuid)
-            if type_node.name == "sunssf":
-                points.append(pt)
+            if hasattr(pt, "type_uuid"):
+                type_node = attrs_model.node_from_uuid(pt.type_uuid)
+                if type_node.name == "staticmodbussf":
+                    points.append(pt)
 
         it = QtWidgets.QListWidgetItem(editor)
         it.setText("")
@@ -171,7 +172,7 @@ class ScaleFactorDelegate(QtWidgets.QStyledItemDelegate):
         for p in points:
             it = QtWidgets.QListWidgetItem(editor)
             param = attrs_model.node_from_uuid(p.parameter_uuid)
-            # it.setText(param.abbreviation)
+            it.setText(param.abbreviation)
             it.setData(epyqlib.utils.qt.UserRoles.raw, p.uuid)
             if p.uuid == raw:
                 it.setSelected(True)
