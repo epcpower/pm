@@ -29,6 +29,7 @@ sunspec_types = {
     "string": "PackedString",
     "bitfield16": "sunsU16",
     "bitfield32": "sunsU32",
+    "UartName": "UartName",
 }
 
 
@@ -303,7 +304,7 @@ class DataPoint:
         model = maybe_model
         model_variable = f"sunspecInterface.model{model.id}"
 
-        return f"&{model_variable}.{parameter.abbreviation}"
+        return f"{model_variable}.{parameter.abbreviation}"
 
 
 @builders(epcpm.sunspecmodel.DataPointBitfieldMember)
@@ -316,7 +317,7 @@ class DataPointBitfieldMember:
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
         uuid_ = str(parameter.uuid).replace("-", "_")
-        return f"&interfaceItem_variable_{uuid_}"
+        return f"interfaceItem_variable_{uuid_}"
 
 
 @builders(epyqlib.pm.parametermodel.Parameter)
@@ -350,6 +351,7 @@ class Parameter:
         if not uses_interface_item or all(x is None for x in interface_data):
             return [[], [], sunspec_models]
 
+        maybe_sunspec_variable_length = []
         scale_factor_variable = "NULL"
         scale_factor_updater = "NULL"
 
@@ -452,6 +454,12 @@ class Parameter:
             )
             sunspec_variable = sunspec_point_builder.interface_variable_name()
 
+            
+            if parameter.internal_type == "UartName":
+                maybe_sunspec_variable_length = [
+                    f".sunspec_variable_length = LENGTHOF({sunspec_variable}),"
+                ]
+
             # TODO: CAMPid 9675436715674367943196954756419543975314
             getter_setter_list = [
                 "InterfaceItem",
@@ -501,6 +509,7 @@ class Parameter:
             sunspec_getter=sunspec_getter,
             sunspec_setter=sunspec_setter,
             sunspec_variable=sunspec_variable,
+            maybe_sunspec_variable_length=maybe_sunspec_variable_length,
             variable_or_getter_setter=variable_or_getter_setter,
             rejected_callback=rejected_callback,
             can_scale_factor=getattr(can_signal, "factor", None),
@@ -592,6 +601,14 @@ class PackedStringType:
     maximum_code = attr.ib(default="(0)")
 
 
+@attr.s(frozen=True)
+class UartNameType:
+    name = attr.ib(default="UartName")
+    type = attr.ib(default="UartName")
+    minimum_code = attr.ib(default="(0)")
+    maximum_code = attr.ib(default="(0)")
+
+
 def fixed_width_name(bits, signed):
     if signed:
         u = ""
@@ -631,6 +648,7 @@ types = {
         SizeType(),
         VoidPointerType(),
         PackedStringType(),
+        UartNameType(),
     )
 }
 
@@ -1020,7 +1038,7 @@ class TableBaseStructures:
 
             if sunspec_scale_factor is not None:
                 scale_factor_variable = (
-                    f"&{sunspec_model_variable}.{sunspec_scale_factor}"
+                    f"{sunspec_model_variable}.{sunspec_scale_factor}"
                 )
                 scale_factor_updater_name = (
                     f"getSUNSPEC_MODEL{model_id}_{sunspec_scale_factor}"
@@ -1374,6 +1392,7 @@ def create_item(
     sunspec_getter,
     sunspec_setter,
     sunspec_variable,
+    maybe_sunspec_variable_length,
     variable_or_getter_setter,
     rejected_callback,
     can_scale_factor,
@@ -1421,6 +1440,7 @@ def create_item(
             "},",
             *variable_or_getter_setter,
             f".rejectedCallback = {rejected_callback},",
+            *maybe_sunspec_variable_length,
             *meta_initializer,
         ],
         "};",
@@ -1472,15 +1492,22 @@ def create_common_initializers(
         "true" if reject_from_inactive_interfaces else "false"
     )
 
+    scale_factor_variable_ref = "NULL"
+    if scale_factor_variable != "NULL":
+        scale_factor_variable_ref = "&" + scale_factor_variable
+    sunspec_variable_ref = "NULL"
+    if sunspec_variable != "NULL":
+        sunspec_variable_ref = "&" + sunspec_variable
+
     common_initializers = [
-        f".sunspecScaleFactor = {scale_factor_variable},",
+        f".sunspecScaleFactor = {scale_factor_variable_ref},",
         f".canScaleFactor = {float(can_scale_factor)}f,",
         f".scaleFactorUpdater = {scale_factor_updater},",
         f".internalScaleFactor = {internal_scale},",
         f".rejectFromInactiveInterface = {reject_from_inactive_interfaces_literal},",
         f".sunspec = {{",
         [
-            f".variable = {sunspec_variable},",
+            f".variable = {sunspec_variable_ref},",
             f".getter = {sunspec_getter},",
             f".setter = {sunspec_setter},",
             f".handGetter = {hand_coded_sunspec_getter_function},",
