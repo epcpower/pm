@@ -622,8 +622,16 @@ class PackedStringType:
 class SunspecScaleFactorType:
     name = attr.ib(default="sunssf")
     type = attr.ib(default="sunssf")
-    minimum_code = attr.ib(default="(0)")
-    maximum_code = attr.ib(default="(0)")
+    minimum_code = attr.ib(default=fixed_width_limit_text(
+        bits=16,
+        signed=True,
+        limit="min",
+    ))
+    maximum_code = attr.ib(default=fixed_width_limit_text(
+        bits=16,
+        signed=True,
+        limit="max",
+    ))
 
 @attr.s(frozen=True)
 class UartNameType:
