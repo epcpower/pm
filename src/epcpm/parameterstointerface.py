@@ -1590,10 +1590,9 @@ def create_common_initializers(
         "true" if reject_from_inactive_interfaces else "false"
     )
 
-    staticmodbus_scale_factor_variable = "xxxUNKNOWNxxx"
     common_initializers = [
         f".sunspecScaleFactor = {scale_factor_variable},",
-        f".staticmodbusScaleFactor = {staticmodbus_scale_factor_variable},",
+        f".staticmodbusScaleFactor = {scale_factor_variable},",
         f".canScaleFactor = {float(can_scale_factor)}f,",
         f".scaleFactorUpdater = {scale_factor_updater},",
         f".internalScaleFactor = {internal_scale},",
