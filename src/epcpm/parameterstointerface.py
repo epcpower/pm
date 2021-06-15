@@ -369,20 +369,19 @@ class FunctionData:
     parameter_uuid_finder = attr.ib()
 
     def interface_variable_name(self):
-        parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
-
+        # parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+        #
         # maybe_model = self.wrapped.tree_parent
         #
-        # while not isinstance(maybe_model, epcpm.staticmodbusmodel.Model):
+        # while not isinstance(maybe_model, epcpm.sunspecmodel.Model):
         #     maybe_model = maybe_model.tree_parent
         #
         # model = maybe_model
-        # model_variable = f"staticmodbusInterface.model{model.id}"
-
-        # TODO: temporary:
-        model_variable = "staticmodbusInterface.yyyUNKNOWNyyy"
-
-        return f"&{model_variable}.{parameter.abbreviation}"
+        # model_variable = f"sunspecInterface.model{model.id}"
+        #
+        # return f"&{model_variable}.{parameter.abbreviation}"
+        # # TODO: This needs to change to return staticmodbusInterface variable name, whenever that exists.
+        return "NULL"
 
 
 @builders(epcpm.staticmodbusmodel.FunctionDataBitfieldMember)
