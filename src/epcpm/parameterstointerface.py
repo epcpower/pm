@@ -373,12 +373,26 @@ class Parameter:
             constant = parameter.constant
             print("constant is NOT none")
 
+        rejected_callback = []
+
         if parameter.internal_variable is not None:
             interface_type = "variable"
 
             variable_or_getter_setter = [
                 f".variable = &{parameter.internal_variable},",
             ]
+            variable_or_getter_setter.append(f".setter = {setter_function},")
+
+            if parameter.rejected_callback is None:
+                rejected_callback = [
+                    f".rejectedCallback = NULL,",
+                ]
+            else:
+                rejected_callback = [
+                    f".rejectedCallback = &{parameter.rejected_callback},",
+                ]
+
+        #optional attributes
         elif parameter.constant is not None:
             interface_type = "constant"
             variable_or_getter_setter = [
@@ -390,8 +404,17 @@ class Parameter:
             variable_or_getter_setter = [
                 f".getter = {getter_function},",
             ]
+            variable_or_getter_setter.append(f".setter = {setter_function},")
 
-        variable_or_getter_setter.append(f".setter = {setter_function},")
+            if parameter.rejected_callback is None:
+                rejected_callback = [
+                    f".rejectedCallback = NULL,",
+                ]
+            else:
+                rejected_callback = [
+                    f".rejectedCallback = &{parameter.rejected_callback},",
+                ]
+
 
         if sunspec_point is None:
             sunspec_variable = "NULL"
@@ -504,11 +527,6 @@ class Parameter:
             parameter_uuid_finder=self.parameter_uuid_finder,
         )
 
-        if parameter.rejected_callback is None:
-            rejected_callback = "NULL"
-        else:
-            rejected_callback = f"&{parameter.rejected_callback}"
-
         result = create_item(
             item_uuid=parameter.uuid,
             include_uuid_in_item=self.include_uuid_in_item,
@@ -618,23 +636,6 @@ class PackedStringType:
     minimum_code = attr.ib(default="(0)")
     maximum_code = attr.ib(default="(0)")
 
-@attr.s(frozen=True)
-class SunspecScaleFactorType:
-    name = attr.ib(default="sunssf")
-    type = attr.ib(default="sunssf")
-    minimum_code = attr.ib(default="(0)")
-    maximum_code = attr.ib(default="(0)")
-
-  #  minimum_code = attr.ib(default=fixed_width_limit_text(
-  #      bits=16,
-  #      signed=True,
-  #      limit="min",
-  #  ))
-  #  maximum_code = attr.ib(default=fixed_width_limit_text(
-  #      bits=16,
-  #      signed=True,
-  #      limit="max",
-  #  ))
 
 @attr.s(frozen=True)
 class UartNameType:
@@ -665,6 +666,21 @@ def fixed_width_limit_text(bits, signed, limit):
     u = "" if signed else "U"
 
     return f"({u}INT{bits}_{limit.upper()})"
+
+@attr.s(frozen=True)
+class SunspecScaleFactorType:
+    name = attr.ib(default="sunssf")
+    type = attr.ib(default="sunssf")
+    minimum_code = attr.ib(default=fixed_width_limit_text(
+        bits=16,
+        signed=True,
+        limit="min",
+    ))
+    maximum_code = attr.ib(default=fixed_width_limit_text(
+        bits=16,
+        signed=True,
+        limit="max",
+    ))
 
 
 types = {
@@ -1439,6 +1455,8 @@ def create_item(
 
     if meta_initializer_values is None:
         meta_initializer = []
+    elif parameter.constant is not None:
+        meta_initializer = []
     else:
         meta_initializer = [
             ".meta_values = {",
@@ -1475,7 +1493,7 @@ def create_item(
             common_initializers,
             "},",
             *variable_or_getter_setter,
-            f".rejectedCallback = {rejected_callback},",
+            *rejected_callback,
             *maybe_sunspec_variable_length,
             *meta_initializer,
         ],
