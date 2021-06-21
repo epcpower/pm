@@ -33,6 +33,18 @@ sunspec_types = {
 }
 
 
+staticmodbus_types = {
+    "uint16": "sunsU16",
+    "enum16": "sunsU16",
+    "int16": "sunsS16",
+    "uint32": "sunsU32",
+    "int32": "sunsS32",
+    "string": "PackedString",
+    "bitfield16": "sunsU16",
+    "bitfield32": "sunsU32",
+}
+
+
 def node_path_string(node):
     nodes = [node, *node.ancestors()][:-1]
     names = [node.name for node in reversed(nodes)]
@@ -550,12 +562,30 @@ class Parameter:
 
         if staticmodbus_point is None:
             staticmodbus_variable = "NULL"
+            staticmodbus_getter = "NULL"
+            staticmodbus_setter = "NULL"
         else:
             staticmodbus_point_builder = builders.wrap(
                 wrapped=staticmodbus_point,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
             staticmodbus_variable = staticmodbus_point_builder.interface_variable_name()
+
+            staticmodbus_type = staticmodbus_types[
+                self.parameter_uuid_finder(staticmodbus_point.type_uuid).name
+            ]
+
+            # TODO: CAMPid 9675436715674367943196954756419543975314
+            getter_setter_list = [
+                "InterfaceItem",
+                var_or_func,
+                types[parameter.internal_type].name,
+                "staticmodbus",
+                staticmodbus_type,
+            ]
+
+            staticmodbus_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
+            staticmodbus_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
 
         interface_item_type = (
             f"InterfaceItem_{var_or_func}_{types[parameter.internal_type].name}"
@@ -595,6 +625,8 @@ class Parameter:
             sunspec_getter=sunspec_getter,
             sunspec_setter=sunspec_setter,
             sunspec_variable=sunspec_variable,
+            staticmodbus_getter=staticmodbus_getter,
+            staticmodbus_setter=staticmodbus_setter,
             staticmodbus_variable=staticmodbus_variable,
             variable_or_getter_setter=variable_or_getter_setter,
             rejected_callback=rejected_callback,
@@ -1011,7 +1043,7 @@ class TableBaseStructures:
 
         return name
 
-    def create_item(self, table_element, layers, sunspec_point):
+    def create_item(self, table_element, layers, sunspec_point, staticmodbus_point):
         # TODO: CAMPid 9655426754319431461354643167
         array_element = table_element.original
 
@@ -1061,6 +1093,9 @@ class TableBaseStructures:
         scale_factor_variable = "NULL"
         scale_factor_updater = "NULL"
         sunspec_model_variable = "NULL"
+        staticmodbus_getter = "NULL"
+        staticmodbus_setter = "NULL"
+        staticmodbus_variable = None
 
         if sunspec_point is not None:
             sunspec_type = sunspec_types[
@@ -1123,6 +1158,27 @@ class TableBaseStructures:
                 )
                 scale_factor_updater = f"&{scale_factor_updater_name}"
 
+        if not staticmodbus_point is None:
+            staticmodbus_type = staticmodbus_types[
+                self.parameter_uuid_finder(staticmodbus_point.type_uuid).name
+            ]
+
+            # TODO: CAMPid 9675436715674367943196954756419543975314
+            getter_setter_list = [
+                "InterfaceItem",
+                "table",
+                types[parameter.internal_type].name,
+                "staticmodbus",
+                staticmodbus_type,
+            ]
+
+            staticmodbus_getter = "_".join(
+                str(x) for x in getter_setter_list + ["getter"]
+            )
+            staticmodbus_setter = "_".join(
+                str(x) for x in getter_setter_list + ["setter"]
+            )
+
         common_initializers = create_common_initializers(
             access_level=access_level,
             can_getter=can_getter,
@@ -1138,6 +1194,9 @@ class TableBaseStructures:
             sunspec_setter=sunspec_setter,
             # not to be used so really hardcode NULL
             sunspec_variable="NULL",
+            staticmodbus_getter=staticmodbus_getter,
+            staticmodbus_setter=staticmodbus_setter,
+            # not to be used so really hardcode NULL
             staticmodbus_variable="NULL",
             can_scale_factor=can_factor,
             reject_from_inactive_interfaces=(parameter.reject_from_inactive_interfaces),
@@ -1183,6 +1242,11 @@ class TableBaseStructures:
                 ]
             sunspec_variable_initializer = f"&{sunspec_variable}"
 
+        if staticmodbus_variable is None:
+            staticmodbus_variable_initializer = "NULL"
+        else:
+            staticmodbus_variable_initializer = f"&{staticmodbus_variable}"
+
         c = [
             f'#pragma DATA_SECTION({item_name}, "Interface")',
             f"// {node_path_string(table_element)}",
@@ -1193,6 +1257,7 @@ class TableBaseStructures:
                 f".can_variable = {can_variable},",
                 f".sunspec_variable = {sunspec_variable_initializer},",
                 *maybe_sunspec_variable_length,
+                f".staticmodbus_variable = {staticmodbus_variable_initializer},",
                 f'.zone = {curve_type if curve_type is not None else "0"},',
                 f".curve = {str(int(curve_index - 1))},",
                 f".point = {0 if point_index is None else point_index},",
@@ -1462,11 +1527,13 @@ class TableArrayElement:
         )
 
         sunspec_point = self.parameter_uuid_to_sunspec_node.get(parameter.uuid)
+        staticmodbus_point = self.parameter_uuid_to_staticmodbus_node.get(parameter.uuid)
 
         return self.table_base_structures.create_item(
             table_element=self.wrapped,
             layers=self.layers,
             sunspec_point=sunspec_point,
+            staticmodbus_point=staticmodbus_point,
         )
 
 
@@ -1488,6 +1555,8 @@ def create_item(
     sunspec_getter,
     sunspec_setter,
     sunspec_variable,
+    staticmodbus_getter,
+    staticmodbus_setter,
     staticmodbus_variable,
     variable_or_getter_setter,
     rejected_callback,
@@ -1519,6 +1588,8 @@ def create_item(
         sunspec_getter=sunspec_getter,
         sunspec_setter=sunspec_setter,
         sunspec_variable=sunspec_variable,
+        staticmodbus_getter=staticmodbus_getter,
+        staticmodbus_setter=staticmodbus_setter,
         staticmodbus_variable=staticmodbus_variable,
         can_scale_factor=can_scale_factor,
         reject_from_inactive_interfaces=reject_from_inactive_interfaces,
@@ -1571,6 +1642,8 @@ def create_common_initializers(
     sunspec_getter,
     sunspec_setter,
     sunspec_variable,
+    staticmodbus_getter,
+    staticmodbus_setter,
     staticmodbus_variable,
     can_scale_factor,
     reject_from_inactive_interfaces,
@@ -1591,7 +1664,7 @@ def create_common_initializers(
 
     common_initializers = [
         f".sunspecScaleFactor = {scale_factor_variable},",
-        f".staticmodbusScaleFactor = {scale_factor_variable},",
+        f".staticmodbusScaleFactor = NULL,",
         f".canScaleFactor = {float(can_scale_factor)}f,",
         f".scaleFactorUpdater = {scale_factor_updater},",
         f".internalScaleFactor = {internal_scale},",
@@ -1608,6 +1681,8 @@ def create_common_initializers(
         f".staticmodbus = {{",
         [
             f".variable = {staticmodbus_variable},",
+            f".getter = {staticmodbus_getter},",
+            f".setter = {staticmodbus_setter},",
         ],
         f"}},",
         f".can = {{",
