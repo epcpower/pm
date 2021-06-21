@@ -584,8 +584,12 @@ class Parameter:
                 staticmodbus_type,
             ]
 
-            staticmodbus_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
-            staticmodbus_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
+            staticmodbus_getter = "_".join(
+                str(x) for x in getter_setter_list + ["getter"]
+            )
+            staticmodbus_setter = "_".join(
+                str(x) for x in getter_setter_list + ["setter"]
+            )
 
         interface_item_type = (
             f"InterfaceItem_{var_or_func}_{types[parameter.internal_type].name}"
@@ -1527,7 +1531,9 @@ class TableArrayElement:
         )
 
         sunspec_point = self.parameter_uuid_to_sunspec_node.get(parameter.uuid)
-        staticmodbus_point = self.parameter_uuid_to_staticmodbus_node.get(parameter.uuid)
+        staticmodbus_point = self.parameter_uuid_to_staticmodbus_node.get(
+            parameter.uuid
+        )
 
         return self.table_base_structures.create_item(
             table_element=self.wrapped,
