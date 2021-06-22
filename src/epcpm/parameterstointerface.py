@@ -366,13 +366,6 @@ class Parameter:
         else:
             setter_function = parameter.setter_function
 
-        if parameter.constant is None:
-            constant = "NULL"
-            #print("constant is none")
-        else:
-            constant = parameter.constant
-            print("constant is NOT none")
-
         rejected_callback = []
 
         if parameter.internal_variable is not None:
@@ -396,7 +389,7 @@ class Parameter:
         elif parameter.constant is not None:
             interface_type = "constant"
             variable_or_getter_setter = [
-                f".constant = {constant},",
+                f".constant = {parameter.constant},",
             ]
         else:
             interface_type = "functions"
@@ -507,8 +500,8 @@ class Parameter:
 
             if(interface_type != "constant"):
                 sunspec_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
-            #Constant is ReadOnly, doesnt need a setter
             else:
+                #Constant is ReadOnly, doesnt need a setter
                 sunspec_setter = "NULL"
 
 
