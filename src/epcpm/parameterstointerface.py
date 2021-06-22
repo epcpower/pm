@@ -385,7 +385,7 @@ class Parameter:
                     f".rejectedCallback = &{parameter.rejected_callback},",
                 ]
 
-        #optional attributes
+        # optional attributes
         elif parameter.constant is not None:
             interface_type = "constant"
             variable_or_getter_setter = [
@@ -407,7 +407,6 @@ class Parameter:
                 rejected_callback = [
                     f".rejectedCallback = &{parameter.rejected_callback},",
                 ]
-
 
         if sunspec_point is None:
             sunspec_variable = "NULL"
@@ -483,7 +482,6 @@ class Parameter:
             )
             sunspec_variable = sunspec_point_builder.interface_variable_name()
 
-
             if parameter.internal_type == "UartName":
                 maybe_sunspec_variable_length = [
                     f".sunspec_variable_length = LENGTHOF({sunspec_variable}),"
@@ -498,12 +496,13 @@ class Parameter:
             ]
             sunspec_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
 
-            if(interface_type != "constant"):
-                sunspec_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
+            if interface_type != "constant":
+                sunspec_setter = "_".join(
+                    str(x) for x in getter_setter_list + ["setter"]
+                )
             else:
-                #Constant is ReadOnly, doesnt need a setter
+                # Constant is ReadOnly, doesnt need a setter
                 sunspec_setter = "NULL"
-
 
         interface_item_type = (
             f"InterfaceItem_{interface_type}_{types[parameter.internal_type].name}"
@@ -660,20 +659,25 @@ def fixed_width_limit_text(bits, signed, limit):
 
     return f"({u}INT{bits}_{limit.upper()})"
 
+
 @attr.s(frozen=True)
 class SunspecScaleFactorType:
     name = attr.ib(default="sunssf")
     type = attr.ib(default="sunssf")
-    minimum_code = attr.ib(default=fixed_width_limit_text(
-        bits=16,
-        signed=True,
-        limit="min",
-    ))
-    maximum_code = attr.ib(default=fixed_width_limit_text(
-        bits=16,
-        signed=True,
-        limit="max",
-    ))
+    minimum_code = attr.ib(
+        default=fixed_width_limit_text(
+            bits=16,
+            signed=True,
+            limit="min",
+        )
+    )
+    maximum_code = attr.ib(
+        default=fixed_width_limit_text(
+            bits=16,
+            signed=True,
+            limit="max",
+        )
+    )
 
 
 types = {
