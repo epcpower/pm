@@ -554,6 +554,7 @@ class Parameter:
                 "InterfaceItem",
                 var_or_func,
                 types[parameter.internal_type].name,
+                "sunspec",
                 sunspec_type,
             ]
 
