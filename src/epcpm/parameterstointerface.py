@@ -24,6 +24,7 @@ sunspec_types = {
     "uint16": "sunsU16",
     "enum16": "sunsU16",
     "int16": "sunsS16",
+    "sunssf": "sunssf",
     "uint32": "sunsU32",
     "int32": "sunsS32",
     "string": "PackedString",
@@ -365,20 +366,47 @@ class Parameter:
         else:
             setter_function = parameter.setter_function
 
+        rejected_callback = []
+
         if parameter.internal_variable is not None:
-            var_or_func = "variable"
+            interface_type = "variable"
 
             variable_or_getter_setter = [
                 f".variable = &{parameter.internal_variable},",
             ]
+            variable_or_getter_setter.append(f".setter = {setter_function},")
+
+            if parameter.rejected_callback is None:
+                rejected_callback = [
+                    f".rejectedCallback = NULL,",
+                ]
+            else:
+                rejected_callback = [
+                    f".rejectedCallback = &{parameter.rejected_callback},",
+                ]
+
+        # optional attributes
+        elif parameter.constant is not None:
+            interface_type = "constant"
+            variable_or_getter_setter = [
+                f".constant = {parameter.constant},",
+            ]
         else:
-            var_or_func = "functions"
+            interface_type = "functions"
 
             variable_or_getter_setter = [
                 f".getter = {getter_function},",
             ]
+            variable_or_getter_setter.append(f".setter = {setter_function},")
 
-        variable_or_getter_setter.append(f".setter = {setter_function},")
+            if parameter.rejected_callback is None:
+                rejected_callback = [
+                    f".rejectedCallback = NULL,",
+                ]
+            else:
+                rejected_callback = [
+                    f".rejectedCallback = &{parameter.rejected_callback},",
+                ]
 
         if sunspec_point is None:
             sunspec_variable = "NULL"
@@ -454,7 +482,6 @@ class Parameter:
             )
             sunspec_variable = sunspec_point_builder.interface_variable_name()
 
-            
             if parameter.internal_type == "UartName":
                 maybe_sunspec_variable_length = [
                     f".sunspec_variable_length = LENGTHOF({sunspec_variable}),"
@@ -463,33 +490,34 @@ class Parameter:
             # TODO: CAMPid 9675436715674367943196954756419543975314
             getter_setter_list = [
                 "InterfaceItem",
-                var_or_func,
+                interface_type,
                 types[parameter.internal_type].name,
                 sunspec_type,
             ]
-
             sunspec_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
-            sunspec_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
+
+            if interface_type != "constant":
+                sunspec_setter = "_".join(
+                    str(x) for x in getter_setter_list + ["setter"]
+                )
+            else:
+                # Constant is ReadOnly, doesnt need a setter
+                sunspec_setter = "NULL"
 
         interface_item_type = (
-            f"InterfaceItem_{var_or_func}_{types[parameter.internal_type].name}"
+            f"InterfaceItem_{interface_type}_{types[parameter.internal_type].name}"
         )
 
         can_getter, can_setter, can_variable = can_getter_setter_variable(
             can_signal=can_signal,
             parameter=parameter,
-            var_or_func_or_table=var_or_func,
+            interface_type=interface_type,
         )
 
         access_level = get_access_level_string(
             parameter=parameter,
             parameter_uuid_finder=self.parameter_uuid_finder,
         )
-
-        if parameter.rejected_callback is None:
-            rejected_callback = "NULL"
-        else:
-            rejected_callback = f"&{parameter.rejected_callback}"
 
         result = create_item(
             item_uuid=parameter.uuid,
@@ -632,6 +660,26 @@ def fixed_width_limit_text(bits, signed, limit):
     return f"({u}INT{bits}_{limit.upper()})"
 
 
+@attr.s(frozen=True)
+class SunspecScaleFactorType:
+    name = attr.ib(default="sunssf")
+    type = attr.ib(default="sunssf")
+    minimum_code = attr.ib(
+        default=fixed_width_limit_text(
+            bits=16,
+            signed=True,
+            limit="min",
+        )
+    )
+    maximum_code = attr.ib(
+        default=fixed_width_limit_text(
+            bits=16,
+            signed=True,
+            limit="max",
+        )
+    )
+
+
 types = {
     type.type: type
     for type in (
@@ -648,6 +696,7 @@ types = {
         SizeType(),
         VoidPointerType(),
         PackedStringType(),
+        SunspecScaleFactorType(),
         UartNameType(),
     )
 }
@@ -724,7 +773,7 @@ def get_access_level_string(parameter, parameter_uuid_finder):
     return access_level
 
 
-def can_getter_setter_variable(can_signal, parameter, var_or_func_or_table):
+def can_getter_setter_variable(can_signal, parameter, interface_type):
     if can_signal is None:
         can_variable = "NULL"
         can_getter = "NULL"
@@ -768,7 +817,7 @@ def can_getter_setter_variable(can_signal, parameter, var_or_func_or_table):
 
     getter_setter_list = [
         "InterfaceItem",
-        var_or_func_or_table,
+        interface_type,
         types[parameter.internal_type].name,
         "can",
         can_type,
@@ -968,7 +1017,7 @@ class TableBaseStructures:
         can_getter, can_setter, can_variable = can_getter_setter_variable(
             can_signal,
             parameter,
-            var_or_func_or_table="table",
+            interface_type="table",
         )
 
         if can_signal is None:
@@ -1403,6 +1452,8 @@ def create_item(
 
     if meta_initializer_values is None:
         meta_initializer = []
+    elif parameter.constant is not None:
+        meta_initializer = []
     else:
         meta_initializer = [
             ".meta_values = {",
@@ -1439,7 +1490,7 @@ def create_item(
             common_initializers,
             "},",
             *variable_or_getter_setter,
-            f".rejectedCallback = {rejected_callback},",
+            *rejected_callback,
             *maybe_sunspec_variable_length,
             *meta_initializer,
         ],
