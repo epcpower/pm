@@ -397,10 +397,12 @@ class Parameter:
             variable_or_getter_setter = [
                 f".getter = {getter_function},",
             ]
-        
+
         if parameter.getter_index is not None:
-            variable_or_getter_setter.append(f".getter_index = {parameter.getter_index},")
-        
+            variable_or_getter_setter.append(
+                f".getter_index = {parameter.getter_index},"
+            )
+
             if parameter.rejected_callback is None:
                 rejected_callback = [
                     f".rejectedCallback = NULL,",
@@ -500,7 +502,9 @@ class Parameter:
             if parameter.getter_index is not None:
                 indexed_str = "indexed_"
 
-            sunspec_getter = "_".join(str(x) for x in getter_setter_list + [indexed_str + "getter"])
+            sunspec_getter = "_".join(
+                str(x) for x in getter_setter_list + [indexed_str + "getter"]
+            )
 
             if interface_type != "constant":
                 sunspec_setter = "_".join(
@@ -514,9 +518,7 @@ class Parameter:
         if parameter.getter_index is not None:
             indexed_getter_str = "indexed_getter_"
 
-        interface_item_type = (
-            f"InterfaceItem_{interface_type}_{indexed_getter_str}{types[parameter.internal_type].name}"
-        )
+        interface_item_type = f"InterfaceItem_{var_or_func}_{indexed_getter_str}{types[parameter.internal_type].name}"
 
         can_getter, can_setter, can_variable = can_getter_setter_variable(
             can_signal=can_signal,
@@ -1544,7 +1546,7 @@ def create_common_initializers(
     if can_scale_factor is None:
         # TODO: don't default here?
         can_scale_factor = 1
-    
+
     maybe_uuid = []
     if include_uuid_in_item:
         maybe_uuid = [f".uuid = {uuid_initializer(uuid_)},"]
