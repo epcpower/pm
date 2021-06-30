@@ -380,8 +380,8 @@ class Parameter:
             variable_or_getter_setter.append(
                 f".getter_index = {parameter.getter_index},"
             )
-
-        variable_or_getter_setter.append(f".setter = {setter_function},")
+        else:
+            variable_or_getter_setter.append(f".setter = {setter_function},")
 
         if sunspec_point is None:
             sunspec_variable = "NULL"
@@ -472,7 +472,12 @@ class Parameter:
             sunspec_getter = "_".join(
                 str(x) for x in getter_setter_list + [indexed_str + "getter"]
             )
-            sunspec_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
+
+            sunspec_setter = "NULL"
+            if parameter.getter_index is None:
+                sunspec_setter = "_".join(
+                    str(x) for x in getter_setter_list + ["setter"]
+                )
 
         indexed_getter_str = ""
         if parameter.getter_index is not None:
