@@ -398,12 +398,12 @@ class Parameter:
                 f".getter = {getter_function},",
             ]
 
-        if parameter.getter_index is not None:
-            variable_or_getter_setter.append(
-                f".getter_index = {parameter.getter_index},"
-            )
-        else:
-            variable_or_getter_setter.append(f".setter = {setter_function},")
+            if parameter.getter_index is not None:
+                variable_or_getter_setter.append(
+                    f".getter_index = {parameter.getter_index},"
+                )
+            else:
+                variable_or_getter_setter.append(f".setter = {setter_function},")
 
             if parameter.rejected_callback is None:
                 rejected_callback = [
@@ -520,7 +520,7 @@ class Parameter:
         if parameter.getter_index is not None:
             indexed_getter_str = "indexed_getter_"
 
-        interface_item_type = f"InterfaceItem_{var_or_func}_{indexed_getter_str}{types[parameter.internal_type].name}"
+        interface_item_type = f"InterfaceItem_{interface_type}_{indexed_getter_str}{types[parameter.internal_type].name}"
 
         can_getter, can_setter, can_variable = can_getter_setter_variable(
             can_signal=can_signal,
