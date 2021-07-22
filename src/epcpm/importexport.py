@@ -14,7 +14,6 @@ import epcpm.parameterstosil
 import epcpm.project
 import epcpm.smdxtosunspec
 import epcpm.sunspecmodel
-import epcpm.sunspecmodel
 import epcpm.sunspectobitfieldsc
 import epcpm.sunspectotablesc
 import epcpm.sunspectomanualc
