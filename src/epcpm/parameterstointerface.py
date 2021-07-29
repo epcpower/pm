@@ -391,6 +391,27 @@ class Parameter:
             variable_or_getter_setter = [
                 f".constant = {parameter.constant},",
             ]
+
+        elif parameter.index is not None:
+            interface_type = "indexed"
+
+            variable_or_getter_setter = [
+                f".getter = {getter_function},",
+            ]
+
+            variable_or_getter_setter.append(f".setter = {setter_function},")
+
+            variable_or_getter_setter.append(f".index = {parameter.index},")
+
+            if parameter.rejected_callback is None:
+                rejected_callback = [
+                    f".rejectedCallback = NULL,",
+                ]
+            else:
+                rejected_callback = [
+                    f".rejectedCallback = &{parameter.rejected_callback},",
+                ]
+
         else:
             interface_type = "functions"
 
@@ -398,12 +419,7 @@ class Parameter:
                 f".getter = {getter_function},",
             ]
 
-            if parameter.getter_index is not None:
-                variable_or_getter_setter.append(
-                    f".getter_index = {parameter.getter_index},"
-                )
-            else:
-                variable_or_getter_setter.append(f".setter = {setter_function},")
+            variable_or_getter_setter.append(f".setter = {setter_function},")
 
             if parameter.rejected_callback is None:
                 rejected_callback = [
@@ -500,15 +516,10 @@ class Parameter:
                 types[parameter.internal_type].name,
                 sunspec_type,
             ]
-            indexed_str = ""
-            if parameter.getter_index is not None:
-                indexed_str = "indexed_"
 
-            sunspec_getter = "_".join(
-                str(x) for x in getter_setter_list + [indexed_str + "getter"]
-            )
+            sunspec_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
 
-            if interface_type != "constant" and parameter.getter_index is None:
+            if interface_type != "constant" and interface_type != "indexed":
                 sunspec_setter = "_".join(
                     str(x) for x in getter_setter_list + ["setter"]
                 )
@@ -516,11 +527,9 @@ class Parameter:
                 # Constant is ReadOnly, doesnt need a setter
                 sunspec_setter = "NULL"
 
-        indexed_getter_str = ""
-        if parameter.getter_index is not None:
-            indexed_getter_str = "indexed_getter_"
-
-        interface_item_type = f"InterfaceItem_{interface_type}_{indexed_getter_str}{types[parameter.internal_type].name}"
+        interface_item_type = (
+            f"InterfaceItem_{interface_type}_{types[parameter.internal_type].name}"
+        )
 
         can_getter, can_setter, can_variable = can_getter_setter_variable(
             can_signal=can_signal,
