@@ -391,12 +391,34 @@ class Parameter:
             variable_or_getter_setter = [
                 f".constant = {parameter.constant},",
             ]
+
+        elif parameter.index is not None:
+            interface_type = "indexed"
+
+            variable_or_getter_setter = [
+                f".getter = {getter_function},",
+            ]
+
+            variable_or_getter_setter.append(f".setter = {setter_function},")
+
+            variable_or_getter_setter.append(f".index = {parameter.index},")
+
+            if parameter.rejected_callback is None:
+                rejected_callback = [
+                    f".rejectedCallback = NULL,",
+                ]
+            else:
+                rejected_callback = [
+                    f".rejectedCallback = &{parameter.rejected_callback},",
+                ]
+
         else:
             interface_type = "functions"
 
             variable_or_getter_setter = [
                 f".getter = {getter_function},",
             ]
+
             variable_or_getter_setter.append(f".setter = {setter_function},")
 
             if parameter.rejected_callback is None:
@@ -494,9 +516,10 @@ class Parameter:
                 types[parameter.internal_type].name,
                 sunspec_type,
             ]
+
             sunspec_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
 
-            if interface_type != "constant":
+            if interface_type != "constant" and interface_type != "indexed":
                 sunspec_setter = "_".join(
                     str(x) for x in getter_setter_list + ["setter"]
                 )
