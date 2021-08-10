@@ -3,6 +3,7 @@ import math
 
 import attr
 import openpyxl
+import csv
 
 import epyqlib.pm.parametermodel
 import epyqlib.utils.general
@@ -48,6 +49,8 @@ class Fields:
     get = attr.ib(default=None)
     set = attr.ib(default=None)
     item = attr.ib(default=None)
+    parameter_uuid = attr.ib(default=None)
+    parameter_uses_interface_item = attr.ib(default=None)
 
     def as_filtered_tuple(self, filter_):
         return tuple(
@@ -103,10 +106,13 @@ enumerator_fields = Fields(
 
 
 def export(
-    path, sunspec_model, parameters_model, column_filter=None, skip_sunspec=False
+    path, sunspec_model, parameters_model, column_filter=None, skip_sunspec=False, output_csv=False, csv_column_filter=None
 ):
     if column_filter is None:
         column_filter = attr_fill(Fields, True)
+
+    if csv_column_filter is None:
+        csv_column_filter = attr_fill(Fields, True)
 
     builder = epcpm.sunspectoxlsx.builders.wrap(
         wrapped=sunspec_model.root,
@@ -114,12 +120,19 @@ def export(
         parameter_model=parameters_model,
         skip_sunspec=skip_sunspec,
         column_filter=column_filter,
+        csv_column_filter=csv_column_filter,
     )
 
-    workbook = builder.gen()
+    workbook, csv_data = builder.gen()
 
     path.parent.mkdir(parents=True, exist_ok=True)
     workbook.save(path)
+
+    if output_csv:
+        with open(path.with_suffix('.csv'), 'w', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file, quoting=csv.QUOTE_NONNUMERIC)
+            for data_row in csv_data:
+                csv_writer.writerow(data_row)
 
 
 @builders(epcpm.sunspecmodel.Root)
@@ -127,6 +140,7 @@ def export(
 class Root:
     wrapped = attr.ib()
     column_filter = attr.ib()
+    csv_column_filter = attr.ib()
     skip_sunspec = attr.ib(default=False)
     parameter_uuid_finder = attr.ib(default=None)
     parameter_model = attr.ib(default=None)
@@ -139,6 +153,8 @@ class Root:
         workbook.create_sheet("License Agreement")
         workbook.create_sheet("Summary")
         workbook.create_sheet("Index")
+
+        csv_data = []
 
         if not self.skip_sunspec:
             if self.sort_models:
@@ -163,6 +179,8 @@ class Root:
                 model_offset += builders.wrap(
                     wrapped=model,
                     worksheet=worksheet,
+                    csv_data=csv_data,
+                    csv_column_filter=self.csv_column_filter,
                     padding_type=self.parameter_model.list_selection_roots[
                         "sunspec types"
                     ].child_by_name("pad"),
@@ -171,7 +189,7 @@ class Root:
                     model_offset=model_offset,
                 ).gen()
 
-        return workbook
+        return workbook, csv_data
 
 
 @builders(epcpm.sunspecmodel.Model)
@@ -179,6 +197,8 @@ class Root:
 class Model:
     wrapped = attr.ib()
     worksheet = attr.ib()
+    csv_data = attr.ib()
+    csv_column_filter = attr.ib()
     padding_type = attr.ib()
     column_filter = attr.ib()
     model_offset = attr.ib()  # starting Modbus address for the model
@@ -230,6 +250,10 @@ class Model:
                 row.value = overall_length
 
             self.worksheet.append(row.as_filtered_tuple(self.column_filter))
+
+            if row.modbus_address is not None:
+                # Skip blank rows.
+                self.csv_data.append(row.as_filtered_tuple(self.csv_column_filter))
 
         for block in self.wrapped.children:
             builder = enumeration_builders.wrap(
@@ -453,6 +477,9 @@ class DataPointBitfield:
                 row.units = parameter.units
             row.description = parameter.comment
             row.read_write = "R" if parameter.read_only else "RW"
+            row.parameter_uuid = parameter.uuid
+            # TODO: Unclear why the interfaceItem_<UUID> is not defined for DataPointBitfield.
+            row.parameter_uses_interface_item = False
 
         uses_interface_item = (
             isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
@@ -724,6 +751,10 @@ class Point:
         if self.wrapped.parameter_uuid is not None:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
+            uses_interface_item = (
+                isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
+                and parameter.uses_interface_item()
+            )
             row.label = parameter.name
             row.name = parameter.abbreviation
             row.notes = "" if parameter.notes is None else parameter.notes
@@ -751,6 +782,8 @@ class Point:
                 row.units = parameter.units
             row.description = parameter.comment
             row.read_write = "R" if parameter.read_only else "RW"
+            row.parameter_uuid = parameter.uuid
+            row.parameter_uses_interface_item = uses_interface_item
 
             meta = "[Meta_Value]"
 
@@ -975,6 +1008,7 @@ class Point:
             row.description = "Force even alignment"
             row.read_write = "R"
             row.mandatory = "O"
+            row.parameter_uses_interface_item = False
 
         return row, row.size
 
