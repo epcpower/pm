@@ -106,7 +106,13 @@ enumerator_fields = Fields(
 
 
 def export(
-    path, sunspec_model, parameters_model, column_filter=None, skip_sunspec=False, output_csv=False, csv_column_filter=None
+    path,
+    sunspec_model,
+    parameters_model,
+    column_filter=None,
+    skip_sunspec=False,
+    output_csv=False,
+    csv_column_filter=None,
 ):
     if column_filter is None:
         column_filter = attr_fill(Fields, True)
@@ -129,7 +135,7 @@ def export(
     workbook.save(path)
 
     if output_csv:
-        with open(path.with_suffix('.csv'), 'w', newline='') as csv_file:
+        with open(path.with_suffix(".csv"), "w", newline="") as csv_file:
             csv_writer = csv.writer(csv_file, quoting=csv.QUOTE_NONNUMERIC)
             for data_row in csv_data:
                 csv_writer.writerow(data_row)
