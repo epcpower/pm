@@ -33,6 +33,7 @@ sunspec_types = {
 }
 
 
+# TODO: This "leakage" will need to be addressed
 staticmodbus_types = {
     "uint16": "sunsU16",
     "enum16": "sunsU16",
@@ -381,18 +382,7 @@ class FunctionData:
     parameter_uuid_finder = attr.ib()
 
     def interface_variable_name(self):
-        # parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
-        #
-        # maybe_model = self.wrapped.tree_parent
-        #
-        # while not isinstance(maybe_model, epcpm.sunspecmodel.Model):
-        #     maybe_model = maybe_model.tree_parent
-        #
-        # model = maybe_model
-        # model_variable = f"sunspecInterface.model{model.id}"
-        #
-        # return f"&{model_variable}.{parameter.abbreviation}"
-        # # TODO: This needs to change to return staticmodbusInterface variable name, whenever that exists.
+        # TODO: Remove when staticmodbus.common.variable is eliminated in the future.
         return "NULL"
 
 
