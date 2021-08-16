@@ -143,6 +143,7 @@ def full_export(
         column_filter=attr.evolve(
             epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True),
             parameter_uuid=False,
+            parameter_uses_interface_item=False,
         ),
         output_csv=True,
         csv_column_filter=attr.evolve(
