@@ -1661,7 +1661,6 @@ def create_common_initializers(
 
     common_initializers = [
         f".sunspecScaleFactor = {scale_factor_variable},",
-        f".staticmodbusScaleFactor = NULL,",
         f".canScaleFactor = {float(can_scale_factor)}f,",
         f".scaleFactorUpdater = {scale_factor_updater},",
         f".internalScaleFactor = {internal_scale},",
