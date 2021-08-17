@@ -15,12 +15,26 @@ import epyqlib.utils.general
 import epcpm.cantosym
 import epcpm.sunspecmodel
 import epcpm.sunspectoxlsx
+import epcpm.staticmodbusmodel
 
 builders = epyqlib.utils.general.TypeMap()
 
 
 # TODO: move this somewhere common in python code...
 sunspec_types = {
+    "uint16": "sunsU16",
+    "enum16": "sunsU16",
+    "int16": "sunsS16",
+    "uint32": "sunsU32",
+    "int32": "sunsS32",
+    "string": "PackedString",
+    "bitfield16": "sunsU16",
+    "bitfield32": "sunsU32",
+}
+
+
+# TODO: This "leakage" will need to be addressed
+staticmodbus_types = {
     "uint16": "sunsU16",
     "enum16": "sunsU16",
     "int16": "sunsS16",
@@ -56,18 +70,22 @@ def export(
     parameters_model,
     can_model,
     sunspec_model,
+    staticmodbus_model,
     skip_sunspec=False,
     include_uuid_in_item=False,
 ):
     if skip_sunspec:
         sunspec_root = None
+        staticmodbus_root = None
     else:
         sunspec_root = sunspec_model.root
+        staticmodbus_root = staticmodbus_model.root
 
     builder = builders.wrap(
         wrapped=parameters_model.root,
         can_root=can_model.root,
         sunspec_root=sunspec_root,
+        staticmodbus_root=staticmodbus_root,
         include_uuid_in_item=include_uuid_in_item,
     )
 
@@ -105,6 +123,7 @@ class Root:
     wrapped = attr.ib()
     can_root = attr.ib()
     sunspec_root = attr.ib()
+    staticmodbus_root = attr.ib()
     include_uuid_in_item = attr.ib()
 
     def gen(self):
@@ -152,6 +171,33 @@ class Root:
                 node.parameter_uuid: node for node in sunspec_nodes_with_parameter_uuid
             }
 
+        def staticmodbus_node_wanted(node):
+            if getattr(node, "parameter_uuid", None) is None:
+                return False
+
+            wanted_types = (
+                epcpm.staticmodbusmodel.FunctionData,
+                epcpm.staticmodbusmodel.FunctionDataBitfieldMember,
+            )
+            if not isinstance(node, wanted_types):
+                return False
+
+            return True
+
+        if self.staticmodbus_root is None:
+            parameter_uuid_to_staticmodbus_node = {}
+        else:
+            staticmodbus_nodes_with_parameter_uuid = (
+                self.staticmodbus_root.nodes_by_filter(
+                    filter=staticmodbus_node_wanted,
+                )
+            )
+
+            parameter_uuid_to_staticmodbus_node = {
+                node.parameter_uuid: node
+                for node in staticmodbus_nodes_with_parameter_uuid
+            }
+
         lengths_equal = len(can_nodes_with_parameter_uuid) == len(
             parameter_uuid_to_can_node
         )
@@ -180,9 +226,13 @@ class Root:
                 wrapped=child,
                 can_root=self.can_root,
                 sunspec_root=self.sunspec_root,
+                staticmodbus_root=self.staticmodbus_root,
                 include_uuid_in_item=self.include_uuid_in_item,
                 parameter_uuid_to_can_node=parameter_uuid_to_can_node,
                 parameter_uuid_to_sunspec_node=(parameter_uuid_to_sunspec_node),
+                parameter_uuid_to_staticmodbus_node=(
+                    parameter_uuid_to_staticmodbus_node
+                ),
                 parameter_uuid_finder=self.wrapped.model.node_from_uuid,
             ).gen()
 
@@ -221,9 +271,11 @@ class Group:
     wrapped = attr.ib()
     can_root = attr.ib()
     sunspec_root = attr.ib()
+    staticmodbus_root = attr.ib()
     include_uuid_in_item = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
     parameter_uuid_to_sunspec_node = attr.ib()
+    parameter_uuid_to_staticmodbus_node = attr.ib()
     parameter_uuid_finder = attr.ib()
 
     def gen(self):
@@ -247,9 +299,13 @@ class Group:
                 wrapped=child,
                 can_root=self.can_root,
                 sunspec_root=self.sunspec_root,
+                staticmodbus_root=self.staticmodbus_root,
                 include_uuid_in_item=self.include_uuid_in_item,
                 parameter_uuid_to_can_node=(self.parameter_uuid_to_can_node),
                 parameter_uuid_to_sunspec_node=(self.parameter_uuid_to_sunspec_node),
+                parameter_uuid_to_staticmodbus_node=(
+                    self.parameter_uuid_to_staticmodbus_node
+                ),
                 parameter_uuid_finder=self.parameter_uuid_finder,
             ).gen()
 
@@ -319,25 +375,56 @@ class DataPointBitfieldMember:
         return f"&interfaceItem_variable_{uuid_}"
 
 
+@builders(epcpm.staticmodbusmodel.FunctionData)
+@attr.s
+class FunctionData:
+    wrapped = attr.ib()
+    parameter_uuid_finder = attr.ib()
+
+    def interface_variable_name(self):
+        # TODO: Remove when staticmodbus.common.variable is eliminated in the future.
+        return "NULL"
+
+
+@builders(epcpm.staticmodbusmodel.FunctionDataBitfieldMember)
+@attr.s
+class FunctionDataBitfieldMember:
+    wrapped = attr.ib()
+    parameter_uuid_finder = attr.ib()
+
+    def interface_variable_name(self):
+        parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+
+        uuid_ = str(parameter.uuid).replace("-", "_")
+        return f"&interfaceItem_variable_{uuid_}"
+
+
 @builders(epyqlib.pm.parametermodel.Parameter)
 @attr.s
 class Parameter:
     wrapped = attr.ib()
     can_root = attr.ib()
     sunspec_root = attr.ib()
+    staticmodbus_root = attr.ib()
     include_uuid_in_item = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
     parameter_uuid_to_sunspec_node = attr.ib()
+    parameter_uuid_to_staticmodbus_node = attr.ib()
     parameter_uuid_finder = attr.ib()
 
     def gen(self):
         parameter = self.wrapped
         can_signal = self.parameter_uuid_to_can_node.get(parameter.uuid)
         sunspec_point = self.parameter_uuid_to_sunspec_node.get(parameter.uuid)
+        # TODO: might want to rename staticmodbus_point to ... ???
+        staticmodbus_point = self.parameter_uuid_to_staticmodbus_node.get(
+            parameter.uuid
+        )
 
         interface_data = [
             can_signal,
             sunspec_point,
+            staticmodbus_point,
         ]
 
         uses_interface_item = (
@@ -464,6 +551,37 @@ class Parameter:
             sunspec_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
             sunspec_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
 
+        if staticmodbus_point is None:
+            staticmodbus_variable = "NULL"
+            staticmodbus_getter = "NULL"
+            staticmodbus_setter = "NULL"
+        else:
+            staticmodbus_point_builder = builders.wrap(
+                wrapped=staticmodbus_point,
+                parameter_uuid_finder=self.parameter_uuid_finder,
+            )
+            staticmodbus_variable = staticmodbus_point_builder.interface_variable_name()
+
+            staticmodbus_type = staticmodbus_types[
+                self.parameter_uuid_finder(staticmodbus_point.type_uuid).name
+            ]
+
+            # TODO: CAMPid 9675436715674367943196954756419543975314
+            getter_setter_list = [
+                "InterfaceItem",
+                var_or_func,
+                types[parameter.internal_type].name,
+                "staticmodbus",
+                staticmodbus_type,
+            ]
+
+            staticmodbus_getter = "_".join(
+                str(x) for x in getter_setter_list + ["getter"]
+            )
+            staticmodbus_setter = "_".join(
+                str(x) for x in getter_setter_list + ["setter"]
+            )
+
         interface_item_type = (
             f"InterfaceItem_{var_or_func}_{types[parameter.internal_type].name}"
         )
@@ -502,6 +620,9 @@ class Parameter:
             sunspec_getter=sunspec_getter,
             sunspec_setter=sunspec_setter,
             sunspec_variable=sunspec_variable,
+            staticmodbus_getter=staticmodbus_getter,
+            staticmodbus_setter=staticmodbus_setter,
+            staticmodbus_variable=staticmodbus_variable,
             variable_or_getter_setter=variable_or_getter_setter,
             rejected_callback=rejected_callback,
             can_scale_factor=getattr(can_signal, "factor", None),
@@ -822,6 +943,7 @@ class TableBaseStructures:
     array_nests = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
     parameter_uuid_to_sunspec_node = attr.ib()
+    parameter_uuid_to_staticmodbus_node = attr.ib()
     parameter_uuid_finder = attr.ib()
     include_uuid_in_item = attr.ib()
     common_structure_names = attr.ib(factory=dict)
@@ -916,7 +1038,7 @@ class TableBaseStructures:
 
         return name
 
-    def create_item(self, table_element, layers, sunspec_point):
+    def create_item(self, table_element, layers, sunspec_point, staticmodbus_point):
         # TODO: CAMPid 9655426754319431461354643167
         array_element = table_element.original
 
@@ -966,6 +1088,9 @@ class TableBaseStructures:
         scale_factor_variable = "NULL"
         scale_factor_updater = "NULL"
         sunspec_model_variable = "NULL"
+        staticmodbus_getter = "NULL"
+        staticmodbus_setter = "NULL"
+        staticmodbus_variable = None
 
         if sunspec_point is not None:
             sunspec_type = sunspec_types[
@@ -1028,6 +1153,27 @@ class TableBaseStructures:
                 )
                 scale_factor_updater = f"&{scale_factor_updater_name}"
 
+        if not staticmodbus_point is None:
+            staticmodbus_type = staticmodbus_types[
+                self.parameter_uuid_finder(staticmodbus_point.type_uuid).name
+            ]
+
+            # TODO: CAMPid 9675436715674367943196954756419543975314
+            getter_setter_list = [
+                "InterfaceItem",
+                "table",
+                types[parameter.internal_type].name,
+                "staticmodbus",
+                staticmodbus_type,
+            ]
+
+            staticmodbus_getter = "_".join(
+                str(x) for x in getter_setter_list + ["getter"]
+            )
+            staticmodbus_setter = "_".join(
+                str(x) for x in getter_setter_list + ["setter"]
+            )
+
         common_initializers = create_common_initializers(
             access_level=access_level,
             can_getter=can_getter,
@@ -1043,6 +1189,10 @@ class TableBaseStructures:
             sunspec_setter=sunspec_setter,
             # not to be used so really hardcode NULL
             sunspec_variable="NULL",
+            staticmodbus_getter=staticmodbus_getter,
+            staticmodbus_setter=staticmodbus_setter,
+            # not to be used so really hardcode NULL
+            staticmodbus_variable="NULL",
             can_scale_factor=can_factor,
             reject_from_inactive_interfaces=(parameter.reject_from_inactive_interfaces),
             uuid_=table_element.uuid,
@@ -1087,6 +1237,11 @@ class TableBaseStructures:
                 ]
             sunspec_variable_initializer = f"&{sunspec_variable}"
 
+        if staticmodbus_variable is None:
+            staticmodbus_variable_initializer = "NULL"
+        else:
+            staticmodbus_variable_initializer = f"&{staticmodbus_variable}"
+
         c = [
             f'#pragma DATA_SECTION({item_name}, "Interface")',
             f"// {node_path_string(table_element)}",
@@ -1097,6 +1252,7 @@ class TableBaseStructures:
                 f".can_variable = {can_variable},",
                 f".sunspec_variable = {sunspec_variable_initializer},",
                 *maybe_sunspec_variable_length,
+                f".staticmodbus_variable = {staticmodbus_variable_initializer},",
                 f'.zone = {curve_type if curve_type is not None else "0"},',
                 f".curve = {str(int(curve_index - 1))},",
                 f".point = {0 if point_index is None else point_index},",
@@ -1191,9 +1347,11 @@ class Table:
     wrapped = attr.ib()
     can_root = attr.ib()
     sunspec_root = attr.ib()
+    staticmodbus_root = attr.ib()
     include_uuid_in_item = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
     parameter_uuid_to_sunspec_node = attr.ib()
+    parameter_uuid_to_staticmodbus_node = attr.ib()
     parameter_uuid_finder = attr.ib()
 
     def gen(self):
@@ -1239,6 +1397,9 @@ class Table:
             array_nests={**array_nests, **non_array_nests},
             parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
             parameter_uuid_to_sunspec_node=(self.parameter_uuid_to_sunspec_node),
+            parameter_uuid_to_staticmodbus_node=(
+                self.parameter_uuid_to_staticmodbus_node
+            ),
             parameter_uuid_finder=self.parameter_uuid_finder,
             include_uuid_in_item=self.include_uuid_in_item,
         )
@@ -1247,9 +1408,13 @@ class Table:
             wrapped=group,
             can_root=self.can_root,
             sunspec_root=self.sunspec_root,
+            staticmodbus_root=self.staticmodbus_root,
             table_base_structures=table_base_structures,
             parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
             parameter_uuid_to_sunspec_node=(self.parameter_uuid_to_sunspec_node),
+            parameter_uuid_to_staticmodbus_node=(
+                self.parameter_uuid_to_staticmodbus_node
+            ),
             parameter_uuid_finder=self.parameter_uuid_finder,
             include_uuid_in_item=self.include_uuid_in_item,
         ).gen()
@@ -1275,10 +1440,12 @@ class TableGroupElement:
     wrapped = attr.ib()
     can_root = attr.ib()
     sunspec_root = attr.ib()
+    staticmodbus_root = attr.ib()
     table_base_structures = attr.ib()
     include_uuid_in_item = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
     parameter_uuid_to_sunspec_node = attr.ib()
+    parameter_uuid_to_staticmodbus_node = attr.ib()
     parameter_uuid_finder = attr.ib()
     layers = attr.ib(default=[])
 
@@ -1300,9 +1467,13 @@ class TableGroupElement:
                 wrapped=child,
                 can_root=self.can_root,
                 sunspec_root=self.sunspec_root,
+                staticmodbus_root=self.staticmodbus_root,
                 table_base_structures=self.table_base_structures,
                 parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
                 parameter_uuid_to_sunspec_node=(self.parameter_uuid_to_sunspec_node),
+                parameter_uuid_to_staticmodbus_node=(
+                    self.parameter_uuid_to_staticmodbus_node
+                ),
                 parameter_uuid_finder=self.parameter_uuid_finder,
                 layers=layers,
                 include_uuid_in_item=self.include_uuid_in_item,
@@ -1332,11 +1503,13 @@ class TableArrayElement:
     wrapped = attr.ib()
     can_root = attr.ib()
     sunspec_root = attr.ib()
+    staticmodbus_root = attr.ib()
     table_base_structures = attr.ib()
     layers = attr.ib()
     include_uuid_in_item = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
     parameter_uuid_to_sunspec_node = attr.ib()
+    parameter_uuid_to_staticmodbus_node = attr.ib()
     parameter_uuid_finder = attr.ib()
 
     def gen(self):
@@ -1349,11 +1522,15 @@ class TableArrayElement:
         )
 
         sunspec_point = self.parameter_uuid_to_sunspec_node.get(parameter.uuid)
+        staticmodbus_point = self.parameter_uuid_to_staticmodbus_node.get(
+            parameter.uuid
+        )
 
         return self.table_base_structures.create_item(
             table_element=self.wrapped,
             layers=self.layers,
             sunspec_point=sunspec_point,
+            staticmodbus_point=staticmodbus_point,
         )
 
 
@@ -1375,6 +1552,9 @@ def create_item(
     sunspec_getter,
     sunspec_setter,
     sunspec_variable,
+    staticmodbus_getter,
+    staticmodbus_setter,
+    staticmodbus_variable,
     variable_or_getter_setter,
     rejected_callback,
     can_scale_factor,
@@ -1405,6 +1585,9 @@ def create_item(
         sunspec_getter=sunspec_getter,
         sunspec_setter=sunspec_setter,
         sunspec_variable=sunspec_variable,
+        staticmodbus_getter=staticmodbus_getter,
+        staticmodbus_setter=staticmodbus_setter,
+        staticmodbus_variable=staticmodbus_variable,
         can_scale_factor=can_scale_factor,
         reject_from_inactive_interfaces=reject_from_inactive_interfaces,
         uuid_=item_uuid,
@@ -1456,6 +1639,9 @@ def create_common_initializers(
     sunspec_getter,
     sunspec_setter,
     sunspec_variable,
+    staticmodbus_getter,
+    staticmodbus_setter,
+    staticmodbus_variable,
     can_scale_factor,
     reject_from_inactive_interfaces,
     uuid_,
@@ -1486,6 +1672,13 @@ def create_common_initializers(
             f".setter = {sunspec_setter},",
             f".handGetter = {hand_coded_sunspec_getter_function},",
             f".handSetter = {hand_coded_sunspec_setter_function},",
+        ],
+        f"}},",
+        f".staticmodbus = {{",
+        [
+            f".variable = {staticmodbus_variable},",
+            f".getter = {staticmodbus_getter},",
+            f".setter = {staticmodbus_setter},",
         ],
         f"}},",
         f".can = {{",

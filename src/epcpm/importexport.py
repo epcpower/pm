@@ -129,6 +129,7 @@ def full_export(
         h_path=paths.interface_c.with_suffix(".h"),
         can_model=project.models.can,
         sunspec_model=project.models.sunspec,
+        staticmodbus_model=project.models.staticmodbus,
         parameters_model=project.models.parameters,
         skip_sunspec=skip_sunspec,
         include_uuid_in_item=include_uuid_in_item,
@@ -139,6 +140,22 @@ def full_export(
         sunspec_model=project.models.sunspec,
         parameters_model=project.models.parameters,
         skip_sunspec=skip_sunspec,
+        column_filter=attr.evolve(
+            epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True),
+            parameter_uuid=False,
+            parameter_uses_interface_item=False,
+        ),
+        output_csv=True,
+        csv_column_filter=attr.evolve(
+            epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, False),
+            size=True,
+            name=True,
+            label=True,
+            type=True,
+            modbus_address=True,
+            parameter_uuid=True,
+            parameter_uses_interface_item=True,
+        ),
     )
 
     epcpm.sunspectoxlsx.export(
@@ -151,6 +168,8 @@ def full_export(
             get=False,
             set=False,
             item=False,
+            parameter_uuid=False,
+            parameter_uses_interface_item=False,
         ),
     )
 
@@ -215,6 +234,14 @@ def run_generation_scripts(base_path, skip_sunspec=False):
         [
             os.fspath(scripts / "sunspecparser"),
             os.fspath(emb_lib / "MODBUS_SunSpec-EPC.xlsx"),
+        ],
+        check=True,
+    )
+
+    subprocess.run(
+        [
+            os.fspath(scripts / "staticmodbusparser"),
+            os.fspath(emb_lib / "MODBUS_SunSpec-EPC.csv"),
         ],
         check=True,
     )
