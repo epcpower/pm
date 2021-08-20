@@ -1035,10 +1035,10 @@ class Point:
             row.read_write = "R"
             row.mandatory = "O"
             row.parameter_uses_interface_item = False
-            pad_uuid = ''
+            pad_uuid = ""
             # Discover the pad UUID.
             for sunspec_type in sunspec_types.children:
-                if sunspec_type.name == 'pad':
+                if sunspec_type.name == "pad":
                     pad_uuid = sunspec_type.uuid
                     break
             row.type_uuid = pad_uuid
