@@ -144,6 +144,12 @@ def full_export(
             epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True),
             parameter_uuid=False,
             parameter_uses_interface_item=False,
+            scale_factor_uuid=False,
+            enumeration_uuid=False,
+            type_uuid=False,
+            not_implemented=False,
+            uuid=False,
+            class_name=False,
         ),
         output_csv=True,
         csv_column_filter=attr.evolve(
@@ -152,9 +158,16 @@ def full_export(
             name=True,
             label=True,
             type=True,
+            units=True,
             modbus_address=True,
             parameter_uuid=True,
             parameter_uses_interface_item=True,
+            scale_factor_uuid=True,
+            enumeration_uuid=True,
+            type_uuid=True,
+            not_implemented=True,
+            uuid=True,
+            class_name=True,
         ),
     )
 
@@ -170,6 +183,12 @@ def full_export(
             item=False,
             parameter_uuid=False,
             parameter_uses_interface_item=False,
+            scale_factor_uuid=False,
+            enumeration_uuid=False,
+            type_uuid=False,
+            not_implemented=False,
+            uuid=False,
+            class_name=False,
         ),
     )
 
