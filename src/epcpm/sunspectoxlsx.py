@@ -494,8 +494,7 @@ class DataPointBitfield:
             row.parameter_uuid = parameter.uuid
             row.parameter_uses_interface_item = False
             row.type_uuid = self.wrapped.type_uuid
-            # TODO: Unclear whether not_implemented==True is correct for bitfields?
-            row.not_implemented = True
+            row.not_implemented = False
             row.uuid = self.wrapped.uuid
             row.class_name = "DataPointBitfield"
 
@@ -1042,7 +1041,7 @@ class Point:
                     pad_uuid = sunspec_type.uuid
                     break
             row.type_uuid = pad_uuid
-            row.not_implemented = True
+            row.not_implemented = False
             row.class_name = "DataPoint"
 
         return row, row.size

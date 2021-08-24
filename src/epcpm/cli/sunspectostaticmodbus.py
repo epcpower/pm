@@ -179,6 +179,7 @@ def cli(input_sunspec_filename, output_staticmodbus_filename):
 
         # Output staticmodbus JSON file using graham.
         with open(output_staticmodbus_filename, "w", newline="\n") as f:
+            # JSON file indents are 4 spaces.
             staticmodbus_out = graham.dumps(root, indent=4).data
             f.write(staticmodbus_out)
 
