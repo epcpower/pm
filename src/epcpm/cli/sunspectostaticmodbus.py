@@ -33,14 +33,25 @@ def create_data_object(
 ):
     # Determine the type of data object to create and then create the object and return it.
     if input_sunspec_data["class_name"] == epcpm.sunspecmodel.DataPoint.__name__:
-        return create_function_data(input_sunspec_data, scale_factor_uuid_map, sunspec_types, staticmodbus_types)
-    elif input_sunspec_data["class_name"] == epcpm.sunspecmodel.DataPointBitfield.__name__:
-        return create_function_data_bitfield(input_sunspec_data, sunspec_types, staticmodbus_types)
+        return create_function_data(
+            input_sunspec_data, scale_factor_uuid_map, sunspec_types, staticmodbus_types
+        )
+    elif (
+        input_sunspec_data["class_name"]
+        == epcpm.sunspecmodel.DataPointBitfield.__name__
+    ):
+        return create_function_data_bitfield(
+            input_sunspec_data, sunspec_types, staticmodbus_types
+        )
     else:
-        raise ValueError(f"Unsupported class_name '{input_sunspec_data['class_name']}' in create_data")
+        raise ValueError(
+            f"Unsupported class_name '{input_sunspec_data['class_name']}' in create_data"
+        )
 
 
-def create_function_data(input_sunspec_data, scale_factor_uuid_map, sunspec_types, staticmodbus_types):
+def create_function_data(
+    input_sunspec_data, scale_factor_uuid_map, sunspec_types, staticmodbus_types
+):
     function_data = epcpm.staticmodbusmodel.FunctionData()
 
     if input_sunspec_data["scale_factor_uuid"]:
@@ -82,7 +93,9 @@ def create_function_data(input_sunspec_data, scale_factor_uuid_map, sunspec_type
     return function_data
 
 
-def create_function_data_bitfield(input_sunspec_data, sunspec_types, staticmodbus_types):
+def create_function_data_bitfield(
+    input_sunspec_data, sunspec_types, staticmodbus_types
+):
     function_data_bitfield = epcpm.staticmodbusmodel.FunctionDataBitfield()
 
     function_data_bitfield.parameter_uuid = (
