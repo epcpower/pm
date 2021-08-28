@@ -13,6 +13,7 @@ import epcpm.parameterstointerface
 import epcpm.parameterstosil
 import epcpm.project
 import epcpm.smdxtosunspec
+import epcpm.staticmodbustoc
 import epcpm.sunspecmodel
 import epcpm.sunspectobitfieldsc
 import epcpm.sunspectotablesc
@@ -100,6 +101,7 @@ def full_import(paths):
     project.paths["parameters"] = "parameters.json"
     project.paths["can"] = "can.json"
     project.paths["sunspec"] = "sunspec.json"
+    project.paths["staticmodbus"] = "staticmodbus.json"
 
     return project
 
@@ -212,6 +214,12 @@ def full_export(
         include_uuid_in_item=include_uuid_in_item,
     )
 
+    epcpm.staticmodbustoc.export(
+        c_path=paths.staticmodbus_c,
+        h_path=paths.staticmodbus_c.with_suffix(".h"),
+        staticmodbus_model=project.models.staticmodbus,
+    )
+
     if first_time and not skip_sunspec:
         epcpm.sunspectomanualc.export(
             path=paths.sunspec_c,
@@ -253,14 +261,6 @@ def run_generation_scripts(base_path, skip_sunspec=False):
         [
             os.fspath(scripts / "sunspecparser"),
             os.fspath(emb_lib / "MODBUS_SunSpec-EPC.xlsx"),
-        ],
-        check=True,
-    )
-
-    subprocess.run(
-        [
-            os.fspath(scripts / "staticmodbusparser"),
-            os.fspath(emb_lib / "MODBUS_SunSpec-EPC.csv"),
         ],
         check=True,
     )
