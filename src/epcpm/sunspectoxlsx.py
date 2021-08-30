@@ -23,6 +23,8 @@ epc_enumerator_fields = attr.fields(
 )
 bitfield_fields = attr.fields(epcpm.sunspecmodel.DataPointBitfield)
 
+sunspec_types = epcpm.sunspecmodel.build_sunspec_types_enumeration()
+
 
 def attr_fill(cls, value):
     return cls(**{field.name: value for field in attr.fields(cls) if field.init})
@@ -51,6 +53,12 @@ class Fields:
     item = attr.ib(default=None)
     parameter_uuid = attr.ib(default=None)
     parameter_uses_interface_item = attr.ib(default=None)
+    scale_factor_uuid = attr.ib(default=None)
+    enumeration_uuid = attr.ib(default=None)
+    type_uuid = attr.ib(default=None)
+    not_implemented = attr.ib(default=None)
+    uuid = attr.ib(default=None)
+    class_name = attr.ib(default=None)
 
     def as_filtered_tuple(self, filter_):
         return tuple(
@@ -136,7 +144,7 @@ def export(
 
     if output_csv:
         with open(path.with_suffix(".csv"), "w", newline="") as csv_file:
-            csv_writer = csv.writer(csv_file, quoting=csv.QUOTE_NONNUMERIC)
+            csv_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
             for data_row in csv_data:
                 csv_writer.writerow(data_row)
 
@@ -484,8 +492,11 @@ class DataPointBitfield:
             row.description = parameter.comment
             row.read_write = "R" if parameter.read_only else "RW"
             row.parameter_uuid = parameter.uuid
-            # TODO: Unclear why the interfaceItem_<UUID> is not defined for DataPointBitfield.
             row.parameter_uses_interface_item = False
+            row.type_uuid = self.wrapped.type_uuid
+            row.not_implemented = False
+            row.uuid = self.wrapped.uuid
+            row.class_name = "DataPointBitfield"
 
         uses_interface_item = (
             isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
@@ -722,6 +733,7 @@ class Point:
 
             setattr(row, name, getattr(self.wrapped, field.name))
 
+        row_scale_factor_uuid = ""
         if self.repeating_block_reference is not None:
             target = self.parameter_uuid_finder(self.wrapped.parameter_uuid).original
             is_array_element = isinstance(
@@ -745,6 +757,7 @@ class Point:
                     ).abbreviation
         else:
             if row.scale_factor is not None:
+                row_scale_factor_uuid = row.scale_factor
                 row.scale_factor = self.parameter_uuid_finder(
                     self.scale_factor_from_uuid[row.scale_factor].parameter_uuid
                 ).abbreviation
@@ -790,6 +803,12 @@ class Point:
             row.read_write = "R" if parameter.read_only else "RW"
             row.parameter_uuid = parameter.uuid
             row.parameter_uses_interface_item = uses_interface_item
+            row.scale_factor_uuid = row_scale_factor_uuid
+            row.enumeration_uuid = parameter.enumeration_uuid
+            row.type_uuid = self.wrapped.type_uuid
+            row.not_implemented = self.wrapped.not_implemented
+            row.uuid = self.wrapped.uuid
+            row.class_name = "DataPoint"
 
             meta = "[Meta_Value]"
 
@@ -1015,6 +1034,15 @@ class Point:
             row.read_write = "R"
             row.mandatory = "O"
             row.parameter_uses_interface_item = False
+            pad_uuid = ""
+            # Discover the pad UUID.
+            for sunspec_type in sunspec_types.children:
+                if sunspec_type.name == "pad":
+                    pad_uuid = sunspec_type.uuid
+                    break
+            row.type_uuid = pad_uuid
+            row.not_implemented = False
+            row.class_name = "DataPoint"
 
         return row, row.size
 

@@ -92,6 +92,16 @@ def create_size_attribute(default=0):
     )
 
 
+def create_address_attribute(default=0):
+    return attr.ib(
+        default=default,
+        converter=int,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(),
+        ),
+    )
+
+
 def create_factor_uuid_attribute():
     return epyqlib.attrsmodel.attr_uuid(
         default=None,
@@ -245,6 +255,8 @@ class FunctionData(epyqlib.treenode.TreeNode):
     #         field=marshmallow.fields.Integer(),
     #     ),
     # )
+
+    address = create_address_attribute()
 
     size = create_size_attribute()
 
@@ -457,6 +469,8 @@ class FunctionDataBitfield(epyqlib.treenode.TreeNode):
     #         field=marshmallow.fields.Integer(),
     #     ),
     # )
+
+    address = create_address_attribute()
 
     size = create_size_attribute()
 
@@ -1292,6 +1306,7 @@ columns = epyqlib.attrsmodel.columns(
     ),
     # merge("abbreviation", TableRepeatingBlock),
     merge("not_implemented", FunctionData),
+    merge("address", FunctionData, FunctionDataBitfield),
     merge("size", FunctionData, FunctionDataBitfield),
     # merge("length", Model) + merge("size", FunctionData, FunctionDataBitfield),
     merge("repeats", TableRepeatingBlock),

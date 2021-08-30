@@ -71,6 +71,13 @@ def test_x():
         column_filter=attr.evolve(
             epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True),
             parameter_uuid=False,
+            parameter_uses_interface_item=False,
+            scale_factor_uuid=False,
+            enumeration_uuid=False,
+            type_uuid=False,
+            not_implemented=False,
+            uuid=False,
+            class_name=False,
         ),
         csv_column_filter=epcpm.sunspectoxlsx.attr_fill(
             epcpm.sunspectoxlsx.Fields, True
