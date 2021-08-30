@@ -20,8 +20,21 @@
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="3" column="3">
-    <widget class="QPushButton" name="pick_sunspec_tables_c">
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>CAN:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QLineEdit" name="can"/>
+   </item>
+   <item row="0" column="2">
+    <widget class="QPushButton" name="pick_can">
      <property name="text">
       <string>...</string>
      </property>
@@ -37,41 +50,15 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="2">
-    <widget class="QLineEdit" name="sunspec_tables_c"/>
+   <item row="1" column="1">
+    <widget class="QLineEdit" name="hierarchy"/>
    </item>
-   <item row="8" column="0">
-    <widget class="QLabel" name="sil_c_label">
-     <property name="text">
-      <string>SIL C:</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="8" column="3">
-    <widget class="QPushButton" name="pick_sil_c">
+   <item row="1" column="2">
+    <widget class="QPushButton" name="pick_hierarchy">
      <property name="text">
       <string>...</string>
      </property>
     </widget>
-   </item>
-   <item row="1" column="2">
-    <widget class="QLineEdit" name="hierarchy"/>
-   </item>
-   <item row="5" column="0">
-    <widget class="QLabel" name="label_3">
-     <property name="text">
-      <string>SunSpec Spreadsheet:</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="2">
-    <widget class="QLineEdit" name="can"/>
    </item>
    <item row="2" column="0">
     <widget class="QLabel" name="tables_c_label">
@@ -83,54 +70,37 @@
      </property>
     </widget>
    </item>
-   <item row="8" column="2">
-    <widget class="QLineEdit" name="sil_c"/>
+   <item row="2" column="1">
+    <widget class="QLineEdit" name="tables_c"/>
    </item>
-   <item row="6" column="2">
-    <widget class="QLineEdit" name="spreadsheet_user"/>
-   </item>
-   <item row="5" column="2">
-    <widget class="QLineEdit" name="spreadsheet"/>
-   </item>
-   <item row="12" column="3">
-    <widget class="QPushButton" name="remove_smdx">
-     <property name="text">
-      <string>Remove</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="3">
-    <widget class="QPushButton" name="pick_spreadsheet">
+   <item row="2" column="2">
+    <widget class="QPushButton" name="pick_tables_c">
      <property name="text">
       <string>...</string>
      </property>
     </widget>
    </item>
-   <item row="11" column="3">
-    <widget class="QPushButton" name="pick_smdx">
+   <item row="3" column="0">
+    <widget class="QLabel" name="staticmodbus_c_label">
      <property name="text">
-      <string>...</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="3">
-    <widget class="QPushButton" name="pick_spreadsheet_user">
-     <property name="text">
-      <string>...</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>CAN:</string>
+      <string>Static Modbus C:</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
    </item>
-   <item row="3" column="0">
+   <item row="3" column="1">
+    <widget class="QLineEdit" name="staticmodbus_c"/>
+   </item>
+   <item row="3" column="2">
+    <widget class="QPushButton" name="pick_staticmodbus_c">
+     <property name="text">
+      <string>...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
     <widget class="QLabel" name="sunspec_tables_c_label">
      <property name="text">
       <string>SunSpec Tables C:</string>
@@ -140,17 +110,168 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="2">
-    <widget class="QLineEdit" name="tables_c"/>
+   <item row="4" column="1">
+    <widget class="QLineEdit" name="sunspec_tables_c"/>
    </item>
-   <item row="2" column="3">
-    <widget class="QPushButton" name="pick_tables_c">
+   <item row="4" column="2">
+    <widget class="QPushButton" name="pick_sunspec_tables_c">
      <property name="text">
       <string>...</string>
      </property>
     </widget>
    </item>
-   <item row="14" column="0" colspan="4">
+   <item row="5" column="0">
+    <widget class="QLabel" name="sunspec_bitfields_c_label">
+     <property name="text">
+      <string>SunSpec Bitfields C</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QLineEdit" name="sunspec_bitfields_c"/>
+   </item>
+   <item row="5" column="2">
+    <widget class="QPushButton" name="pick_sunspec_bitfields_c">
+     <property name="text">
+      <string>...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>SunSpec Spreadsheet:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QLineEdit" name="spreadsheet"/>
+   </item>
+   <item row="6" column="2">
+    <widget class="QPushButton" name="pick_spreadsheet">
+     <property name="text">
+      <string>...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>SunSpec User Spreadsheet:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="QLineEdit" name="spreadsheet_user"/>
+   </item>
+   <item row="7" column="2">
+    <widget class="QPushButton" name="pick_spreadsheet_user">
+     <property name="text">
+      <string>...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QLabel" name="sunspec_c_label">
+     <property name="text">
+      <string>SunSpec C:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1">
+    <widget class="QLineEdit" name="sunspec_c"/>
+   </item>
+   <item row="8" column="2">
+    <widget class="QPushButton" name="pick_sunspec_c">
+     <property name="text">
+      <string>...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0">
+    <widget class="QLabel" name="sil_c_label">
+     <property name="text">
+      <string>SIL C:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="1">
+    <widget class="QLineEdit" name="sil_c"/>
+   </item>
+   <item row="9" column="2">
+    <widget class="QPushButton" name="pick_sil_c">
+     <property name="text">
+      <string>...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="0">
+    <widget class="QLabel" name="interface_c_label">
+     <property name="text">
+      <string>Interface C:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="1">
+    <widget class="QLineEdit" name="interface_c"/>
+   </item>
+   <item row="10" column="2">
+    <widget class="QPushButton" name="pick_interface_c">
+     <property name="text">
+      <string>...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="0">
+    <widget class="QLabel" name="smdx_label">
+     <property name="text">
+      <string>SunSpec SMDX:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="1" rowspan="2">
+    <widget class="QListWidget" name="smdx_list">
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="2">
+    <widget class="QPushButton" name="pick_smdx">
+     <property name="text">
+      <string>...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="2">
+    <widget class="QPushButton" name="remove_smdx">
+     <property name="text">
+      <string>Remove</string>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="from_directory">
@@ -167,107 +288,6 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="7" column="2">
-    <widget class="QLineEdit" name="sunspec_c"/>
-   </item>
-   <item row="11" column="2" rowspan="3">
-    <widget class="QListWidget" name="smdx_list">
-     <property name="selectionMode">
-      <enum>QAbstractItemView::ExtendedSelection</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="3">
-    <widget class="QPushButton" name="pick_hierarchy">
-     <property name="text">
-      <string>...</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0">
-    <widget class="QLabel" name="label_4">
-     <property name="text">
-      <string>SunSpec User Spreadsheet:</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="0">
-    <widget class="QLabel" name="interface_c_label">
-     <property name="text">
-      <string>Interface C:</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="3">
-    <widget class="QPushButton" name="pick_interface_c">
-     <property name="text">
-      <string>...</string>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="0">
-    <widget class="QLabel" name="sunspec_c_label">
-     <property name="text">
-      <string>SunSpec C:</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="2">
-    <widget class="QLineEdit" name="interface_c"/>
-   </item>
-   <item row="0" column="3">
-    <widget class="QPushButton" name="pick_can">
-     <property name="text">
-      <string>...</string>
-     </property>
-    </widget>
-   </item>
-   <item row="11" column="0">
-    <widget class="QLabel" name="smdx_label">
-     <property name="text">
-      <string>SunSpec SMDX:</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="3">
-    <widget class="QPushButton" name="pick_sunspec_c">
-     <property name="text">
-      <string>...</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QLabel" name="sunspec_bitfields_c_label">
-     <property name="text">
-      <string>SunSpec Bitfields C</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="2">
-    <widget class="QLineEdit" name="sunspec_bitfields_c"/>
-   </item>
-   <item row="4" column="3">
-    <widget class="QPushButton" name="pick_sunspec_bitfields_c">
-     <property name="text">
-      <string>...</string>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

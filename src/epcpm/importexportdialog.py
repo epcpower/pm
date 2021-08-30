@@ -152,6 +152,7 @@ class Dialog(QtWidgets.QDialog):
             spreadsheet=self.ui.spreadsheet.text(),
             spreadsheet_user=self.ui.spreadsheet_user.text(),
             smdx=smdx,
+            staticmodbus_c=self.ui.staticmodbus_c.text(),
             sunspec_c=self.ui.sunspec_c.text(),
             sil_c=self.ui.sil_c.text(),
             interface_c=self.ui.interface_c.text(),
