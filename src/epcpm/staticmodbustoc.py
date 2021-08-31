@@ -7,12 +7,13 @@ import epyqlib.utils.general
 builders = epyqlib.utils.general.TypeMap()
 
 
-def export(c_path, h_path, staticmodbus_model):
+def export(c_path, h_path, staticmodbus_model, skip_sunspec):
     builder = builders.wrap(
         wrapped=staticmodbus_model.root,
         parameter_uuid_finder=staticmodbus_model.node_from_uuid,
         c_path=c_path,
         h_path=h_path,
+        skip_sunspec=skip_sunspec,
     )
 
     c_path.parent.mkdir(parents=True, exist_ok=True)
@@ -28,6 +29,7 @@ def gen(self, first=0):
             parameter_uuid_finder=self.parameter_uuid_finder,
             c_path=self.c_path,
             h_path=self.h_path,
+            skip_sunspec=self.skip_sunspec,
         )
         lines.extend(builder.gen())
         lines.append("")
@@ -42,6 +44,7 @@ class Root:
     parameter_uuid_finder = attr.ib()
     c_path = attr.ib()
     h_path = attr.ib()
+    skip_sunspec = attr.ib(default=False)
 
     def gen(self):
         with self.h_path.open("w", newline="\n") as h_file:
@@ -63,6 +66,7 @@ class Root:
                 builder = builders.wrap(
                     wrapped=member,
                     parameter_uuid_finder=self.parameter_uuid_finder,
+                    skip_sunspec=self.skip_sunspec,
                 )
 
                 addr_val, c_line = builder.gen()
@@ -85,6 +89,7 @@ class Root:
 class FunctionData:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
+    skip_sunspec = attr.ib(default=False)
 
     def gen(self):
         uses_interface_item = False
@@ -99,7 +104,8 @@ class FunctionData:
 
         # Generate the defined register that returns interfaceItem_<UUID> (or NULL for some cases).
         if (
-            uses_interface_item
+            not self.skip_sunspec
+            and uses_interface_item
             and not self.wrapped.not_implemented
             and type_node is not None
             and type_node.name != "staticmodbussf"
@@ -120,6 +126,7 @@ class FunctionData:
 class FunctionDataBitfield:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
+    skip_sunspec = attr.ib(default=False)
 
     def gen(self):
         # NULL for all FunctionDataBitfield objects.

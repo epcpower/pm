@@ -218,6 +218,7 @@ def full_export(
         c_path=paths.staticmodbus_c,
         h_path=paths.staticmodbus_c.with_suffix(".h"),
         staticmodbus_model=project.models.staticmodbus,
+        skip_sunspec=skip_sunspec,
     )
 
     if first_time and not skip_sunspec:
