@@ -20,23 +20,6 @@ def export(c_path, h_path, staticmodbus_model, skip_sunspec):
     builder.gen()
 
 
-def gen(self, first=0):
-    lines = []
-
-    for member in self.wrapped.children[first:]:
-        builder = builders.wrap(
-            wrapped=member,
-            parameter_uuid_finder=self.parameter_uuid_finder,
-            c_path=self.c_path,
-            h_path=self.h_path,
-            skip_sunspec=self.skip_sunspec,
-        )
-        lines.extend(builder.gen())
-        lines.append("")
-
-    return lines
-
-
 @builders(epcpm.staticmodbusmodel.Root)
 @attr.s
 class Root:
