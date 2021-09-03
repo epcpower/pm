@@ -71,10 +71,10 @@ def export(
     can_model,
     sunspec_model,
     staticmodbus_model,
-    skip_sunspec=False,
+    skip_output=False,
     include_uuid_in_item=False,
 ):
-    if skip_sunspec:
+    if skip_output:
         sunspec_root = None
         staticmodbus_root = None
     else:

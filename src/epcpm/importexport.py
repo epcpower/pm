@@ -111,7 +111,7 @@ def full_export(
     paths,
     target_directory,
     first_time=False,
-    skip_sunspec=False,
+    skip_output=False,
     include_uuid_in_item=False,
 ):
     epcpm.cantosym.export(
@@ -133,7 +133,7 @@ def full_export(
         sunspec_model=project.models.sunspec,
         staticmodbus_model=project.models.staticmodbus,
         parameters_model=project.models.parameters,
-        skip_sunspec=skip_sunspec,
+        skip_output=skip_output,
         include_uuid_in_item=include_uuid_in_item,
     )
 
@@ -141,7 +141,7 @@ def full_export(
         path=paths.spreadsheet,
         sunspec_model=project.models.sunspec,
         parameters_model=project.models.parameters,
-        skip_sunspec=skip_sunspec,
+        skip_output=skip_output,
         column_filter=attr.evolve(
             epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True),
             parameter_uuid=False,
@@ -177,7 +177,7 @@ def full_export(
         path=paths.spreadsheet_user,
         sunspec_model=project.models.sunspec,
         parameters_model=project.models.parameters,
-        skip_sunspec=skip_sunspec,
+        skip_output=skip_output,
         column_filter=attr.evolve(
             epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True),
             get=False,
@@ -198,7 +198,7 @@ def full_export(
         c_path=paths.sunspec_tables_c,
         h_path=paths.sunspec_tables_c.with_suffix(".h"),
         sunspec_model=project.models.sunspec,
-        skip_sunspec=skip_sunspec,
+        skip_sunspec=skip_output,
     )
 
     epcpm.parameterstosil.export(
@@ -218,10 +218,10 @@ def full_export(
         c_path=paths.staticmodbus_c,
         h_path=paths.staticmodbus_c.with_suffix(".h"),
         staticmodbus_model=project.models.staticmodbus,
-        skip_sunspec=skip_sunspec,
+        skip_output=skip_output,
     )
 
-    if first_time and not skip_sunspec:
+    if first_time and not skip_output:
         epcpm.sunspectomanualc.export(
             path=paths.sunspec_c,
             sunspec_model=project.models.sunspec,
@@ -232,10 +232,10 @@ def full_export(
             sunspec_model=project.models.sunspec,
         )
 
-    run_generation_scripts(target_directory, skip_sunspec=skip_sunspec)
+    run_generation_scripts(target_directory)
 
 
-def run_generation_scripts(base_path, skip_sunspec=False):
+def run_generation_scripts(base_path):
     scripts = base_path / "venv" / "Scripts"
     interface = base_path / "interface"
 

@@ -7,13 +7,13 @@ import epyqlib.utils.general
 builders = epyqlib.utils.general.TypeMap()
 
 
-def export(c_path, h_path, staticmodbus_model, skip_sunspec):
+def export(c_path, h_path, staticmodbus_model, skip_output):
     builder = builders.wrap(
         wrapped=staticmodbus_model.root,
         parameter_uuid_finder=staticmodbus_model.node_from_uuid,
         c_path=c_path,
         h_path=h_path,
-        skip_sunspec=skip_sunspec,
+        skip_output=skip_output,
     )
 
     c_path.parent.mkdir(parents=True, exist_ok=True)
@@ -27,7 +27,7 @@ class Root:
     parameter_uuid_finder = attr.ib()
     c_path = attr.ib()
     h_path = attr.ib()
-    skip_sunspec = attr.ib(default=False)
+    skip_output = attr.ib(default=False)
 
     def gen(self):
         with self.h_path.open("w", newline="\n") as h_file:
@@ -49,7 +49,7 @@ class Root:
                 builder = builders.wrap(
                     wrapped=member,
                     parameter_uuid_finder=self.parameter_uuid_finder,
-                    skip_sunspec=self.skip_sunspec,
+                    skip_output=self.skip_output,
                 )
 
                 addr_val, c_line = builder.gen()
@@ -72,7 +72,7 @@ class Root:
 class FunctionData:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
-    skip_sunspec = attr.ib(default=False)
+    skip_output = attr.ib(default=False)
 
     def gen(self):
         uses_interface_item = False
@@ -87,7 +87,7 @@ class FunctionData:
 
         # Generate the defined register that returns interfaceItem_<UUID> (or NULL for some cases).
         if (
-            not self.skip_sunspec
+            not self.skip_output
             and uses_interface_item
             and not self.wrapped.not_implemented
             and type_node is not None
@@ -109,7 +109,7 @@ class FunctionData:
 class FunctionDataBitfield:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
-    skip_sunspec = attr.ib(default=False)
+    skip_output = attr.ib(default=False)
 
     def gen(self):
         # NULL for all FunctionDataBitfield objects.

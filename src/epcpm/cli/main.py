@@ -103,7 +103,7 @@ def build(
         target_directory=target_path,
         paths=paths,
         first_time=False,
-        skip_sunspec=skip_sunspec,
+        skip_output=skip_sunspec,
         include_uuid_in_item=include_uuid_in_item,
     )
 
