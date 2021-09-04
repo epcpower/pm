@@ -112,7 +112,7 @@ class FunctionDataBitfield:
     skip_output = attr.ib(default=False)
 
     def gen(self):
-        # NULL for all FunctionDataBitfield objects.
+        # TODO: to be implemented, for now NULL for all FunctionDataBitfield objects
         addr_val = self.wrapped.address
         c_line = f"    [{addr_val}] = NULL,\n"
 
