@@ -42,29 +42,21 @@ class Root:
         with self.c_path.open("w", newline="\n") as c_file:
             c_file.write('#include "staticmodbusInterfaceGen.h"\n')
             c_file.write('#include "interfaceGen.h"\n\n')
-            c_file.write("InterfaceItem_void * const staticmodbusAddrRegMap[] = \n{\n")
+            c_file.write("InterfaceItem_void * const staticmodbusAddrRegMap[] = \n")
 
-            current_addr = 0
+            # Initialize with open curly brace for correct indentation.
+            c_lines = ["{"]
             for member in self.wrapped.children:
                 builder = builders.wrap(
                     wrapped=member,
                     parameter_uuid_finder=self.parameter_uuid_finder,
                     skip_output=self.skip_output,
                 )
+                more_c_lines = builder.gen()
+                c_lines.extend(more_c_lines)
 
-                addr_val, c_line = builder.gen()
-
-                # Fill the undefined registers to return NULL.
-                while current_addr < addr_val:
-                    null_line = f"    [{current_addr}] = NULL,\n"
-                    c_file.write(null_line)
-                    current_addr += 1
-                # Write the defined register that returns interfaceItem_<UUID>.
-                c_file.write(c_line)
-                # Update the current address for the next undefined register fill.
-                current_addr = addr_val + 1
-
-            c_file.write("};\n\n")
+            c_file.write(epcpm.c.format_nested_lists(c_lines).strip())
+            c_file.write("\n};\n\n")
 
 
 @builders(epcpm.staticmodbusmodel.FunctionData)
@@ -85,7 +77,8 @@ class FunctionData:
 
         type_node = self.parameter_uuid_finder(self.wrapped.type_uuid)
 
-        # Generate the defined register that returns interfaceItem_<UUID> (or NULL for some cases).
+        # Generate the defined register that returns interfaceItem_<UUID> (or NULL for many cases).
+        c_lines = []
         if (
             not self.skip_output
             and uses_interface_item
@@ -96,12 +89,22 @@ class FunctionData:
             # TODO: CAMPid 9685439641536675431653179671436
             parameter_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
             uuid_interface_val = f"&interfaceItem_{parameter_uuid}"
-        else:
-            uuid_interface_val = "NULL"
-        addr_val = self.wrapped.address
-        c_line = f"    [{addr_val}] = {uuid_interface_val},\n"
 
-        return addr_val, c_line
+            # Generate one or more ("size") lines with UUID interface.
+            for addr_val in range(
+                self.wrapped.address, self.wrapped.address + self.wrapped.size
+            ):
+                c_line = f"    [{str(addr_val)}] = {uuid_interface_val},"
+                c_lines.append(c_line)
+        else:
+            # Generate one or more ("size") lines with NULL interface.
+            for addr_val in range(
+                self.wrapped.address, self.wrapped.address + self.wrapped.size
+            ):
+                c_line = f"    [{str(addr_val)}] = NULL,"
+                c_lines.append(c_line)
+
+        return c_lines
 
 
 @builders(epcpm.staticmodbusmodel.FunctionDataBitfield)
@@ -113,7 +116,12 @@ class FunctionDataBitfield:
 
     def gen(self):
         # TODO: to be implemented, for now NULL for all FunctionDataBitfield objects
-        addr_val = self.wrapped.address
-        c_line = f"    [{addr_val}] = NULL,\n"
+        c_lines = []
+        # Generate one or more ("size") lines with NULL interface.
+        for addr_val in range(
+            self.wrapped.address, self.wrapped.address + self.wrapped.size
+        ):
+            c_line = f"    [{str(addr_val)}] = NULL,"
+            c_lines.append(c_line)
 
-        return addr_val, c_line
+        return c_lines
