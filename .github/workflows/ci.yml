@@ -37,7 +37,7 @@ jobs:
           pip --version
           python boots.py create --group package
           venv/Scripts/black --check --diff .
-          venv/Scripts/python -c "import sys; print(sys.version)"
+          #venv/Scripts/python -c "import sys; print(sys.version)"
 
           venv/Scripts/pip freeze --all
           venv/Scripts/genbuildinfo "src/epcpm/__build.py"
