@@ -39,24 +39,30 @@ class Root:
             )
             h_file.write("\n#endif //__STATICMODBUS_INTERFACE_GEN_H__\n")
 
+        c_lines_interface = []
+        c_lines = [
+            '#include "staticmodbusInterfaceGen.h"',
+            '#include "interfaceGen.h"',
+            "",
+            "",
+            "InterfaceItem_void * const staticmodbusAddrRegMap[] =",
+            "{",
+            c_lines_interface,
+            "};",
+        ]
+
+        for member in self.wrapped.children:
+            builder = builders.wrap(
+                wrapped=member,
+                parameter_uuid_finder=self.parameter_uuid_finder,
+                skip_output=self.skip_output,
+            )
+            more_c_lines = builder.gen()
+            c_lines_interface.extend(more_c_lines)
+
         with self.c_path.open("w", newline="\n") as c_file:
-            c_file.write('#include "staticmodbusInterfaceGen.h"\n')
-            c_file.write('#include "interfaceGen.h"\n\n')
-            c_file.write("InterfaceItem_void * const staticmodbusAddrRegMap[] = \n")
-
-            # Initialize with open curly brace for correct indentation.
-            c_lines = ["{"]
-            for member in self.wrapped.children:
-                builder = builders.wrap(
-                    wrapped=member,
-                    parameter_uuid_finder=self.parameter_uuid_finder,
-                    skip_output=self.skip_output,
-                )
-                more_c_lines = builder.gen()
-                c_lines.extend(more_c_lines)
-
             c_file.write(epcpm.c.format_nested_lists(c_lines).strip())
-            c_file.write("\n};\n\n")
+            c_file.write("\n")
 
 
 @builders(epcpm.staticmodbusmodel.FunctionData)
@@ -94,14 +100,14 @@ class FunctionData:
             for addr_val in range(
                 self.wrapped.address, self.wrapped.address + self.wrapped.size
             ):
-                c_line = f"    [{str(addr_val)}] = {uuid_interface_val},"
+                c_line = f"[{addr_val}] = {uuid_interface_val},"
                 c_lines.append(c_line)
         else:
             # Generate one or more ("size") lines with NULL interface.
             for addr_val in range(
                 self.wrapped.address, self.wrapped.address + self.wrapped.size
             ):
-                c_line = f"    [{str(addr_val)}] = NULL,"
+                c_line = f"[{addr_val}] = NULL,"
                 c_lines.append(c_line)
 
         return c_lines
@@ -121,7 +127,7 @@ class FunctionDataBitfield:
         for addr_val in range(
             self.wrapped.address, self.wrapped.address + self.wrapped.size
         ):
-            c_line = f"    [{str(addr_val)}] = NULL,"
+            c_line = f"[{str(addr_val)}] = NULL,"
             c_lines.append(c_line)
 
         return c_lines
