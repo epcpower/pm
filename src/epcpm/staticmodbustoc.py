@@ -30,14 +30,21 @@ class Root:
     skip_output = attr.ib(default=False)
 
     def gen(self):
+        h_lines = [
+            "#ifndef __STATICMODBUS_INTERFACE_GEN_H__",
+            "#define __STATICMODBUS_INTERFACE_GEN_H__",
+            "",
+            '#include "interface.h"',
+            "",
+            "",
+            "extern InterfaceItem_void * const staticmodbusAddrRegMap[];",
+            "",
+            "#endif //__STATICMODBUS_INTERFACE_GEN_H__",
+        ]
+
         with self.h_path.open("w", newline="\n") as h_file:
-            h_file.write("#ifndef __STATICMODBUS_INTERFACE_GEN_H__\n")
-            h_file.write("#define __STATICMODBUS_INTERFACE_GEN_H__\n\n")
-            h_file.write('#include "interface.h"\n\n')
-            h_file.write(
-                "extern InterfaceItem_void * const staticmodbusAddrRegMap[];\n"
-            )
-            h_file.write("\n#endif //__STATICMODBUS_INTERFACE_GEN_H__\n")
+            h_file.write(epcpm.c.format_nested_lists(h_lines).strip())
+            h_file.write("\n")
 
         c_lines_interface = []
         c_lines = [
