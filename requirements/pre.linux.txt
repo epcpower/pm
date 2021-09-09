@@ -4,36 +4,36 @@
 #
 #    python boots.py lock
 #
-bleach==3.3.0             # via readme-renderer
-certifi==2020.12.5        # via requests
-cffi==1.14.5              # via cryptography
-chardet==4.0.0            # via requests
-click==7.1.2              # via pip-tools, romp
-cryptography==3.4.7       # via secretstorage
+bleach==4.1.0             # via readme-renderer
+certifi==2021.5.30        # via requests
+cffi==1.14.6              # via cryptography
+charset-normalizer==2.0.4  # via requests
+click==8.0.1              # via pip-tools, romp
+cryptography==3.4.8       # via secretstorage
 docutils==0.17.1          # via readme-renderer
-idna==2.10                # via requests
-importlib-metadata==4.0.0  # via keyring, twine
-jeepney==0.6.0            # via keyring, secretstorage
-keyring==23.0.1           # via twine
-packaging==20.9           # via bleach
+idna==3.2                 # via requests
+importlib-metadata==4.8.1  # via click, keyring, twine
+jeepney==0.7.1            # via keyring, secretstorage
+keyring==23.1.0           # via twine
+packaging==21.0           # via bleach
 pip-tools==5.1.0          # via -r /home/vsts/work/1/s/work/requirements/pre.in
-pkginfo==1.7.0            # via twine
+pkginfo==1.7.1            # via twine
 pycparser==2.20           # via cffi
-pygments==2.8.1           # via readme-renderer
+pygments==2.10.0          # via readme-renderer
 pyparsing==2.4.7          # via packaging
 readme-renderer==29.0     # via twine
 requests-toolbelt==0.9.1  # via twine
-requests==2.25.1          # via requests-toolbelt, romp, twine
+requests==2.26.0          # via requests-toolbelt, romp, twine
 romp==2020.3              # via -r /home/vsts/work/1/s/work/requirements/pre.in
 secretstorage==3.3.1      # via keyring
-six==1.15.0               # via bleach, pip-tools, readme-renderer
-tqdm==4.60.0              # via twine
+six==1.16.0               # via bleach, pip-tools, readme-renderer
+tqdm==4.62.2              # via twine
 twine==3.1.1              # via -r /home/vsts/work/1/s/work/requirements/pre.in
-typing-extensions==3.7.4.3  # via importlib-metadata
-urllib3==1.26.4           # via requests
+typing-extensions==3.10.0.2  # via importlib-metadata
+urllib3==1.26.6           # via requests
 webencodings==0.5.1       # via bleach
 wheel==0.34.2             # via -r /home/vsts/work/1/s/work/requirements/pre.in
-zipp==3.4.1               # via importlib-metadata
+zipp==3.5.0               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==20.1                 # via -r /home/vsts/work/1/s/work/requirements/pre.in, pip-tools
