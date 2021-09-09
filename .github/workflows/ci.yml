@@ -44,14 +44,16 @@ jobs:
           venv/Scripts/generateversion --distribution epcpm --out "src/epcpm/__version.py"
 
           venv/Scripts/pyinstaller pyinstaller.spec
-          mv "dist/epcpm" "EPCPM REPLACETHIS_WITH_BUILD_VERSION"
-          7z a "REPLACETHIS_WITH_BUILD_VERSION.zip" "EPCPM REPLACETHIS_WITH_BUILD_VERSION"
+          mv "dist/epcpm" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
+          7z a "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}.zip" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
+
 
           mkdir artifacts
-          mv ../*.zip artifacts/
-          mv ../dist/* artifacts/
+          mv *.zip artifacts/
 
+          rm -rf dist
           python boots.py build
+          mv dist/* artifacts/
 
           venv/Scripts/pytest epcpm.tests --pyargs
 
@@ -60,6 +62,6 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: epyq_st
+          name: pm
           path: |
             artifacts/*
