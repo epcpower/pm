@@ -17,6 +17,7 @@ def test_blank(qtbot):
         spreadsheet=None,
         spreadsheet_user=None,
         smdx=[],
+        staticmodbus_c=None,
         sunspec_tables_c=None,
         sunspec_bitfields_c=None,
         sunspec_c=None,

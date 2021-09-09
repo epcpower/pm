@@ -118,7 +118,7 @@ def export(
     sunspec_model,
     parameters_model,
     column_filter=None,
-    skip_sunspec=False,
+    skip_output=False,
     output_csv=False,
     csv_column_filter=None,
 ):
@@ -132,7 +132,7 @@ def export(
         wrapped=sunspec_model.root,
         parameter_uuid_finder=sunspec_model.node_from_uuid,
         parameter_model=parameters_model,
-        skip_sunspec=skip_sunspec,
+        skip_output=skip_output,
         column_filter=column_filter,
         csv_column_filter=csv_column_filter,
     )
@@ -155,7 +155,7 @@ class Root:
     wrapped = attr.ib()
     column_filter = attr.ib()
     csv_column_filter = attr.ib()
-    skip_sunspec = attr.ib(default=False)
+    skip_output = attr.ib(default=False)
     parameter_uuid_finder = attr.ib(default=None)
     parameter_model = attr.ib(default=None)
     sort_models = attr.ib(default=False)
@@ -170,7 +170,7 @@ class Root:
 
         csv_data = []
 
-        if not self.skip_sunspec:
+        if not self.skip_output:
             if self.sort_models:
                 children = sorted(
                     self.wrapped.children,
