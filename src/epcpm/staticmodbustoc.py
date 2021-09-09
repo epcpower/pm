@@ -134,7 +134,7 @@ class FunctionDataBitfield:
         for addr_val in range(
             self.wrapped.address, self.wrapped.address + self.wrapped.size
         ):
-            c_line = f"[{str(addr_val)}] = NULL,"
+            c_line = f"[{addr_val}] = NULL,"
             c_lines.append(c_line)
 
         return c_lines
