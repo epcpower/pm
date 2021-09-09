@@ -57,7 +57,7 @@ jobs:
           echo "5"
           ls ../
           mv *.zip artifacts/
-          mv ../dist/* artifacts/
+          mv dist/* artifacts/
 
           python boots.py build
 
