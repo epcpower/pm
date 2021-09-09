@@ -45,7 +45,7 @@ jobs:
 
           venv/Scripts/pyinstaller pyinstaller.spec
           mv "dist/epcpm" "EPCPM REPLACETHIS_WITH_BUILD_VERSION"
-          7z a "REPLACETHIS_WITH_BUILD_VERSION.zip" "EPCPM REPLACETHIS_WITH_BUILD_VERSION"
+          7z a "REPLACETHIS_WITH_BUILD_VERSION.zip" "EPCPM REPLACETHIS_WITH_BUILD_VERSION2"
 
           mkdir artifacts
           mv ../*.zip artifacts/
