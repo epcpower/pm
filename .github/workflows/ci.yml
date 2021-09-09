@@ -57,9 +57,13 @@ jobs:
           echo "5"
           ls ../
           mv *.zip artifacts/
+
+
+          rm -rf dist
+          python boots.py build
           mv dist/* artifacts/
 
-          python boots.py build
+
 
           venv/Scripts/pytest epcpm.tests --pyargs
 
