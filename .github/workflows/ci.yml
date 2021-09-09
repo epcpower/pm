@@ -44,26 +44,16 @@ jobs:
           venv/Scripts/generateversion --distribution epcpm --out "src/epcpm/__version.py"
 
           venv/Scripts/pyinstaller pyinstaller.spec
-          mv "dist/epcpm" "EPCPM ${GITHUB_RUN_NUMBER}"
-          7z a "EPCPM ${GITHUB_RUN_NUMBER}.zip" "EPCPM ${GITHUB_RUN_NUMBER}"
+          mv "dist/epcpm" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
+          7z a "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}.zip" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
 
 
           mkdir artifacts
-          ls
-          echo "1"
-          echo "2"
-          echo "3"
-          echo "4"
-          echo "5"
-          ls ../
           mv *.zip artifacts/
-
 
           rm -rf dist
           python boots.py build
           mv dist/* artifacts/
-
-
 
           venv/Scripts/pytest epcpm.tests --pyargs
 
