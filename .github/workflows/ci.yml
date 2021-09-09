@@ -44,8 +44,8 @@ jobs:
           venv/Scripts/generateversion --distribution epcpm --out "src/epcpm/__version.py"
 
           venv/Scripts/pyinstaller pyinstaller.spec
-          mv "dist/epcpm" "EPCPM REPLACETHIS_WITH_BUILD_VERSION"
-          7z a "REPLACETHIS_WITH_BUILD_VERSION.zip" "EPCPM REPLACETHIS_WITH_BUILD_VERSION2"
+          mv "dist/epcpm" "EPCPM ${{env.GITHUB_RUN_ID}}"
+          7z a "EPCPM ${{env.GITHUB_RUN_ID}}.zip" "EPCPM ${{env.GITHUB_RUN_ID}}"
 
           mkdir artifacts
           mv ../*.zip artifacts/
