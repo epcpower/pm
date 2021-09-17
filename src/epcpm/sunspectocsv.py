@@ -197,6 +197,7 @@ class Root:
 
         return csv_data
 
+
 @builders(epcpm.sunspecmodel.Model)
 @attr.s
 class Model:
@@ -718,12 +719,14 @@ class TableRepeatingBlockReference:
                 row.type_uuid = row.type
                 row.type = self.parameter_uuid_finder(row.type).name
                 row.units = table_element2.units
-                row.modbus_address = block_size + self.model_offset + self.address_offset
+                row.modbus_address = (
+                    block_size + self.model_offset + self.address_offset
+                )
                 row.parameter_uuid = table_element2.uuid
                 parameter = self.parameter_uuid_finder(table_element2.uuid)
                 uses_interface_item = (
-                        isinstance(parameter, epyqlib.pm.parametermodel.TableArrayElement)
-                        and parameter.uses_interface_item()
+                    isinstance(parameter, epyqlib.pm.parametermodel.TableArrayElement)
+                    and parameter.uses_interface_item()
                 )
                 row.parameter_uses_interface_item = uses_interface_item
 
@@ -746,6 +749,7 @@ class TableRepeatingBlockReference:
                 curve_points += 1
 
         return rows, 0
+
 
 # # TODO: CAMPid 079549750417808543178043180
 # def get_curve_type(combination_string):
@@ -826,6 +830,7 @@ class TableRepeatingBlock:
         # #         )
 
         return [], 0
+
 
 @builders(epcpm.sunspecmodel.DataPoint)
 @attr.s
