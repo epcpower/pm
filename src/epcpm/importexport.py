@@ -16,6 +16,7 @@ import epcpm.smdxtosunspec
 import epcpm.staticmodbustoc
 import epcpm.sunspecmodel
 import epcpm.sunspectobitfieldsc
+import epcpm.sunspectocsv
 import epcpm.sunspectotablesc
 import epcpm.sunspectomanualc
 import epcpm.sunspectomanualh
@@ -137,6 +138,30 @@ def full_export(
         include_uuid_in_item=include_uuid_in_item,
     )
 
+    epcpm.sunspectocsv.export(
+        path=paths.spreadsheet,
+        sunspec_model=project.models.sunspec,
+        parameters_model=project.models.parameters,
+        skip_output=skip_output,
+        csv_column_filter=attr.evolve(
+            epcpm.sunspectocsv.attr_fill(epcpm.sunspectocsv.Fields, False),
+            size=True,
+            name=True,
+            label=True,
+            type=True,
+            units=True,
+            modbus_address=True,
+            parameter_uuid=True,
+            parameter_uses_interface_item=True,
+            scale_factor_uuid=True,
+            enumeration_uuid=True,
+            type_uuid=True,
+            not_implemented=True,
+            uuid=True,
+            class_name=True,
+        ),
+    )
+
     epcpm.sunspectoxlsx.export(
         path=paths.spreadsheet,
         sunspec_model=project.models.sunspec,
@@ -153,7 +178,7 @@ def full_export(
             uuid=False,
             class_name=False,
         ),
-        output_csv=True,
+        output_csv=False,  # TODO: remove the CSV output in sunspectoxlsx
         csv_column_filter=attr.evolve(
             epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, False),
             size=True,

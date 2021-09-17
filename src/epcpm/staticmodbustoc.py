@@ -88,6 +88,21 @@ class FunctionData:
                 and parameter.uses_interface_item()
             )
 
+            # Special handling for TableArrayElement, which ultimately generates a FunctionData object.
+            if isinstance(parameter, epyqlib.pm.parametermodel.TableArrayElement):
+                # TODO: CAMPid 9655426754319431461354643167
+                array_element = parameter.original
+
+                if isinstance(array_element, epyqlib.pm.parametermodel.Parameter):
+                    parameter = array_element
+                else:
+                    parameter = array_element.tree_parent.children[0]
+
+                uses_interface_item = (
+                    isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
+                    and parameter.uses_interface_item()
+                )
+
         type_node = self.parameter_uuid_finder(self.wrapped.type_uuid)
 
         # Generate the defined register that returns interfaceItem_<UUID> (or NULL for many cases).
