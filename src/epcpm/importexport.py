@@ -143,7 +143,7 @@ def full_export(
         sunspec_model=project.models.sunspec,
         parameters_model=project.models.parameters,
         skip_output=skip_output,
-        csv_column_filter=attr.evolve(
+        column_filter=attr.evolve(
             epcpm.sunspectocsv.attr_fill(epcpm.sunspectocsv.Fields, False),
             size=True,
             name=True,
@@ -166,56 +166,19 @@ def full_export(
         path=paths.spreadsheet,
         sunspec_model=project.models.sunspec,
         parameters_model=project.models.parameters,
-        skip_output=skip_output,
-        column_filter=attr.evolve(
-            epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True),
-            parameter_uuid=False,
-            parameter_uses_interface_item=False,
-            scale_factor_uuid=False,
-            enumeration_uuid=False,
-            type_uuid=False,
-            not_implemented=False,
-            uuid=False,
-            class_name=False,
-        ),
-        output_csv=False,  # TODO: remove the CSV output in sunspectoxlsx
-        csv_column_filter=attr.evolve(
-            epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, False),
-            size=True,
-            name=True,
-            label=True,
-            type=True,
-            units=True,
-            modbus_address=True,
-            parameter_uuid=True,
-            parameter_uses_interface_item=True,
-            scale_factor_uuid=True,
-            enumeration_uuid=True,
-            type_uuid=True,
-            not_implemented=True,
-            uuid=True,
-            class_name=True,
-        ),
+        skip_sunspec=skip_output,
     )
 
     epcpm.sunspectoxlsx.export(
         path=paths.spreadsheet_user,
         sunspec_model=project.models.sunspec,
         parameters_model=project.models.parameters,
-        skip_output=skip_output,
+        skip_sunspec=skip_output,
         column_filter=attr.evolve(
             epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True),
             get=False,
             set=False,
             item=False,
-            parameter_uuid=False,
-            parameter_uses_interface_item=False,
-            scale_factor_uuid=False,
-            enumeration_uuid=False,
-            type_uuid=False,
-            not_implemented=False,
-            uuid=False,
-            class_name=False,
         ),
     )
 

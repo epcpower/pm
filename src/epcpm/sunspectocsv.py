@@ -63,44 +63,6 @@ class Fields:
         )
 
 
-field_names = Fields(
-    field_type="Field Type",
-    applicable_point="Applicable Point",
-    address_offset="Address Offset",
-    block_offset="Block Offset",
-    size="Size",
-    name="Name",
-    label="Label",
-    value="Value",
-    type="Type",
-    units="Units",
-    scale_factor="SF",
-    read_write="R/W",
-    mandatory="Mandatory M/O",
-    description="Description",
-    notes="Notes",
-    modbus_address="Modbus Address",
-    get="get",
-    set="set",
-    item="item",
-)
-
-# This is the order of the fields being output to CSV:
-#             size=True,
-#             name=True,
-#             label=True,
-#             type=True,
-#             units=True,
-#             modbus_address=True,
-#             parameter_uuid=True,
-#             parameter_uses_interface_item=True,
-#             scale_factor_uuid=True,
-#             enumeration_uuid=True,
-#             type_uuid=True,
-#             not_implemented=True,
-#             uuid=True,
-#             class_name=True,
-
 point_fields = Fields(
     block_offset=data_point_fields.block_offset,
     size=data_point_fields.size,
@@ -129,21 +91,20 @@ def export(
     path,
     sunspec_model,
     parameters_model,
-    column_filter=None,  # TODO: remove
+    column_filter=None,
     skip_output=False,
-    csv_column_filter=None,
 ):
     if skip_output:
         return
 
-    if csv_column_filter is None:
-        csv_column_filter = attr_fill(Fields, True)
+    if column_filter is None:
+        column_filter = attr_fill(Fields, True)
 
     builder = epcpm.sunspectocsv.builders.wrap(
         wrapped=sunspec_model.root,
         parameter_uuid_finder=sunspec_model.node_from_uuid,
         parameter_model=parameters_model,
-        csv_column_filter=csv_column_filter,
+        column_filter=column_filter,
     )
 
     csv_data = builder.gen()
@@ -158,7 +119,7 @@ def export(
 @attr.s
 class Root:
     wrapped = attr.ib()
-    csv_column_filter = attr.ib()
+    column_filter = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
     parameter_model = attr.ib(default=None)
     sort_models = attr.ib(default=False)
@@ -166,34 +127,33 @@ class Root:
     def gen(self):
         csv_data = []
 
-        if True:  # TODO: REMOVE THIS
-            if self.sort_models:
-                children = sorted(
-                    self.wrapped.children,
-                    key=lambda child: (
-                        0 if isinstance(child, epcpm.sunspecmodel.Model) else 1,
-                        getattr(child, "id", math.inf),
-                    ),
-                )
-            else:
-                children = list(self.wrapped.children)
+        if self.sort_models:
+            children = sorted(
+                self.wrapped.children,
+                key=lambda child: (
+                    0 if isinstance(child, epcpm.sunspecmodel.Model) else 1,
+                    getattr(child, "id", math.inf),
+                ),
+            )
+        else:
+            children = list(self.wrapped.children)
 
-            model_offset = 2  # account for starting 'SunS'
-            for model in children:
-                if isinstance(model, epcpm.sunspecmodel.Table):
-                    # TODO: for now, implement it soon...
-                    continue
+        model_offset = 2  # account for starting 'SunS'
+        for model in children:
+            if isinstance(model, epcpm.sunspecmodel.Table):
+                # TODO: for now, implement it soon...
+                continue
 
-                model_offset += builders.wrap(
-                    wrapped=model,
-                    csv_data=csv_data,
-                    csv_column_filter=self.csv_column_filter,
-                    padding_type=self.parameter_model.list_selection_roots[
-                        "sunspec types"
-                    ].child_by_name("pad"),
-                    parameter_uuid_finder=self.parameter_uuid_finder,
-                    model_offset=model_offset,
-                ).gen()
+            model_offset += builders.wrap(
+                wrapped=model,
+                csv_data=csv_data,
+                column_filter=self.column_filter,
+                padding_type=self.parameter_model.list_selection_roots[
+                    "sunspec types"
+                ].child_by_name("pad"),
+                parameter_uuid_finder=self.parameter_uuid_finder,
+                model_offset=model_offset,
+            ).gen()
 
         return csv_data
 
@@ -203,9 +163,8 @@ class Root:
 class Model:
     wrapped = attr.ib()
     csv_data = attr.ib()
-    csv_column_filter = attr.ib()
+    column_filter = attr.ib()
     padding_type = attr.ib()
-    # column_filter = attr.ib()
     model_offset = attr.ib()  # starting Modbus address for the model
     parameter_uuid_finder = attr.ib(default=None)
 
@@ -255,7 +214,7 @@ class Model:
 
             if row.modbus_address is not None:
                 # Skip blank rows.
-                self.csv_data.append(row.as_filtered_tuple(self.csv_column_filter))
+                self.csv_data.append(row.as_filtered_tuple(self.column_filter))
 
         # for block in self.wrapped.children:
         #     builder = enumeration_builders.wrap(
@@ -1158,8 +1117,8 @@ class Point:
         if self.parameter_uuid_finder(self.wrapped.type_uuid).name == "pad":
             row.name = "Pad"
             row.description = "Force even alignment"
-            # row.read_write = "R"
-            # row.mandatory = "O"
+            row.read_write = "R"
+            row.mandatory = "O"
             row.parameter_uses_interface_item = False
             pad_uuid = ""
             # TODO: This pad UUID discovery code should probably be a separate method.
