@@ -1,6 +1,5 @@
 import csv
 import pathlib
-import attr
 
 import epcpm.project
 import epcpm.smdxtosunspec
@@ -68,23 +67,10 @@ def test_x():
         wrapped=attrs_model.root,
         parameter_uuid_finder=attrs_model.node_from_uuid,
         parameter_model=project.models.parameters,
-        column_filter=attr.evolve(
-            epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True),
-            parameter_uuid=False,
-            parameter_uses_interface_item=False,
-            scale_factor_uuid=False,
-            enumeration_uuid=False,
-            type_uuid=False,
-            not_implemented=False,
-            uuid=False,
-            class_name=False,
-        ),
-        csv_column_filter=epcpm.sunspectoxlsx.attr_fill(
-            epcpm.sunspectoxlsx.Fields, True
-        ),
+        column_filter=epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True),
     )
 
-    workbook, csv_data = builder.gen()
+    workbook = builder.gen()
 
     assert workbook.sheetnames == [
         "License Agreement",
