@@ -43,10 +43,10 @@ class Fields:
     read_write = attr.ib(default=None)
     mandatory = attr.ib(default=None)
     description = attr.ib(default=None)
-    notes = attr.ib(default=None)
+    # notes = attr.ib(default=None)
     modbus_address = attr.ib(default=None)
-    get = attr.ib(default=None)
-    set = attr.ib(default=None)
+    # get = attr.ib(default=None)
+    # set = attr.ib(default=None)
     item = attr.ib(default=None)
     parameter_uuid = attr.ib(default=None)
     parameter_uses_interface_item = attr.ib(default=None)
@@ -202,19 +202,14 @@ class Model:
             accumulated_length += block_length
             if len(built_rows) > 0:
                 rows.extend(built_rows)
-                rows.append(Fields())
 
         for i, row in enumerate(rows):
-            # if i == 0:
-            #     row.value = self.wrapped.id
-            # elif i == 1:
-            #     row.value = overall_length
+            if i == 0:
+                row.value = self.wrapped.id
+            elif i == 1:
+                row.value = overall_length
 
-            # self.worksheet.append(row.as_filtered_tuple(self.column_filter))
-
-            if row.modbus_address is not None:
-                # Skip blank rows.
-                self.csv_data.append(row.as_filtered_tuple(self.column_filter))
+            self.csv_data.append(row.as_filtered_tuple(self.column_filter))
 
         # for block in self.wrapped.children:
         #     builder = enumeration_builders.wrap(
@@ -222,11 +217,6 @@ class Model:
         #         parameter_uuid_finder=self.parameter_uuid_finder,
         #     )
         #     rows = builder.gen()
-        #
-        #     for row in rows:
-        #         self.worksheet.append(
-        #             row.as_filtered_tuple(self.column_filter),
-        #         )
 
         return overall_length + 2  # add header length
 
@@ -429,8 +419,8 @@ class DataPointBitfield:
 
             row.label = parameter.name
             row.name = parameter.abbreviation
-            row.notes = "" if parameter.notes is None else parameter.notes
-            row.notes = f"{row.notes}  <uuid:{parameter.uuid}>".strip()
+            # row.notes = "" if parameter.notes is None else parameter.notes
+            # row.notes = f"{row.notes}  <uuid:{parameter.uuid}>".strip()
 
             if row.units is None:
                 row.units = parameter.units
@@ -448,45 +438,45 @@ class DataPointBitfield:
             and parameter.uses_interface_item()
         )
 
-        getter = []
-        setter = []
-
-        # TODO: should we just require that it does and assume etc?
-        if uses_interface_item:
-            # TODO: CAMPid 9685439641536675431653179671436
-            parameter_uuid = str(parameter.uuid).replace("-", "_")
-            item_name = f"interfaceItem_{parameter_uuid}"
-
-            getter.extend(
-                [
-                    f"{item_name}.common.sunspec.getter(",
-                    [
-                        f"(InterfaceItem_void *) &{item_name},",
-                        f"Meta_Value",
-                    ],
-                    f");",
-                ]
-            )
-            setter.extend(
-                [
-                    f"{item_name}.common.sunspec.setter(",
-                    [
-                        f"(InterfaceItem_void *) &{item_name},",
-                        f"true,",
-                        f"Meta_Value",
-                    ],
-                    f");",
-                ]
-            )
-
-        if len(getter) > 0:
-            # TODO: what if write-only?
-            row.get = epcpm.c.format_nested_lists(getter)
-
-        if not parameter.read_only:
-            row.set = epcpm.c.format_nested_lists(setter)
-        else:
-            row.set = None
+        # getter = []
+        # setter = []
+        #
+        # # TODO: should we just require that it does and assume etc?
+        # if uses_interface_item:
+        #     # TODO: CAMPid 9685439641536675431653179671436
+        #     parameter_uuid = str(parameter.uuid).replace("-", "_")
+        #     item_name = f"interfaceItem_{parameter_uuid}"
+        #
+        #     getter.extend(
+        #         [
+        #             f"{item_name}.common.sunspec.getter(",
+        #             [
+        #                 f"(InterfaceItem_void *) &{item_name},",
+        #                 f"Meta_Value",
+        #             ],
+        #             f");",
+        #         ]
+        #     )
+        #     setter.extend(
+        #         [
+        #             f"{item_name}.common.sunspec.setter(",
+        #             [
+        #                 f"(InterfaceItem_void *) &{item_name},",
+        #                 f"true,",
+        #                 f"Meta_Value",
+        #             ],
+        #             f");",
+        #         ]
+        #     )
+        #
+        # if len(getter) > 0:
+        #     # TODO: what if write-only?
+        #     row.get = epcpm.c.format_nested_lists(getter)
+        #
+        # if not parameter.read_only:
+        #     row.set = epcpm.c.format_nested_lists(setter)
+        # else:
+        #     row.set = None
 
         return row, row.size
 
@@ -671,8 +661,7 @@ class TableRepeatingBlockReference:
 
                     setattr(row, name, getattr(point, field.name))
 
-                row.address_offset = self.address_offset  # not sure if this is needed?
-
+                row.address_offset = self.address_offset
                 row.name = table_element2.name
                 row.label = table_element2.abbreviation
                 row.type_uuid = row.type
@@ -707,18 +696,7 @@ class TableRepeatingBlockReference:
                 block_size += point.size
                 curve_points += 1
 
-        return rows, 0
-
-
-# # TODO: CAMPid 079549750417808543178043180
-# def get_curve_type(combination_string):
-#     # TODO: backmatching
-#     return {
-#         "LowRideThrough": "IEEE1547_CURVE_TYPE_LRT",
-#         "HighRideThrough": "IEEE1547_CURVE_TYPE_HRT",
-#         "LowTrip": "IEEE1547_CURVE_TYPE_LTRIP",
-#         "HighTrip": "IEEE1547_CURVE_TYPE_HTRIP",
-#     }.get(combination_string)
+        return rows, block_size
 
 
 @builders(epcpm.sunspecmodel.TableRepeatingBlock)
@@ -736,58 +714,6 @@ class TableRepeatingBlock:
     is_table = attr.ib(default=False)
 
     def gen(self):
-        # # both_lines = [[], []]
-        #
-        # curve_group_string = "".join(
-        #     self.parameter_uuid_finder(uuid).name for uuid in self.wrapped.path[:-1]
-        # )
-        # curve_type = get_curve_type(curve_group_string)
-        #
-        # print("\nTableRepeatingBlock")
-        # print(f"uuid: {self.wrapped.uuid}")  # This UUID (sunspec_table_repeating_block::original) references the table_model_reference in sunspec.json, strange that it isn't the UUID of the repeating block?
-        # print(f"model_id: {self.model_id}")  # SunSpec model #
-        # print(f"repeats: {self.wrapped.repeats}")  # always 4, unclear how it gets this number
-        # print(f"wrapped.path[:-1]: {self.wrapped.path[:-1]}")
-        # print(f"curve_group_str: {curve_group_string}")
-        # print(f"curve_type: {curve_type}")
-        # print(f"is_table: {self.is_table}")
-        # print("")
-        #
-        # block_size = 0
-        # for curve_index in range(self.wrapped.repeats):
-        #     curve_points = 0
-        #     for point in self.wrapped.children:
-        #         print(f"\n    Point: (curve_index: {curve_index})")
-        #         print(f"        parameter_uuid: {point.parameter_uuid}")  # This is always the first curve parameter UUID
-        #         print(f"        uuid: {point.uuid}")  # This UUID is for the first curve from sunspec.json
-        #         print(f"        curve_pts: {curve_points}  block_size: {block_size}")
-        #         print(f"        calculated_modbus_addr: {block_size + self.model_offset + self.address_offset}")
-        #
-        #         table_element1 = self.parameter_uuid_finder(point.parameter_uuid)
-        #         # print(f"table_element1: {table_element}")  # used to get more information?
-        #         curve_parent = table_element1.tree_parent.tree_parent.tree_parent
-        #         table_element2 = curve_parent.descendent(
-        #             str(curve_index + 1),
-        #             table_element1.tree_parent.name,
-        #             table_element1.name,
-        #         )
-        #         print(f"        table_element name: {table_element2.name}")
-        #         print(f"        table_element uuid: {table_element2.uuid}")  # This is the true parameter UUID dependent on curve number.
-        #
-        #         # Increase the address offset by the size of the data type.
-        #         block_size += point.size
-        #         curve_points += 1
-        #
-        # # for curve_index in range(self.wrapped.repeats):
-        # #     for point in self.wrapped.children:
-        # #         builder = builders.wrap(
-        # #             wrapped=point,
-        # #             model_id=self.model_id,
-        # #             curve_index=curve_index,
-        # #             curve_type=curve_type,
-        # #             parameter_uuid_finder=self.parameter_uuid_finder,
-        # #         )
-
         return [], 0
 
 
@@ -862,7 +788,7 @@ class Point:
             )
             row.label = parameter.name
             row.name = parameter.abbreviation
-            row.notes = "" if parameter.notes is None else parameter.notes
+            # row.notes = "" if parameter.notes is None else parameter.notes
             # to_tree = list(
             #     itertools.takewhile(
             #         lambda node: not isinstance(node, epyqlib.pm.parametermodel.Table),
