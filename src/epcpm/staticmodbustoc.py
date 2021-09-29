@@ -1,13 +1,32 @@
 import attr
-
+import pathlib
+import typing
 import epcpm.staticmodbusmodel
+import epyqlib.attrsmodel
 import epyqlib.utils.general
 
 
 builders = epyqlib.utils.general.TypeMap()
 
 
-def export(c_path, h_path, staticmodbus_model, skip_output):
+def export(
+    c_path: pathlib.Path,
+    h_path: pathlib.Path,
+    staticmodbus_model: epyqlib.attrsmodel.Model,
+    skip_output: bool,
+) -> None:
+    """
+    Generate the static modbus interface .c and .h files.
+
+    Args:
+        c_path: path and filename to generated .c file
+        h_path: path and filename to generated .h file
+        staticmodbus_model: static modbus model
+        skip_output: skip output of the generated files, previously used for skip_sunspec
+
+    Returns:
+
+    """
     builder = builders.wrap(
         wrapped=staticmodbus_model.root,
         parameter_uuid_finder=staticmodbus_model.node_from_uuid,
@@ -23,13 +42,21 @@ def export(c_path, h_path, staticmodbus_model, skip_output):
 @builders(epcpm.staticmodbusmodel.Root)
 @attr.s
 class Root:
-    wrapped = attr.ib()
-    parameter_uuid_finder = attr.ib()
-    c_path = attr.ib()
-    h_path = attr.ib()
-    skip_output = attr.ib(default=False)
+    wrapped = attr.ib(type=epcpm.staticmodbusmodel.Root)
+    parameter_uuid_finder = attr.ib(type=typing.Callable)
+    c_path = attr.ib(type=pathlib.Path)
+    h_path = attr.ib(type=pathlib.Path)
+    skip_output = attr.ib(default=False, type=bool)
 
-    def gen(self):
+    def gen(self) -> None:
+        """
+        Interface generator for the static modbus Root class.
+        Writes the .c and .h files.
+        Calls generators for Root children.
+
+        Returns:
+
+        """
         h_lines = [
             "#ifndef __STATICMODBUS_INTERFACE_GEN_H__",
             "#define __STATICMODBUS_INTERFACE_GEN_H__",
@@ -75,11 +102,18 @@ class Root:
 @builders(epcpm.staticmodbusmodel.FunctionData)
 @attr.s
 class FunctionData:
-    wrapped = attr.ib()
-    parameter_uuid_finder = attr.ib()
-    skip_output = attr.ib(default=False)
+    wrapped = attr.ib(type=epcpm.staticmodbusmodel.FunctionData)
+    parameter_uuid_finder = attr.ib(type=typing.Callable)
+    skip_output = attr.ib(default=False, type=bool)
 
-    def gen(self):
+    def gen(self) -> typing.List[str]:
+        """
+        Interface generator for the static modbus FunctionData class.
+        Generates the interface items for FunctionData, including tables.
+
+        Returns:
+            list: staticmodbusAddrRegMap rows for the generated .c file output
+        """
         uses_interface_item = False
         if self.wrapped.parameter_uuid is not None:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
@@ -138,11 +172,18 @@ class FunctionData:
 @builders(epcpm.staticmodbusmodel.FunctionDataBitfield)
 @attr.s
 class FunctionDataBitfield:
-    wrapped = attr.ib()
-    parameter_uuid_finder = attr.ib()
-    skip_output = attr.ib(default=False)
+    wrapped = attr.ib(type=epcpm.staticmodbusmodel.FunctionDataBitfield)
+    parameter_uuid_finder = attr.ib(type=typing.Callable)
+    skip_output = attr.ib(default=False, type=bool)
 
-    def gen(self):
+    def gen(self) -> typing.List[str]:
+        """
+        Interface generator for the static modbus FunctionDataBitfield class.
+        Generates the interface items for FunctionDataBitfield.
+
+        Returns:
+            list: staticmodbusAddrRegMap rows for the generated .c file output
+        """
         # TODO: to be implemented, for now NULL for all FunctionDataBitfield objects
         c_lines = []
         # Generate one or more ("size") lines with NULL interface.
