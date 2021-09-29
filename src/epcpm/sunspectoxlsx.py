@@ -333,6 +333,7 @@ class Enumerator:
 
 
 def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
+    # TODO: CAMPid 45002738594281495565841631423784
     scale_factor_from_uuid = {}
     for point in points:
         if point.type_uuid is None:

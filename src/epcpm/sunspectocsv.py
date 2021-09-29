@@ -1,9 +1,14 @@
+from __future__ import (
+    annotations,
+)  # See PEP 563, check to remove in future Python version higher than 3.7
 import attr
 import csv
-import itertools
 import math
-import openpyxl
+import pathlib
+import typing
+import uuid
 import epcpm.c
+import epyqlib.attrsmodel
 import epcpm.sunspecmodel
 import epyqlib.pm.parametermodel
 import epyqlib.utils.general
@@ -23,32 +28,43 @@ def attr_fill(cls, value):
 
 @attr.s
 class Fields:
-    field_type = attr.ib(default=None)
-    applicable_point = attr.ib(default=None)
-    address_offset = attr.ib(default=None)
-    block_offset = attr.ib(default=None)
-    size = attr.ib(default=None)
-    name = attr.ib(default=None)
-    label = attr.ib(default=None)
-    value = attr.ib(default=None)
-    type = attr.ib(default=None)
-    units = attr.ib(default=None)
-    scale_factor = attr.ib(default=None)
-    read_write = attr.ib(default=None)
-    mandatory = attr.ib(default=None)
-    description = attr.ib(default=None)
-    modbus_address = attr.ib(default=None)
-    item = attr.ib(default=None)
-    parameter_uuid = attr.ib(default=None)
-    parameter_uses_interface_item = attr.ib(default=None)
-    scale_factor_uuid = attr.ib(default=None)
-    enumeration_uuid = attr.ib(default=None)
-    type_uuid = attr.ib(default=None)
-    not_implemented = attr.ib(default=None)
-    uuid = attr.ib(default=None)
-    class_name = attr.ib(default=None)
+    """
+    The fields defined for a given row in the output CSV file.
+    """
 
-    def as_filtered_tuple(self, filter_):
+    field_type = attr.ib(default=None, type=str)
+    address_offset = attr.ib(default=None, type=str)
+    block_offset = attr.ib(default=None, type=str)
+    size = attr.ib(default=None, type=str)
+    name = attr.ib(default=None, type=str)
+    label = attr.ib(default=None, type=str)
+    value = attr.ib(default=None, type=str)
+    type = attr.ib(default=None, type=str)
+    units = attr.ib(default=None, type=str)
+    scale_factor = attr.ib(default=None, type=str)
+    read_write = attr.ib(default=None, type=str)
+    mandatory = attr.ib(default=None, type=str)
+    description = attr.ib(default=None, type=str)
+    modbus_address = attr.ib(default=None, type=str)
+    parameter_uuid = attr.ib(default=None, type=str)
+    parameter_uses_interface_item = attr.ib(default=None, type=str)
+    scale_factor_uuid = attr.ib(default=None, type=str)
+    enumeration_uuid = attr.ib(default=None, type=str)
+    type_uuid = attr.ib(default=None, type=str)
+    not_implemented = attr.ib(default=None, type=str)
+    uuid = attr.ib(default=None, type=str)
+    class_name = attr.ib(default=None, type=str)
+
+    def as_filtered_tuple(self, filter_: Fields) -> typing.Tuple:
+        """
+        Returns a tuple of field attribute values specified by the filter.
+
+        Args:
+            filter_: a subset of a Fields object to be used as a filter
+
+        Returns:
+            tuple: a tuple of values that have been filtered specified by field values in filter_
+        """
         return tuple(
             value for value, f in zip(attr.astuple(self), attr.astuple(filter_)) if f
         )
@@ -70,12 +86,25 @@ bitfield_fields = Fields(
 
 
 def export(
-    path,
-    sunspec_model,
-    parameters_model,
-    column_filter=None,
-    skip_output=False,
-):
+    path: pathlib.Path,
+    sunspec_model: epyqlib.attrsmodel.Model,
+    parameters_model: epyqlib.attrsmodel.Model,
+    column_filter: Fields = None,
+    skip_output: bool = False,
+) -> None:
+    """
+    Generate the SunSpec model data .csv file.
+
+    Args:
+        path: path and filename for .csv file
+        sunspec_model: SunSpec model
+        parameters_model: parameters model
+        column_filter: columns to be output to .csv file
+        skip_output: skip output of the generated files, previously used for skip_sunspec
+
+    Returns:
+
+    """
     if skip_output:
         return
 
@@ -100,13 +129,19 @@ def export(
 @builders(epcpm.sunspecmodel.Root)
 @attr.s
 class Root:
-    wrapped = attr.ib()
-    column_filter = attr.ib()
-    parameter_uuid_finder = attr.ib(default=None)
-    parameter_model = attr.ib(default=None)
-    sort_models = attr.ib(default=False)
+    wrapped = attr.ib(type=epcpm.sunspecmodel.Root)
+    column_filter = attr.ib(type=Fields)
+    parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
+    parameter_model = attr.ib(default=None, type=epyqlib.attrsmodel.Model)
+    sort_models = attr.ib(default=False, type=bool)
 
-    def gen(self):
+    def gen(self) -> typing.List[str]:
+        """
+        CSV generator for the SunSpec Root class.
+
+        Returns:
+            list: the rows of CSV data to be output
+        """
         csv_data = []
 
         if self.sort_models:
@@ -143,23 +178,30 @@ class Root:
 @builders(epcpm.sunspecmodel.Model)
 @attr.s
 class Model:
-    wrapped = attr.ib()
-    csv_data = attr.ib()
-    column_filter = attr.ib()
-    padding_type = attr.ib()
-    model_offset = attr.ib()  # starting Modbus address for the model
-    parameter_uuid_finder = attr.ib(default=None)
+    wrapped = attr.ib(type=epcpm.sunspecmodel.Model)
+    csv_data = attr.ib(type=typing.List[str])
+    column_filter = attr.ib(type=Fields)
+    padding_type = attr.ib(type=epyqlib.pm.parametermodel.Enumerator)
+    model_offset = attr.ib(type=int)  # starting Modbus address for the model
+    parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
 
-    def gen(self):
+    def gen(self) -> int:
+        """
+        CSV generator for the SunSpec Model class.
+
+        Returns:
+            int: total register length of SunSpec model, including header, fixed, padding, repeating
+        """
         self.wrapped.children[0].check_offsets_and_length()
 
-        overall_length = sum(
+        non_header_block_length = sum(
             child.check_offsets_and_length() for child in self.wrapped.children[1:]
         )
 
-        add_padding = (overall_length % 2) == 1
+        # Per SunSpec model specification, pad with a 16-bit pad to force even alignment to 32-bit boundaries.
+        add_padding = (non_header_block_length % 2) == 1
         if add_padding:
-            overall_length += 1
+            non_header_block_length += 1
 
         accumulated_length = 0
 
@@ -187,27 +229,51 @@ class Model:
 
         for i, row in enumerate(rows):
             if i == 0:
+                # Set ID value with model ID.
                 row.value = self.wrapped.id
             elif i == 1:
-                row.value = overall_length
+                # Set L value with length of fixed block plus repeating block.
+                row.value = non_header_block_length
 
             self.csv_data.append(row.as_filtered_tuple(self.column_filter))
 
-        return overall_length + 2  # add header length
+        return accumulated_length
 
 
 @builders(epcpm.sunspecmodel.Table)
 @attr.s
 class Table:
-    wrapped = attr.ib()
-    padding_type = attr.ib()
-    parameter_uuid_finder = attr.ib(default=None)
+    wrapped = attr.ib(type=epcpm.sunspecmodel.Model)
+    padding_type = attr.ib(type=epyqlib.pm.parametermodel.Enumerator)
+    parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
 
-    def gen(self):
+    def gen(self) -> typing.List:
+        """
+        CSV generator for the SunSpec Table class.
+
+        Returns:
+            list: empty list
+        """
         return []
 
 
-def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
+def build_uuid_scale_factor_dict(
+    points: typing.List[
+        typing.Union[epcpm.sunspecmodel.DataPoint, epcpm.sunspecmodel.DataPointBitfield]
+    ],
+    parameter_uuid_finder: typing.Callable,
+) -> typing.Dict[uuid.UUID, epcpm.sunspecmodel.DataPoint]:
+    """
+    Generates a dictionary of scale factor data.
+
+    Args:
+        points: list of DataPoint / DataPointBitfield objects from which to generate scale factor data
+        parameter_uuid_finder: parameter UUID finder method
+
+    Returns:
+        dict: dictionary of scale factor data (UUID -> DataPoint)
+    """
+    # TODO: CAMPid 45002738594281495565841631423784
     scale_factor_from_uuid = {}
     for point in points:
         if point.type_uuid is None:
@@ -228,18 +294,28 @@ def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
 @builders(epcpm.sunspecmodel.FixedBlock)
 @attr.s
 class Block:
-    wrapped = attr.ib()
-    add_padding = attr.ib()
-    padding_type = attr.ib()
-    model_type = attr.ib()
-    model_id = attr.ib()
-    model_offset = attr.ib()
-    address_offset = attr.ib()
-    repeating_block_reference = attr.ib(default=None)
-    parameter_uuid_finder = attr.ib(default=None)
-    is_table = attr.ib(default=False)
+    wrapped = attr.ib(
+        type=typing.Union[epcpm.sunspecmodel.HeaderBlock, epcpm.sunspecmodel.FixedBlock]
+    )
+    add_padding = attr.ib(type=bool)
+    padding_type = attr.ib(type=epyqlib.pm.parametermodel.Enumerator)
+    model_type = attr.ib(type=str)
+    model_id = attr.ib(type=int)
+    model_offset = attr.ib(type=int)
+    address_offset = attr.ib(type=int)
+    repeating_block_reference = attr.ib(
+        default=None, type=epcpm.sunspecmodel.TableRepeatingBlockReference
+    )
+    parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
+    is_table = attr.ib(default=False, type=bool)
 
-    def gen(self):
+    def gen(self) -> typing.List[typing.List[str], int]:
+        """
+        CSV generator for the SunSpec HeaderBlock and FixedBlock classes.
+
+        Returns:
+            list, int: list of point data, total register size of block
+        """
         # TODO: CAMPid 07548795421667967542697543743987
 
         scale_factor_from_uuid = build_uuid_scale_factor_dict(
@@ -290,17 +366,27 @@ class Block:
 @builders(epcpm.sunspecmodel.DataPointBitfield)
 @attr.s
 class DataPointBitfield:
-    wrapped = attr.ib()
-    model_type = attr.ib()
-    scale_factor_from_uuid = attr.ib()
-    parameter_uuid_finder = attr.ib()
-    model_id = attr.ib()
-    model_offset = attr.ib()
-    is_table = attr.ib()
-    repeating_block_reference = attr.ib()
-    address_offset = attr.ib()
+    wrapped = attr.ib(type=epcpm.sunspecmodel.DataPointBitfield)
+    model_type = attr.ib(type=str)
+    scale_factor_from_uuid = attr.ib(
+        type=typing.Dict[uuid.UUID, epcpm.sunspecmodel.DataPoint]
+    )
+    parameter_uuid_finder = attr.ib(type=typing.Callable)
+    model_id = attr.ib(type=int)
+    model_offset = attr.ib(type=int)
+    is_table = attr.ib(type=bool)
+    repeating_block_reference = attr.ib(
+        type=epcpm.sunspecmodel.TableRepeatingBlockReference
+    )
+    address_offset = attr.ib(type=int)
 
-    def gen(self):
+    def gen(self) -> typing.List[typing.List[str], int]:
+        """
+        CSV generator for the SunSpec DataPointBitfield class.
+
+        Returns:
+            list, int: row data for bitfield, bitfield size
+        """
         row = Fields()
         row.address_offset = self.address_offset
         row.modbus_address = self.model_offset + self.address_offset
@@ -342,20 +428,27 @@ class DataPointBitfield:
 @builders(epcpm.sunspecmodel.TableRepeatingBlockReference)
 @attr.s
 class TableRepeatingBlockReference:
-    wrapped = attr.ib()
-    add_padding = attr.ib()
-    padding_type = attr.ib()
-    model_type = attr.ib()
-    model_id = attr.ib()
-    model_offset = attr.ib()
-    address_offset = attr.ib()
-    parameter_uuid_finder = attr.ib(default=None)
+    wrapped = attr.ib(type=epcpm.sunspecmodel.TableRepeatingBlockReference)
+    add_padding = attr.ib(type=bool)
+    padding_type = attr.ib(type=epyqlib.pm.parametermodel.Enumerator)
+    model_type = attr.ib(type=str)
+    model_id = attr.ib(type=int)
+    model_offset = attr.ib(type=int)
+    address_offset = attr.ib(type=int)
+    parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
 
-    def gen(self):
+    def gen(self) -> typing.List[typing.List[str], int]:
+        """
+        CSV generator for the SunSpec TableRepeatingBlockReference class.
+
+        Returns:
+            list, int: list of point data, total register size of block
+        """
         table_repeating_block = self.wrapped.original
 
         rows = []
         block_size = 0
+        # For each curve (# curves = repeats) in the table, add the table's tree children.
         for curve_index in range(table_repeating_block.repeats):
             curve_points = 0
             for point in table_repeating_block.children:
@@ -416,36 +509,54 @@ class TableRepeatingBlockReference:
 @builders(epcpm.sunspecmodel.TableRepeatingBlock)
 @attr.s
 class TableRepeatingBlock:
-    wrapped = attr.ib()
-    add_padding = attr.ib()
-    padding_type = attr.ib()
-    model_type = attr.ib()
-    model_id = attr.ib()
-    model_offset = attr.ib()
-    address_offset = attr.ib()
-    repeating_block_reference = attr.ib(default=None)
-    parameter_uuid_finder = attr.ib(default=None)
-    is_table = attr.ib(default=False)
+    wrapped = attr.ib(type=epcpm.sunspecmodel.TableRepeatingBlock)
+    add_padding = attr.ib(type=bool)
+    padding_type = attr.ib(type=epyqlib.pm.parametermodel.Enumerator)
+    model_type = attr.ib(type=str)
+    model_id = attr.ib(type=int)
+    model_offset = attr.ib(type=int)
+    address_offset = attr.ib(type=int)
+    repeating_block_reference = attr.ib(
+        default=None, type=epcpm.sunspecmodel.TableRepeatingBlockReference
+    )
+    parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
+    is_table = attr.ib(default=False, type=bool)
 
-    def gen(self):
+    def gen(self) -> typing.List[typing.List[str], int]:
+        """
+        CSV generator for the SunSpec TableRepeatingBlock class.
+
+        Returns:
+            list, int: empty list, zero size
+        """
         return [], 0
 
 
 @builders(epcpm.sunspecmodel.DataPoint)
 @attr.s
 class Point:
-    wrapped = attr.ib()
-    scale_factor_from_uuid = attr.ib()
-    model_type = attr.ib()
-    model_id = attr.ib()
-    model_offset = attr.ib()
-    is_table = attr.ib()
-    address_offset = attr.ib()
-    repeating_block_reference = attr.ib()
-    parameter_uuid_finder = attr.ib(default=None)
+    wrapped = attr.ib(type=epcpm.sunspecmodel.DataPoint)
+    scale_factor_from_uuid = attr.ib(
+        type=typing.Dict[uuid.UUID, epcpm.sunspecmodel.DataPoint]
+    )
+    model_type = attr.ib(type=str)
+    model_id = attr.ib(type=int)
+    model_offset = attr.ib(type=int)
+    is_table = attr.ib(type=bool)
+    address_offset = attr.ib(type=int)
+    repeating_block_reference = attr.ib(
+        type=epcpm.sunspecmodel.TableRepeatingBlockReference
+    )
+    parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
 
     # TODO: CAMPid 07397546759269756456100183066795496952476951653
-    def gen(self):
+    def gen(self) -> typing.List[typing.List[str], int]:
+        """
+        CSV generator for the SunSpec DataPoint class.
+
+        Returns:
+            list, int: row data for data point, data point size
+        """
         row = Fields()
         row.address_offset = self.address_offset
         row.modbus_address = self.model_offset + self.address_offset
