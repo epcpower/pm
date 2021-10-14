@@ -43,6 +43,13 @@ def create_data_object(
         return create_function_data_bitfield(
             input_sunspec_data, sunspec_types, staticmodbus_types
         )
+    elif (
+        input_sunspec_data["class_name"]
+        == epcpm.sunspecmodel.TableRepeatingBlockReferenceDataPointReference.__name__
+    ):
+        return create_function_data(
+            input_sunspec_data, scale_factor_uuid_map, sunspec_types, staticmodbus_types
+        )
     else:
         raise ValueError(
             f"Unsupported class_name '{input_sunspec_data['class_name']}' in create_data"

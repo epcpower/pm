@@ -16,6 +16,7 @@ import epcpm.smdxtosunspec
 import epcpm.staticmodbustoc
 import epcpm.sunspecmodel
 import epcpm.sunspectobitfieldsc
+import epcpm.sunspectocsv
 import epcpm.sunspectotablesc
 import epcpm.sunspectomanualc
 import epcpm.sunspectomanualh
@@ -137,25 +138,13 @@ def full_export(
         include_uuid_in_item=include_uuid_in_item,
     )
 
-    epcpm.sunspectoxlsx.export(
+    epcpm.sunspectocsv.export(
         path=paths.spreadsheet,
         sunspec_model=project.models.sunspec,
         parameters_model=project.models.parameters,
         skip_output=skip_output,
         column_filter=attr.evolve(
-            epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True),
-            parameter_uuid=False,
-            parameter_uses_interface_item=False,
-            scale_factor_uuid=False,
-            enumeration_uuid=False,
-            type_uuid=False,
-            not_implemented=False,
-            uuid=False,
-            class_name=False,
-        ),
-        output_csv=True,
-        csv_column_filter=attr.evolve(
-            epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, False),
+            epcpm.sunspectocsv.attr_fill(epcpm.sunspectocsv.Fields, False),
             size=True,
             name=True,
             label=True,
@@ -174,23 +163,22 @@ def full_export(
     )
 
     epcpm.sunspectoxlsx.export(
+        path=paths.spreadsheet,
+        sunspec_model=project.models.sunspec,
+        parameters_model=project.models.parameters,
+        skip_sunspec=skip_output,
+    )
+
+    epcpm.sunspectoxlsx.export(
         path=paths.spreadsheet_user,
         sunspec_model=project.models.sunspec,
         parameters_model=project.models.parameters,
-        skip_output=skip_output,
+        skip_sunspec=skip_output,
         column_filter=attr.evolve(
             epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True),
             get=False,
             set=False,
             item=False,
-            parameter_uuid=False,
-            parameter_uses_interface_item=False,
-            scale_factor_uuid=False,
-            enumeration_uuid=False,
-            type_uuid=False,
-            not_implemented=False,
-            uuid=False,
-            class_name=False,
         ),
     )
 

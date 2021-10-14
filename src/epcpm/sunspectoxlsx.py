@@ -3,7 +3,6 @@ import math
 
 import attr
 import openpyxl
-import csv
 
 import epyqlib.pm.parametermodel
 import epyqlib.utils.general
@@ -22,8 +21,6 @@ epc_enumerator_fields = attr.fields(
     epyqlib.pm.parametermodel.SunSpecEnumerator,
 )
 bitfield_fields = attr.fields(epcpm.sunspecmodel.DataPointBitfield)
-
-sunspec_types = epcpm.sunspecmodel.build_sunspec_types_enumeration()
 
 
 def attr_fill(cls, value):
@@ -51,14 +48,6 @@ class Fields:
     get = attr.ib(default=None)
     set = attr.ib(default=None)
     item = attr.ib(default=None)
-    parameter_uuid = attr.ib(default=None)
-    parameter_uses_interface_item = attr.ib(default=None)
-    scale_factor_uuid = attr.ib(default=None)
-    enumeration_uuid = attr.ib(default=None)
-    type_uuid = attr.ib(default=None)
-    not_implemented = attr.ib(default=None)
-    uuid = attr.ib(default=None)
-    class_name = attr.ib(default=None)
 
     def as_filtered_tuple(self, filter_):
         return tuple(
@@ -114,39 +103,23 @@ enumerator_fields = Fields(
 
 
 def export(
-    path,
-    sunspec_model,
-    parameters_model,
-    column_filter=None,
-    skip_output=False,
-    output_csv=False,
-    csv_column_filter=None,
+    path, sunspec_model, parameters_model, column_filter=None, skip_sunspec=False
 ):
     if column_filter is None:
         column_filter = attr_fill(Fields, True)
-
-    if csv_column_filter is None:
-        csv_column_filter = attr_fill(Fields, True)
 
     builder = epcpm.sunspectoxlsx.builders.wrap(
         wrapped=sunspec_model.root,
         parameter_uuid_finder=sunspec_model.node_from_uuid,
         parameter_model=parameters_model,
-        skip_output=skip_output,
+        skip_sunspec=skip_sunspec,
         column_filter=column_filter,
-        csv_column_filter=csv_column_filter,
     )
 
-    workbook, csv_data = builder.gen()
+    workbook = builder.gen()
 
     path.parent.mkdir(parents=True, exist_ok=True)
     workbook.save(path)
-
-    if output_csv:
-        with open(path.with_suffix(".csv"), "w", newline="") as csv_file:
-            csv_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
-            for data_row in csv_data:
-                csv_writer.writerow(data_row)
 
 
 @builders(epcpm.sunspecmodel.Root)
@@ -154,8 +127,7 @@ def export(
 class Root:
     wrapped = attr.ib()
     column_filter = attr.ib()
-    csv_column_filter = attr.ib()
-    skip_output = attr.ib(default=False)
+    skip_sunspec = attr.ib(default=False)
     parameter_uuid_finder = attr.ib(default=None)
     parameter_model = attr.ib(default=None)
     sort_models = attr.ib(default=False)
@@ -168,9 +140,7 @@ class Root:
         workbook.create_sheet("Summary")
         workbook.create_sheet("Index")
 
-        csv_data = []
-
-        if not self.skip_output:
+        if not self.skip_sunspec:
             if self.sort_models:
                 children = sorted(
                     self.wrapped.children,
@@ -193,8 +163,6 @@ class Root:
                 model_offset += builders.wrap(
                     wrapped=model,
                     worksheet=worksheet,
-                    csv_data=csv_data,
-                    csv_column_filter=self.csv_column_filter,
                     padding_type=self.parameter_model.list_selection_roots[
                         "sunspec types"
                     ].child_by_name("pad"),
@@ -203,7 +171,7 @@ class Root:
                     model_offset=model_offset,
                 ).gen()
 
-        return workbook, csv_data
+        return workbook
 
 
 @builders(epcpm.sunspecmodel.Model)
@@ -211,8 +179,6 @@ class Root:
 class Model:
     wrapped = attr.ib()
     worksheet = attr.ib()
-    csv_data = attr.ib()
-    csv_column_filter = attr.ib()
     padding_type = attr.ib()
     column_filter = attr.ib()
     model_offset = attr.ib()  # starting Modbus address for the model
@@ -264,10 +230,6 @@ class Model:
                 row.value = overall_length
 
             self.worksheet.append(row.as_filtered_tuple(self.column_filter))
-
-            if row.modbus_address is not None:
-                # Skip blank rows.
-                self.csv_data.append(row.as_filtered_tuple(self.csv_column_filter))
 
         for block in self.wrapped.children:
             builder = enumeration_builders.wrap(
@@ -371,6 +333,7 @@ class Enumerator:
 
 
 def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
+    # TODO: CAMPid 45002738594281495565841631423784
     scale_factor_from_uuid = {}
     for point in points:
         if point.type_uuid is None:
@@ -491,12 +454,6 @@ class DataPointBitfield:
                 row.units = parameter.units
             row.description = parameter.comment
             row.read_write = "R" if parameter.read_only else "RW"
-            row.parameter_uuid = parameter.uuid
-            row.parameter_uses_interface_item = False
-            row.type_uuid = self.wrapped.type_uuid
-            row.not_implemented = False
-            row.uuid = self.wrapped.uuid
-            row.class_name = "DataPointBitfield"
 
         uses_interface_item = (
             isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
@@ -733,7 +690,6 @@ class Point:
 
             setattr(row, name, getattr(self.wrapped, field.name))
 
-        row_scale_factor_uuid = ""
         if self.repeating_block_reference is not None:
             target = self.parameter_uuid_finder(self.wrapped.parameter_uuid).original
             is_array_element = isinstance(
@@ -757,7 +713,6 @@ class Point:
                     ).abbreviation
         else:
             if row.scale_factor is not None:
-                row_scale_factor_uuid = row.scale_factor
                 row.scale_factor = self.parameter_uuid_finder(
                     self.scale_factor_from_uuid[row.scale_factor].parameter_uuid
                 ).abbreviation
@@ -770,10 +725,6 @@ class Point:
         if self.wrapped.parameter_uuid is not None:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
-            uses_interface_item = (
-                isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
-                and parameter.uses_interface_item()
-            )
             row.label = parameter.name
             row.name = parameter.abbreviation
             row.notes = "" if parameter.notes is None else parameter.notes
@@ -801,14 +752,6 @@ class Point:
                 row.units = parameter.units
             row.description = parameter.comment
             row.read_write = "R" if parameter.read_only else "RW"
-            row.parameter_uuid = parameter.uuid
-            row.parameter_uses_interface_item = uses_interface_item
-            row.scale_factor_uuid = row_scale_factor_uuid
-            row.enumeration_uuid = parameter.enumeration_uuid
-            row.type_uuid = self.wrapped.type_uuid
-            row.not_implemented = self.wrapped.not_implemented
-            row.uuid = self.wrapped.uuid
-            row.class_name = "DataPoint"
 
             meta = "[Meta_Value]"
 
@@ -1033,16 +976,6 @@ class Point:
             row.description = "Force even alignment"
             row.read_write = "R"
             row.mandatory = "O"
-            row.parameter_uses_interface_item = False
-            pad_uuid = ""
-            # Discover the pad UUID.
-            for sunspec_type in sunspec_types.children:
-                if sunspec_type.name == "pad":
-                    pad_uuid = sunspec_type.uuid
-                    break
-            row.type_uuid = pad_uuid
-            row.not_implemented = False
-            row.class_name = "DataPoint"
 
         return row, row.size
 
