@@ -203,6 +203,7 @@ class Model:
         if add_padding:
             non_header_block_length += 1
 
+        # Track the total accumulated length of the model's registers.
         accumulated_length = 0
 
         rows = []
@@ -210,10 +211,11 @@ class Model:
         model_types = ["Header", "Fixed Block", "Repeating Block"]
 
         zipped = zip(enumerate(self.wrapped.children), model_types)
-        for (i, child), model_type in zipped:
+        for (model_type_index, child), model_type in zipped:
+            # TODO: Check if this is one of the spots where "add_padding" is incorrect for tables.
             builder = builders.wrap(
                 wrapped=child,
-                add_padding=add_padding and i == 1,
+                add_padding=add_padding and model_type_index == 1,
                 padding_type=self.padding_type,
                 model_type=model_type,
                 model_id=self.wrapped.id,
