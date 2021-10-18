@@ -76,7 +76,7 @@ class Root:
             "",
             "",
             "// TODO: Create a StaticModbusInterfaceData data section",
-            "#pragma DATA_SECTION(staticmodbusAddrRegMap, \"SunSpecInterfaceData\")",
+            '#pragma DATA_SECTION(staticmodbusAddrRegMap, "SunSpecInterfaceData")',
             f"StaticModbusReg staticmodbusAddrRegMap[{total_registers}] =",
             "{",
             c_lines_interface,
