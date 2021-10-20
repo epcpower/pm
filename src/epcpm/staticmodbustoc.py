@@ -4,6 +4,7 @@ import typing
 import epcpm.staticmodbusmodel
 import epyqlib.attrsmodel
 import epyqlib.utils.general
+import sunspec.core.suns
 
 
 builders = epyqlib.utils.general.TypeMap()
@@ -68,8 +69,9 @@ class Root:
             more_c_lines = builder.gen()
             c_lines_interface.extend(more_c_lines)
 
-        # Add the +2 for the 'SunS' values.
-        total_registers = len(c_lines_interface) + 2
+        # Add the +2 registers for the 'SunS' values, which form two 16-bit words.
+        # These are ignored by static modbus, but the registers are still reserved.
+        total_registers = len(c_lines_interface) + sunspec.core.suns.SUNS_SUNS_LEN
         c_lines = [
             '#include "staticmodbusInterfaceGen.h"',
             '#include "interfaceGen.h"',
@@ -100,12 +102,11 @@ class Root:
             "    INTERFACE_TYPE_TABLE = 2,",
             "} InterfaceType;",
             "",
-            "typedef struct StaticModbusReg StaticModbusReg;",
-            "struct StaticModbusReg",
+            "typedef struct StaticModbusReg",
             "{",
             "    InterfaceType interfaceType;",
             "    InterfaceItem_void * interface;",
-            "};",
+            "} StaticModbusReg;",
             "",
             "#define STATIC_MODBUS_REGISTER_DEFAULTS(...) \\",
             "{ \\",
