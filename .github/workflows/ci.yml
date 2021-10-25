@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**" #double star includes a '/'.  single star doesnt match a '/'
+    tags:
+      - "**" #double star includes a '/'.  single star doesnt match a '/'
+  schedule:
+    # Daily at 05:44
+    - cron: '44 5 * * *'
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PYTHON_VERSION: 3.7
+
+jobs:
+  build:
+    name: CI
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: recursive
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: python commands
+        run: |
+          set -vx
+          which pip
+          pip --version
+          python boots.py create --group test
+          venv/Scripts/black --check --diff .
+          venv/Scripts/python -c "import sys; print(sys.version)"
+
+          venv/Scripts/pip freeze --all
+          venv/Scripts/genbuildinfo "src/epcpm/__build.py"
+          venv/Scripts/generateversion --distribution epcpm --out "src/epcpm/__version.py"
+
+          venv/Scripts/pyinstaller pyinstaller.spec
+          mv "dist/epcpm" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
+          7z a "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}.zip" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
+
+
+          mkdir artifacts
+          mv *.zip artifacts/
+
+          rm -rf dist
+          python boots.py build
+          mv dist/* artifacts/
+
+          venv/Scripts/pytest epcpm.tests --pyargs
+
+          python boots.py publish
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: pm
+          path: |
+            artifacts/*

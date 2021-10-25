@@ -186,8 +186,8 @@ class DataPointBitfield:
                     [  # TODO: generate a real complete common initializer
                         f".sunspec = {{",
                         [
-                            f".getter = InterfaceItem_bitfield_{bit_length}_getter,",
-                            f".setter = InterfaceItem_bitfield_{bit_length}_setter,",
+                            f".getter = InterfaceItem_bitfield_{bit_length}_sunspec_getter,",
+                            f".setter = InterfaceItem_bitfield_{bit_length}_sunspec_setter,",
                             f".variable = &sunspecInterface.model{model:05}.{parameter.abbreviation},",
                         ],
                         f"}},",
