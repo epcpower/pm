@@ -4,6 +4,7 @@ import typing
 import epcpm.staticmodbusmodel
 import epyqlib.attrsmodel
 import epyqlib.utils.general
+import sunspec.core.suns
 
 
 builders = epyqlib.utils.general.TypeMap()
@@ -57,33 +58,7 @@ class Root:
         Returns:
 
         """
-        h_lines = [
-            "#ifndef __STATICMODBUS_INTERFACE_GEN_H__",
-            "#define __STATICMODBUS_INTERFACE_GEN_H__",
-            "",
-            '#include "interface.h"',
-            "",
-            "",
-            "extern InterfaceItem_void * const staticmodbusAddrRegMap[];",
-            "",
-            "#endif //__STATICMODBUS_INTERFACE_GEN_H__",
-        ]
-
-        with self.h_path.open("w", newline="\n") as h_file:
-            h_file.write(epcpm.c.format_nested_lists(h_lines).strip())
-            h_file.write("\n")
-
         c_lines_interface = []
-        c_lines = [
-            '#include "staticmodbusInterfaceGen.h"',
-            '#include "interfaceGen.h"',
-            "",
-            "",
-            "InterfaceItem_void * const staticmodbusAddrRegMap[] =",
-            "{",
-            c_lines_interface,
-            "};",
-        ]
 
         for member in self.wrapped.children:
             builder = builders.wrap(
@@ -94,9 +69,60 @@ class Root:
             more_c_lines = builder.gen()
             c_lines_interface.extend(more_c_lines)
 
+        # Add the +2 registers for the 'SunS' values, which form two 16-bit words.
+        # These are ignored by static modbus, but the registers are still reserved.
+        total_registers = len(c_lines_interface) + sunspec.core.suns.SUNS_SUNS_LEN
+        c_lines = [
+            '#include "staticmodbusInterfaceGen.h"',
+            '#include "interfaceGen.h"',
+            "",
+            "",
+            "// TODO: Create a StaticModbusInterfaceData data section",
+            '#pragma DATA_SECTION(staticmodbusAddrRegMap, "SunSpecInterfaceData")',
+            f"StaticModbusReg staticmodbusAddrRegMap[{total_registers}] =",
+            "{",
+            c_lines_interface,
+            "};",
+        ]
+
         with self.c_path.open("w", newline="\n") as c_file:
             c_file.write(epcpm.c.format_nested_lists(c_lines).strip())
             c_file.write("\n")
+
+        h_lines = [
+            "#ifndef __STATICMODBUS_INTERFACE_GEN_H__",
+            "#define __STATICMODBUS_INTERFACE_GEN_H__",
+            "",
+            '#include "interface.h"',
+            "",
+            "",
+            "typedef enum InterfaceType {",
+            "    INTERFACE_TYPE_UNASSIGNED = 0,",
+            "    INTERFACE_TYPE_NORMAL = 1,",
+            "    INTERFACE_TYPE_TABLE = 2,",
+            "} InterfaceType;",
+            "",
+            "typedef struct StaticModbusReg",
+            "{",
+            "    InterfaceType interfaceType;",
+            "    InterfaceItem_void * interface;",
+            "} StaticModbusReg;",
+            "",
+            "#define STATIC_MODBUS_REGISTER_DEFAULTS(...) \\",
+            "{ \\",
+            "    .interfaceType = INTERFACE_TYPE_UNASSIGNED, \\",
+            "    .interface = NULL, \\",
+            "    __VA_ARGS__ \\",
+            "}",
+            "",
+            f"extern StaticModbusReg staticmodbusAddrRegMap[{total_registers}];",
+            "",
+            "#endif //__STATICMODBUS_INTERFACE_GEN_H__",
+        ]
+
+        with self.h_path.open("w", newline="\n") as h_file:
+            h_file.write(epcpm.c.format_nested_lists(h_lines).strip())
+            h_file.write("\n")
 
 
 @builders(epcpm.staticmodbusmodel.FunctionData)
@@ -115,6 +141,7 @@ class FunctionData:
             list: staticmodbusAddrRegMap rows for the generated .c file output
         """
         uses_interface_item = False
+        is_table_item = False
         if self.wrapped.parameter_uuid is not None:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
             uses_interface_item = (
@@ -124,6 +151,8 @@ class FunctionData:
 
             # Special handling for TableArrayElement, which ultimately generates a FunctionData object.
             if isinstance(parameter, epyqlib.pm.parametermodel.TableArrayElement):
+                is_table_item = True
+
                 # TODO: CAMPid 9655426754319431461354643167
                 array_element = parameter.original
 
@@ -156,14 +185,17 @@ class FunctionData:
             for addr_val in range(
                 self.wrapped.address, self.wrapped.address + self.wrapped.size
             ):
-                c_line = f"[{addr_val}] = {uuid_interface_val},"
+                if is_table_item:
+                    c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_TABLE, .interface = {uuid_interface_val}),"
+                else:
+                    c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_NORMAL, .interface = {uuid_interface_val}),"
                 c_lines.append(c_line)
         else:
-            # Generate one or more ("size") lines with NULL interface.
+            # Generate one or more ("size") lines with default NULL interface.
             for addr_val in range(
                 self.wrapped.address, self.wrapped.address + self.wrapped.size
             ):
-                c_line = f"[{addr_val}] = NULL,"
+                c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(),"
                 c_lines.append(c_line)
 
         return c_lines
@@ -190,7 +222,7 @@ class FunctionDataBitfield:
         for addr_val in range(
             self.wrapped.address, self.wrapped.address + self.wrapped.size
         ):
-            c_line = f"[{addr_val}] = NULL,"
+            c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(),"
             c_lines.append(c_line)
 
         return c_lines
