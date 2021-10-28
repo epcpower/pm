@@ -74,6 +74,7 @@ class Root:
         total_registers = len(c_lines_interface) + sunspec.core.suns.SUNS_SUNS_LEN
         c_lines = [
             '#include "staticmodbusInterfaceGen.h"',
+            '#include "staticmodbusInterfaceBitfieldsGen.h"',
             '#include "interfaceGen.h"',
             "",
             "",
@@ -100,6 +101,7 @@ class Root:
             "    INTERFACE_TYPE_UNASSIGNED = 0,",
             "    INTERFACE_TYPE_NORMAL = 1,",
             "    INTERFACE_TYPE_TABLE = 2,",
+            "    INTERFACE_TYPE_BITFIELD = 3,",
             "} InterfaceType;",
             "",
             "typedef struct StaticModbusReg",
@@ -216,13 +218,15 @@ class FunctionDataBitfield:
         Returns:
             list: staticmodbusAddrRegMap rows for the generated .c file output
         """
-        # TODO: to be implemented, for now NULL for all FunctionDataBitfield objects
+        # TODO: CAMPid 9685439641536675431653179671436
+        parameter_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
+        uuid_interface_val = f"&interfaceItem_staticmodbus_{parameter_uuid}"
         c_lines = []
         # Generate one or more ("size") lines with NULL interface.
         for addr_val in range(
             self.wrapped.address, self.wrapped.address + self.wrapped.size
         ):
-            c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(),"
+            c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_BITFIELD, .interface = {uuid_interface_val}),"
             c_lines.append(c_line)
 
         return c_lines

@@ -73,6 +73,7 @@ class ImportPaths:
     hierarchy = attr.ib(converter=path_or_none)
     tables_c = attr.ib(converter=path_or_none)
     staticmodbus_c = attr.ib(converter=path_or_none)
+    staticmodbus_bitfields_c = attr.ib(converter=path_or_none)
     sunspec_tables_c = attr.ib(converter=path_or_none)
     sunspec_bitfields_c = attr.ib(converter=path_or_none)
     spreadsheet = attr.ib(converter=path_or_none)
@@ -94,6 +95,7 @@ def paths_from_directory(directory):
         hierarchy=interface / "EPC_DG_ID247_FACTORY.parameters.json",
         tables_c=interface / "canInterfaceGenTables.c",
         staticmodbus_c=interface / "staticmodbusInterfaceGen.c",
+        staticmodbus_bitfields_c=interface / "staticmodbusInterfaceBitfieldsGen.c",
         sunspec_tables_c=sunspec / "sunspecInterfaceGenTables.c",
         sunspec_bitfields_c=sunspec / "sunspecInterfaceBitfieldsGen.c",
         spreadsheet=embedded / "MODBUS_SunSpec-EPC.xlsx",

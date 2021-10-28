@@ -13,6 +13,7 @@ import epcpm.parameterstointerface
 import epcpm.parameterstosil
 import epcpm.project
 import epcpm.smdxtosunspec
+import epcpm.staticmodbustobitfieldsc
 import epcpm.staticmodbustoc
 import epcpm.sunspecmodel
 import epcpm.sunspectobitfieldsc
@@ -151,6 +152,8 @@ def full_export(
             type=True,
             units=True,
             modbus_address=True,
+            bit_offset=True,
+            bit_length=True,
             parameter_uuid=True,
             parameter_uses_interface_item=True,
             scale_factor_uuid=True,
@@ -207,6 +210,13 @@ def full_export(
         h_path=paths.staticmodbus_c.with_suffix(".h"),
         staticmodbus_model=project.models.staticmodbus,
         skip_output=skip_output,
+    )
+
+    epcpm.staticmodbustobitfieldsc.export(
+        c_path=paths.staticmodbus_bitfields_c,
+        h_path=paths.staticmodbus_bitfields_c.with_suffix(".h"),
+        staticmodbus_model=project.models.staticmodbus,
+        include_uuid_in_item=include_uuid_in_item,
     )
 
     if first_time and not skip_output:
