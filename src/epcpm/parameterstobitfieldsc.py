@@ -1,9 +1,11 @@
 import attr
+import pathlib
 
 import epcpm.c
 import epcpm.parameterstointerface
 import epcpm.staticmodbusmodel
 import epcpm.sunspecmodel
+import epyqlib.attrsmodel
 import epyqlib.utils.general
 
 
@@ -11,12 +13,12 @@ builders = epyqlib.utils.general.TypeMap()
 
 
 def export(
-    c_path,
-    h_path,
-    parameters_model,
-    sunspec_model,
-    staticmodbus_model,
-    include_uuid_in_item,
+    c_path: pathlib.Path,
+    h_path: pathlib.Path,
+    parameters_model: epyqlib.attrsmodel.Model,
+    sunspec_model: epyqlib.attrsmodel.Model,
+    staticmodbus_model: epyqlib.attrsmodel.Model,
+    skip_output: bool = False,
 ):
     sunspec_root = sunspec_model.root
     staticmodbus_root = staticmodbus_model.root
@@ -29,7 +31,7 @@ def export(
         sunspec_model=sunspec_model,
         staticmodbus_root=staticmodbus_root,
         staticmodbus_model=staticmodbus_model,
-        include_uuid_in_item=include_uuid_in_item,
+        skip_output=skip_output,
     )
 
     builder.gen()
@@ -45,7 +47,7 @@ class Root:
     sunspec_model = attr.ib()
     staticmodbus_root = attr.ib()
     staticmodbus_model = attr.ib()
-    include_uuid_in_item = attr.ib()
+    skip_output = attr.ib()
 
     def gen(self):
         def sunspec_node_wanted(node):
@@ -126,83 +128,80 @@ class Root:
             f"",
         ]
 
-        for parameter_uuid, modbus_nodes in parameter_uuid_to_modbus_node.items():
-            members_interface_c_lines = []
-            members_info_c_lines = []
+        if not self.skip_output:
+            for parameter_uuid, modbus_nodes in parameter_uuid_to_modbus_node.items():
+                members_interface_c_lines = []
+                members_info_c_lines = []
 
-            name_uuid = str(parameter_uuid).replace("-", "_")
+                name_uuid = str(parameter_uuid).replace("-", "_")
 
-            # Generate the SunSpec related .c/.h rows.
-            builder = builders.wrap(
-                wrapped=modbus_nodes["sunspec"],
-                parameter_uuid_finder=self.sunspec_model.node_from_uuid,
-                include_uuid_in_item=self.include_uuid_in_item,
-            )
-            more_c_lines, more_h_lines = builder.gen()
-            c_lines.extend(more_c_lines)
-            h_lines.extend(more_h_lines)
-
-            common_c_lines = []
-            if "sunspec" in modbus_nodes:
+                # Generate the SunSpec related .c/.h rows.
                 builder = builders.wrap(
                     wrapped=modbus_nodes["sunspec"],
                     parameter_uuid_finder=self.sunspec_model.node_from_uuid,
-                    include_uuid_in_item=self.include_uuid_in_item,
                 )
-                common_c_lines.extend(builder.gen_common_interface())
-                members_interface_c_lines.extend(
-                    builder.gen_bitfield_members_interface()
-                )
-                members_info_c_lines.extend(builder.gen_members_interface())
-            else:
-                common_c_lines.extend(builder.gen_default_common_interface())
+                more_c_lines, more_h_lines = builder.gen()
+                c_lines.extend(more_c_lines)
+                h_lines.extend(more_h_lines)
 
-            if "staticmodbus" in modbus_nodes:
+                common_c_lines = []
+                if "sunspec" in modbus_nodes:
+                    builder = builders.wrap(
+                        wrapped=modbus_nodes["sunspec"],
+                        parameter_uuid_finder=self.sunspec_model.node_from_uuid,
+                    )
+                    common_c_lines.extend(builder.gen_common_interface())
+                    members_interface_c_lines.extend(
+                        builder.gen_bitfield_members_interface()
+                    )
+                    members_info_c_lines.extend(builder.gen_members_interface())
+                else:
+                    common_c_lines.extend(builder.gen_default_common_interface())
+
+                if "staticmodbus" in modbus_nodes:
+                    builder = builders.wrap(
+                        wrapped=modbus_nodes["staticmodbus"],
+                        parameter_uuid_finder=self.staticmodbus_model.node_from_uuid,
+                    )
+                    common_c_lines.extend(builder.gen_common_interface())
+                    members_interface_c_lines.extend(
+                        builder.gen_bitfield_members_interface()
+                    )
+                    members_info_c_lines.extend(builder.gen_members_interface())
+                else:
+                    common_c_lines.extend(builder.gen_default_common_interface())
+
+                c_lines.extend(members_interface_c_lines)
+
+                c_lines.extend(
+                    [
+                        f"InterfaceItem_Bitfield interfaceItem_{name_uuid} = {{",
+                        [
+                            f".common = {{",
+                            [ccl for ccl in common_c_lines],
+                            f"}},",
+                        ],
+                        [micl for micl in members_info_c_lines],
+                        f"}};",
+                        "",
+                    ]
+                )
+
+                # Generate the static modbus related .h rows.
                 builder = builders.wrap(
                     wrapped=modbus_nodes["staticmodbus"],
                     parameter_uuid_finder=self.staticmodbus_model.node_from_uuid,
-                    include_uuid_in_item=self.include_uuid_in_item,
                 )
-                common_c_lines.extend(builder.gen_common_interface())
-                members_interface_c_lines.extend(
-                    builder.gen_bitfield_members_interface()
-                )
-                members_info_c_lines.extend(builder.gen_members_interface())
-            else:
-                common_c_lines.extend(builder.gen_default_common_interface())
+                more_h_lines = builder.gen()
+                h_lines.extend(more_h_lines)
 
-            c_lines.extend(members_interface_c_lines)
-
-            c_lines.extend(
-                [
-                    f"InterfaceItem_Bitfield interfaceItem_{name_uuid} = {{",
+                # Add the interfaceItem_<UUID>, which defines both SunSpec and static modbus interfaces.
+                h_lines.extend(
                     [
-                        f".common = {{",
-                        [ccl for ccl in common_c_lines],
-                        f"}},",
-                    ],
-                    [micl for micl in members_info_c_lines],
-                    f"}};",
-                    "",
-                ]
-            )
-
-            # Generate the static modbus related .h rows.
-            builder = builders.wrap(
-                wrapped=modbus_nodes["staticmodbus"],
-                parameter_uuid_finder=self.staticmodbus_model.node_from_uuid,
-                include_uuid_in_item=self.include_uuid_in_item,
-            )
-            more_h_lines = builder.gen()
-            h_lines.extend(more_h_lines)
-
-            # Add the interfaceItem_<UUID>, which defines both SunSpec and static modbus interfaces.
-            h_lines.extend(
-                [
-                    f"extern InterfaceItem_Bitfield interfaceItem_{name_uuid};",
-                    "",
-                ]
-            )
+                        f"extern InterfaceItem_Bitfield interfaceItem_{name_uuid};",
+                        "",
+                    ]
+                )
 
         h_lines.append("#endif")
 
@@ -218,7 +217,6 @@ class Root:
 class FunctionDataBitfield:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
-    include_uuid_in_item = attr.ib()
 
     def gen(self):
         # TODO: CAMPid 07954360685417610543064316843160
@@ -307,7 +305,6 @@ class FunctionDataBitfield:
 class DataPointBitfield:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
-    include_uuid_in_item = attr.ib()
 
     def gen(self):
         name_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")

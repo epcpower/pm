@@ -210,7 +210,7 @@ def full_export(
         parameters_model=project.models.parameters,
         staticmodbus_model=project.models.staticmodbus,
         sunspec_model=project.models.sunspec,
-        include_uuid_in_item=include_uuid_in_item,
+        skip_output=skip_output,
     )
 
     if first_time and not skip_output:
