@@ -205,8 +205,8 @@ def full_export(
     )
 
     epcpm.parameterstobitfieldsc.export(
-        c_path=paths.staticmodbus_bitfields_c,
-        h_path=paths.staticmodbus_bitfields_c.with_suffix(".h"),
+        c_path=paths.bitfields_c,
+        h_path=paths.bitfields_c.with_suffix(".h"),
         parameters_model=project.models.parameters,
         staticmodbus_model=project.models.staticmodbus,
         sunspec_model=project.models.sunspec,
