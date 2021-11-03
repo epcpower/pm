@@ -74,7 +74,7 @@ class Root:
         total_registers = len(c_lines_interface) + sunspec.core.suns.SUNS_SUNS_LEN
         c_lines = [
             '#include "staticmodbusInterfaceGen.h"',
-            '#include "staticmodbusInterfaceBitfieldsGen.h"',
+            '#include "interfaceBitfieldsGen.h"',
             '#include "interfaceGen.h"',
             "",
             "",
@@ -220,7 +220,7 @@ class FunctionDataBitfield:
         """
         # TODO: CAMPid 9685439641536675431653179671436
         parameter_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
-        uuid_interface_val = f"&interfaceItem_staticmodbus_{parameter_uuid}"
+        uuid_interface_val = f"&interfaceItem_{parameter_uuid}"
         c_lines = []
         # Generate one or more ("size") lines with NULL interface.
         for addr_val in range(
