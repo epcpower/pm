@@ -78,6 +78,7 @@ def create_data_objects(
 def create_function_data(
     input_sunspec_data, scale_factor_uuid_map, sunspec_types, staticmodbus_types
 ):
+    # Create the FunctionData object given input data.
     function_data = epcpm.staticmodbusmodel.FunctionData()
 
     if input_sunspec_data["scale_factor_uuid"]:
@@ -122,6 +123,7 @@ def create_function_data(
 def create_function_data_bitfield(
     input_sunspec_data, sunspec_types, staticmodbus_types
 ):
+    # Create FunctionDataBitfield object given input data.
     function_data_bitfield = epcpm.staticmodbusmodel.FunctionDataBitfield()
 
     function_data_bitfield.parameter_uuid = (
@@ -146,6 +148,7 @@ def create_function_data_bitfield(
 def create_function_data_bitfield_member(
     input_sunspec_data, sunspec_types, staticmodbus_types
 ):
+    # Create FunctionDataBitfieldMember object given input data.
     function_data_bitfield_member = epcpm.staticmodbusmodel.FunctionDataBitfieldMember()
 
     function_data_bitfield_member.parameter_uuid = (
@@ -168,6 +171,7 @@ def create_function_data_bitfield_member(
 
 
 def generate_uuid_mapping_for_scale_factor(input_sunspec_data):
+    # Generate UUID mapping for scale factor rows given input data.
     uuid_map_for_sf = dict()
     for data_row in input_sunspec_data:
         if data_row["type"] == "sunssf":
@@ -193,6 +197,7 @@ def cli(input_sunspec_filename, output_staticmodbus_filename):
 
     with open(input_sunspec_filename, "r", newline="") as csv_file:
         csv_reader = csv.reader(csv_file, quoting=csv.QUOTE_NONNUMERIC)
+        # These keys should match the fields defined in the sunspectocsv export located in importexport.py.
         keys = [
             "size",
             "name",
