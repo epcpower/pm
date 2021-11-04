@@ -1,5 +1,7 @@
 import attr
 import pathlib
+import typing
+from typing import Any
 
 import epcpm.c
 import epcpm.parameterstointerface
@@ -20,6 +22,20 @@ def export(
     staticmodbus_model: epyqlib.attrsmodel.Model,
     skip_output: bool = False,
 ):
+    """
+    Generate the SunSpec and static modbus bitfield interfaces (.c/.h).
+
+    Args:
+        c_path: path and filename for .c file
+        h_path: path and filename for .h file
+        parameters_model: parameters model
+        sunspec_model: SunSpec model
+        staticmodbus_model: static modbus model
+        skip_output: skip output of the interface in the generated files (files are still output)
+
+    Returns:
+
+    """
     sunspec_root = sunspec_model.root
     staticmodbus_root = staticmodbus_model.root
 
@@ -40,17 +56,25 @@ def export(
 @builders(epyqlib.pm.parametermodel.Root)
 @attr.s
 class Root:
-    wrapped = attr.ib()
-    c_path = attr.ib()
-    h_path = attr.ib()
-    sunspec_root = attr.ib()
-    sunspec_model = attr.ib()
-    staticmodbus_root = attr.ib()
-    staticmodbus_model = attr.ib()
-    skip_output = attr.ib()
+    wrapped = attr.ib(type=epyqlib.pm.parametermodel.Root)
+    c_path = attr.ib(type=pathlib.Path)
+    h_path = attr.ib(type=pathlib.Path)
+    sunspec_root = attr.ib(type=epyqlib.attrsmodel.Root)
+    sunspec_model = attr.ib(type=epyqlib.attrsmodel.Model)
+    staticmodbus_root = attr.ib(type=epyqlib.attrsmodel.Root)
+    staticmodbus_model = attr.ib(type=epyqlib.attrsmodel.Model)
+    skip_output = attr.ib(type=bool)
 
-    def gen(self):
-        def sunspec_node_wanted(node):
+    def gen(self) -> None:
+        """
+        From the root of the parameter model, generate the bitfield interfaces for SunSpec and static modbus.
+
+        Returns:
+
+        """
+
+        def sunspec_node_wanted(node: Any) -> bool:
+            # Filter for SunSpec DataPointBitfield types
             if getattr(node, "parameter_uuid", None) is None:
                 return False
 
@@ -71,7 +95,8 @@ class Root:
                 node.parameter_uuid: node for node in sunspec_nodes_with_parameter_uuid
             }
 
-        def staticmodbus_node_wanted(node):
+        def staticmodbus_node_wanted(node: Any) -> bool:
+            # Filter for static modbus FunctionDataBitfield types
             if getattr(node, "parameter_uuid", None) is None:
                 return False
 
@@ -145,6 +170,7 @@ class Root:
                 h_lines.extend(more_h_lines)
 
                 common_c_lines = []
+                # Generate C lines for SunSpec node
                 if "sunspec" in modbus_nodes:
                     builder = builders.wrap(
                         wrapped=modbus_nodes["sunspec"],
@@ -158,6 +184,7 @@ class Root:
                 else:
                     common_c_lines.extend(builder.gen_default_common_interface())
 
+                # Generate C lines for static modbus node
                 if "staticmodbus" in modbus_nodes:
                     builder = builders.wrap(
                         wrapped=modbus_nodes["staticmodbus"],
@@ -173,6 +200,7 @@ class Root:
 
                 c_lines.extend(members_interface_c_lines)
 
+                # Generate the combined interface item code
                 c_lines.extend(
                     [
                         f"InterfaceItem_Bitfield interfaceItem_{name_uuid} = {{",
@@ -205,6 +233,7 @@ class Root:
 
         h_lines.append("#endif")
 
+        # Output the .c & .h files
         with self.c_path.open("w", newline="\n") as f:
             f.write(epcpm.c.format_nested_lists(c_lines).strip() + "\n")
 
@@ -215,10 +244,16 @@ class Root:
 @builders(epcpm.staticmodbusmodel.FunctionDataBitfield)
 @attr.s
 class FunctionDataBitfield:
-    wrapped = attr.ib()
-    parameter_uuid_finder = attr.ib()
+    wrapped = attr.ib(type=epcpm.staticmodbusmodel.FunctionDataBitfield)
+    parameter_uuid_finder = attr.ib(type=typing.Callable)
 
-    def gen(self):
+    def gen(self) -> typing.List[str]:
+        """
+        Generate a static modbus bitfield member extern definition.
+
+        Returns:
+            list: bitfield member definition row
+        """
         # TODO: CAMPid 07954360685417610543064316843160
 
         bits_per_modbus_register = 16
@@ -234,39 +269,53 @@ class FunctionDataBitfield:
 
         return h_lines
 
-    def gen_common_interface(self):
+    def gen_common_interface(self) -> typing.List[str]:
+        """
+        Generate a static modbus bitfield common definitions for the interface item.
+
+        Returns:
+            list: bitfield common definitions
+        """
         bits_per_modbus_register = 16
         bit_length = bits_per_modbus_register * self.wrapped.size
 
-        c_lines = (
+        c_lines = [
+            f".staticmodbus = {{",
             [
-                f".staticmodbus = {{",
-                [
-                    f".getter = InterfaceItem_bitfield_{bit_length}_staticmodbus_getter,",
-                    f".setter = InterfaceItem_bitfield_{bit_length}_staticmodbus_setter,",
-                    ".variable = NULL,",
-                ],
-                f"}},",
+                f".getter = InterfaceItem_bitfield_{bit_length}_staticmodbus_getter,",
+                f".setter = InterfaceItem_bitfield_{bit_length}_staticmodbus_setter,",
+                ".variable = NULL,",
             ],
-        )
+            f"}},",
+        ]
 
         return c_lines
 
     @staticmethod
-    def gen_default_common_interface(self):
-        return (
-            [
-                f".staticmodbus = {{",
-                [
-                    f".getter = NULL,",
-                    f".setter = NULL,",
-                    f".variable = NULL,",
-                ],
-                f"}},",
-            ],
-        )
+    def gen_default_common_interface() -> typing.List[str]:
+        """
+        Generate a default (empty) static modbus bitfield common definitions for the interface item.
 
-    def gen_bitfield_members_interface(self):
+        Returns:
+            list: default bitfield common definitions
+        """
+        return [
+            f".staticmodbus = {{",
+            [
+                f".getter = NULL,",
+                f".setter = NULL,",
+                f".variable = NULL,",
+            ],
+            f"}},",
+        ]
+
+    def gen_bitfield_members_interface(self) -> typing.List[str]:
+        """
+        Generate a static modbus bitfield member definition.
+
+        Returns:
+            list: bitfield member definition
+        """
         name_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
         members = self.wrapped.children
         array_name = f"staticmodbusBitfieldItems_{name_uuid}"
@@ -289,7 +338,13 @@ class FunctionDataBitfield:
             "",
         ]
 
-    def gen_members_interface(self):
+    def gen_members_interface(self) -> typing.List[str]:
+        """
+        Generate the static modbus bitfield member additional definitions.
+
+        Returns:
+            list: bitfield member additional definitions
+        """
         name_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
         members = self.wrapped.children
         array_name = f"staticmodbusBitfieldItems_{name_uuid}"
@@ -306,7 +361,13 @@ class DataPointBitfield:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
 
-    def gen(self):
+    def gen(self) -> typing.List:
+        """
+        Generate a SunSpec bitfield variable and bitfield member extern definitions.
+        Returns:
+            list: bitfield variable and bitfield member extern definitions (.c)
+            list: bitfield variable and bitfield member extern definitions (.h)
+        """
         name_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
         members = self.wrapped.children
         array_name = f"sunspecBitfieldItems_{name_uuid}"
@@ -341,41 +402,55 @@ class DataPointBitfield:
 
         return c_lines, h_lines
 
-    def gen_common_interface(self):
+    def gen_common_interface(self) -> typing.List[str]:
+        """
+        Generate a SunSpec bitfield common definitions for the interface item.
+
+        Returns:
+            list: bitfield common definitions
+        """
         bits_per_modbus_register = 16
         bit_length = bits_per_modbus_register * self.wrapped.size
         model = self.wrapped.tree_parent.tree_parent.id
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
-        c_lines = (
+        c_lines = [
+            f".sunspec = {{",
             [
-                f".sunspec = {{",
-                [
-                    f".getter = InterfaceItem_bitfield_{bit_length}_sunspec_getter,",
-                    f".setter = InterfaceItem_bitfield_{bit_length}_sunspec_setter,",
-                    f".variable = &sunspecInterface.model{model:05}.{parameter.abbreviation},",
-                ],
-                f"}},",
+                f".getter = InterfaceItem_bitfield_{bit_length}_sunspec_getter,",
+                f".setter = InterfaceItem_bitfield_{bit_length}_sunspec_setter,",
+                f".variable = &sunspecInterface.model{model:05}.{parameter.abbreviation},",
             ],
-        )
+            f"}},",
+        ]
 
         return c_lines
 
     @staticmethod
-    def gen_default_common_interface(self):
-        return (
-            [
-                f".sunspec = {{",
-                [
-                    f".getter = NULL,",
-                    f".setter = NULL,",
-                    f".variable = NULL,",
-                ],
-                f"}},",
-            ],
-        )
+    def gen_default_common_interface() -> typing.List[str]:
+        """
+        Generate a default (empty) SunSpec bitfield common definitions for the interface item.
 
-    def gen_bitfield_members_interface(self):
+        Returns:
+            list: default bitfield common definitions
+        """
+        return [
+            f".sunspec = {{",
+            [
+                f".getter = NULL,",
+                f".setter = NULL,",
+                f".variable = NULL,",
+            ],
+            f"}},",
+        ]
+
+    def gen_bitfield_members_interface(self) -> typing.List[str]:
+        """
+        Generate a SunSpec bitfield member definition.
+
+        Returns:
+            list: bitfield member definition
+        """
         name_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
         members = self.wrapped.children
         array_name = f"sunspecBitfieldItems_{name_uuid}"
@@ -398,7 +473,13 @@ class DataPointBitfield:
             "",
         ]
 
-    def gen_members_interface(self):
+    def gen_members_interface(self) -> typing.List[str]:
+        """
+        Generate the SunSpec bitfield member additional definitions.
+
+        Returns:
+            list: bitfield member additional definitions
+        """
         name_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
         members = self.wrapped.children
         array_name = f"sunspecBitfieldItems_{name_uuid}"
