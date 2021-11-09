@@ -29,9 +29,7 @@ def attr_fill(cls, value):
 
 @attr.s
 class Fields:
-    """
-    The fields defined for a given row in the output CSV file.
-    """
+    """The fields defined for a given row in the output CSV file."""
 
     address_offset = attr.ib(default=None, type=str)
     block_offset = attr.ib(default=None, type=str)
@@ -135,6 +133,8 @@ def export(
 @builders(epcpm.sunspecmodel.Root)
 @attr.s
 class Root:
+    """CSV generator for the SunSpec Root class."""
+
     wrapped = attr.ib(type=epcpm.sunspecmodel.Root)
     column_filter = attr.ib(type=Fields)
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
@@ -184,6 +184,8 @@ class Root:
 @builders(epcpm.sunspecmodel.Model)
 @attr.s
 class Model:
+    """CSV generator for the SunSpec Model class."""
+
     wrapped = attr.ib(type=epcpm.sunspecmodel.Model)
     csv_data = attr.ib(type=typing.List[str])
     column_filter = attr.ib(type=Fields)
@@ -251,6 +253,8 @@ class Model:
 @builders(epcpm.sunspecmodel.Table)
 @attr.s
 class Table:
+    """CSV generator for the SunSpec Table class."""
+
     wrapped = attr.ib(type=epcpm.sunspecmodel.Model)
     padding_type = attr.ib(type=epyqlib.pm.parametermodel.Enumerator)
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
@@ -302,6 +306,8 @@ def build_uuid_scale_factor_dict(
 @builders(epcpm.sunspecmodel.FixedBlock)
 @attr.s
 class Block:
+    """CSV generator for the SunSpec HeaderBlock and FixedBlock classes."""
+
     wrapped = attr.ib(
         type=typing.Union[epcpm.sunspecmodel.HeaderBlock, epcpm.sunspecmodel.FixedBlock]
     )
@@ -374,6 +380,8 @@ class Block:
 @builders(epcpm.sunspecmodel.DataPointBitfield)
 @attr.s
 class DataPointBitfield:
+    """CSV generator for the SunSpec DataPointBitfield class."""
+
     wrapped = attr.ib(type=epcpm.sunspecmodel.DataPointBitfield)
     model_type = attr.ib(type=str)
     scale_factor_from_uuid = attr.ib(
@@ -454,6 +462,8 @@ class DataPointBitfield:
 @builders(epcpm.sunspecmodel.DataPointBitfieldMember)
 @attr.s
 class DataPointBitfieldMember:
+    """CSV generator for the SunSpec DataPointBitfieldMember class."""
+
     wrapped = attr.ib(type=epcpm.sunspecmodel.DataPointBitfieldMember)
     model_type = attr.ib(type=str)
     parameter_uuid_finder = attr.ib(type=typing.Callable)
@@ -511,6 +521,8 @@ class DataPointBitfieldMember:
 @builders(epcpm.sunspecmodel.TableRepeatingBlockReference)
 @attr.s
 class TableRepeatingBlockReference:
+    """CSV generator for the SunSpec TableRepeatingBlockReference class."""
+
     wrapped = attr.ib(type=epcpm.sunspecmodel.TableRepeatingBlockReference)
     add_padding = attr.ib(type=bool)
     padding_type = attr.ib(type=epyqlib.pm.parametermodel.Enumerator)
@@ -592,6 +604,8 @@ class TableRepeatingBlockReference:
 @builders(epcpm.sunspecmodel.TableRepeatingBlock)
 @attr.s
 class TableRepeatingBlock:
+    """CSV generator for the SunSpec TableRepeatingBlock class."""
+
     wrapped = attr.ib(type=epcpm.sunspecmodel.TableRepeatingBlock)
     add_padding = attr.ib(type=bool)
     padding_type = attr.ib(type=epyqlib.pm.parametermodel.Enumerator)
@@ -618,6 +632,8 @@ class TableRepeatingBlock:
 @builders(epcpm.sunspecmodel.DataPoint)
 @attr.s
 class Point:
+    """CSV generator for the SunSpec DataPoint class."""
+
     wrapped = attr.ib(type=epcpm.sunspecmodel.DataPoint)
     scale_factor_from_uuid = attr.ib(
         type=typing.Dict[uuid.UUID, epcpm.sunspecmodel.DataPoint]
