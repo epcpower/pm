@@ -2,20 +2,42 @@ import click
 import csv
 import distutils.util
 import graham
+import typing
 import uuid
 
 import epcpm.sunspecmodel
 import epcpm.staticmodbusmodel
+import epyqlib.pm.parametermodel
 
 
-def generate_uuid():
+def generate_uuid() -> str:
+    """
+    Generate a UUID in string format.
+
+    Returns:
+        str: UUID
+    """
     return str(uuid.uuid4())
 
 
-def map_type_uuid(input, sunspec_types, staticmodbus_types):
-    # Map the type UUID from sunspec type to static modbus type.
+def map_type_uuid(
+    input_type_uuid: str,
+    sunspec_types: epyqlib.pm.parametermodel.Enumeration,
+    staticmodbus_types: epyqlib.pm.parametermodel.Enumeration,
+) -> str:
+    """
+    Map the type UUID from SunSpec type to static modbus type.
+
+    Args:
+        input_type_uuid: input SunSpec type UUID
+        sunspec_types: enum of SunSpec types
+        staticmodbus_types: enum of static modbus types
+
+    Returns:
+        str: UUID of the static modbus type
+    """
     for sunspec_type in sunspec_types.children:
-        if input == str(sunspec_type.uuid):
+        if input_type_uuid == str(sunspec_type.uuid):
             for staticmodbus_type in staticmodbus_types.children:
                 if sunspec_type.name == staticmodbus_type.name:
                     return str(staticmodbus_type.uuid)
@@ -29,9 +51,23 @@ def map_type_uuid(input, sunspec_types, staticmodbus_types):
 
 
 def create_data_objects(
-    input_sunspec_csv, scale_factor_uuid_map, sunspec_types, staticmodbus_types
-):
-    # Create root object to store the static modbus model.
+    input_sunspec_csv: typing.List[typing.Dict[str, str]],
+    scale_factor_uuid_map: typing.Dict[str, str],
+    sunspec_types: epyqlib.pm.parametermodel.Enumeration,
+    staticmodbus_types: epyqlib.pm.parametermodel.Enumeration,
+) -> epcpm.staticmodbusmodel.Root:
+    """
+    Given the input SunSpec CSV data, transform and generate data objects for the output static modbus root.
+
+    Args:
+        input_sunspec_csv: input SunSpec CSV data structure
+        scale_factor_uuid_map: map of SunSpec to static modbus scale factor UUID's
+        sunspec_types: enum of SunSpec types
+        staticmodbus_types: enum of static modbus types
+
+    Returns:
+        Root: root object to store the static modbus model
+    """
     root = epcpm.staticmodbusmodel.Root()
 
     # Transform input data from sunspec to staticmodbus output.
@@ -75,32 +111,72 @@ def create_data_objects(
     return root
 
 
-def create_function_data(
-    input_sunspec_data, scale_factor_uuid_map, sunspec_types, staticmodbus_types
+def set_common_staticmodbus_node_data(
+    staticmodbus_node: typing.Union[
+        epcpm.staticmodbusmodel.FunctionData,
+        epcpm.staticmodbusmodel.FunctionDataBitfield,
+        epcpm.staticmodbusmodel.FunctionDataBitfieldMember,
+    ],
+    input_sunspec_data: typing.List[typing.Dict[str, str]],
+    sunspec_types: epyqlib.pm.parametermodel.Enumeration,
+    staticmodbus_types: epyqlib.pm.parametermodel.Enumeration,
 ):
-    # Create the FunctionData object given input data.
-    function_data = epcpm.staticmodbusmodel.FunctionData()
+    """
+    Given the input SunSpec CSV data, sets common values to the given static modbus node.
 
+    Args:
+        staticmodbus_node: static modbus node on which to set common values
+        input_sunspec_data: input SunSpec CSV data structure
+        sunspec_types: enum of SunSpec types
+        staticmodbus_types: enum of static modbus types
+
+    Returns:
+
+    """
+    staticmodbus_node.parameter_uuid = (
+        input_sunspec_data["parameter_uuid"]
+        if input_sunspec_data["parameter_uuid"]
+        else None
+    )
+    if input_sunspec_data["type_uuid"]:
+        staticmodbus_node.type_uuid = map_type_uuid(
+            input_sunspec_data["type_uuid"], sunspec_types, staticmodbus_types
+        )
+    else:
+        staticmodbus_node.type_uuid = None
+
+
+def create_function_data(
+    input_sunspec_data: typing.List[typing.Dict[str, str]],
+    scale_factor_uuid_map: typing.Dict[str, str],
+    sunspec_types: epyqlib.pm.parametermodel.Enumeration,
+    staticmodbus_types: epyqlib.pm.parametermodel.Enumeration,
+) -> epcpm.staticmodbusmodel.FunctionData:
+    """
+    Given the input SunSpec CSV data, transform and generate FunctionData objects for the output static modbus.
+
+    Args:
+        input_sunspec_data: input SunSpec CSV data structure
+        scale_factor_uuid_map: map of SunSpec to static modbus scale factor UUID's
+        sunspec_types: enum of SunSpec types
+        staticmodbus_types: enum of static modbus types
+
+    Returns:
+        FunctionData: object to store in the static modbus model
+    """
+    function_data = epcpm.staticmodbusmodel.FunctionData()
+    set_common_staticmodbus_node_data(
+        function_data, input_sunspec_data, sunspec_types, staticmodbus_types
+    )
     if input_sunspec_data["scale_factor_uuid"]:
         function_data.factor_uuid = scale_factor_uuid_map[
             input_sunspec_data["scale_factor_uuid"]
         ]
     else:
         function_data.factor_uuid = None
-    function_data.parameter_uuid = (
-        input_sunspec_data["parameter_uuid"]
-        if input_sunspec_data["parameter_uuid"]
-        else None
-    )
     function_data.not_implemented = bool(
         distutils.util.strtobool(input_sunspec_data["not_implemented"])
     )
-    if input_sunspec_data["type_uuid"]:
-        function_data.type_uuid = map_type_uuid(
-            input_sunspec_data["type_uuid"], sunspec_types, staticmodbus_types
-        )
-    else:
-        function_data.type_uuid = None
     function_data.size = int(input_sunspec_data["size"])
     function_data.enumeration_uuid = (
         input_sunspec_data["enumeration_uuid"]
@@ -121,48 +197,55 @@ def create_function_data(
 
 
 def create_function_data_bitfield(
-    input_sunspec_data, sunspec_types, staticmodbus_types
-):
-    # Create FunctionDataBitfield object given input data.
-    function_data_bitfield = epcpm.staticmodbusmodel.FunctionDataBitfield()
+    input_sunspec_data: typing.List[typing.Dict[str, str]],
+    sunspec_types: epyqlib.pm.parametermodel.Enumeration,
+    staticmodbus_types: epyqlib.pm.parametermodel.Enumeration,
+) -> epcpm.staticmodbusmodel.FunctionDataBitfield:
+    """
+    Given the input SunSpec CSV data, transform and generate FunctionDataBitfield objects for the output static modbus.
 
-    function_data_bitfield.parameter_uuid = (
-        input_sunspec_data["parameter_uuid"]
-        if input_sunspec_data["parameter_uuid"]
-        else None
+    Args:
+        input_sunspec_data: input SunSpec CSV data structure
+        sunspec_types: enum of SunSpec types
+        staticmodbus_types: enum of static modbus types
+
+    Returns:
+        FunctionDataBitfield: object to store in the static modbus model
+    """
+    function_data_bitfield = epcpm.staticmodbusmodel.FunctionDataBitfield()
+    set_common_staticmodbus_node_data(
+        function_data_bitfield, input_sunspec_data, sunspec_types, staticmodbus_types
     )
-    if input_sunspec_data["type_uuid"]:
-        function_data_bitfield.type_uuid = map_type_uuid(
-            input_sunspec_data["type_uuid"], sunspec_types, staticmodbus_types
-        )
-    else:
-        function_data_bitfield.type_uuid = None
-    function_data_bitfield.size = int(input_sunspec_data["size"])
-    # A bitfield is never a scale factor, so no need to check for uuid in scale_factor_uuid_map.
     function_data_bitfield.uuid = generate_uuid()
+    function_data_bitfield.size = int(input_sunspec_data["size"])
     function_data_bitfield.address = int(input_sunspec_data["modbus_address"])
 
     return function_data_bitfield
 
 
 def create_function_data_bitfield_member(
-    input_sunspec_data, sunspec_types, staticmodbus_types
-):
-    # Create FunctionDataBitfieldMember object given input data.
-    function_data_bitfield_member = epcpm.staticmodbusmodel.FunctionDataBitfieldMember()
+    input_sunspec_data: typing.List[typing.Dict[str, str]],
+    sunspec_types: epcpm.staticmodbusmodel.FunctionDataBitfield,
+    staticmodbus_types: epcpm.staticmodbusmodel.FunctionDataBitfield,
+) -> epcpm.staticmodbusmodel.FunctionDataBitfieldMember:
+    """
+    Given the input SunSpec CSV data, transform and generate FunctionDataBitfieldMember objects for the output static modbus.
 
-    function_data_bitfield_member.parameter_uuid = (
-        input_sunspec_data["parameter_uuid"]
-        if input_sunspec_data["parameter_uuid"]
-        else None
+    Args:
+        input_sunspec_data: input SunSpec CSV data structure
+        sunspec_types: enum of SunSpec types
+        staticmodbus_types: enum of static modbus types
+
+    Returns:
+        FunctionDataBitfieldMember: object to store in the static modbus model
+    """
+    function_data_bitfield_member = epcpm.staticmodbusmodel.FunctionDataBitfieldMember()
+    set_common_staticmodbus_node_data(
+        function_data_bitfield_member,
+        input_sunspec_data,
+        sunspec_types,
+        staticmodbus_types,
     )
-    if input_sunspec_data["type_uuid"]:
-        function_data_bitfield_member.type_uuid = map_type_uuid(
-            input_sunspec_data["type_uuid"], sunspec_types, staticmodbus_types
-        )
-    else:
-        function_data_bitfield_member.type_uuid = None
-    # A bitfield member is never a scale factor, so no need to check for uuid in scale_factor_uuid_map.
     function_data_bitfield_member.uuid = generate_uuid()
     function_data_bitfield_member.bit_offset = int(input_sunspec_data["bit_offset"])
     function_data_bitfield_member.bit_length = int(input_sunspec_data["bit_length"])
@@ -170,8 +253,18 @@ def create_function_data_bitfield_member(
     return function_data_bitfield_member
 
 
-def generate_uuid_mapping_for_scale_factor(input_sunspec_data):
-    # Generate UUID mapping for scale factor rows given input data.
+def generate_uuid_mapping_for_scale_factor(
+    input_sunspec_data: typing.List[typing.Dict[str, str]]
+) -> typing.Dict[str, str]:
+    """
+    Generates map of SunSpec to static modbus scale factor UUID's.
+
+    Args:
+        input_sunspec_data: input SunSpec CSV data structure
+
+    Returns:
+        dict: map of SunSpec to static modbus scale factor UUID's
+    """
     uuid_map_for_sf = dict()
     for data_row in input_sunspec_data:
         if data_row["type"] == "sunssf":
@@ -190,8 +283,17 @@ def generate_uuid_mapping_for_scale_factor(input_sunspec_data):
     type=click.Path(dir_okay=False, resolve_path=True),
     required=True,
 )
-def cli(input_sunspec_filename, output_staticmodbus_filename):
-    """SunSpec CSV file to static modbus JSON file"""
+def cli(input_sunspec_filename: str, output_staticmodbus_filename: str) -> None:
+    """
+    Transforms input SunSpec CSV file to a static modbus JSON file.
+
+    Args:
+        input_sunspec_filename: input SunSpec CSV path and file name
+        output_staticmodbus_filename: output static modbus JSON path and file name
+
+    Returns:
+
+    """
     sunspec_types = epcpm.sunspecmodel.build_sunspec_types_enumeration()
     staticmodbus_types = epcpm.staticmodbusmodel.build_staticmodbus_types_enumeration()
 
