@@ -8,6 +8,7 @@ import epyqlib.pm.parametermodel
 import epyqlib.utils.general
 
 import epcpm.c
+import epcpm.pm_helper
 import epcpm.sunspecmodel
 
 
@@ -465,8 +466,9 @@ class DataPointBitfield:
 
         # TODO: should we just require that it does and assume etc?
         if uses_interface_item:
-            # TODO: CAMPid 9685439641536675431653179671436
-            parameter_uuid = str(parameter.uuid).replace("-", "_")
+            parameter_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
+                parameter.uuid
+            )
             item_name = f"interfaceItem_{parameter_uuid}"
 
             getter.extend(
@@ -919,8 +921,9 @@ class Point:
                 # minimum_variable = parameter.nv_format.format('[Meta_Min]')
                 # maximum_variable = parameter.nv_format.format('[Meta_Max]')
             elif uses_interface_item:
-                # TODO: CAMPid 9685439641536675431653179671436
-                parameter_uuid = str(parameter.uuid).replace("-", "_")
+                parameter_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
+                    parameter.uuid
+                )
                 item_name = f"interfaceItem_{parameter_uuid}"
 
                 getter.extend(

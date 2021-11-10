@@ -13,6 +13,7 @@ import epyqlib.pm.parametermodel
 import epyqlib.utils.general
 
 import epcpm.cantosym
+import epcpm.pm_helper
 import epcpm.sunspecmodel
 import epcpm.sunspectoxlsx
 import epcpm.staticmodbusmodel
@@ -371,7 +372,7 @@ class DataPointBitfieldMember:
     def interface_variable_name(self):
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
-        uuid_ = str(parameter.uuid).replace("-", "_")
+        uuid_ = epcpm.pm_helper.convert_uuid_to_variable_name(parameter.uuid)
         return f"&interfaceItem_variable_{uuid_}"
 
 
@@ -395,7 +396,7 @@ class FunctionDataBitfieldMember:
     def interface_variable_name(self):
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
-        uuid_ = str(parameter.uuid).replace("-", "_")
+        uuid_ = epcpm.pm_helper.convert_uuid_to_variable_name(parameter.uuid)
         return f"&interfaceItem_variable_{uuid_}"
 
 
@@ -968,7 +969,9 @@ class TableBaseStructures:
             if len(self.c_code) > 0:
                 self.c_code.append("")
 
-            formatted_uuid = str(parameter.uuid).replace("-", "_")
+            formatted_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
+                parameter.uuid
+            )
             name = f"InterfaceItem_table_common_{internal_type}_{formatted_uuid}"
 
             if remainder is None:
@@ -1220,7 +1223,9 @@ class TableBaseStructures:
             f"InterfaceItem_table_{types[parameter.internal_type].name}"
         )
 
-        item_uuid_string = str(table_element.uuid).replace("-", "_")
+        item_uuid_string = epcpm.pm_helper.convert_uuid_to_variable_name(
+            table_element.uuid
+        )
         item_name = f"interfaceItem_{item_uuid_string}"
 
         maybe_uuid = []
@@ -1560,7 +1565,7 @@ def create_item(
     can_scale_factor,
     reject_from_inactive_interfaces,
 ):
-    item_uuid_string = str(item_uuid).replace("-", "_")
+    item_uuid_string = epcpm.pm_helper.convert_uuid_to_variable_name(item_uuid)
     item_name = f"interfaceItem_{item_uuid_string}"
 
     if meta_initializer_values is None:

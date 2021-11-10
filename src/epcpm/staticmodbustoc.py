@@ -1,6 +1,7 @@
 import attr
 import pathlib
 import typing
+import epcpm.pm_helper
 import epcpm.staticmodbusmodel
 import epyqlib.attrsmodel
 import epyqlib.utils.general
@@ -179,8 +180,9 @@ class FunctionData:
             and type_node is not None
             and type_node.name != "staticmodbussf"
         ):
-            # TODO: CAMPid 9685439641536675431653179671436
-            parameter_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
+            parameter_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
+                self.wrapped.parameter_uuid
+            )
             uuid_interface_val = f"&interfaceItem_{parameter_uuid}"
 
             # Generate one or more ("size") lines with UUID interface.
@@ -218,8 +220,9 @@ class FunctionDataBitfield:
         Returns:
             list: staticmodbusAddrRegMap rows for the generated .c file output
         """
-        # TODO: CAMPid 9685439641536675431653179671436
-        parameter_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
+        parameter_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
+            self.wrapped.parameter_uuid
+        )
         uuid_interface_val = f"&interfaceItem_{parameter_uuid}"
         c_lines = []
         # Generate one or more ("size") lines with NULL interface.

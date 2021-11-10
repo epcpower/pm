@@ -1,10 +1,10 @@
 import attr
 import pathlib
 import typing
-from typing import Any
 
 import epcpm.c
 import epcpm.parameterstointerface
+import epcpm.pm_helper
 import epcpm.staticmodbusmodel
 import epcpm.sunspecmodel
 import epyqlib.attrsmodel
@@ -73,7 +73,7 @@ class Root:
 
         """
 
-        def sunspec_node_wanted(node: Any) -> bool:
+        def sunspec_node_wanted(node: typing.Any) -> bool:
             # Filter for SunSpec DataPointBitfield types
             if getattr(node, "parameter_uuid", None) is None:
                 return False
@@ -95,7 +95,7 @@ class Root:
                 node.parameter_uuid: node for node in sunspec_nodes_with_parameter_uuid
             }
 
-        def staticmodbus_node_wanted(node: Any) -> bool:
+        def staticmodbus_node_wanted(node: typing.Any) -> bool:
             # Filter for static modbus FunctionDataBitfield types
             if getattr(node, "parameter_uuid", None) is None:
                 return False
@@ -158,7 +158,9 @@ class Root:
                 members_interface_c_lines = []
                 members_info_c_lines = []
 
-                name_uuid = str(parameter_uuid).replace("-", "_")
+                name_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
+                    parameter_uuid
+                )
 
                 # Generate the SunSpec related .c/.h rows.
                 builder = builders.wrap(
@@ -254,12 +256,12 @@ class FunctionDataBitfield:
         Returns:
             list: bitfield member definition row
         """
-        # TODO: CAMPid 07954360685417610543064316843160
-
         bits_per_modbus_register = 16
         bit_length = bits_per_modbus_register * self.wrapped.size
 
-        name_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
+        name_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
+            self.wrapped.parameter_uuid
+        )
         members = self.wrapped.children
         array_name = f"staticmodbusBitfieldItems_{name_uuid}"
 
@@ -316,7 +318,9 @@ class FunctionDataBitfield:
         Returns:
             list: bitfield member definition
         """
-        name_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
+        name_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
+            self.wrapped.parameter_uuid
+        )
         members = self.wrapped.children
         array_name = f"staticmodbusBitfieldItems_{name_uuid}"
 
@@ -328,7 +332,7 @@ class FunctionDataBitfield:
                     [
                         f".offset = {member.bit_offset},",
                         f".length = {member.bit_length},",
-                        f'.item = &interfaceItem_{str(member.parameter_uuid).replace("-", "_")},',
+                        f".item = &interfaceItem_{epcpm.pm_helper.convert_uuid_to_variable_name(member.parameter_uuid)},",
                     ],
                     f"}},",
                 ]
@@ -345,7 +349,9 @@ class FunctionDataBitfield:
         Returns:
             list: bitfield member additional definitions
         """
-        name_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
+        name_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
+            self.wrapped.parameter_uuid
+        )
         members = self.wrapped.children
         array_name = f"staticmodbusBitfieldItems_{name_uuid}"
 
@@ -368,7 +374,9 @@ class DataPointBitfield:
             list: bitfield variable and bitfield member extern definitions (.c)
             list: bitfield variable and bitfield member extern definitions (.h)
         """
-        name_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
+        name_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
+            self.wrapped.parameter_uuid
+        )
         members = self.wrapped.children
         array_name = f"sunspecBitfieldItems_{name_uuid}"
 
@@ -376,7 +384,9 @@ class DataPointBitfield:
         h_lines = []
 
         for member in members:
-            member_name_uuid = str(member.parameter_uuid).replace("-", "_")
+            member_name_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
+                member.parameter_uuid
+            )
             variable_name = f"interfaceItem_variable_{member_name_uuid}"
             variable_type = epcpm.parameterstointerface.sunspec_types[
                 self.parameter_uuid_finder(member.type_uuid).name
@@ -451,7 +461,9 @@ class DataPointBitfield:
         Returns:
             list: bitfield member definition
         """
-        name_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
+        name_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
+            self.wrapped.parameter_uuid
+        )
         members = self.wrapped.children
         array_name = f"sunspecBitfieldItems_{name_uuid}"
 
@@ -463,7 +475,7 @@ class DataPointBitfield:
                     [
                         f".offset = {member.bit_offset},",
                         f".length = {member.bit_length},",
-                        f'.item = &interfaceItem_{str(member.parameter_uuid).replace("-", "_")},',
+                        f".item = &interfaceItem_{epcpm.pm_helper.convert_uuid_to_variable_name(member.parameter_uuid)},",
                     ],
                     f"}},",
                 ]
@@ -480,7 +492,9 @@ class DataPointBitfield:
         Returns:
             list: bitfield member additional definitions
         """
-        name_uuid = str(self.wrapped.parameter_uuid).replace("-", "_")
+        name_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
+            self.wrapped.parameter_uuid
+        )
         members = self.wrapped.children
         array_name = f"sunspecBitfieldItems_{name_uuid}"
 
