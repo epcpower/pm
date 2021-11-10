@@ -439,7 +439,8 @@ class DataPointBitfield:
             row.uuid = self.wrapped.uuid
             row.class_name = "DataPointBitfield"
 
-        rows = []
+        # The parent DataPointBitfield row slots in before the DataPointBitfieldMember rows.
+        rows = [row]
         points = list(self.wrapped.children)
         for child in points:
             builder = builders.wrap(
@@ -452,9 +453,6 @@ class DataPointBitfield:
             )
             child_row = builder.gen()
             rows.append(child_row)
-
-        # Insert the parent DataPointBitfield ahead of the list of DataPointBitfieldMember rows.
-        rows.insert(0, row)
 
         return rows, row.size
 
