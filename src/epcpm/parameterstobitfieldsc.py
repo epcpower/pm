@@ -256,9 +256,6 @@ class FunctionDataBitfield:
         Returns:
             list: bitfield member definition row
         """
-        bits_per_modbus_register = 16
-        bit_length = bits_per_modbus_register * self.wrapped.size
-
         name_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
             self.wrapped.parameter_uuid
         )
@@ -279,13 +276,13 @@ class FunctionDataBitfield:
             list: bitfield common definitions
         """
         bits_per_modbus_register = 16
-        bit_length = bits_per_modbus_register * self.wrapped.size
+        bitfield_bit_length = bits_per_modbus_register * self.wrapped.size
 
         c_lines = [
             f".staticmodbus = {{",
             [
-                f".getter = InterfaceItem_bitfield_{bit_length}_staticmodbus_getter,",
-                f".setter = InterfaceItem_bitfield_{bit_length}_staticmodbus_setter,",
+                f".getter = InterfaceItem_bitfield_{bitfield_bit_length}_staticmodbus_getter,",
+                f".setter = InterfaceItem_bitfield_{bitfield_bit_length}_staticmodbus_setter,",
                 ".variable = NULL,",
             ],
             f"}},",
