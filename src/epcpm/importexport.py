@@ -8,6 +8,7 @@ import attr
 import graham
 
 import epcpm.cantosym
+import epcpm.parameterstobitfieldsc
 import epcpm.parameterstohierarchy
 import epcpm.parameterstointerface
 import epcpm.parameterstosil
@@ -15,7 +16,6 @@ import epcpm.project
 import epcpm.smdxtosunspec
 import epcpm.staticmodbustoc
 import epcpm.sunspecmodel
-import epcpm.sunspectobitfieldsc
 import epcpm.sunspectocsv
 import epcpm.sunspectotablesc
 import epcpm.sunspectomanualc
@@ -150,6 +150,8 @@ def full_export(
             label=True,
             type=True,
             units=True,
+            bit_offset=True,
+            bit_length=True,
             modbus_address=True,
             parameter_uuid=True,
             parameter_uses_interface_item=True,
@@ -195,17 +197,19 @@ def full_export(
         parameters_model=project.models.parameters,
     )
 
-    epcpm.sunspectobitfieldsc.export(
-        c_path=paths.sunspec_bitfields_c,
-        h_path=paths.sunspec_bitfields_c.with_suffix(".h"),
-        sunspec_model=project.models.sunspec,
-        include_uuid_in_item=include_uuid_in_item,
-    )
-
     epcpm.staticmodbustoc.export(
         c_path=paths.staticmodbus_c,
         h_path=paths.staticmodbus_c.with_suffix(".h"),
         staticmodbus_model=project.models.staticmodbus,
+        skip_output=skip_output,
+    )
+
+    epcpm.parameterstobitfieldsc.export(
+        c_path=paths.bitfields_c,
+        h_path=paths.bitfields_c.with_suffix(".h"),
+        parameters_model=project.models.parameters,
+        staticmodbus_model=project.models.staticmodbus,
+        sunspec_model=project.models.sunspec,
         skip_output=skip_output,
     )
 

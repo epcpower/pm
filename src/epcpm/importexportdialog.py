@@ -36,6 +36,14 @@ def import_dialog():
     dialog.ui.tables_c.hide()
     dialog.ui.pick_tables_c.hide()
 
+    dialog.ui.staticmodbus_c_label.hide()
+    dialog.ui.staticmodbus_c.hide()
+    dialog.ui.pick_staticmodbus_c.hide()
+
+    dialog.ui.bitfields_c_label.hide()
+    dialog.ui.bitfields_c.hide()
+    dialog.ui.pick_bitfields_c.hide()
+
     dialog.ui.sunspec_tables_c_label.hide()
     dialog.ui.sunspec_tables_c.hide()
     dialog.ui.pick_sunspec_tables_c.hide()
@@ -47,10 +55,6 @@ def import_dialog():
     dialog.ui.interface_c_label.hide()
     dialog.ui.interface_c.hide()
     dialog.ui.pick_interface_c.hide()
-
-    dialog.ui.sunspec_bitfields_c_label.hide()
-    dialog.ui.sunspec_bitfields_c.hide()
-    dialog.ui.pick_sunspec_bitfields_c.hide()
 
     return dialog
 
@@ -72,9 +76,9 @@ class ImportPaths:
     can = attr.ib(converter=path_or_none)
     hierarchy = attr.ib(converter=path_or_none)
     tables_c = attr.ib(converter=path_or_none)
+    bitfields_c = attr.ib(converter=path_or_none)
     staticmodbus_c = attr.ib(converter=path_or_none)
     sunspec_tables_c = attr.ib(converter=path_or_none)
-    sunspec_bitfields_c = attr.ib(converter=path_or_none)
     spreadsheet = attr.ib(converter=path_or_none)
     spreadsheet_user = attr.ib(converter=path_or_none)
     smdx = attr.ib(converter=paths_or_none)
@@ -93,9 +97,9 @@ def paths_from_directory(directory):
         can=interface / "EPC_DG_ID247_FACTORY.sym",
         hierarchy=interface / "EPC_DG_ID247_FACTORY.parameters.json",
         tables_c=interface / "canInterfaceGenTables.c",
+        bitfields_c=interface / "interfaceBitfieldsGen.c",
         staticmodbus_c=interface / "staticmodbusInterfaceGen.c",
         sunspec_tables_c=sunspec / "sunspecInterfaceGenTables.c",
-        sunspec_bitfields_c=sunspec / "sunspecInterfaceBitfieldsGen.c",
         spreadsheet=embedded / "MODBUS_SunSpec-EPC.xlsx",
         spreadsheet_user=embedded / "EPCSunspec.xlsx",
         smdx=sorted(sunspec.glob("smdx_*.xml")),
@@ -124,13 +128,14 @@ class Dialog(QtWidgets.QDialog):
         self.ui.pick_can.clicked.connect(self.pick_can)
         self.ui.pick_hierarchy.clicked.connect(self.pick_hierarchy)
         self.ui.pick_tables_c.clicked.connect(self.pick_tables_c)
+        self.ui.pick_bitfields_c.clicked.connect(self.pick_bitfields_c)
+        self.ui.pick_staticmodbus_c.clicked.connect(self.pick_staticmodbus_c)
         self.ui.pick_sunspec_tables_c.clicked.connect(
             self.pick_sunspec_tables_c,
         )
         self.ui.pick_spreadsheet.clicked.connect(self.pick_spreadsheet)
         self.ui.pick_spreadsheet_user.clicked.connect(self.pick_spreadsheet_user)
         self.ui.pick_sunspec_c.clicked.connect(self.pick_sunspec_c)
-        self.ui.pick_sunspec_bitfields_c.clicked.connect(self.pick_sunspec_bitfields_c)
         self.ui.pick_sil_c.clicked.connect(self.pick_sil_c)
         self.ui.pick_interface_c.clicked.connect(self.pick_interface_c)
         self.ui.pick_smdx.clicked.connect(self.pick_smdx)
@@ -147,8 +152,8 @@ class Dialog(QtWidgets.QDialog):
             can=self.ui.can.text(),
             hierarchy=self.ui.hierarchy.text(),
             tables_c=self.ui.tables_c.text(),
+            bitfields_c=self.ui.bitfields_c.text(),
             sunspec_tables_c=self.ui.sunspec_tables_c.text(),
-            sunspec_bitfields_c=self.ui.sunspec_bitfields_c.text(),
             spreadsheet=self.ui.spreadsheet.text(),
             spreadsheet_user=self.ui.spreadsheet_user.text(),
             smdx=smdx,
@@ -171,8 +176,9 @@ class Dialog(QtWidgets.QDialog):
         self.ui.can.setText(os.fspath(paths.can))
         self.ui.hierarchy.setText(os.fspath(paths.hierarchy))
         self.ui.tables_c.setText(os.fspath(paths.tables_c))
+        self.ui.bitfields_c.setText(os.fspath(paths.bitfields_c))
+        self.ui.staticmodbus_c.setText(os.fspath(paths.staticmodbus_c))
         self.ui.sunspec_tables_c.setText(os.fspath(paths.sunspec_tables_c))
-        self.ui.sunspec_bitfields_c.setText(os.fspath(paths.sunspec_bitfields_c))
         self.ui.spreadsheet.setText(os.fspath(paths.spreadsheet))
         self.ui.spreadsheet_user.setText(os.fspath(paths.spreadsheet_user))
         self.ui.sunspec_c.setText(os.fspath(paths.sunspec_c))
@@ -236,6 +242,26 @@ class Dialog(QtWidgets.QDialog):
             multiple=False,
         )
 
+    def pick_bitfields_c(self):
+        filters = (
+            ("Bitfields C", ["c"]),
+            all_files_filter,
+        )
+
+        self.file_dialog(
+            target=self.ui.bitfields_c,
+            filters=filters,
+            multiple=False,
+        )
+
+    def pick_staticmodbus_c(self):
+        directory = QtWidgets.QFileDialog.getExistingDirectory(parent=self)
+
+        if len(directory) == 0:
+            return
+
+        self.ui.staticmodbus_c.setText(directory)
+
     def pick_sunspec_tables_c(self):
         filters = (
             ("SunSpec Tables C", ["c"]),
@@ -244,18 +270,6 @@ class Dialog(QtWidgets.QDialog):
 
         self.file_dialog(
             target=self.ui.sunspec_tables_c,
-            filters=filters,
-            multiple=False,
-        )
-
-    def pick_sunspec_bitfields_c(self):
-        filters = (
-            ("SunSpec Bitfields C", ["c"]),
-            all_files_filter,
-        )
-
-        self.file_dialog(
-            target=self.ui.sunspec_bitfields_c,
             filters=filters,
             multiple=False,
         )

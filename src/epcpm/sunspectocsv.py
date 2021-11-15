@@ -18,6 +18,7 @@ builders = epyqlib.utils.general.TypeMap()
 
 data_point_fields = attr.fields(epcpm.sunspecmodel.DataPoint)
 bitfield_fields = attr.fields(epcpm.sunspecmodel.DataPointBitfield)
+bitfield_member_fields = attr.fields(epcpm.sunspecmodel.DataPointBitfieldMember)
 
 sunspec_types = epcpm.sunspecmodel.build_sunspec_types_enumeration()
 
@@ -28,11 +29,8 @@ def attr_fill(cls, value):
 
 @attr.s
 class Fields:
-    """
-    The fields defined for a given row in the output CSV file.
-    """
+    """The fields defined for a given row in the output CSV file."""
 
-    field_type = attr.ib(default=None, type=str)
     address_offset = attr.ib(default=None, type=str)
     block_offset = attr.ib(default=None, type=str)
     size = attr.ib(default=None, type=str)
@@ -45,6 +43,8 @@ class Fields:
     read_write = attr.ib(default=None, type=str)
     mandatory = attr.ib(default=None, type=str)
     description = attr.ib(default=None, type=str)
+    bit_offset = attr.ib(default=None, type=str)
+    bit_length = attr.ib(default=None, type=str)
     modbus_address = attr.ib(default=None, type=str)
     parameter_uuid = attr.ib(default=None, type=str)
     parameter_uses_interface_item = attr.ib(default=None, type=str)
@@ -82,6 +82,10 @@ bitfield_fields = Fields(
     block_offset=bitfield_fields.block_offset,
     size=bitfield_fields.size,
     type=bitfield_fields.type_uuid,
+)
+
+bitfield_member_fields = Fields(
+    type=bitfield_member_fields.type_uuid,
 )
 
 
@@ -129,6 +133,8 @@ def export(
 @builders(epcpm.sunspecmodel.Root)
 @attr.s
 class Root:
+    """CSV generator for the SunSpec Root class."""
+
     wrapped = attr.ib(type=epcpm.sunspecmodel.Root)
     column_filter = attr.ib(type=Fields)
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
@@ -178,6 +184,8 @@ class Root:
 @builders(epcpm.sunspecmodel.Model)
 @attr.s
 class Model:
+    """CSV generator for the SunSpec Model class."""
+
     wrapped = attr.ib(type=epcpm.sunspecmodel.Model)
     csv_data = attr.ib(type=typing.List[str])
     column_filter = attr.ib(type=Fields)
@@ -245,6 +253,8 @@ class Model:
 @builders(epcpm.sunspecmodel.Table)
 @attr.s
 class Table:
+    """CSV generator for the SunSpec Table class."""
+
     wrapped = attr.ib(type=epcpm.sunspecmodel.Model)
     padding_type = attr.ib(type=epyqlib.pm.parametermodel.Enumerator)
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
@@ -296,6 +306,8 @@ def build_uuid_scale_factor_dict(
 @builders(epcpm.sunspecmodel.FixedBlock)
 @attr.s
 class Block:
+    """CSV generator for the SunSpec HeaderBlock and FixedBlock classes."""
+
     wrapped = attr.ib(
         type=typing.Union[epcpm.sunspecmodel.HeaderBlock, epcpm.sunspecmodel.FixedBlock]
     )
@@ -360,7 +372,7 @@ class Block:
             )
             built_rows, address_offset_increment = builder.gen()
             summed_increments += address_offset_increment
-            rows.append(built_rows)
+            rows.extend(built_rows)
 
         return rows, summed_increments
 
@@ -368,6 +380,8 @@ class Block:
 @builders(epcpm.sunspecmodel.DataPointBitfield)
 @attr.s
 class DataPointBitfield:
+    """CSV generator for the SunSpec DataPointBitfield class."""
+
     wrapped = attr.ib(type=epcpm.sunspecmodel.DataPointBitfield)
     model_type = attr.ib(type=str)
     scale_factor_from_uuid = attr.ib(
@@ -385,14 +399,20 @@ class DataPointBitfield:
     def gen(self) -> typing.List[typing.List[str], int]:
         """
         CSV generator for the SunSpec DataPointBitfield class.
+        Call to generate the DataPointBitfieldMember children.
 
         Returns:
             list, int: row data for bitfield, bitfield size
         """
         row = Fields()
+        for name, field in attr.asdict(bitfield_fields).items():
+            if field is None:
+                continue
+
+            setattr(row, name, getattr(self.wrapped, field.name))
+
         row.address_offset = self.address_offset
         row.modbus_address = self.model_offset + self.address_offset
-        row.field_type = self.model_type
 
         for name, field in attr.asdict(bitfield_fields).items():
             if field is None:
@@ -419,17 +439,88 @@ class DataPointBitfield:
             row.uuid = self.wrapped.uuid
             row.class_name = "DataPointBitfield"
 
-        uses_interface_item = (
-            isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
-            and parameter.uses_interface_item()
-        )
+        # The parent DataPointBitfield row slots in before the DataPointBitfieldMember rows.
+        rows = [row]
+        points = list(self.wrapped.children)
+        for child in points:
+            builder = builders.wrap(
+                wrapped=child,
+                model_type=self.model_type,
+                parameter_uuid_finder=self.parameter_uuid_finder,
+                model_id=self.model_id,
+                model_offset=self.model_offset,
+                address_offset=self.address_offset,
+            )
+            child_row = builder.gen()
+            rows.append(child_row)
 
-        return row, row.size
+        return rows, row.size
+
+
+@builders(epcpm.sunspecmodel.DataPointBitfieldMember)
+@attr.s
+class DataPointBitfieldMember:
+    """CSV generator for the SunSpec DataPointBitfieldMember class."""
+
+    wrapped = attr.ib(type=epcpm.sunspecmodel.DataPointBitfieldMember)
+    model_type = attr.ib(type=str)
+    parameter_uuid_finder = attr.ib(type=typing.Callable)
+    model_id = attr.ib(type=int)
+    model_offset = attr.ib(type=int)
+    address_offset = attr.ib(type=int)
+
+    def gen(self) -> typing.List[str]:
+        """
+        CSV generator for the SunSpec DataPointBitfieldMember class.
+
+        Returns:
+            row: row data for bitfield member
+        """
+        row = Fields()
+        row.address_offset = self.address_offset
+        row.modbus_address = self.model_offset + self.address_offset
+
+        for name, field in attr.asdict(bitfield_member_fields).items():
+            if field is None:
+                continue
+
+            setattr(row, name, getattr(self.wrapped, field.name))
+
+        if row.type is not None:
+            row.type = self.parameter_uuid_finder(row.type).name
+
+        if self.wrapped.parameter_uuid is not None:
+            parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+
+            uses_interface_item = (
+                isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
+                and parameter.uses_interface_item()
+            )
+
+            row.label = parameter.name
+            row.name = parameter.abbreviation
+            if row.units is None:
+                row.units = parameter.units
+            row.description = parameter.comment
+            row.read_write = "R" if parameter.read_only else "RW"
+            row.parameter_uuid = parameter.uuid
+            row.parameter_uses_interface_item = uses_interface_item
+            row.type_uuid = self.wrapped.type_uuid
+            row.not_implemented = False
+            row.size = 0
+            row.bit_offset = self.wrapped.bit_offset
+            row.bit_length = self.wrapped.bit_length
+            row.uuid = self.wrapped.uuid
+            row.class_name = "DataPointBitfieldMember"
+
+        return row
 
 
 @builders(epcpm.sunspecmodel.TableRepeatingBlockReference)
 @attr.s
 class TableRepeatingBlockReference:
+    """CSV generator for the SunSpec TableRepeatingBlockReference class."""
+
     wrapped = attr.ib(type=epcpm.sunspecmodel.TableRepeatingBlockReference)
     add_padding = attr.ib(type=bool)
     padding_type = attr.ib(type=epyqlib.pm.parametermodel.Enumerator)
@@ -511,6 +602,8 @@ class TableRepeatingBlockReference:
 @builders(epcpm.sunspecmodel.TableRepeatingBlock)
 @attr.s
 class TableRepeatingBlock:
+    """CSV generator for the SunSpec TableRepeatingBlock class."""
+
     wrapped = attr.ib(type=epcpm.sunspecmodel.TableRepeatingBlock)
     add_padding = attr.ib(type=bool)
     padding_type = attr.ib(type=epyqlib.pm.parametermodel.Enumerator)
@@ -537,6 +630,8 @@ class TableRepeatingBlock:
 @builders(epcpm.sunspecmodel.DataPoint)
 @attr.s
 class Point:
+    """CSV generator for the SunSpec DataPoint class."""
+
     wrapped = attr.ib(type=epcpm.sunspecmodel.DataPoint)
     scale_factor_from_uuid = attr.ib(
         type=typing.Dict[uuid.UUID, epcpm.sunspecmodel.DataPoint]
@@ -642,4 +737,4 @@ class Point:
             row.not_implemented = False
             row.class_name = "DataPoint"
 
-        return row, row.size
+        return [row], row.size

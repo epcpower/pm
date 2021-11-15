@@ -101,6 +101,26 @@
     </widget>
    </item>
    <item row="4" column="0">
+    <widget class="QLabel" name="bitfields_c_label">
+     <property name="text">
+      <string>Bitfields C:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QLineEdit" name="bitfields_c"/>
+   </item>
+   <item row="4" column="2">
+    <widget class="QPushButton" name="pick_bitfields_c">
+     <property name="text">
+      <string>...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
     <widget class="QLabel" name="sunspec_tables_c_label">
      <property name="text">
       <string>SunSpec Tables C:</string>
@@ -110,31 +130,11 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="1">
+   <item row="5" column="1">
     <widget class="QLineEdit" name="sunspec_tables_c"/>
    </item>
-   <item row="4" column="2">
-    <widget class="QPushButton" name="pick_sunspec_tables_c">
-     <property name="text">
-      <string>...</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0">
-    <widget class="QLabel" name="sunspec_bitfields_c_label">
-     <property name="text">
-      <string>SunSpec Bitfields C</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="1">
-    <widget class="QLineEdit" name="sunspec_bitfields_c"/>
-   </item>
    <item row="5" column="2">
-    <widget class="QPushButton" name="pick_sunspec_bitfields_c">
+    <widget class="QPushButton" name="pick_sunspec_tables_c">
      <property name="text">
       <string>...</string>
      </property>
