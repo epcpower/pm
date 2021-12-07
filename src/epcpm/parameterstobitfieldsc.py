@@ -283,7 +283,6 @@ class FunctionDataBitfield:
             [
                 f".getter = InterfaceItem_bitfield_{bitfield_bit_length}_staticmodbus_getter,",
                 f".setter = InterfaceItem_bitfield_{bitfield_bit_length}_staticmodbus_setter,",
-                ".variable = NULL,",
             ],
             f"}},",
         ]
@@ -303,7 +302,6 @@ class FunctionDataBitfield:
             [
                 f".getter = NULL,",
                 f".setter = NULL,",
-                f".variable = NULL,",
             ],
             f"}},",
         ]

@@ -1681,7 +1681,6 @@ def create_common_initializers(
         f"}},",
         f".staticmodbus = {{",
         [
-            f".variable = {staticmodbus_variable},",
             f".getter = {staticmodbus_getter},",
             f".setter = {staticmodbus_setter},",
         ],
