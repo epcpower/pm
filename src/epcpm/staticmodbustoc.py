@@ -5,7 +5,6 @@ import epcpm.pm_helper
 import epcpm.staticmodbusmodel
 import epyqlib.attrsmodel
 import epyqlib.utils.general
-import sunspec.core.suns
 
 
 builders = epyqlib.utils.general.TypeMap()
@@ -59,7 +58,13 @@ class Root:
         Returns:
 
         """
-        c_lines_interface = []
+        # Add the initial two registers for the 'SunS' values, which form two 16-bit words.
+        # These registers are reserved in static modbus because of their functionality in SunSpec.
+        # It is possible they could be used by static modbus in the future.
+        c_lines_interface = [
+            "[0] = STATIC_MODBUS_REGISTER_DEFAULTS(),",
+            "[1] = STATIC_MODBUS_REGISTER_DEFAULTS(),",
+        ]
 
         for member in self.wrapped.children:
             builder = builders.wrap(
@@ -70,9 +75,7 @@ class Root:
             more_c_lines = builder.gen()
             c_lines_interface.extend(more_c_lines)
 
-        # Add the +2 registers for the 'SunS' values, which form two 16-bit words.
-        # These are ignored by static modbus, but the registers are still reserved.
-        total_registers = len(c_lines_interface) + sunspec.core.suns.SUNS_SUNS_LEN
+        total_registers = len(c_lines_interface)
         c_lines = [
             '#include "staticmodbusInterfaceGen.h"',
             '#include "interfaceBitfieldsGen.h"',
