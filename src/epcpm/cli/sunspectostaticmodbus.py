@@ -301,6 +301,7 @@ def cli(input_sunspec_filename: str, output_staticmodbus_filename: str) -> None:
         csv_reader = csv.reader(csv_file, quoting=csv.QUOTE_NONNUMERIC)
         # These keys should match the fields defined in the sunspectocsv export located in importexport.py.
         keys = [
+            "model_id",
             "size",
             "name",
             "label",

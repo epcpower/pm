@@ -145,6 +145,7 @@ def full_export(
         skip_output=skip_output,
         column_filter=attr.evolve(
             epcpm.sunspectocsv.attr_fill(epcpm.sunspectocsv.Fields, False),
+            model_id=True,
             size=True,
             name=True,
             label=True,

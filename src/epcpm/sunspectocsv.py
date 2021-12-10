@@ -31,6 +31,7 @@ def attr_fill(cls, value):
 class Fields:
     """The fields defined for a given row in the output CSV file."""
 
+    model_id = attr.ib(default=None, type=str)
     address_offset = attr.ib(default=None, type=str)
     block_offset = attr.ib(default=None, type=str)
     size = attr.ib(default=None, type=str)
@@ -238,6 +239,7 @@ class Model:
                 rows.extend(built_rows)
 
         for i, row in enumerate(rows):
+            row.model_id = self.wrapped.id
             if i == 0:
                 # Set ID value with model ID.
                 row.value = self.wrapped.id
