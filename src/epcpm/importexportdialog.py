@@ -137,7 +137,9 @@ class Dialog(QtWidgets.QDialog):
         )
         self.ui.pick_spreadsheet.clicked.connect(self.pick_spreadsheet)
         self.ui.pick_spreadsheet_user.clicked.connect(self.pick_spreadsheet_user)
-        self.ui.pick_staticmodbus_spreadsheet.clicked.connect(self.pick_staticmodbus_spreadsheet)
+        self.ui.pick_staticmodbus_spreadsheet.clicked.connect(
+            self.pick_staticmodbus_spreadsheet
+        )
         self.ui.pick_sunspec_c.clicked.connect(self.pick_sunspec_c)
         self.ui.pick_sil_c.clicked.connect(self.pick_sil_c)
         self.ui.pick_interface_c.clicked.connect(self.pick_interface_c)
@@ -185,7 +187,9 @@ class Dialog(QtWidgets.QDialog):
         self.ui.sunspec_tables_c.setText(os.fspath(paths.sunspec_tables_c))
         self.ui.spreadsheet.setText(os.fspath(paths.spreadsheet))
         self.ui.spreadsheet_user.setText(os.fspath(paths.spreadsheet_user))
-        self.ui.staticmodbus_spreadsheet.setText(os.fspath(paths.staticmodbus_spreadsheet))
+        self.ui.staticmodbus_spreadsheet.setText(
+            os.fspath(paths.staticmodbus_spreadsheet)
+        )
         self.ui.sunspec_c.setText(os.fspath(paths.sunspec_c))
         self.ui.sil_c.setText(os.fspath(paths.sil_c))
         self.ui.interface_c.setText(os.fspath(paths.interface_c))

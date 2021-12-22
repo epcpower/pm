@@ -20,19 +20,9 @@ class Fields:
     size = attr.ib(default=None)
     type = attr.ib(default=None)
     units = attr.ib(default=None)
+    read_write = attr.ib(default=None)
     description = attr.ib(default=None)
     field_type = attr.ib(default=None)
-    # read_write = attr.ib(default=None)
-    # mandatory = attr.ib(default=None)
-    # applicable_point = attr.ib(default=None)
-    # address_offset = attr.ib(default=None)
-    # block_offset = attr.ib(default=None)
-    # value = attr.ib(default=None)
-    # scale_factor = attr.ib(default=None)
-    # notes = attr.ib(default=None)
-    # get = attr.ib(default=None)
-    # set = attr.ib(default=None)
-    # item = attr.ib(default=None)
 
     def as_filtered_tuple(self, filter_):
         return tuple(
@@ -41,25 +31,15 @@ class Fields:
 
 
 field_names = Fields(
-    field_type="Field Type",
-    # applicable_point="Applicable Point",
-    # address_offset="Address Offset",
-    # block_offset="Block Offset",
-    size="Size",
+    modbus_address="Modbus Address",
     name="Name",
     label="Label",
-    # value="Value",
+    size="Size",
     type="Type",
     units="Units",
-    # scale_factor="SF",
-    # read_write="R/W",
-    # mandatory="Mandatory M/O",
+    read_write="R/W",
     description="Description",
-    # notes="Notes",
-    modbus_address="Modbus Address",
-    # get="get",
-    # set="set",
-    # item="item",
+    field_type="Field Type",
 )
 
 
@@ -88,8 +68,6 @@ def export(
     path.parent.mkdir(parents=True, exist_ok=True)
     workbook.save(path)
 
-    raise ValueError("NOT REAL!!!")
-
 
 @builders(epcpm.staticmodbusmodel.Root)
 @attr.s
@@ -103,6 +81,7 @@ class Root:
         workbook = openpyxl.Workbook()
         workbook.remove(workbook.active)
         worksheet = workbook.create_sheet()
+        worksheet.append(field_names.as_filtered_tuple(self.column_filter))
 
         for member in self.wrapped.children:
             builder = builders.wrap(
@@ -135,6 +114,13 @@ class FunctionData:
             row.label = parameter.name
             row.name = parameter.abbreviation
             row.description = parameter.comment
+            row.read_write = "R" if parameter.read_only else "RW"
+
+        if type_node.name == "pad":
+            row.name = "Pad"
+            row.description = "Force even alignment"
+            row.read_write = "R"
+
         return [row]
 
 
@@ -149,9 +135,7 @@ class FunctionDataBitfield:
         row = Fields()
         row.field_type = FunctionDataBitfield.__name__
         row.modbus_address = self.wrapped.address
-        # row.type = type_node.name
         row.size = self.wrapped.size
-        # row.units = self.wrapped.units
         rows.append(row)
 
         for member in self.wrapped.children:
@@ -183,5 +167,6 @@ class FunctionDataBitfieldMember:
             row.label = parameter.name
             row.name = parameter.abbreviation
             row.description = parameter.comment
+            row.read_write = "R" if parameter.read_only else "RW"
 
         return row
