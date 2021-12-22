@@ -15,6 +15,7 @@ import epcpm.parameterstosil
 import epcpm.project
 import epcpm.smdxtosunspec
 import epcpm.staticmodbustoc
+import epcpm.staticmodbustoxls
 import epcpm.sunspecmodel
 import epcpm.sunspectocsv
 import epcpm.sunspectotablesc
@@ -183,6 +184,13 @@ def full_export(
             set=False,
             item=False,
         ),
+    )
+
+    epcpm.staticmodbustoxls.export(
+        path=paths.staticmodbus_spreadsheet,
+        staticmodbus_model=project.models.staticmodbus,
+        parameters_model=project.models.parameters,
+        skip_output=skip_output,
     )
 
     epcpm.sunspectotablesc.export(
