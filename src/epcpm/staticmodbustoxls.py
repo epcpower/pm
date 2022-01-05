@@ -8,6 +8,8 @@ import typing
 
 import epcpm
 import epcpm.pm_helper
+import epcpm.staticmodbusmodel
+import epyqlib.attrsmodel
 import epyqlib.utils.general
 
 
@@ -18,10 +20,10 @@ builders = epyqlib.utils.general.TypeMap()
 class Fields(epcpm.pm_helper.FieldsInterface):
     """The fields defined for a given row in the output XLS file."""
 
-    modbus_address = attr.ib(default=None, type=typing.Union[str, bool])
+    modbus_address = attr.ib(default=None, type=typing.Union[str, bool, int])
     name = attr.ib(default=None, type=typing.Union[str, bool])
     label = attr.ib(default=None, type=typing.Union[str, bool])
-    size = attr.ib(default=None, type=typing.Union[str, bool])
+    size = attr.ib(default=None, type=typing.Union[str, bool, int])
     type = attr.ib(default=None, type=typing.Union[str, bool])
     units = attr.ib(default=None, type=typing.Union[str, bool])
     read_write = attr.ib(default=None, type=typing.Union[str, bool])
@@ -80,6 +82,12 @@ def export(
     workbook.save(path)
 
 
+# TODO: Remove this method when static modbus start address is changed to zero.
+def add_temporary_modbus_address_offset(input_modbus_address: int):
+    """TEMPORARY offset addition, to be removed when static modbus start address becomes zero"""
+    return input_modbus_address + 20000
+
+
 @builders(epcpm.staticmodbusmodel.Root)
 @attr.s
 class Root:
@@ -132,7 +140,7 @@ class FunctionData:
         type_node = self.parameter_uuid_finder(self.wrapped.type_uuid)
         row = Fields()
         row.field_type = FunctionData.__name__
-        row.modbus_address = self.wrapped.address
+        row.modbus_address = add_temporary_modbus_address_offset(self.wrapped.address)
         row.type = type_node.name
         row.size = self.wrapped.size
         row.units = self.wrapped.units
@@ -171,7 +179,7 @@ class FunctionDataBitfield:
         row = Fields()
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
         row.field_type = FunctionDataBitfield.__name__
-        row.modbus_address = self.wrapped.address
+        row.modbus_address = add_temporary_modbus_address_offset(self.wrapped.address)
         row.size = self.wrapped.size
         row.label = parameter.name
         row.name = parameter.abbreviation
@@ -185,7 +193,9 @@ class FunctionDataBitfield:
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
             member_row = builder.gen()
-            member_row.modbus_address = self.wrapped.address
+            member_row.modbus_address = add_temporary_modbus_address_offset(
+                self.wrapped.address
+            )
             rows.append(member_row)
 
         return rows
@@ -199,7 +209,7 @@ class FunctionDataBitfieldMember:
     wrapped = attr.ib(type=epcpm.staticmodbusmodel.FunctionDataBitfield)
     parameter_uuid_finder = attr.ib(type=typing.Callable)
 
-    def gen(self) -> typing.List[Fields]:
+    def gen(self) -> Fields:
         """
         Excel spreadsheet generator for the static modbus FunctionDataBitfieldMember class.
 
