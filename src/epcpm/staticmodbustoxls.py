@@ -1,9 +1,13 @@
+from __future__ import (
+    annotations,
+)  # See PEP 563, check to remove in future Python version higher than 3.7
 import attr
 import openpyxl
+import pathlib
 import typing
 
 import epcpm
-
+import epcpm.pm_helper
 import epyqlib.utils.general
 
 
@@ -11,20 +15,29 @@ builders = epyqlib.utils.general.TypeMap()
 
 
 @attr.s
-class Fields:
+class Fields(epcpm.pm_helper.FieldsInterface):
     """The fields defined for a given row in the output XLS file."""
 
-    modbus_address = attr.ib(default=None)
-    name = attr.ib(default=None)
-    label = attr.ib(default=None)
-    size = attr.ib(default=None)
-    type = attr.ib(default=None)
-    units = attr.ib(default=None)
-    read_write = attr.ib(default=None)
-    description = attr.ib(default=None)
-    field_type = attr.ib(default=None)
+    modbus_address = attr.ib(default=None, type=typing.Union[str, bool])
+    name = attr.ib(default=None, type=typing.Union[str, bool])
+    label = attr.ib(default=None, type=typing.Union[str, bool])
+    size = attr.ib(default=None, type=typing.Union[str, bool])
+    type = attr.ib(default=None, type=typing.Union[str, bool])
+    units = attr.ib(default=None, type=typing.Union[str, bool])
+    read_write = attr.ib(default=None, type=typing.Union[str, bool])
+    description = attr.ib(default=None, type=typing.Union[str, bool])
+    field_type = attr.ib(default=None, type=typing.Union[str, bool])
 
-    def as_filtered_tuple(self, filter_):
+    def as_filtered_tuple(self, filter_: Fields) -> typing.Tuple:
+        """
+        Returns a tuple of field attribute values specified by the filter.
+
+        Args:
+            filter_: a subset of a Fields object to be used as a filter
+
+        Returns:
+            tuple: a tuple of values that have been filtered specified by field values in filter_
+        """
         return tuple(
             value for value, f in zip(attr.astuple(self), attr.astuple(filter_)) if f
         )
@@ -43,18 +56,30 @@ field_names = Fields(
 )
 
 
-def attr_fill(cls, value):
-    return cls(**{field.name: value for field in attr.fields(cls) if field.init})
-
-
 def export(
-    path, staticmodbus_model, parameters_model, column_filter=None, skip_output=False
-):
+    path: pathlib.Path,
+    staticmodbus_model: epyqlib.attrsmodel.Model,
+    parameters_model: epyqlib.attrsmodel.Model,
+    column_filter: Fields = None,
+    skip_output: bool = False,
+) -> None:
+    """
+    Generate the static modbus model data Excel .xls file.
+    Args:
+        path: path and filename for .xls file
+        staticmodbus_model: static modbus model
+        parameters_model: parameters model
+        column_filter: columns to be output to .xls file
+        skip_output: skip output of the generated files
+
+    Returns:
+
+    """
     if skip_output:
         return
 
     if column_filter is None:
-        column_filter = attr_fill(Fields, True)
+        column_filter = epcpm.pm_helper.attr_fill(Fields, True)
 
     builder = epcpm.staticmodbustoxls.builders.wrap(
         wrapped=staticmodbus_model.root,
@@ -72,12 +97,20 @@ def export(
 @builders(epcpm.staticmodbusmodel.Root)
 @attr.s
 class Root:
-    wrapped = attr.ib()
-    column_filter = attr.ib()
-    parameter_uuid_finder = attr.ib(default=None)
-    parameter_model = attr.ib(default=None)
+    """Excel spreadsheet generator for the static modbus Root class."""
 
-    def gen(self):
+    wrapped = attr.ib(type=epcpm.staticmodbusmodel.Root)
+    column_filter = attr.ib(type=Fields)
+    parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
+    parameter_model = attr.ib(default=None, type=epyqlib.attrsmodel.Model)
+
+    def gen(self) -> openpyxl.workbook.workbook.Workbook:
+        """
+        Excel spreadsheet generator for the static modbus root class.
+
+        Returns:
+            workbook: generated Excel workbook
+        """
         workbook = openpyxl.Workbook()
         workbook.remove(workbook.active)
         worksheet = workbook.create_sheet()
@@ -98,10 +131,18 @@ class Root:
 @builders(epcpm.staticmodbusmodel.FunctionData)
 @attr.s
 class FunctionData:
+    """Excel spreadsheet generator for the static modbus FunctionData class."""
+
     wrapped = attr.ib(type=epcpm.staticmodbusmodel.FunctionData)
     parameter_uuid_finder = attr.ib(type=typing.Callable)
 
-    def gen(self) -> typing.List[str]:
+    def gen(self) -> typing.List[Fields]:
+        """
+        Excel spreadsheet generator for the static modbus FunctionData class.
+
+        Returns:
+            list: single Fields row of FunctionData
+        """
         type_node = self.parameter_uuid_finder(self.wrapped.type_uuid)
         row = Fields()
         row.field_type = FunctionData.__name__
@@ -127,15 +168,29 @@ class FunctionData:
 @builders(epcpm.staticmodbusmodel.FunctionDataBitfield)
 @attr.s
 class FunctionDataBitfield:
+    """Excel spreadsheet generator for the static modbus FunctionDataBitfield class."""
+
     wrapped = attr.ib(type=epcpm.staticmodbusmodel.FunctionDataBitfield)
     parameter_uuid_finder = attr.ib(type=typing.Callable)
 
-    def gen(self) -> typing.List[str]:
+    def gen(self) -> typing.List[Fields]:
+        """
+        Excel spreadsheet generator for the static modbus FunctionDataBitfield class.
+        Call to generate the FunctionDataBitfieldMember children.
+
+        Returns:
+            list: list of Fields rows for FunctionDataBitfield and FunctionDataBitfieldMember
+        """
         rows = []
         row = Fields()
+        parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
         row.field_type = FunctionDataBitfield.__name__
         row.modbus_address = self.wrapped.address
         row.size = self.wrapped.size
+        row.label = parameter.name
+        row.name = parameter.abbreviation
+        row.description = parameter.comment
+        row.read_write = "R" if parameter.read_only else "RW"
         rows.append(row)
 
         for member in self.wrapped.children:
@@ -153,10 +208,18 @@ class FunctionDataBitfield:
 @builders(epcpm.staticmodbusmodel.FunctionDataBitfieldMember)
 @attr.s
 class FunctionDataBitfieldMember:
+    """Excel spreadsheet generator for the static modbus FunctionDataBitfieldMember class."""
+
     wrapped = attr.ib(type=epcpm.staticmodbusmodel.FunctionDataBitfield)
     parameter_uuid_finder = attr.ib(type=typing.Callable)
 
-    def gen(self) -> typing.List[str]:
+    def gen(self) -> typing.List[Fields]:
+        """
+        Excel spreadsheet generator for the static modbus FunctionDataBitfieldMember class.
+
+        Returns:
+            row: Fields row for a FunctionDataBitfieldMember
+        """
         row = Fields()
         row.field_type = FunctionDataBitfieldMember.__name__
         type_node = self.parameter_uuid_finder(self.wrapped.type_uuid)

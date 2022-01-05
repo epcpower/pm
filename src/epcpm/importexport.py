@@ -178,12 +178,6 @@ def full_export(
         sunspec_model=project.models.sunspec,
         parameters_model=project.models.parameters,
         skip_sunspec=skip_output,
-        column_filter=attr.evolve(
-            epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True),
-            get=False,
-            set=False,
-            item=False,
-        ),
     )
 
     epcpm.staticmodbustoxls.export(
