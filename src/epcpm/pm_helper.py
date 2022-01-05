@@ -40,7 +40,9 @@ class FieldsInterface(ABC):
         )
 
 
-def attr_fill(cls: typing.Type[FieldsInterface], value: bool) -> typing.Type[FieldsInterface]:
+def attr_fill(
+    cls: typing.Type[FieldsInterface], value: bool
+) -> typing.Type[FieldsInterface]:
     """
     Takes as input a Fields class and outputs a Fields object
     to be used as a filter for the fields.

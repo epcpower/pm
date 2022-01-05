@@ -17,6 +17,7 @@ builders = epyqlib.utils.general.TypeMap()
 @attr.s
 class Fields(epcpm.pm_helper.FieldsInterface):
     """The fields defined for a given row in the output XLS file."""
+
     modbus_address = attr.ib(default=None, type=typing.Union[str, bool])
     name = attr.ib(default=None, type=typing.Union[str, bool])
     label = attr.ib(default=None, type=typing.Union[str, bool])

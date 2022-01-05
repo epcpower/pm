@@ -27,6 +27,7 @@ sunspec_types = epcpm.sunspecmodel.build_sunspec_types_enumeration()
 @attr.s
 class Fields(epcpm.pm_helper.FieldsInterface):
     """The fields defined for a given row in the output CSV file."""
+
     model_id = attr.ib(default=None, type=typing.Union[str, bool])
     address_offset = attr.ib(default=None, type=typing.Union[str, bool])
     block_offset = attr.ib(default=None, type=typing.Union[str, bool])

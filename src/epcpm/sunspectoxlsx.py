@@ -31,6 +31,7 @@ bitfield_fields = attr.fields(epcpm.sunspecmodel.DataPointBitfield)
 @attr.s
 class Fields(epcpm.pm_helper.FieldsInterface):
     """The fields defined for a given row in the output XLS file."""
+
     field_type = attr.ib(default=None, type=typing.Union[str, bool])
     applicable_point = attr.ib(default=None, type=typing.Union[str, bool])
     address_offset = attr.ib(default=None, type=typing.Union[str, bool])
