@@ -308,7 +308,7 @@ class Block:
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
     is_table = attr.ib(default=False, type=bool)
 
-    def gen(self) -> typing.List[typing.List[str], int]:
+    def gen(self) -> typing.Tuple[list, int]:
         """
         CSV generator for the SunSpec HeaderBlock and FixedBlock classes.
 
@@ -381,7 +381,7 @@ class DataPointBitfield:
     )
     address_offset = attr.ib(type=int)
 
-    def gen(self) -> typing.List[typing.List[str], int]:
+    def gen(self) -> typing.Tuple[typing.List[Fields], int]:
         """
         CSV generator for the SunSpec DataPointBitfield class.
         Call to generate the DataPointBitfieldMember children.
@@ -454,7 +454,7 @@ class DataPointBitfieldMember:
     model_offset = attr.ib(type=int)
     address_offset = attr.ib(type=int)
 
-    def gen(self) -> typing.List[str]:
+    def gen(self) -> Fields:
         """
         CSV generator for the SunSpec DataPointBitfieldMember class.
 
@@ -515,7 +515,7 @@ class TableRepeatingBlockReference:
     address_offset = attr.ib(type=int)
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
 
-    def gen(self) -> typing.List[typing.List[str], int]:
+    def gen(self) -> typing.Tuple[typing.List[Fields], int]:
         """
         CSV generator for the SunSpec TableRepeatingBlockReference class.
 
@@ -602,7 +602,7 @@ class TableRepeatingBlock:
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
     is_table = attr.ib(default=False, type=bool)
 
-    def gen(self) -> typing.List[typing.List[str], int]:
+    def gen(self) -> typing.Tuple[typing.List[Fields], int]:
         """
         CSV generator for the SunSpec TableRepeatingBlock class.
 
@@ -632,7 +632,7 @@ class Point:
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
 
     # TODO: CAMPid 07397546759269756456100183066795496952476951653
-    def gen(self) -> typing.List[typing.List[str], int]:
+    def gen(self) -> typing.Tuple[typing.List[Fields], int]:
         """
         CSV generator for the SunSpec DataPoint class.
 
