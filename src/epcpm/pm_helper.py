@@ -23,9 +23,9 @@ def convert_uuid_to_variable_name(uuid: uuid.UUID) -> str:
     return str(uuid).replace("-", "_")
 
 
+@attr.s
 class FieldsInterface(ABC):
-    @abstractmethod
-    def as_filtered_tuple(self, filter_: FieldsInterface) -> typing.Tuple:
+    def as_filtered_tuple(self, filter_: typing.Type[FieldsInterface]) -> typing.Tuple:
         """
         Returns a tuple of field attribute values specified by the filter.
 
@@ -35,10 +35,12 @@ class FieldsInterface(ABC):
         Returns:
             tuple: a tuple of values that have been filtered specified by field values in filter_
         """
-        pass
+        return tuple(
+            value for value, f in zip(attr.astuple(self), attr.astuple(filter_)) if f
+        )
 
 
-def attr_fill(cls: FieldsInterface, value: bool) -> FieldsInterface:
+def attr_fill(cls: typing.Type[FieldsInterface], value: bool) -> typing.Type[FieldsInterface]:
     """
     Takes as input a Fields class and outputs a Fields object
     to be used as a filter for the fields.

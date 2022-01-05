@@ -12,6 +12,7 @@ import epcpm.parameterstobitfieldsc
 import epcpm.parameterstohierarchy
 import epcpm.parameterstointerface
 import epcpm.parameterstosil
+import epcpm.pm_helper
 import epcpm.project
 import epcpm.smdxtosunspec
 import epcpm.staticmodbustoc
@@ -145,7 +146,7 @@ def full_export(
         parameters_model=project.models.parameters,
         skip_output=skip_output,
         column_filter=attr.evolve(
-            epcpm.sunspectocsv.attr_fill(epcpm.sunspectocsv.Fields, False),
+            epcpm.pm_helper.attr_fill(epcpm.sunspectocsv.Fields, False),
             model_id=True,
             size=True,
             name=True,

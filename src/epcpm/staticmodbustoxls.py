@@ -17,7 +17,6 @@ builders = epyqlib.utils.general.TypeMap()
 @attr.s
 class Fields(epcpm.pm_helper.FieldsInterface):
     """The fields defined for a given row in the output XLS file."""
-
     modbus_address = attr.ib(default=None, type=typing.Union[str, bool])
     name = attr.ib(default=None, type=typing.Union[str, bool])
     label = attr.ib(default=None, type=typing.Union[str, bool])
@@ -27,20 +26,6 @@ class Fields(epcpm.pm_helper.FieldsInterface):
     read_write = attr.ib(default=None, type=typing.Union[str, bool])
     description = attr.ib(default=None, type=typing.Union[str, bool])
     field_type = attr.ib(default=None, type=typing.Union[str, bool])
-
-    def as_filtered_tuple(self, filter_: Fields) -> typing.Tuple:
-        """
-        Returns a tuple of field attribute values specified by the filter.
-
-        Args:
-            filter_: a subset of a Fields object to be used as a filter
-
-        Returns:
-            tuple: a tuple of values that have been filtered specified by field values in filter_
-        """
-        return tuple(
-            value for value, f in zip(attr.astuple(self), attr.astuple(filter_)) if f
-        )
 
 
 field_names = Fields(
@@ -60,7 +45,7 @@ def export(
     path: pathlib.Path,
     staticmodbus_model: epyqlib.attrsmodel.Model,
     parameters_model: epyqlib.attrsmodel.Model,
-    column_filter: Fields = None,
+    column_filter: typing.Type[epcpm.pm_helper.FieldsInterface] = None,
     skip_output: bool = False,
 ) -> None:
     """
