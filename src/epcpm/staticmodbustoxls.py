@@ -29,6 +29,7 @@ class Fields(epcpm.pm_helper.FieldsInterface):
     read_write = attr.ib(default=None, type=typing.Union[str, bool])
     description = attr.ib(default=None, type=typing.Union[str, bool])
     field_type = attr.ib(default=None, type=typing.Union[str, bool])
+    parameter_uses_interface_item = attr.ib(default=False, type=typing.Union[str, bool])
 
 
 field_names = Fields(
@@ -41,6 +42,7 @@ field_names = Fields(
     read_write="R/W",
     description="Description",
     field_type="Field Type",
+    parameter_uses_interface_item="Implemented",
 )
 
 
@@ -150,6 +152,11 @@ class FunctionData:
             row.name = parameter.abbreviation
             row.description = parameter.comment
             row.read_write = "R" if parameter.read_only else "RW"
+            uses_interface_item = (
+                isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
+                and parameter.uses_interface_item()
+            )
+            row.parameter_uses_interface_item = uses_interface_item
 
         if type_node.name == "pad":
             row.name = "Pad"
@@ -227,5 +234,10 @@ class FunctionDataBitfieldMember:
             row.name = parameter.abbreviation
             row.description = parameter.comment
             row.read_write = "R" if parameter.read_only else "RW"
+            uses_interface_item = (
+                isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
+                and parameter.uses_interface_item()
+            )
+            row.parameter_uses_interface_item = uses_interface_item
 
         return row
