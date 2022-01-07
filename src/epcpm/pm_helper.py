@@ -40,9 +40,7 @@ class FieldsInterface(ABC):
         )
 
 
-def attr_fill(
-    cls: typing.Type[FieldsInterface], value: bool
-) -> FieldsInterface:
+def attr_fill(cls: typing.Type[FieldsInterface], value: bool) -> FieldsInterface:
     """
     Takes as input a Fields class and outputs a Fields object
     with all attributes set to the value parameter
