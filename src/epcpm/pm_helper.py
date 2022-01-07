@@ -5,22 +5,22 @@ from __future__ import (
 import attr
 import typing
 import uuid
-from abc import ABC, abstractmethod
+from abc import ABC
 
 
-def convert_uuid_to_variable_name(uuid: uuid.UUID) -> str:
+def convert_uuid_to_variable_name(input_uuid: uuid.UUID) -> str:
     """
     Replace the dashes in a given UUID with underscores. Return a string value.
     Replacement for CAMPid 9685439641536675431653179671436
     Replacement for CAMPid 07954360685417610543064316843160
 
     Args:
-        uuid: input UUID
+        input_uuid: input UUID
 
     Returns:
         str: UUID with dashes replaced by underscores
     """
-    return str(uuid).replace("-", "_")
+    return str(input_uuid).replace("-", "_")
 
 
 @attr.s
@@ -42,10 +42,11 @@ class FieldsInterface(ABC):
 
 def attr_fill(
     cls: typing.Type[FieldsInterface], value: bool
-) -> typing.Type[FieldsInterface]:
+) -> FieldsInterface:
     """
     Takes as input a Fields class and outputs a Fields object
-    to be used as a filter for the fields.
+    with all attributes set to the value parameter
+    which will then be used as a filter.
 
     Args:
         cls: attrs class of field names
