@@ -9,6 +9,7 @@ import typing
 import uuid
 import epcpm.c
 import epyqlib.attrsmodel
+import epcpm.pm_helper
 import epcpm.sunspecmodel
 import epyqlib.pm.parametermodel
 import epyqlib.utils.general
@@ -23,52 +24,34 @@ bitfield_member_fields = attr.fields(epcpm.sunspecmodel.DataPointBitfieldMember)
 sunspec_types = epcpm.sunspecmodel.build_sunspec_types_enumeration()
 
 
-def attr_fill(cls, value):
-    return cls(**{field.name: value for field in attr.fields(cls) if field.init})
-
-
 @attr.s
-class Fields:
+class Fields(epcpm.pm_helper.FieldsInterface):
     """The fields defined for a given row in the output CSV file."""
 
-    model_id = attr.ib(default=None, type=str)
-    address_offset = attr.ib(default=None, type=str)
-    block_offset = attr.ib(default=None, type=str)
-    size = attr.ib(default=None, type=str)
-    name = attr.ib(default=None, type=str)
-    label = attr.ib(default=None, type=str)
-    value = attr.ib(default=None, type=str)
-    type = attr.ib(default=None, type=str)
-    units = attr.ib(default=None, type=str)
-    scale_factor = attr.ib(default=None, type=str)
-    read_write = attr.ib(default=None, type=str)
-    mandatory = attr.ib(default=None, type=str)
-    description = attr.ib(default=None, type=str)
-    bit_offset = attr.ib(default=None, type=str)
-    bit_length = attr.ib(default=None, type=str)
-    modbus_address = attr.ib(default=None, type=str)
-    parameter_uuid = attr.ib(default=None, type=str)
-    parameter_uses_interface_item = attr.ib(default=None, type=str)
-    scale_factor_uuid = attr.ib(default=None, type=str)
-    enumeration_uuid = attr.ib(default=None, type=str)
-    type_uuid = attr.ib(default=None, type=str)
-    not_implemented = attr.ib(default=None, type=str)
-    uuid = attr.ib(default=None, type=str)
-    class_name = attr.ib(default=None, type=str)
-
-    def as_filtered_tuple(self, filter_: Fields) -> typing.Tuple:
-        """
-        Returns a tuple of field attribute values specified by the filter.
-
-        Args:
-            filter_: a subset of a Fields object to be used as a filter
-
-        Returns:
-            tuple: a tuple of values that have been filtered specified by field values in filter_
-        """
-        return tuple(
-            value for value, f in zip(attr.astuple(self), attr.astuple(filter_)) if f
-        )
+    model_id = attr.ib(default=None, type=typing.Union[str, bool])
+    address_offset = attr.ib(default=None, type=typing.Union[str, bool])
+    block_offset = attr.ib(default=None, type=typing.Union[str, bool])
+    size = attr.ib(default=None, type=typing.Union[str, bool])
+    name = attr.ib(default=None, type=typing.Union[str, bool])
+    label = attr.ib(default=None, type=typing.Union[str, bool])
+    value = attr.ib(default=None, type=typing.Union[str, bool])
+    type = attr.ib(default=None, type=typing.Union[str, bool])
+    units = attr.ib(default=None, type=typing.Union[str, bool])
+    scale_factor = attr.ib(default=None, type=typing.Union[str, bool])
+    read_write = attr.ib(default=None, type=typing.Union[str, bool])
+    mandatory = attr.ib(default=None, type=typing.Union[str, bool])
+    description = attr.ib(default=None, type=typing.Union[str, bool])
+    bit_offset = attr.ib(default=None, type=typing.Union[str, bool])
+    bit_length = attr.ib(default=None, type=typing.Union[str, bool])
+    modbus_address = attr.ib(default=None, type=typing.Union[str, bool])
+    parameter_uuid = attr.ib(default=None, type=typing.Union[str, bool])
+    parameter_uses_interface_item = attr.ib(default=None, type=typing.Union[str, bool])
+    scale_factor_uuid = attr.ib(default=None, type=typing.Union[str, bool])
+    enumeration_uuid = attr.ib(default=None, type=typing.Union[str, bool])
+    type_uuid = attr.ib(default=None, type=typing.Union[str, bool])
+    not_implemented = attr.ib(default=None, type=typing.Union[str, bool])
+    uuid = attr.ib(default=None, type=typing.Union[str, bool])
+    class_name = attr.ib(default=None, type=typing.Union[str, bool])
 
 
 point_fields = Fields(
@@ -94,7 +77,7 @@ def export(
     path: pathlib.Path,
     sunspec_model: epyqlib.attrsmodel.Model,
     parameters_model: epyqlib.attrsmodel.Model,
-    column_filter: Fields = None,
+    column_filter: typing.Type[epcpm.pm_helper.FieldsInterface] = None,
     skip_output: bool = False,
 ) -> None:
     """
@@ -114,7 +97,7 @@ def export(
         return
 
     if column_filter is None:
-        column_filter = attr_fill(Fields, True)
+        column_filter = epcpm.pm_helper.attr_fill(Fields, True)
 
     builder = epcpm.sunspectocsv.builders.wrap(
         wrapped=sunspec_model.root,
@@ -325,7 +308,7 @@ class Block:
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
     is_table = attr.ib(default=False, type=bool)
 
-    def gen(self) -> typing.List[typing.List[str], int]:
+    def gen(self) -> typing.Tuple[list, int]:
         """
         CSV generator for the SunSpec HeaderBlock and FixedBlock classes.
 
@@ -398,7 +381,7 @@ class DataPointBitfield:
     )
     address_offset = attr.ib(type=int)
 
-    def gen(self) -> typing.List[typing.List[str], int]:
+    def gen(self) -> typing.Tuple[typing.List[Fields], int]:
         """
         CSV generator for the SunSpec DataPointBitfield class.
         Call to generate the DataPointBitfieldMember children.
@@ -471,7 +454,7 @@ class DataPointBitfieldMember:
     model_offset = attr.ib(type=int)
     address_offset = attr.ib(type=int)
 
-    def gen(self) -> typing.List[str]:
+    def gen(self) -> Fields:
         """
         CSV generator for the SunSpec DataPointBitfieldMember class.
 
@@ -532,7 +515,7 @@ class TableRepeatingBlockReference:
     address_offset = attr.ib(type=int)
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
 
-    def gen(self) -> typing.List[typing.List[str], int]:
+    def gen(self) -> typing.Tuple[typing.List[Fields], int]:
         """
         CSV generator for the SunSpec TableRepeatingBlockReference class.
 
@@ -619,7 +602,7 @@ class TableRepeatingBlock:
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
     is_table = attr.ib(default=False, type=bool)
 
-    def gen(self) -> typing.List[typing.List[str], int]:
+    def gen(self) -> typing.Tuple[typing.List[Fields], int]:
         """
         CSV generator for the SunSpec TableRepeatingBlock class.
 
@@ -649,7 +632,7 @@ class Point:
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
 
     # TODO: CAMPid 07397546759269756456100183066795496952476951653
-    def gen(self) -> typing.List[typing.List[str], int]:
+    def gen(self) -> typing.Tuple[typing.List[Fields], int]:
         """
         CSV generator for the SunSpec DataPoint class.
 

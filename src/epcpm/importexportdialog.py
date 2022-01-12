@@ -81,6 +81,7 @@ class ImportPaths:
     sunspec_tables_c = attr.ib(converter=path_or_none)
     spreadsheet = attr.ib(converter=path_or_none)
     spreadsheet_user = attr.ib(converter=path_or_none)
+    staticmodbus_spreadsheet = attr.ib(converter=path_or_none)
     smdx = attr.ib(converter=paths_or_none)
     sunspec_c = attr.ib(converter=path_or_none)
     sil_c = attr.ib(converter=path_or_none)
@@ -102,6 +103,7 @@ def paths_from_directory(directory):
         sunspec_tables_c=sunspec / "sunspecInterfaceGenTables.c",
         spreadsheet=embedded / "MODBUS_SunSpec-EPC.xlsx",
         spreadsheet_user=embedded / "EPCSunspec.xlsx",
+        staticmodbus_spreadsheet=embedded / "MODBUS-EPC.xlsx",
         smdx=sorted(sunspec.glob("smdx_*.xml")),
         sunspec_c=sunspec,
         sil_c=path / "sil" / "libEpcControlInterfaceGen.c",
@@ -135,6 +137,9 @@ class Dialog(QtWidgets.QDialog):
         )
         self.ui.pick_spreadsheet.clicked.connect(self.pick_spreadsheet)
         self.ui.pick_spreadsheet_user.clicked.connect(self.pick_spreadsheet_user)
+        self.ui.pick_staticmodbus_spreadsheet.clicked.connect(
+            self.pick_staticmodbus_spreadsheet
+        )
         self.ui.pick_sunspec_c.clicked.connect(self.pick_sunspec_c)
         self.ui.pick_sil_c.clicked.connect(self.pick_sil_c)
         self.ui.pick_interface_c.clicked.connect(self.pick_interface_c)
@@ -156,6 +161,7 @@ class Dialog(QtWidgets.QDialog):
             sunspec_tables_c=self.ui.sunspec_tables_c.text(),
             spreadsheet=self.ui.spreadsheet.text(),
             spreadsheet_user=self.ui.spreadsheet_user.text(),
+            staticmodbus_spreadsheet=self.ui.staticmodbus_spreadsheet.text(),
             smdx=smdx,
             staticmodbus_c=self.ui.staticmodbus_c.text(),
             sunspec_c=self.ui.sunspec_c.text(),
@@ -181,6 +187,9 @@ class Dialog(QtWidgets.QDialog):
         self.ui.sunspec_tables_c.setText(os.fspath(paths.sunspec_tables_c))
         self.ui.spreadsheet.setText(os.fspath(paths.spreadsheet))
         self.ui.spreadsheet_user.setText(os.fspath(paths.spreadsheet_user))
+        self.ui.staticmodbus_spreadsheet.setText(
+            os.fspath(paths.staticmodbus_spreadsheet)
+        )
         self.ui.sunspec_c.setText(os.fspath(paths.sunspec_c))
         self.ui.sil_c.setText(os.fspath(paths.sil_c))
         self.ui.interface_c.setText(os.fspath(paths.interface_c))
@@ -294,6 +303,18 @@ class Dialog(QtWidgets.QDialog):
 
         self.file_dialog(
             target=self.ui.spreadsheet_user,
+            filters=filters,
+            multiple=False,
+        )
+
+    def pick_staticmodbus_spreadsheet(self):
+        filters = (
+            ("Static Modbus Spreadsheet", ["xls"]),
+            all_files_filter,
+        )
+
+        self.file_dialog(
+            target=self.ui.staticmodbus_spreadsheet,
             filters=filters,
             multiple=False,
         )

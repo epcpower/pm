@@ -117,7 +117,7 @@ def set_common_staticmodbus_node_data(
         epcpm.staticmodbusmodel.FunctionDataBitfield,
         epcpm.staticmodbusmodel.FunctionDataBitfieldMember,
     ],
-    input_sunspec_data: typing.List[typing.Dict[str, str]],
+    input_sunspec_data: typing.Dict[str, str],
     sunspec_types: epyqlib.pm.parametermodel.Enumeration,
     staticmodbus_types: epyqlib.pm.parametermodel.Enumeration,
 ):
@@ -147,7 +147,7 @@ def set_common_staticmodbus_node_data(
 
 
 def create_function_data(
-    input_sunspec_data: typing.List[typing.Dict[str, str]],
+    input_sunspec_data: typing.Dict[str, str],
     scale_factor_uuid_map: typing.Dict[str, str],
     sunspec_types: epyqlib.pm.parametermodel.Enumeration,
     staticmodbus_types: epyqlib.pm.parametermodel.Enumeration,
@@ -197,7 +197,7 @@ def create_function_data(
 
 
 def create_function_data_bitfield(
-    input_sunspec_data: typing.List[typing.Dict[str, str]],
+    input_sunspec_data: typing.Dict[str, str],
     sunspec_types: epyqlib.pm.parametermodel.Enumeration,
     staticmodbus_types: epyqlib.pm.parametermodel.Enumeration,
 ) -> epcpm.staticmodbusmodel.FunctionDataBitfield:
@@ -224,9 +224,9 @@ def create_function_data_bitfield(
 
 
 def create_function_data_bitfield_member(
-    input_sunspec_data: typing.List[typing.Dict[str, str]],
-    sunspec_types: epcpm.staticmodbusmodel.FunctionDataBitfield,
-    staticmodbus_types: epcpm.staticmodbusmodel.FunctionDataBitfield,
+    input_sunspec_data: typing.Dict[str, str],
+    sunspec_types: epyqlib.pm.parametermodel.Enumeration,
+    staticmodbus_types: epyqlib.pm.parametermodel.Enumeration,
 ) -> epcpm.staticmodbusmodel.FunctionDataBitfieldMember:
     """
     Given the input SunSpec CSV data, transform and generate FunctionDataBitfieldMember objects for the output static modbus.

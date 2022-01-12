@@ -12,9 +12,11 @@ import epcpm.parameterstobitfieldsc
 import epcpm.parameterstohierarchy
 import epcpm.parameterstointerface
 import epcpm.parameterstosil
+import epcpm.pm_helper
 import epcpm.project
 import epcpm.smdxtosunspec
 import epcpm.staticmodbustoc
+import epcpm.staticmodbustoxls
 import epcpm.sunspecmodel
 import epcpm.sunspectocsv
 import epcpm.sunspectotablesc
@@ -144,7 +146,7 @@ def full_export(
         parameters_model=project.models.parameters,
         skip_output=skip_output,
         column_filter=attr.evolve(
-            epcpm.sunspectocsv.attr_fill(epcpm.sunspectocsv.Fields, False),
+            epcpm.pm_helper.attr_fill(epcpm.sunspectocsv.Fields, False),
             model_id=True,
             size=True,
             name=True,
@@ -177,12 +179,13 @@ def full_export(
         sunspec_model=project.models.sunspec,
         parameters_model=project.models.parameters,
         skip_sunspec=skip_output,
-        column_filter=attr.evolve(
-            epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True),
-            get=False,
-            set=False,
-            item=False,
-        ),
+    )
+
+    epcpm.staticmodbustoxls.export(
+        path=paths.staticmodbus_spreadsheet,
+        staticmodbus_model=project.models.staticmodbus,
+        parameters_model=project.models.parameters,
+        skip_output=skip_output,
     )
 
     epcpm.sunspectotablesc.export(
