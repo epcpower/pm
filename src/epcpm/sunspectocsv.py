@@ -77,7 +77,7 @@ def export(
     path: pathlib.Path,
     sunspec_model: epyqlib.attrsmodel.Model,
     parameters_model: epyqlib.attrsmodel.Model,
-    column_filter: typing.Type[epcpm.pm_helper.FieldsInterface] = None,
+    column_filter: epcpm.pm_helper.FieldsInterface = None,
     skip_output: bool = False,
 ) -> None:
     """
