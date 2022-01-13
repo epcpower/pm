@@ -9,7 +9,7 @@ import epyqlib.checkresultmodel
 import epyqlib.pm.parametermodel
 import epyqlib.utils
 import epyqlib.utils.qt
-from PyQt5 import QtCore
+# from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
 
@@ -109,7 +109,6 @@ def create_factor_uuid_attribute():
         allow_none=True,
         data_display=name_from_uuid,
         list_selection_path=("/"),
-        # list_selection_path=("..", "..", "Fixed Block"),
         override_delegate=ScaleFactorDelegate,
     )
 
@@ -207,13 +206,6 @@ class FunctionData(epyqlib.treenode.TreeNode):
     factor_uuid = create_factor_uuid_attribute()
     parameter_uuid = create_parameter_uuid_attribute()
 
-    # hand_coded_getter = epyqlib.attrsmodel.create_checkbox_attribute(
-    #     default=False,
-    # )
-    # hand_coded_setter = epyqlib.attrsmodel.create_checkbox_attribute(
-    #     default=False,
-    # )
-
     not_implemented = epyqlib.attrsmodel.create_checkbox_attribute(
         default=False,
     )
@@ -225,36 +217,6 @@ class FunctionData(epyqlib.treenode.TreeNode):
         data_display=epyqlib.attrsmodel.name_from_uuid,
         list_selection_root="staticmodbus types",
     )
-
-    # offset = attr.ib(
-    #     default=0,
-    #     converter=int,
-    # )  # this is somewhat redundant with the position in the list of data
-    # # points but helpful for keeping things from incidentally floating
-    # # around especially in custom models where we have no sunspec
-    # # model to be validating against
-    # # for now, yes, this is vaguely nondescript of address vs block offset
-    # @QtCore.pyqtProperty("PyQt_PyObject")
-    # def pyqtify_offset(self):
-    #     block_offset = getattr(self.tree_parent, "block_offset", None)
-    #
-    #     if block_offset is None:
-    #         return None
-    #
-    #     return block_offset + self.block_offset
-    #
-    # # TODO: shouldn't this be read only?
-    # @pyqtify_offset.setter
-    # def pyqtify_offset(self, value):
-    #     pass
-
-    # block_offset = attr.ib(
-    #     default=0,
-    #     converter=int,
-    #     metadata=graham.create_metadata(
-    #         field=marshmallow.fields.Integer(),
-    #     ),
-    # )
 
     address = create_address_attribute()
 
@@ -275,49 +237,8 @@ class FunctionData(epyqlib.treenode.TreeNode):
 
     units = epyqlib.attrsmodel.create_str_or_none_attribute()
 
-    # get = attr.ib(
-    #     default=None,
-    #     converter=epyqlib.attrsmodel.to_str_or_none,
-    #     metadata=graham.create_metadata(
-    #         field=marshmallow.fields.String(allow_none=True),
-    #     ),
-    # )
-    # epyqlib.attrsmodel.attrib(
-    #     attribute=get,
-    #     no_column=True,
-    # )
-    # set = attr.ib(
-    #     default=None,
-    #     converter=epyqlib.attrsmodel.to_str_or_none,
-    #     metadata=graham.create_metadata(
-    #         field=marshmallow.fields.String(allow_none=True),
-    #     ),
-    # )
-    # epyqlib.attrsmodel.attrib(
-    #     attribute=set,
-    #     no_column=True,
-    # )
-
-    # mandatory = attr.ib(
-    #     default=True,
-    #     converter=epyqlib.attrsmodel.two_state_checkbox,
-    #     metadata=graham.create_metadata(
-    #         field=marshmallow.fields.Boolean(),
-    #     ),
-    # )
-
     uuid = epyqlib.attrsmodel.attr_uuid()
-    # value  doesn't make sense here, this is interface definition, not a
-    #       value set
 
-    # ? point_id = attr.ib()
-    # ? index = index
-
-    # last access time?
-    # time = time
-
-    #     getter_code = attr.ib()
-    #     setter_code = attr.ib()
     def __attrs_post_init__(self):
         super().__init__()
 
@@ -342,21 +263,6 @@ class FunctionData(epyqlib.treenode.TreeNode):
         else:
             root = self.find_root()
             parameter = root.model.node_from_uuid(self.parameter_uuid)
-
-            # Currently no "Static Modbus..." parameters.
-            # if (
-            #     parameter.tree_parent.name.startswith("Static Modbus")
-            #     and parameter.tree_parent.tree_parent.tree_parent is None
-            # ):
-            #     result.append_child(
-            #         epyqlib.checkresultmodel.Result(
-            #             node=self,
-            #             severity=(epyqlib.checkresultmodel.ResultSeverity.information),
-            #             message=(
-            #                 "Connected to temporary Static Modbus imported parameter"
-            #             ),
-            #         )
-            #     )
 
             if not parameter.uses_interface_item():
                 result.append_child(
@@ -462,14 +368,6 @@ class FunctionDataBitfield(epyqlib.treenode.TreeNode):
         list_selection_root="staticmodbus types",
     )
 
-    # block_offset = attr.ib(
-    #     default=0,
-    #     converter=int,
-    #     metadata=graham.create_metadata(
-    #         field=marshmallow.fields.Integer(),
-    #     ),
-    # )
-
     address = create_address_attribute()
 
     size = create_size_attribute()
@@ -504,180 +402,6 @@ class FunctionDataBitfield(epyqlib.treenode.TreeNode):
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
     check = epyqlib.attrsmodel.check_just_children
-
-
-# Not clear if this functionality will be used in the future.
-# def check_block_offsets_and_length(self):
-#     length = 0
-#
-#     root = self.find_root()
-#
-#     for point in self.children:
-#         try:
-#             type_ = root.model.node_from_uuid(point.type_uuid)
-#         except epyqlib.attrsmodel.NotFoundError:
-#             point_name = root.model.node_from_uuid(point.parameter_uuid).name
-#             raise TypeNotFoundError(
-#                 f"Point {point_name!r}" f" has unknown type uuid {point.type_uuid!r}"
-#             )
-#
-#         if type_.name != "string" and point.size != type_.value:
-#             point_name = root.model.node_from_uuid(point.parameter_uuid).name
-#             raise MismatchedSizeAndTypeError(
-#                 f"Expected {type_.value} for {type_.name}"
-#                 f", is {point.size} for {point_name}"
-#             )
-#
-#         length += point.size
-#
-#     return length
-
-
-# @graham.schemify(tag="staticmodbus_header_block", register=True)
-# @epyqlib.attrsmodel.ify()
-# @epyqlib.utils.qt.pyqtify()
-# @attr.s(hash=False)
-# class HeaderBlock(epyqlib.treenode.TreeNode):
-#     name = attr.ib(
-#         default="Header",
-#         metadata=graham.create_metadata(
-#             field=marshmallow.fields.String(),
-#         ),
-#     )
-#     # offset = attr.ib(
-#     #     default=0,
-#     #     converter=int,
-#     # )
-#     children = attr.ib(
-#         factory=list,
-#         metadata=graham.create_metadata(
-#             field=graham.fields.MixedList(
-#                 fields=(marshmallow.fields.Nested(graham.schema(FunctionData)),)
-#             ),
-#         ),
-#     )
-#
-#     uuid = epyqlib.attrsmodel.attr_uuid()
-#
-#     def __attrs_post_init__(self):
-#         super().__init__()
-#
-#     def can_drop_on(self, node):
-#         return False
-#
-#     def can_delete(self, node=None):
-#         return False
-#
-#     check_offsets_and_length = check_block_offsets_and_length
-#
-#     def add_data_points(self, uint16_uuid, model_id):
-#         parameters = [
-#             epyqlib.pm.parametermodel.Parameter(
-#                 name=model_id,
-#                 abbreviation="ID",
-#                 read_only=True,
-#             ),
-#             epyqlib.pm.parametermodel.Parameter(
-#                 name="",
-#                 abbreviation="L",
-#                 comment="Model Length",
-#                 read_only=True,
-#             ),
-#         ]
-#         points = [
-#             FunctionData(
-#                 # block_offset=0,
-#                 size=1,
-#                 type_uuid=uint16_uuid,
-#                 parameter_uuid=parameters[0].uuid,
-#                 # mandatory=True,
-#             ),
-#             FunctionData(
-#                 # block_offset=1,
-#                 size=1,
-#                 type_uuid=uint16_uuid,
-#                 parameter_uuid=parameters[1].uuid,
-#                 # mandatory=True,
-#             ),
-#         ]
-#
-#         for point in points:
-#             self.append_child(point)
-#
-#         return parameters
-#
-#     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
-#     child_from = epyqlib.attrsmodel.default_child_from
-#     internal_move = epyqlib.attrsmodel.default_internal_move
-#     check = epyqlib.attrsmodel.check_just_children
-#
-#
-# @graham.schemify(tag="staticmodbus_fixed_block", register=True)
-# @epyqlib.attrsmodel.ify()
-# @epyqlib.utils.qt.pyqtify()
-# @attr.s(hash=False)
-# class FixedBlock(epyqlib.treenode.TreeNode):
-#     name = attr.ib(
-#         default="Fixed Block",
-#         metadata=graham.create_metadata(
-#             field=marshmallow.fields.String(),
-#         ),
-#     )
-#     # offset = attr.ib(
-#     #     default=2,
-#     #     converter=int,
-#     # )
-#     children = attr.ib(
-#         factory=list,
-#         metadata=graham.create_metadata(
-#             field=graham.fields.MixedList(
-#                 fields=(
-#                     marshmallow.fields.Nested(graham.schema(FunctionData)),
-#                     marshmallow.fields.Nested(graham.schema(FunctionDataBitfield)),
-#                 )
-#             ),
-#         ),
-#     )
-#
-#     uuid = epyqlib.attrsmodel.attr_uuid()
-#
-#     def __attrs_post_init__(self):
-#         super().__init__()
-#         self.pyqt_signals.child_added_complete.connect(self.update)
-#         self.pyqt_signals.child_removed_complete.connect(self.update)
-#
-#     def can_drop_on(self, node):
-#         return isinstance(
-#             node,
-#             (
-#                 epyqlib.pm.parametermodel.Parameter,
-#                 FunctionData,
-#                 FunctionDataBitfield,
-#             ),
-#         )
-#
-#     def can_delete(self, node=None):
-#         if node is None:
-#             return self.tree_parent.can_delete(node=self)
-#
-#         return isinstance(node, (FunctionData, FunctionDataBitfield))
-#
-#     def child_from(self, node):
-#         if isinstance(node, epyqlib.pm.parametermodel.Parameter):
-#             return FunctionData(parameter_uuid=node.uuid)
-#
-#         return node
-#
-#     def update(self):
-#         block_offset = 0
-#         for pt in self.children:
-#             pt.block_offset = block_offset
-#             block_offset = block_offset + pt.size
-#
-#     check_offsets_and_length = check_block_offsets_and_length
-#     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
-#     internal_move = epyqlib.attrsmodel.default_internal_move
-#     check = epyqlib.attrsmodel.check_just_children
 
 
 @graham.schemify(
@@ -729,10 +453,6 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
             field=marshmallow.fields.String(),
         ),
     )
-    # offset = attr.ib(
-    #     default=2,
-    #     converter=int,
-    # )
     children = attr.ib(
         factory=list,
         metadata=graham.create_metadata(
@@ -772,74 +492,10 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
 
         return False
 
-    # def check_offsets_and_length(self):
-    #     return self.original.check_block_offsets_and_length()
-
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
     internal_move = epyqlib.attrsmodel.default_internal_move
     check = epyqlib.attrsmodel.check_just_children
-
-
-# @graham.schemify(tag="staticmodbus_table_repeating_block", register=True)
-# @epyqlib.attrsmodel.ify()
-# @epyqlib.utils.qt.pyqtify()
-# @epyqlib.utils.qt.pyqtify_passthrough_properties(
-#     original="original",
-#     field_names=("name",),
-# )
-# @attr.s(hash=False)
-# class FunctionDataReference(epyqlib.treenode.TreeNode):
-#     name = attr.ib(
-#         default="Table Data Point Reference",
-#         metadata=graham.create_metadata(
-#             field=marshmallow.fields.String(),
-#         ),
-#     )
-#     offset = attr.ib(
-#         default=2,
-#         converter=int,
-#     )
-#     children = attr.ib(
-#         factory=list,
-#         metadata=graham.create_metadata(
-#             field=graham.fields.MixedList(fields=()),
-#         ),
-#     )
-#
-#     original = attr.ib(
-#         default=None,
-#         metadata=graham.create_metadata(
-#             field=epyqlib.attrsmodel.Reference(allow_none=True),
-#         ),
-#     )
-#     epyqlib.attrsmodel.attrib(
-#         attribute=original,
-#         no_column=True,
-#     )
-#
-#     uuid = epyqlib.attrsmodel.attr_uuid()
-#
-#     def __attrs_post_init__(self):
-#         super().__init__()
-#
-#     @classmethod
-#     def all_addable_types(cls):
-#         return epyqlib.attrsmodel.create_addable_types(())
-#
-#     @staticmethod
-#     def addable_types():
-#         return {}
-#
-#     def can_drop_on(self, node):
-#         return False
-#
-#     def can_delete(self, node=None):
-#         return False
-#
-#     # check_offsets_and_length = check_block_offsets_and_length
-#     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
-#     child_from = epyqlib.attrsmodel.default_child_from
 
 
 @graham.schemify(tag="table_model_reference", register=True)
@@ -855,8 +511,6 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
         ),
     )
 
-    # abbreviation = epyqlib.pm.parametermodel.create_abbreviation_attribute()
-
     children = attr.ib(
         factory=list,
         metadata=graham.create_metadata(
@@ -865,11 +519,6 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
             ),
         ),
     )
-
-    # offset = attr.ib(
-    #     default=2,
-    #     converter=int,
-    # )
 
     repeats = attr.ib(
         default=0,
@@ -907,9 +556,6 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
             return self.tree_parent.can_delete(node=self)
 
         return False
-
-    # def check_block_offsets_and_length(self):
-    #     return self.repeats * check_block_offsets_and_length(self)
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
@@ -1061,9 +707,6 @@ class Table(epyqlib.treenode.TreeNode):
                 attribute_value=tuple(node.uuid for node in combination),
                 attribute_name="path",
             )
-            # continue
-
-            # block_offset = 0
 
             group_elements = [[], []]
             group_of_groups = group_elements[0]
@@ -1088,14 +731,11 @@ class Table(epyqlib.treenode.TreeNode):
                     point_node = FunctionData(
                         parameter_uuid=element.uuid,
                     )
-                # point_node.mandatory = reference_function_data.mandatory
                 point_node.units = reference_function_data.units
                 point_node.type_uuid = reference_function_data.type_uuid
                 point_node.size = reference_function_data.size
                 point_node.enumeration_uuid = reference_function_data.enumeration_uuid
-                # point_node.block_offset = block_offset
                 block_node.append_child(point_node)
-                # block_offset += point_node.size
 
             array_elements = itertools.chain.from_iterable(
                 zip(
@@ -1115,14 +755,11 @@ class Table(epyqlib.treenode.TreeNode):
                     point_node = FunctionData(
                         parameter_uuid=element.uuid,
                     )
-                # point_node.mandatory = reference_function_data.mandatory
                 point_node.units = reference_function_data.units
                 point_node.type_uuid = reference_function_data.type_uuid
                 point_node.size = reference_function_data.size
                 point_node.enumeration_uuid = reference_function_data.enumeration_uuid
-                # point_node.block_offset = block_offset
                 block_node.append_child(point_node)
-                # block_offset += point_node.size
 
             # TODO: CAMPid 143707880547014313476753071297360068134
             for element in group_elements[1]:
@@ -1134,119 +771,15 @@ class Table(epyqlib.treenode.TreeNode):
                     point_node = FunctionData(
                         parameter_uuid=element.uuid,
                     )
-                # point_node.mandatory = reference_function_data.mandatory
                 point_node.units = reference_function_data.units
                 point_node.type_uuid = reference_function_data.type_uuid
                 point_node.size = reference_function_data.size
                 point_node.enumeration_uuid = reference_function_data.enumeration_uuid
-                # point_node.block_offset = block_offset
                 block_node.append_child(point_node)
-                # block_offset += point_node.size
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
     check = epyqlib.attrsmodel.check_just_children
-
-
-# @graham.schemify(tag="staticmodbus_model", register=True)
-# @epyqlib.attrsmodel.ify()
-# @epyqlib.utils.qt.pyqtify()
-# @attr.s(hash=False)
-# class Model(epyqlib.treenode.TreeNode):
-#     name = attr.ib(
-#         default=0,
-#         converter=str,
-#         metadata=graham.create_metadata(
-#             field=marshmallow.fields.String(),
-#         ),
-#     )
-#     # id = attr.ib(
-#     #     default=0,
-#     #     converter=int,
-#     #     metadata=graham.create_metadata(
-#     #         field=marshmallow.fields.Integer(),
-#     #     ),
-#     # )  # 103
-#     length = attr.ib(
-#         default=0,
-#         converter=int,
-#         metadata=graham.create_metadata(
-#             field=marshmallow.fields.Integer(),
-#         ),
-#     )  # 50, in the spirit of over constraining like how
-#     # data points have their offset
-#
-#     # ?
-#     # self.model_id = '{}'.format(model_id)
-#     # self.namespace = namespace
-#     # self.index = index
-#
-#     # special children
-#     # header: id and length
-#
-#     # self.point_data = []
-#     children = attr.ib(
-#         factory=lambda: [HeaderBlock(), FixedBlock()],
-#         metadata=graham.create_metadata(
-#             field=graham.fields.MixedList(
-#                 fields=(
-#                     # marshmallow.fields.Nested(graham.schema(HeaderBlock)),
-#                     # marshmallow.fields.Nested(graham.schema(FixedBlock)),
-#                     marshmallow.fields.Nested(graham.schema(FunctionData)),
-#                     marshmallow.fields.Nested(
-#                         graham.schema(TableRepeatingBlockReference)
-#                     ),
-#                 )
-#             ),
-#         ),
-#     )
-#
-#     uuid = epyqlib.attrsmodel.attr_uuid()
-#
-#     def __attrs_post_init__(self):
-#         super().__init__()
-#
-#     def remove_old_on_drop(self, node):
-#         return False
-#
-#     def child_from(self, node):
-#         reference = TableRepeatingBlockReference(original=node)
-#         for child in node.tree_parent.children:
-#             if not isinstance(child, FunctionData):
-#                 continue
-#
-#             reference.append_child(
-#                 TableRepeatingBlockReferenceFunctionDataReference(
-#                     original=child,
-#                 ),
-#             )
-#
-#         return reference
-#
-#     def can_drop_on(self, node):
-#         return isinstance(node, TableRepeatingBlock) and not any(
-#             isinstance(child, TableRepeatingBlockReference) for child in self.children
-#         )
-#
-#     def can_delete(self, node=None):
-#         if node is None:
-#             return self.tree_parent.can_delete(node=self)
-#
-#         return not isinstance(node, (HeaderBlock, FixedBlock))
-#
-#     def check_offsets_and_length(self):
-#         length = 0
-#
-#         for block in self.children:
-#             length += block.check_offsets_and_length()
-#
-#         return length
-#
-#     internal_move = epyqlib.attrsmodel.default_internal_move
-#     check = epyqlib.attrsmodel.check_just_children
-
-
-# class Repeating...?
 
 
 Root = epyqlib.attrsmodel.Root(
@@ -1256,21 +789,16 @@ Root = epyqlib.attrsmodel.Root(
         Table,
         TableRepeatingBlockReference,
         FunctionDataBitfield,
-        # FunctionDataBitfieldMember,
     ),
-    # valid_types=(Model, Table),
 )
 
 
 types = epyqlib.attrsmodel.Types(
     types=(
         Root,
-        # Model,
         FunctionData,
         FunctionDataBitfield,
         FunctionDataBitfieldMember,
-        # HeaderBlock,
-        # FixedBlock,
         Table,
         TableRepeatingBlock,
         TableRepeatingBlockReference,
@@ -1288,14 +816,10 @@ columns = epyqlib.attrsmodel.columns(
     (
         merge(
             "name",
-            # HeaderBlock,
-            # FixedBlock,
             Table,
             TableRepeatingBlock,
             TableRepeatingBlockReference,
         )
-        # + merge("name", Model)
-        # + merge("id", Model)
         + merge(
             "parameter_uuid",
             FunctionData,
@@ -1304,14 +828,10 @@ columns = epyqlib.attrsmodel.columns(
             FunctionDataBitfieldMember,
         )
     ),
-    # merge("abbreviation", TableRepeatingBlock),
     merge("not_implemented", FunctionData),
     merge("address", FunctionData, FunctionDataBitfield),
     merge("size", FunctionData, FunctionDataBitfield),
-    # merge("length", Model) + merge("size", FunctionData, FunctionDataBitfield),
     merge("repeats", TableRepeatingBlock),
-    # merge("hand_coded_getter", FunctionData),
-    # merge("hand_coded_setter", FunctionData),
     merge(
         "factor_uuid",
         FunctionData,
@@ -1323,16 +843,6 @@ columns = epyqlib.attrsmodel.columns(
     merge("bit_length", FunctionDataBitfieldMember),
     merge("bit_offset", FunctionDataBitfieldMember),
     merge("parameter_table_uuid", Table),
-    # merge("mandatory", FunctionData),
-    # merge(
-    #     "offset",
-    #     FunctionData,
-    #     HeaderBlock,
-    #     FixedBlock,
-    #     TableRepeatingBlockReference,
-    #     TableRepeatingBlock,
-    # ),
-    # merge("block_offset", FunctionData, FunctionDataBitfield),
     merge("uuid", *types.types.values()),
 )
 
