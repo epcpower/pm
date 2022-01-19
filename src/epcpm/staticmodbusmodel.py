@@ -9,7 +9,6 @@ import epyqlib.checkresultmodel
 import epyqlib.pm.parametermodel
 import epyqlib.utils
 import epyqlib.utils.qt
-# from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
 
