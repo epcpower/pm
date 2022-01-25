@@ -44,6 +44,9 @@ jobs:
           which pip
           pip --version
           #python boots.py create --group test
+
+          poetry install
+
           .venv/Scripts/black --exclude=.\.venv --check --diff .
           .venv/Scripts/python -c "import sys; print(sys.version)"
 
