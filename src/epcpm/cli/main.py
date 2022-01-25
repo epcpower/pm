@@ -272,7 +272,7 @@ def transition(target_path):
     subprocess.run(["git", "reset", "."], check=True, cwd=target_path)
     subprocess.run(["git", "checkout", "--", "."], check=True, cwd=target_path)
     subprocess.run(
-        ["git", "clean", "-fdx", "--exclude", "venv"],
+        ["git", "clean", "-fdx", "--exclude", ".venv"],
         check=True,
         cwd=target_path,
     )
@@ -282,7 +282,7 @@ def transition(target_path):
         cwd=target_path,
     )
     subprocess.run(
-        [target_path / "venv" / "bin" / "sunspecparser", os.fspath(new_spreadsheet)],
+        [target_path / ".venv" / "bin" / "sunspecparser", os.fspath(new_spreadsheet)],
         check=True,
         cwd=library_path,  # it expects to be in _some_ subdirectory and then ..
     )

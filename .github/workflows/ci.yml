@@ -30,20 +30,27 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install Poetry and Venv
+        run: |
+          python3 -m ensurepip
+          python3 -m pip install --upgrade pip
+          python3 -m pip install poetry
+
+          poetry install
       - name: python commands
         run: |
           set -vx
           which pip
           pip --version
-          python boots.py create --group test
-          venv/Scripts/black --check --diff .
-          venv/Scripts/python -c "import sys; print(sys.version)"
+          #python boots.py create --group test
+          .venv/Scripts/black --check --diff .
+          .venv/Scripts/python -c "import sys; print(sys.version)"
 
-          venv/Scripts/pip freeze --all
-          venv/Scripts/genbuildinfo "src/epcpm/__build.py"
-          venv/Scripts/generateversion --distribution epcpm --out "src/epcpm/__version.py"
+          .venv/Scripts/pip freeze --all
+          .venv/Scripts/genbuildinfo "src/epcpm/__build.py"
+          .venv/Scripts/generateversion --distribution epcpm --out "src/epcpm/__version.py"
 
-          venv/Scripts/pyinstaller pyinstaller.spec
+          .venv/Scripts/pyinstaller pyinstaller.spec
           mv "dist/epcpm" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
           7z a "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}.zip" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
 
@@ -52,12 +59,13 @@ jobs:
           mv *.zip artifacts/
 
           rm -rf dist
-          python boots.py build
+          poetry build
+          #python boots.py build
           mv dist/* artifacts/
 
-          venv/Scripts/pytest epcpm.tests --pyargs
+          .venv/Scripts/pytest epcpm.tests --pyargs
 
-          python boots.py publish
+          #python boots.py publish
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
