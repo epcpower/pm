@@ -42,6 +42,7 @@ jobs:
         run: |
           set -vx
           poetry run buildui
+          poetry run poetry-dynamic-versioning
           which pip
           pip --version
           #python boots.py create --group test
