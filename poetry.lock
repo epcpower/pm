@@ -377,7 +377,7 @@ python-versions = "*"
 
 [[package]]
 name = "epyqlib"
-version = "0.0.0"
+version = "2022.1.1.post2.dev0+a45a1196"
 description = ""
 category = "main"
 optional = false

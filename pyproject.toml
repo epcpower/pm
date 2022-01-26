@@ -1,13 +1,16 @@
 [tool.poetry]
 name = "epcpm"
-version = "2021.7.post29.dev0+eb0c335"
+version = "0.0.0"
 description = ""
 authors = ["Alex Anker <alex.anker@epcpower.com>"]
 
 [tool.poetry-dynamic-versioning]
-enable = false
+enable = true
 vcs = "git"
 style = "pep440"
+
+[tool.poetry-dynamic-versioning.substitution]
+files = ["src/epcpm/__init__.py"]
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.11"
@@ -36,14 +39,7 @@ epyqlib = {path = "./sub/epyqlib",  develop = true}
 pytest = "3.8.2"
 pytest-qt = "3.2.1"
 Jinja2 = "^3.0.3"
-
-
 pycparser = {git = "https://github.com/eliben/pycparser", rev = "7547e850a05d84fbe598e6bd1bd03f09bf524ac6"}
-
-#epcsunspecdemo = {git = "https://github.com/epcpower/sunspec-demo", rev = "19581317ae2fd136b5df229d824f81a17da52c58"}
-
-#epcsunspecdemo = {git = "https://github.com/epcpower/sunspec-demo", rev = "19581317ae2fd136b5df229d824f81a17da52c58"}
-
 
 [tool.poetry.dev-dependencies]
 gitignoreio = "0.1.5"
