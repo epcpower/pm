@@ -77,17 +77,17 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "attrs"
-version = "19.3.0"
+version = "21.4.0"
 description = "Classes Without Boilerplate"
 category = "main"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [package.extras]
-azure-pipelines = ["coverage", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "zope.interface", "pytest-azurepipelines"]
-dev = ["coverage", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "zope.interface", "sphinx", "pre-commit"]
-docs = ["sphinx", "zope.interface"]
-tests = ["coverage", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "zope.interface"]
+dev = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "mypy", "pytest-mypy-plugins", "zope.interface", "furo", "sphinx", "sphinx-notfound-page", "pre-commit", "cloudpickle"]
+docs = ["furo", "sphinx", "zope.interface", "sphinx-notfound-page"]
+tests = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "mypy", "pytest-mypy-plugins", "zope.interface", "cloudpickle"]
+tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "mypy", "pytest-mypy-plugins", "cloudpickle"]
 
 [[package]]
 name = "automat"
@@ -291,9 +291,6 @@ category = "main"
 optional = false
 python-versions = ">=3.7"
 
-[package.dependencies]
-tomli = {version = "*", optional = true, markers = "extra == \"toml\""}
-
 [package.extras]
 toml = ["tomli"]
 
@@ -391,7 +388,7 @@ develop = true
 alqtendpy = "0.0.4"
 appdirs = "1.4.3"
 arrow = "0.12.1"
-attrs = "19.3.0"
+attrs = ">=19.3.0"
 bitstruct = "6.0.0"
 black = "20.8b1"
 boto3 = "1.14.41.0"
@@ -409,13 +406,13 @@ natsort = "5.5.0"
 paho-mqtt = "1.4.0"
 Pint = "0.11"
 pyelftools = "0.25"
-PyQt5 = "5.14.1"
+PyQt5 = ">=5.13.0"
 PyQt5Designer = "^5.14.1"
 pysunspec = "^2.1.1"
-pytest = "5.3.5"
-pytest-qt = "3.3.0"
+pytest = ">=3.8.2"
+pytest-qt = ">=3.2.1"
 pytest-rerunfailures = "5.0"
-pytest-twisted = "1.12"
+pytest-twisted = ">=1.9"
 pytest-xvfb = "1.2.0"
 python-can = "^3.3.4"
 python-dateutil = "2.7.5"
@@ -784,17 +781,18 @@ test = ["appdirs (==1.4.4)", "pytest (>=6)", "pytest-cov (>=2.7)", "pytest-mock 
 
 [[package]]
 name = "pluggy"
-version = "0.13.1"
+version = "1.0.0"
 description = "plugin and hook calling mechanisms for python"
 category = "main"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+python-versions = ">=3.6"
 
 [package.dependencies]
 importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
 
 [package.extras]
 dev = ["pre-commit", "tox"]
+testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "poetry-dynamic-versioning"
@@ -838,7 +836,7 @@ pyasn1 = ">=0.4.6,<0.5.0"
 
 [[package]]
 name = "pycparser"
-version = "2.21"
+version = "2.20"
 description = "C parser in Python"
 category = "main"
 optional = false
@@ -917,14 +915,14 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pyqt5"
-version = "5.14.1"
-description = "Python bindings for the Qt cross platform application toolkit"
+version = "5.13.0"
+description = "Python bindings for the Qt cross platform UI and application toolkit"
 category = "main"
 optional = false
-python-versions = ">=3.5"
+python-versions = "*"
 
 [package.dependencies]
-PyQt5-sip = ">=12.7,<13"
+PyQt5_sip = ">=4.19.14,<13"
 
 [[package]]
 name = "pyqt5-sip"
@@ -966,55 +964,45 @@ pyserial = "*"
 
 [[package]]
 name = "pytest"
-version = "5.3.5"
+version = "3.8.2"
 description = "pytest: simple powerful testing with Python"
 category = "main"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [package.dependencies]
-atomicwrites = {version = ">=1.0", markers = "sys_platform == \"win32\""}
+atomicwrites = ">=1.0"
 attrs = ">=17.4.0"
 colorama = {version = "*", markers = "sys_platform == \"win32\""}
-importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
 more-itertools = ">=4.0.0"
-packaging = "*"
-pluggy = ">=0.12,<1.0"
+pluggy = ">=0.7"
 py = ">=1.5.0"
-wcwidth = "*"
-
-[package.extras]
-checkqa-mypy = ["mypy (==v0.761)"]
-testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xmlschema"]
+six = ">=1.10.0"
 
 [[package]]
 name = "pytest-cov"
-version = "3.0.0"
+version = "2.5.1"
 description = "Pytest plugin for measuring coverage."
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = "*"
 
 [package.dependencies]
-coverage = {version = ">=5.2.1", extras = ["toml"]}
-pytest = ">=4.6"
-
-[package.extras]
-testing = ["fields", "hunter", "process-tests", "six", "pytest-xdist", "virtualenv"]
+coverage = ">=3.7.1"
+pytest = ">=2.6.0"
 
 [[package]]
 name = "pytest-qt"
-version = "3.3.0"
+version = "3.2.1"
 description = "pytest support for PyQt and PySide applications"
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [package.dependencies]
-pytest = ">=3.0.0"
+pytest = ">=2.7.0"
 
 [package.extras]
-dev = ["pre-commit", "tox"]
 doc = ["sphinx", "sphinx-rtd-theme"]
 
 [[package]]
@@ -1030,7 +1018,7 @@ pytest = ">=3.6"
 
 [[package]]
 name = "pytest-twisted"
-version = "1.12"
+version = "1.9"
 description = "A twisted plugin for py.test."
 category = "main"
 optional = false
@@ -1314,14 +1302,6 @@ optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
-name = "tomli"
-version = "2.0.0"
-description = "A lil' TOML parser"
-category = "main"
-optional = false
-python-versions = ">=3.7"
-
-[[package]]
 name = "tomlkit"
 version = "0.8.0"
 description = "Style preserving TOML library"
@@ -1500,14 +1480,6 @@ docs = ["proselint (>=0.10.2)", "sphinx (>=3)", "sphinx-argparse (>=0.2.5)", "sp
 testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", "pytest (>=4)", "pytest-env (>=0.6.2)", "pytest-freezegun (>=0.4.1)", "pytest-mock (>=2)", "pytest-randomly (>=1)", "pytest-timeout (>=1)", "packaging (>=20.0)"]
 
 [[package]]
-name = "wcwidth"
-version = "0.2.5"
-description = "Measures the displayed width of unicode strings in a terminal"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "webencodings"
 version = "0.5.1"
 description = "Character encoding aliases for legacy web content"
@@ -1571,7 +1543,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7,<3.11"
-content-hash = "830c19f764be88e606babcb63342a50012df79e036fe0162edf8a8857b78911a"
+content-hash = "813bcd60ef61b34c76f1542711f49b4d1f04f51c9060bd0ebdd079596fa47804"
 
 [metadata.files]
 aenum = [
@@ -1601,8 +1573,8 @@ atomicwrites = [
     {file = "atomicwrites-1.4.0.tar.gz", hash = "sha256:ae70396ad1a434f9c7046fd2dd196fc04b12f9e91ffb859164193be8b6168a7a"},
 ]
 attrs = [
-    {file = "attrs-19.3.0-py2.py3-none-any.whl", hash = "sha256:08a96c641c3a74e44eb59afb61a24f2cb9f4d7188748e76ba4bb5edfa3cb7d1c"},
-    {file = "attrs-19.3.0.tar.gz", hash = "sha256:f7b7ce16570fe9965acd6d30101a28f62fb4a7f9e926b3bbc9b61f8b04247e72"},
+    {file = "attrs-21.4.0-py2.py3-none-any.whl", hash = "sha256:2d27e3784d7a565d36ab851fe94887c5eccd6a463168875832a1be79c82828b4"},
+    {file = "attrs-21.4.0.tar.gz", hash = "sha256:626ba8234211db98e869df76230a137c4c40a12d72445c45d5f5b716f076e2fd"},
 ]
 automat = [
     {file = "Automat-20.2.0-py2.py3-none-any.whl", hash = "sha256:b6feb6455337df834f6c9962d6ccf771515b7d939bca142b29c20c2376bc6111"},
@@ -2092,8 +2064,8 @@ platformdirs = [
     {file = "platformdirs-2.4.1.tar.gz", hash = "sha256:440633ddfebcc36264232365d7840a970e75e1018d15b4327d11f91909045fda"},
 ]
 pluggy = [
-    {file = "pluggy-0.13.1-py2.py3-none-any.whl", hash = "sha256:966c145cd83c96502c3c3868f50408687b38434af77734af1e9ca461a4081d2d"},
-    {file = "pluggy-0.13.1.tar.gz", hash = "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0"},
+    {file = "pluggy-1.0.0-py2.py3-none-any.whl", hash = "sha256:74134bbf457f031a36d68416e1509f34bd5ccc019f0bcc952c7b909d06b37bd3"},
+    {file = "pluggy-1.0.0.tar.gz", hash = "sha256:4224373bacce55f955a878bf9cfa763c1e360858e330072059e10bad68531159"},
 ]
 poetry-dynamic-versioning = [
     {file = "poetry-dynamic-versioning-0.13.1.tar.gz", hash = "sha256:5c0e7b22560db76812057ef95dadad662ecc63eb270145787eabe73da7c222f9"},
@@ -2134,8 +2106,8 @@ pyasn1-modules = [
     {file = "pyasn1_modules-0.2.8-py3.7.egg", hash = "sha256:c29a5e5cc7a3f05926aff34e097e84f8589cd790ce0ed41b67aed6857b26aafd"},
 ]
 pycparser = [
-    {file = "pycparser-2.21-py2.py3-none-any.whl", hash = "sha256:8ee45429555515e1f6b185e78100aea234072576aa43ab53aefcae078162fca9"},
-    {file = "pycparser-2.21.tar.gz", hash = "sha256:e644fdec12f7872f86c58ff790da456218b10f863970249516d60a5eaca77206"},
+    {file = "pycparser-2.20-py2.py3-none-any.whl", hash = "sha256:7582ad22678f0fcd81102833f60ef8d0e57288b6b5fb00323d101be910e35705"},
+    {file = "pycparser-2.20.tar.gz", hash = "sha256:2d475327684562c3a96cc71adf7dc8c4f0565175cf86b6d7a404ff4c771f15f0"},
 ]
 pyelftools = [
     {file = "pyelftools-0.25-py2.py3-none-any.whl", hash = "sha256:1ec62792b31d9d4e5399a686a515a31091be84e307c4680fd3627121500a1be7"},
@@ -2161,11 +2133,10 @@ pyparsing = [
     {file = "pyparsing-3.0.7.tar.gz", hash = "sha256:18ee9022775d270c55187733956460083db60b37d0d0fb357445f3094eed3eea"},
 ]
 pyqt5 = [
-    {file = "PyQt5-5.14.1-5.14.1-cp35.cp36.cp37.cp38-abi3-macosx_10_6_intel.whl", hash = "sha256:a0bfe9fd718bca4de3e33000347e048f73126b6dc46530eb020b0251a638ee9d"},
-    {file = "PyQt5-5.14.1-5.14.1-cp35.cp36.cp37.cp38-abi3-manylinux2014_x86_64.whl", hash = "sha256:713b9a201f5e7b2fca8691373e5d5c8c2552a51d87ca9ffbb1461e34e3241211"},
-    {file = "PyQt5-5.14.1-5.14.1-cp35.cp36.cp37.cp38-none-win32.whl", hash = "sha256:2d94ec761fb656707050c68b41958e3a9f755bb1df96c064470f4096d2899e32"},
-    {file = "PyQt5-5.14.1-5.14.1-cp35.cp36.cp37.cp38-none-win_amd64.whl", hash = "sha256:31b142a868152d60c6323e0527edb692fdf05fd7cb4fe2fe9ce07d1ce560221a"},
-    {file = "PyQt5-5.14.1.tar.gz", hash = "sha256:2f230f2dbd767099de7a0cb915abdf0cbc3256a0b5bb910eb09b99117db7a65b"},
+    {file = "PyQt5-5.13.0-5.13.0-cp35.cp36.cp37.cp38-abi3-macosx_10_6_intel.whl", hash = "sha256:aa75b829cd977ca796262fcfe0dc8fc72f8413da4e5e2795e63897e1abfd2258"},
+    {file = "PyQt5-5.13.0-5.13.0-cp35.cp36.cp37.cp38-abi3-manylinux1_x86_64.whl", hash = "sha256:70954a2d182c8634e3b5f9deeb4230f186b59ec1166f3142cb523b74876c0d98"},
+    {file = "PyQt5-5.13.0-5.13.0-cp35.cp36.cp37.cp38-none-win32.whl", hash = "sha256:4d51a245d64fbd85c77ba3dee12b8fe018a440ccb49fd1cb0e4587c360655d3c"},
+    {file = "PyQt5-5.13.0-5.13.0-cp35.cp36.cp37.cp38-none-win_amd64.whl", hash = "sha256:afbee0925439124b5c52dacaf9a6d8d4e160e36b636a6f9023832a696e15e3e9"},
 ]
 pyqt5-sip = [
     {file = "PyQt5_sip-12.9.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:6d5bca2fc222d58e8093ee8a81a6e3437067bb22bc3f86d06ec8be721e15e90a"},
@@ -2203,24 +2174,23 @@ pysunspec = [
     {file = "pysunspec-2.1.1.tar.gz", hash = "sha256:9824c815a98935399029276837feb1f3d5749646415910317026d3b7f8d9a142"},
 ]
 pytest = [
-    {file = "pytest-5.3.5-py3-none-any.whl", hash = "sha256:ff615c761e25eb25df19edddc0b970302d2a9091fbce0e7213298d85fb61fef6"},
-    {file = "pytest-5.3.5.tar.gz", hash = "sha256:0d5fe9189a148acc3c3eb2ac8e1ac0742cb7618c084f3d228baaec0c254b318d"},
+    {file = "pytest-3.8.2-py2.py3-none-any.whl", hash = "sha256:7e258ee50338f4e46957f9e09a0f10fb1c2d05493fa901d113a8dafd0790de4e"},
+    {file = "pytest-3.8.2.tar.gz", hash = "sha256:9332147e9af2dcf46cd7ceb14d5acadb6564744ddff1fe8c17f0ce60ece7d9a2"},
 ]
 pytest-cov = [
-    {file = "pytest-cov-3.0.0.tar.gz", hash = "sha256:e7f0f5b1617d2210a2cabc266dfe2f4c75a8d32fb89eafb7ad9d06f6d076d470"},
-    {file = "pytest_cov-3.0.0-py3-none-any.whl", hash = "sha256:578d5d15ac4a25e5f961c938b85a05b09fdaae9deef3bb6de9a6e766622ca7a6"},
+    {file = "pytest-cov-2.5.1.tar.gz", hash = "sha256:03aa752cf11db41d281ea1d807d954c4eda35cfa1b21d6971966cc041bbf6e2d"},
+    {file = "pytest_cov-2.5.1-py2.py3-none-any.whl", hash = "sha256:890fe5565400902b0c78b5357004aab1c814115894f4f21370e2433256a3eeec"},
 ]
 pytest-qt = [
-    {file = "pytest-qt-3.3.0.tar.gz", hash = "sha256:714b0bf86c5313413f2d300ac613515db3a1aef595051ab8ba2ffe619dbe8925"},
-    {file = "pytest_qt-3.3.0-py2.py3-none-any.whl", hash = "sha256:5f8928288f50489d83f5d38caf2d7d9fcd6e7cf769947902caa4661dc7c851e3"},
+    {file = "pytest-qt-3.2.1.tar.gz", hash = "sha256:c94dc1ca0f3e12651a9a3eddea9e55130b6e246a9714acb4baeeeb5be8a5cffb"},
+    {file = "pytest_qt-3.2.1-py2.py3-none-any.whl", hash = "sha256:7e2a638750e2759363832942ce16cd5365150d43a565365798184bbd1b7b0935"},
 ]
 pytest-rerunfailures = [
     {file = "pytest-rerunfailures-5.0.tar.gz", hash = "sha256:5601fcec1ae121a56c1b8b0f92e237aea9f701c3c274a8852c0a1dd7e04cfdf4"},
     {file = "pytest_rerunfailures-5.0-py2.py3-none-any.whl", hash = "sha256:2ff8c6c1f490acafc6cc85ca1005420675680c52a5aada195ca71e48a1e1ceb7"},
 ]
 pytest-twisted = [
-    {file = "pytest-twisted-1.12.zip", hash = "sha256:bb9af117c5c6063d9ef20ffdf2fa297caaf57de5a687e4d3607db7b0a6f74fea"},
-    {file = "pytest_twisted-1.12-py2.py3-none-any.whl", hash = "sha256:3b948221b0144a1e00c435ad89f0b99fb2aa6e19e215d3622be101ea26ff6c05"},
+    {file = "pytest-twisted-1.9.zip", hash = "sha256:6396e3d46c9acc8dda6c408aef74cb36c252621ee8387797984ba35ab6ef600a"},
 ]
 pytest-xvfb = [
     {file = "pytest-xvfb-1.2.0.tar.gz", hash = "sha256:a7544ca8d0c7c40db4b40d7a417a7b071c68d6ef6bdf9700872d7a167302f979"},
@@ -2378,10 +2348,6 @@ toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
     {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
 ]
-tomli = [
-    {file = "tomli-2.0.0-py3-none-any.whl", hash = "sha256:b5bde28da1fed24b9bd1d4d2b8cba62300bfb4ec9a6187a957e8ddb9434c5224"},
-    {file = "tomli-2.0.0.tar.gz", hash = "sha256:c292c34f58502a1eb2bbb9f5bbc9a5ebc37bee10ffb8c2d6bbdfa8eb13cc14e1"},
-]
 tomlkit = [
     {file = "tomlkit-0.8.0-py3-none-any.whl", hash = "sha256:b824e3466f1d475b2b5f1c392954c6cb7ea04d64354ff7300dc7c14257dc85db"},
     {file = "tomlkit-0.8.0.tar.gz", hash = "sha256:29e84a855712dfe0e88a48f6d05c21118dbafb283bb2eed614d46f80deb8e9a1"},
@@ -2460,10 +2426,6 @@ urllib3 = [
 virtualenv = [
     {file = "virtualenv-20.13.0-py2.py3-none-any.whl", hash = "sha256:339f16c4a86b44240ba7223d0f93a7887c3ca04b5f9c8129da7958447d079b09"},
     {file = "virtualenv-20.13.0.tar.gz", hash = "sha256:d8458cf8d59d0ea495ad9b34c2599487f8a7772d796f9910858376d1600dd2dd"},
-]
-wcwidth = [
-    {file = "wcwidth-0.2.5-py2.py3-none-any.whl", hash = "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784"},
-    {file = "wcwidth-0.2.5.tar.gz", hash = "sha256:c4d647b99872929fdb7bdcaa4fbe7f01413ed3d98077df798530e5b04f116c83"},
 ]
 webencodings = [
     {file = "webencodings-0.5.1-py2.py3-none-any.whl", hash = "sha256:a0af1213f3c2226497a97e2b3aa01a7e4bee4f403f95be16fc9acd2947514a78"},
