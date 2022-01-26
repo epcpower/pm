@@ -41,7 +41,7 @@ jobs:
       - name: python commands
         run: |
           set -vx
-          poetry env
+          poetry shell
           buildui
           poetry-dynamic-versioning
           which pip
