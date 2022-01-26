@@ -41,21 +41,20 @@ jobs:
       - name: python commands
         run: |
           set -vx
-          poetry shell
-          buildui
-          poetry-dynamic-versioning
+          poetry run buildui
+          poetry run poetry-dynamic-versioning
           which pip
           pip --version
           #python boots.py create --group test
 
-          black --exclude=.\.venv --check --diff .
-          python -c "import sys; print(sys.version)"
+          .venv/Scripts/black --exclude=.\.venv --check --diff .
+          .venv/Scripts/python -c "import sys; print(sys.version)"
 
-          pip freeze --all
-          genbuildinfo "src/epcpm/__build.py"
-          generateversion --distribution epcpm --out "src/epcpm/__version.py"
+          .venv/Scripts/pip freeze --all
+          .venv/Scripts/genbuildinfo "src/epcpm/__build.py"
+          .venv/Scripts/generateversion --distribution epcpm --out "src/epcpm/__version.py"
 
-          pyinstaller pyinstaller.spec
+          .venv/Scripts/pyinstaller pyinstaller.spec
           mv "dist/epcpm" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
           7z a "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}.zip" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
 
@@ -68,11 +67,9 @@ jobs:
           #python boots.py build
           mv dist/* artifacts/
 
-          pytest epcpm.tests --pyargs
+          .venv/Scripts/pytest epcpm.tests --pyargs
 
           #python boots.py publish
-
-          exit
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
