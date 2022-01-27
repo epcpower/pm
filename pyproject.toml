@@ -5,7 +5,7 @@ description = ""
 authors = ["Alex Anker <alex.anker@epcpower.com>"]
 
 [tool.poetry-dynamic-versioning]
-enable = true
+enable = false
 vcs = "git"
 style = "pep440"
 
