@@ -64,9 +64,10 @@ jobs:
 
           rm -rf dist
           poetry build
-          mv dist/* artifacts/
+          cp dist/* artifacts/
 
           .venv/Scripts/pytest epcpm.tests --pyargs
+          ls
 
       - name: Publish executable
         #only run if a new tag is created
