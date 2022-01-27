@@ -27,6 +27,7 @@ def Type(name, type):
     return pycparser.c_ast.TypeDecl(
         declname=name,
         quals=[],
+        align=None,
         type=pycparser.c_ast.IdentifierType(
             names=(type,),
         ),
@@ -61,6 +62,7 @@ def function(name):
             pycparser.c_ast.Typename(
                 name=None,
                 quals=[],
+                align=None,
                 type=pycparser.c_ast.IdentifierType(
                     names=["void"],
                 ),
@@ -76,6 +78,7 @@ def function(name):
     decl = Decl(
         name=name,
         type=func_decl,
+        align=None,
     )
 
     compound = pycparser.c_ast.Compound(

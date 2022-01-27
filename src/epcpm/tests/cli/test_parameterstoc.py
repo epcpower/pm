@@ -29,7 +29,9 @@ def test_declaration():
     {
       RedType red;
     };
-    typedef struct GreenType_s GreenType_t;
+    typedef struct GreenType_s
+    {
+    } GreenType_t;
     """
     )
 

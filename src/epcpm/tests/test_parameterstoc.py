@@ -112,7 +112,9 @@ def test_pycparser_exploration_wrapped():
       int16_t a;
       uint16_t b;
     };
-    typedef struct StructName_s StructName_t;
+    typedef struct StructName_s
+    {
+    } StructName_t;
     """
     )
 
@@ -154,7 +156,9 @@ def test_single_layer_group_to_c():
           int16_t parameterB;
           int16_t parameterC;
         };
-        typedef struct GroupName_s GroupName_t;
+        typedef struct GroupName_s
+        {
+        } GroupName_t;
         """
     )
 
@@ -233,14 +237,18 @@ def test_nested_group_to_c():
           int16_t parameterF;
           int16_t parameterG;
         };
-        typedef struct InnerInnerGroupName_s InnerInnerGroupName_t;
+        typedef struct InnerInnerGroupName_s
+        {
+        } InnerInnerGroupName_t;
         struct InnerGroupName_s
         {
           int16_t parameterD;
           InnerInnerGroupName_t innerInnerGroupName;
           int16_t parameterE;
         };
-        typedef struct InnerGroupName_s InnerGroupName_t;
+        typedef struct InnerGroupName_s
+        {
+        } InnerGroupName_t;
         struct OuterGroupName_s
         {
           int16_t parameterA;
@@ -248,7 +256,9 @@ def test_nested_group_to_c():
           int16_t parameterB;
           int16_t parameterC;
         };
-        typedef struct OuterGroupName_s OuterGroupName_t;
+        typedef struct OuterGroupName_s
+        {
+        } OuterGroupName_t;
         """
     )
 
@@ -309,7 +319,9 @@ def test_datalogger_a():
       int16_t address;
       int16_t bytes;
     };
-    typedef struct Chunk_s Chunk_t;
+    typedef struct Chunk_s
+    {
+    } Chunk_t;
     enum Chunks_e
     {
       Chunks_First = 0,
@@ -324,14 +336,18 @@ def test_datalogger_a():
     {
       int16_t param;
     };
-    typedef struct Group_s Group_t;
+    typedef struct Group_s
+    {
+    } Group_t;
     struct DataLogger_s
     {
       Chunks_t chunks;
       int16_t postTriggerDuration;
       Group_t group;
     };
-    typedef struct DataLogger_s DataLogger_t;
+    typedef struct DataLogger_s
+    {
+    } DataLogger_t;
     """
     )
 
@@ -441,7 +457,9 @@ def test_grouped_parameter_array():
     {
       ArrayName_t arrayName;
     };
-    typedef struct GroupName_s GroupName_t;
+    typedef struct GroupName_s
+    {
+    } GroupName_t;
     """
     )
 
@@ -524,7 +542,9 @@ def test_line_monitor_params():
       _iq frequency;
       _iq clearingTime;
     };
-    typedef struct FrequencyLimit_s FrequencyLimit_t;
+    typedef struct FrequencyLimit_s
+    {
+    } FrequencyLimit_t;
     enum FrequencyLimits_e
     {
       FrequencyLimits_First = 0,
@@ -539,7 +559,9 @@ def test_line_monitor_params():
     {
       FrequencyLimits_t frequencyLimits;
     };
-    typedef struct LineMonitoring_s LineMonitoring_t;
+    typedef struct LineMonitoring_s
+    {
+    } LineMonitoring_t;
     """
     )
 
@@ -566,7 +588,9 @@ def test_root():
     {
       RedType red;
     };
-    typedef struct Group_s Group_t;
+    typedef struct Group_s
+    {
+    } Group_t;
     """
     )
 
