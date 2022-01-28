@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "epcpm"
-version = "0.0.0"
+version = "2022.1.1"
 description = ""
 authors = ["Alex Anker <alex.anker@epcpower.com>"]
 
 [tool.poetry-dynamic-versioning]
-enable = true
+enable = false
 vcs = "git"
 style = "pep440"
 
