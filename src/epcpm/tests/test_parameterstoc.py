@@ -1,3 +1,9 @@
+"""
+Testing for parameterstoc script to build a parameters model.
+
+It is possible that the parameterstoc module is either out of date
+or no longer applicable for normal use.
+"""
 import functools
 import os
 import textwrap
