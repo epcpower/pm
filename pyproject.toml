@@ -38,7 +38,6 @@ python-can = "^3.3.4"
 pytest = "3.8.2"
 pytest-qt = "3.2.1"
 Jinja2 = "^3.0.3"
-#pycparser = {git = "https://github.com/eliben/pycparser", rev = "7547e850a05d84fbe598e6bd1bd03f09bf524ac6"}
 
 [tool.poetry.dev-dependencies]
 gitignoreio = "0.1.5"

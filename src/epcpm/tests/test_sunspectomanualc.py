@@ -38,6 +38,7 @@ Decl = functools.partial(
     pycparser.c_ast.Decl,
     name=None,
     quals=[],
+    align=None,
     storage=[],
     funcspec=[],
     init=None,
@@ -78,7 +79,6 @@ def function(name):
     decl = Decl(
         name=name,
         type=func_decl,
-        align=None,
     )
 
     compound = pycparser.c_ast.Compound(

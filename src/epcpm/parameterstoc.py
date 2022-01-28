@@ -194,9 +194,9 @@ ArrayDecl = functools.partial(
 
 TypeDecl = functools.partial(
     pycparser.c_ast.TypeDecl,
-    align=None,
     declname="",
     quals=[],
+    align=None,
 )
 
 
@@ -206,9 +206,9 @@ def typedef(target, name):
         quals=[],
         storage=["typedef"],
         type=pycparser.c_ast.TypeDecl(
-            align=None,
             declname=name,
             quals=[],
+            align=None,
             type=target,
         ),
     )
@@ -222,7 +222,6 @@ def array_typedef(target, name, length):
         type=ArrayDecl(
             dim=length,
             type=TypeDecl(
-                align=None,
                 declname=name,
                 type=pycparser.c_ast.IdentifierType(
                     names=[target],
