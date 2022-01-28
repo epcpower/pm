@@ -377,7 +377,7 @@ python-versions = "*"
 
 [[package]]
 name = "epyqlib"
-version = "2022.1.1.post2.dev0+a45a1196"
+version = "0.0.0"
 description = ""
 category = "dev"
 optional = false
@@ -1537,8 +1537,8 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
 lock-version = "1.1"
-python-versions = ">=3.7,<3.11"
-content-hash = "219b2ac36c464b748a86030679eb080753334981dce0f7b01027920f50d91c57"
+python-versions = "^3.7"
+content-hash = "3031dfe4a01da7a70c74978ef613456be5e5469abf7bc8c9b9b221b32d21584a"
 
 [metadata.files]
 aenum = [

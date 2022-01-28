@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "epcpm"
-version = "2022.1.1"
+version = "0.0.0"
 description = ""
 authors = ["Alex Anker <alex.anker@epcpower.com>"]
 
@@ -13,7 +13,7 @@ style = "pep440"
 files = ["src/epcpm/__init__.py"]
 
 [tool.poetry.dependencies]
-python = ">=3.7,<3.11"
+python = "^3.7"
 attrs = "20.2.0"
 click = "7.1.2"
 lxml = "4.3.0"
