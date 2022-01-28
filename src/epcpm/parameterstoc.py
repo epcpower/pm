@@ -1,3 +1,9 @@
+"""
+Used by parameterstoc script to build a parameters model.
+
+It is possible that this module is either out of date or
+no longer applicable for normal use.
+"""
 import itertools
 import functools
 
