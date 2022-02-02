@@ -5,11 +5,7 @@ import pathlib
 
 
 def compile_ui():
-    print("epyq::compile_ui building UI in epyq")
-    alqtendpy.compileui.compile_ui(
-        directory_paths=[pathlib.Path(__file__).parent / "src" / "epcpm"],
-    )
-
+    print("build epyq from pm (TODO: TEMPORARY!, i dont like this)")
     # todo, both of these are the same.  change it only have one
     alqtendpy.compileui.compile_ui(
         directory_paths=[pathlib.Path(__file__).parent / "sub" / "epyqlib" / "epyqlib"],

@@ -55,6 +55,7 @@ epcexportsym = 'epcpm.cli.exportsym:cli'
 epcexportdocx = 'epcpm.cli.exportdocx:cli'
 epcconvertparameters = 'epcpm.cli.convertepp:cli'
 builduipm = 'epcpm.builduipm:compile_ui'
+delmebuilduiepyqlib = 'buildui:compile_ui'
 epcpm = 'epcpm.__main__:_entry_point'
 
 [tool.black]
