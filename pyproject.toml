@@ -15,7 +15,6 @@ files = ["src/epcpm/__init__.py"]
 [tool.poetry.dependencies]
 python = "^3.7"
 attrs = "20.2.0"
-click = "7.1.2"
 lxml = "4.3.0"
 PyQt5 = "5.13.2"
 requests = "2.26.0"
@@ -38,6 +37,7 @@ python-can = "^3.3.4"
 pytest = "5.3.5"
 pytest-qt = "3.3.0"
 Jinja2 = "^3.0.3"
+click = "<=7.1.2"
 
 [tool.poetry.dev-dependencies]
 gitignoreio = "0.1.5"

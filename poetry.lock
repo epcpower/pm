@@ -396,7 +396,7 @@ boto3-type-annotations = "0.3.1"
 canmatrix = "0.9.1"
 certifi = "2020.6.20"
 certitude = {version = "1.0.1", markers = "sys_platform == \"Darwin\""}
-click = "7.1.2"
+click = "<=7.1.2"
 dulwich = "0.20.6"
 fab = "3.0.0"
 GitPython = "2.1.15"
@@ -1554,7 +1554,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "fabfe96f8bb87300fbeac2f94ddfd8d791fe0d7317ea3a89c35da073cc68428a"
+content-hash = "fd0217b2a1097aa2bda84a921b46cb3b4a3c6cf3ea19b620723cd30e51e00d6c"
 
 [metadata.files]
 aenum = [
