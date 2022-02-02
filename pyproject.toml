@@ -55,6 +55,7 @@ epcexportsym = 'epcpm.cli.exportsym:cli'
 epcexportdocx = 'epcpm.cli.exportdocx:cli'
 epcconvertparameters = 'epcpm.cli.convertepp:cli'
 buildui = 'buildui:compile_ui'
+builduitwo = 'epcpm.builduitwo:compile_ui'
 epcpm = 'epcpm.__main__:_entry_point'
 
 [tool.black]
