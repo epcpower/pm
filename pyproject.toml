@@ -38,13 +38,13 @@ pytest = "5.3.5"
 pytest-qt = "3.3.0"
 Jinja2 = "^3.0.3"
 click = "<=7.1.2"
+epyqlib = {path = "./sub/epyqlib",  develop = true}
 
 [tool.poetry.dev-dependencies]
 gitignoreio = "0.1.5"
 pyinstaller = "4.2"
 poetry-dynamic-versioning = "^0.13.1"
 black = ">=20.8b1"
-epyqlib = {path = "./sub/epyqlib",  develop = true}
 
 
 [tool.poetry.scripts]
@@ -55,7 +55,6 @@ epcexportsym = 'epcpm.cli.exportsym:cli'
 epcexportdocx = 'epcpm.cli.exportdocx:cli'
 epcconvertparameters = 'epcpm.cli.convertepp:cli'
 builduipm = 'epcpm.builduipm:compile_ui'
-delmebuilduiepyqlib = 'buildui:compile_ui'
 epcpm = 'epcpm.__main__:_entry_point'
 
 [tool.black]
