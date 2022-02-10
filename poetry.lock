@@ -68,6 +68,14 @@ python-versions = "*"
 python-dateutil = "*"
 
 [[package]]
+name = "atomicwrites"
+version = "1.4.0"
+description = "Atomic file writes."
+category = "dev"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[[package]]
 name = "attrs"
 version = "20.2.0"
 description = "Classes Without Boilerplate"
@@ -268,7 +276,7 @@ requests = ">=2.7.9"
 name = "colorama"
 version = "0.4.4"
 description = "Cross-platform colored terminal text."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -314,7 +322,7 @@ test = ["pytest (>=6.2.0)", "pytest-cov", "pytest-subtests", "pytest-xdist", "pr
 name = "decorator"
 version = "5.1.1"
 description = "Decorators for Humans"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -365,14 +373,6 @@ importlib-metadata = {version = ">=1.6.0", markers = "python_version < \"3.8\""}
 packaging = ">=20.9"
 
 [[package]]
-name = "easyprocess"
-version = "1.1"
-description = "Easy to use Python subprocess interface."
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "epyqlib"
 version = "0.0.0"
 description = ""
@@ -405,11 +405,6 @@ pyelftools = "0.26"
 PyQt5 = ">=5.13.0"
 PyQt5Designer = {version = "^5.14.1", markers = "sys_platform == \"win32\""}
 pysunspec = "^2.1.1"
-pytest = "3.5.1"
-pytest-qt = "3.3.0"
-pytest-rerunfailures = "<=5.0"
-pytest-twisted = "<=1.13.4"
-pytest-xvfb = "1.2.0"
 python-can = "^3.3.4"
 python-dateutil = "2.7.5"
 python-docx = "0.8.7"
@@ -520,7 +515,7 @@ tests = ["codecov", "pytest", "pytest-cov", "tox"]
 name = "greenlet"
 version = "1.1.2"
 description = "Lightweight in-process concurrent programming"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
 
@@ -663,7 +658,7 @@ tests = ["pytest", "pytz"]
 name = "more-itertools"
 version = "8.12.0"
 description = "More routines for operating on iterables, beyond itertools"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -786,11 +781,17 @@ test = ["appdirs (==1.4.4)", "pytest (>=6)", "pytest-cov (>=2.7)", "pytest-mock 
 
 [[package]]
 name = "pluggy"
-version = "0.6.0"
+version = "0.13.1"
 description = "plugin and hook calling mechanisms for python"
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[package.dependencies]
+importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
+
+[package.extras]
+dev = ["pre-commit", "tox"]
 
 [[package]]
 name = "poetry-dynamic-versioning"
@@ -958,25 +959,32 @@ pyserial = "*"
 
 [[package]]
 name = "pytest"
-version = "3.5.1"
+version = "5.3.5"
 description = "pytest: simple powerful testing with Python"
-category = "main"
+category = "dev"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+python-versions = ">=3.5"
 
 [package.dependencies]
+atomicwrites = {version = ">=1.0", markers = "sys_platform == \"win32\""}
 attrs = ">=17.4.0"
 colorama = {version = "*", markers = "sys_platform == \"win32\""}
+importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
 more-itertools = ">=4.0.0"
-pluggy = ">=0.5,<0.7"
+packaging = "*"
+pluggy = ">=0.12,<1.0"
 py = ">=1.5.0"
-six = ">=1.10.0"
+wcwidth = "*"
+
+[package.extras]
+checkqa-mypy = ["mypy (==v0.761)"]
+testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xmlschema"]
 
 [[package]]
 name = "pytest-cov"
 version = "2.5.1"
 description = "Pytest plugin for measuring coverage."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -988,7 +996,7 @@ pytest = ">=2.6.0"
 name = "pytest-qt"
 version = "3.3.0"
 description = "pytest support for PyQt and PySide applications"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -1000,21 +1008,10 @@ dev = ["pre-commit", "tox"]
 doc = ["sphinx", "sphinx-rtd-theme"]
 
 [[package]]
-name = "pytest-rerunfailures"
-version = "4.2"
-description = "pytest plugin to re-run tests to eliminate flaky failures"
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-pytest = ">=2.8.7"
-
-[[package]]
 name = "pytest-twisted"
 version = "1.13.4"
 description = "A twisted plugin for pytest."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
 
@@ -1027,18 +1024,6 @@ pytest = ">=2.3"
 dev = ["pre-commit", "black"]
 pyqt5 = ["qt5reactor[pyqt5] (>=0.6.2)"]
 pyside2 = ["qt5reactor[pyside2] (>=0.6.3)"]
-
-[[package]]
-name = "pytest-xvfb"
-version = "1.2.0"
-description = "A pytest plugin to run Xvfb for tests."
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-pytest = ">=2.8.1"
-pyvirtualdisplay = ">=0.2.1"
 
 [[package]]
 name = "python-can"
@@ -1090,17 +1075,6 @@ python-versions = "*"
 
 [package.extras]
 cli = ["click (>=5.0)"]
-
-[[package]]
-name = "pyvirtualdisplay"
-version = "2.2"
-description = "python wrapper for Xvfb, Xephyr and Xvnc"
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-EasyProcess = "*"
 
 [[package]]
 name = "pywin32-ctypes"
@@ -1466,6 +1440,14 @@ docs = ["proselint (>=0.10.2)", "sphinx (>=3)", "sphinx-argparse (>=0.2.5)", "sp
 testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", "pytest (>=4)", "pytest-env (>=0.6.2)", "pytest-freezegun (>=0.4.1)", "pytest-mock (>=2)", "pytest-randomly (>=1)", "pytest-timeout (>=1)", "packaging (>=20.0)"]
 
 [[package]]
+name = "wcwidth"
+version = "0.2.5"
+description = "Measures the displayed width of unicode strings in a terminal"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "webencodings"
 version = "0.5.1"
 description = "Character encoding aliases for legacy web content"
@@ -1529,7 +1511,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "aa022f122952e048724a66a068ef54817b67672bbd026c34d0a689fcaeccd1a3"
+content-hash = "6bd824f98264544bc3c5bdbef4118ce5e04fd4392c869bdbf2486c95d52f04d3"
 
 [metadata.files]
 aenum = [
@@ -1553,6 +1535,10 @@ appdirs = [
 ]
 arrow = [
     {file = "arrow-0.12.1.tar.gz", hash = "sha256:a558d3b7b6ce7ffc74206a86c147052de23d3d4ef0e17c210dd478c53575c4cd"},
+]
+atomicwrites = [
+    {file = "atomicwrites-1.4.0-py2.py3-none-any.whl", hash = "sha256:6d1784dea7c0c8d4a5172b6c620f40b6e4cbfdf96d783691f2e1302a7b88e197"},
+    {file = "atomicwrites-1.4.0.tar.gz", hash = "sha256:ae70396ad1a434f9c7046fd2dd196fc04b12f9e91ffb859164193be8b6168a7a"},
 ]
 attrs = [
     {file = "attrs-20.2.0-py2.py3-none-any.whl", hash = "sha256:fce7fc47dfc976152e82d53ff92fa0407700c21acd20886a13777a0d20e655dc"},
@@ -1771,10 +1757,6 @@ dulwich = [
 dunamai = [
     {file = "dunamai-1.8.0-py3-none-any.whl", hash = "sha256:846855e45d5969f6d11835d486bbf4d6ca175d4169a0ab11f619a5135cc86bdf"},
     {file = "dunamai-1.8.0.tar.gz", hash = "sha256:ff1f958af3575ec612e72c84bf96367469f418d31b9685f8311a5de2eb754a85"},
-]
-easyprocess = [
-    {file = "EasyProcess-1.1-py3-none-any.whl", hash = "sha256:82eed523a0a5eb12a81fa4eacd9f342caeb3f900eb4b798740e6696ad07e63f9"},
-    {file = "EasyProcess-1.1.tar.gz", hash = "sha256:885898302a57aab948973e8b5d32a4229392b9fb2d986ab1d4ffd590e5ba90ec"},
 ]
 epyqlib = []
 et-xmlfile = [
@@ -2047,9 +2029,8 @@ platformdirs = [
     {file = "platformdirs-2.5.0.tar.gz", hash = "sha256:8ec11dfba28ecc0715eb5fb0147a87b1bf325f349f3da9aab2cd6b50b96b692b"},
 ]
 pluggy = [
-    {file = "pluggy-0.6.0-py2-none-any.whl", hash = "sha256:d345c8fe681115900d6da8d048ba67c25df42973bda370783cd58826442dcd7c"},
-    {file = "pluggy-0.6.0-py3-none-any.whl", hash = "sha256:e160a7fcf25762bb60efc7e171d4497ff1d8d2d75a3d0df7a21b76821ecbf5c5"},
-    {file = "pluggy-0.6.0.tar.gz", hash = "sha256:7f8ae7f5bdf75671a718d2daf0a64b7885f74510bcd98b1a0bb420eb9a9d0cff"},
+    {file = "pluggy-0.13.1-py2.py3-none-any.whl", hash = "sha256:966c145cd83c96502c3c3868f50408687b38434af77734af1e9ca461a4081d2d"},
+    {file = "pluggy-0.13.1.tar.gz", hash = "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0"},
 ]
 poetry-dynamic-versioning = [
     {file = "poetry-dynamic-versioning-0.13.1.tar.gz", hash = "sha256:5c0e7b22560db76812057ef95dadad662ecc63eb270145787eabe73da7c222f9"},
@@ -2158,8 +2139,8 @@ pysunspec = [
     {file = "pysunspec-2.1.1.tar.gz", hash = "sha256:9824c815a98935399029276837feb1f3d5749646415910317026d3b7f8d9a142"},
 ]
 pytest = [
-    {file = "pytest-3.5.1-py2.py3-none-any.whl", hash = "sha256:829230122facf05a5f81a6d4dfe6454a04978ea3746853b2b84567ecf8e5c526"},
-    {file = "pytest-3.5.1.tar.gz", hash = "sha256:54713b26c97538db6ff0703a12b19aeaeb60b5e599de542e7fca0ec83b9038e8"},
+    {file = "pytest-5.3.5-py3-none-any.whl", hash = "sha256:ff615c761e25eb25df19edddc0b970302d2a9091fbce0e7213298d85fb61fef6"},
+    {file = "pytest-5.3.5.tar.gz", hash = "sha256:0d5fe9189a148acc3c3eb2ac8e1ac0742cb7618c084f3d228baaec0c254b318d"},
 ]
 pytest-cov = [
     {file = "pytest-cov-2.5.1.tar.gz", hash = "sha256:03aa752cf11db41d281ea1d807d954c4eda35cfa1b21d6971966cc041bbf6e2d"},
@@ -2169,16 +2150,9 @@ pytest-qt = [
     {file = "pytest-qt-3.3.0.tar.gz", hash = "sha256:714b0bf86c5313413f2d300ac613515db3a1aef595051ab8ba2ffe619dbe8925"},
     {file = "pytest_qt-3.3.0-py2.py3-none-any.whl", hash = "sha256:5f8928288f50489d83f5d38caf2d7d9fcd6e7cf769947902caa4661dc7c851e3"},
 ]
-pytest-rerunfailures = [
-    {file = "pytest-rerunfailures-4.2.tar.gz", hash = "sha256:97216f8a549f74da3cc786236d9093fbd43150a6fbe533ba622cb311f7431774"},
-    {file = "pytest_rerunfailures-4.2-py2.py3-none-any.whl", hash = "sha256:b6124f66a7a636ab5e0108281563165480a6d66ae84b7cdd8dc9146162a28499"},
-]
 pytest-twisted = [
     {file = "pytest-twisted-1.13.4.tar.gz", hash = "sha256:4b9644258a267f63f8ba24b91b83c9f3372caec393722f8d8263674fc51168e1"},
     {file = "pytest_twisted-1.13.4-py2.py3-none-any.whl", hash = "sha256:1ae215f71247d0d75dc2611fa744291aebf40dbd6c260d528cb82bbbbe252d97"},
-]
-pytest-xvfb = [
-    {file = "pytest-xvfb-1.2.0.tar.gz", hash = "sha256:a7544ca8d0c7c40db4b40d7a417a7b071c68d6ef6bdf9700872d7a167302f979"},
 ]
 python-can = [
     {file = "python-can-3.3.4.tar.gz", hash = "sha256:2d3c223b7adc4dd46ce258d4a33b7e0dbb6c339e002faa40ee4a69d5fdce9449"},
@@ -2193,10 +2167,6 @@ python-docx = [
 python-dotenv = [
     {file = "python-dotenv-0.9.1.tar.gz", hash = "sha256:122290a38ece9fe4f162dc7c95cae3357b983505830a154d3c98ef7f6c6cea77"},
     {file = "python_dotenv-0.9.1-py2.py3-none-any.whl", hash = "sha256:4a205787bc829233de2a823aa328e44fd9996fedb954989a21f1fc67c13d7a77"},
-]
-pyvirtualdisplay = [
-    {file = "PyVirtualDisplay-2.2-py3-none-any.whl", hash = "sha256:3dd8f63d32a134c07c2433f6931e9877172a99a33757f0e5cd146612e1c6380d"},
-    {file = "PyVirtualDisplay-2.2.tar.gz", hash = "sha256:3ecda6b183b03ba65dcfdf0019809722480d7b7e10eea6e3a40bf1ba3146bab7"},
 ]
 pywin32-ctypes = [
     {file = "pywin32-ctypes-0.2.0.tar.gz", hash = "sha256:24ffc3b341d457d48e8922352130cf2644024a4ff09762a2261fd34c36ee5942"},
@@ -2339,6 +2309,10 @@ urllib3 = [
 virtualenv = [
     {file = "virtualenv-20.13.1-py2.py3-none-any.whl", hash = "sha256:45e1d053cad4cd453181ae877c4ffc053546ae99e7dd049b9ff1d9be7491abf7"},
     {file = "virtualenv-20.13.1.tar.gz", hash = "sha256:e0621bcbf4160e4e1030f05065c8834b4e93f4fcc223255db2a823440aca9c14"},
+]
+wcwidth = [
+    {file = "wcwidth-0.2.5-py2.py3-none-any.whl", hash = "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784"},
+    {file = "wcwidth-0.2.5.tar.gz", hash = "sha256:c4d647b99872929fdb7bdcaa4fbe7f01413ed3d98077df798530e5b04f116c83"},
 ]
 webencodings = [
     {file = "webencodings-0.5.1-py2.py3-none-any.whl", hash = "sha256:a0af1213f3c2226497a97e2b3aa01a7e4bee4f403f95be16fc9acd2947514a78"},
