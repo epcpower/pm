@@ -32,7 +32,6 @@ twine = "1.13.0"
 codecov = "^2.1.12"
 Twisted = "21.2.0"
 python-can = "^3.3.4"
-epyqlib = {path = "./sub/epyqlib",  develop = true}
 Jinja2 = "^3.0.3"
 click = "<=7.1.2"
 
@@ -45,6 +44,7 @@ pytest = "5.3.5"
 pytest-qt = "3.3.0"
 pytest-cov = "2.5.1"
 pytest-twisted = "<=1.13.4"
+epyqlib = {path = "./sub/epyqlib",  develop = true}
 
 [tool.poetry.scripts]
 epcpmcli = 'epcpm.cli.main:main'
