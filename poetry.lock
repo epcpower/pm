@@ -10,7 +10,7 @@ python-versions = "*"
 name = "alqtendpy"
 version = "0.0.4"
 description = "Extras for working with PyQt5."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -28,7 +28,7 @@ test = ["codecov", "pytest", "pytest-cov", "pytest-qt", "pytest-twisted", "pytes
 name = "altendpy"
 version = "0.0.21"
 description = "Extras for working with Python."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -52,7 +52,7 @@ python-versions = "*"
 name = "appdirs"
 version = "1.4.3"
 description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -60,7 +60,7 @@ python-versions = "*"
 name = "arrow"
 version = "0.12.1"
 description = "Better dates and times for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -71,7 +71,7 @@ python-dateutil = "*"
 name = "atomicwrites"
 version = "1.4.0"
 description = "Atomic file writes."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -156,7 +156,7 @@ webencodings = "*"
 name = "boto3"
 version = "1.14.41"
 description = "The AWS SDK for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -169,7 +169,7 @@ s3transfer = ">=0.3.0,<0.4.0"
 name = "boto3-type-annotations"
 version = "0.3.1"
 description = "Type annotations for boto3. Adds code completion in IDEs such as PyCharm."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -177,7 +177,7 @@ python-versions = "*"
 name = "botocore"
 version = "1.17.63"
 description = "Low-level, data-driven core of boto 3."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -223,7 +223,7 @@ python-versions = "*"
 name = "certitude"
 version = "1.0.1"
 description = "A library that provides access to system certificate stores."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -234,7 +234,7 @@ cffi = ">=1.0.0"
 name = "cffi"
 version = "1.15.0"
 description = "Foreign Function Interface for Python calling C code."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -276,7 +276,7 @@ requests = ">=2.7.9"
 name = "colorama"
 version = "0.4.4"
 description = "Cross-platform colored terminal text."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -303,7 +303,7 @@ toml = ["tomli"]
 name = "cryptography"
 version = "36.0.1"
 description = "cryptography is a package which provides cryptographic recipes and primitives to Python developers."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -322,7 +322,7 @@ test = ["pytest (>=6.2.0)", "pytest-cov", "pytest-subtests", "pytest-xdist", "pr
 name = "decorator"
 version = "5.1.1"
 description = "Decorators for Humans"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -346,7 +346,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "dulwich"
 version = "0.20.6"
 description = "Python Git Library"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -373,18 +373,10 @@ importlib-metadata = {version = ">=1.6.0", markers = "python_version < \"3.8\""}
 packaging = ">=20.9"
 
 [[package]]
-name = "easyprocess"
-version = "1.1"
-description = "Easy to use Python subprocess interface."
-category = "dev"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "epyqlib"
 version = "0.0.0"
 description = ""
-category = "dev"
+category = "main"
 optional = false
 python-versions = "^3.7"
 develop = true
@@ -413,11 +405,6 @@ pyelftools = "0.26"
 PyQt5 = ">=5.13.0"
 PyQt5Designer = {version = "^5.14.1", markers = "sys_platform == \"win32\""}
 pysunspec = "^2.1.1"
-pytest = "5.3.5"
-pytest-qt = "3.3.0"
-pytest-rerunfailures = "5.0"
-pytest-twisted = "<=1.13.4"
-pytest-xvfb = "1.2.0"
 python-can = "^3.3.4"
 python-dateutil = "2.7.5"
 python-docx = "0.8.7"
@@ -446,7 +433,7 @@ python-versions = ">=3.6"
 name = "fab"
 version = "3.0.0"
 description = "Wrapper around Phabricator API"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.4"
 
@@ -477,7 +464,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "gitdb2"
 version = "2.0.6"
 description = "Git Object Database"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -500,7 +487,7 @@ requests = "*"
 name = "gitpython"
 version = "2.1.15"
 description = "Python Git Library"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -528,7 +515,7 @@ tests = ["codecov", "pytest", "pytest-cov", "tox"]
 name = "greenlet"
 version = "1.1.2"
 description = "Lightweight in-process concurrent programming"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
 
@@ -616,7 +603,7 @@ i18n = ["Babel (>=2.7)"]
 name = "jmespath"
 version = "0.10.0"
 description = "JSON Matching Expressions"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -671,7 +658,7 @@ tests = ["pytest", "pytz"]
 name = "more-itertools"
 version = "8.12.0"
 description = "More routines for operating on iterables, beyond itertools"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -687,7 +674,7 @@ python-versions = "*"
 name = "natsort"
 version = "5.5.0"
 description = "Simple yet flexible natural sorting in Python."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -722,13 +709,13 @@ pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
 name = "paho-mqtt"
 version = "1.4.0"
 description = "MQTT version 3.1.1 client class"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
 [[package]]
 name = "pathlib2"
-version = "2.3.6"
+version = "2.3.7.post1"
 description = "Object-oriented filesystem paths"
 category = "main"
 optional = false
@@ -760,7 +747,7 @@ future = "*"
 name = "pint"
 version = "0.11"
 description = "Physical quantities module"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -782,7 +769,7 @@ testing = ["coverage", "nose"]
 
 [[package]]
 name = "platformdirs"
-version = "2.4.1"
+version = "2.5.0"
 description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 category = "main"
 optional = false
@@ -831,7 +818,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "pyasn1"
 version = "0.4.8"
 description = "ASN.1 types and codecs"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -839,7 +826,7 @@ python-versions = "*"
 name = "pyasn1-modules"
 version = "0.2.8"
 description = "A collection of ASN.1-based protocols modules."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -858,7 +845,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "pyelftools"
 version = "0.26"
 description = "Library for analyzing ELF files and DWARF debugging information"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -902,7 +889,7 @@ python-versions = "*"
 name = "pyopenssl"
 version = "22.0.0"
 description = "Python wrapper module around the OpenSSL library"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -947,7 +934,7 @@ python-versions = ">=3.5"
 name = "pyqt5designer"
 version = "5.14.1"
 description = "PyQt5 Designer"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -974,7 +961,7 @@ pyserial = "*"
 name = "pytest"
 version = "5.3.5"
 description = "pytest: simple powerful testing with Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -997,7 +984,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xm
 name = "pytest-cov"
 version = "2.5.1"
 description = "Pytest plugin for measuring coverage."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1009,7 +996,7 @@ pytest = ">=2.6.0"
 name = "pytest-qt"
 version = "3.3.0"
 description = "pytest support for PyQt and PySide applications"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -1021,21 +1008,10 @@ dev = ["pre-commit", "tox"]
 doc = ["sphinx", "sphinx-rtd-theme"]
 
 [[package]]
-name = "pytest-rerunfailures"
-version = "5.0"
-description = "pytest plugin to re-run tests to eliminate flaky failures"
-category = "dev"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-pytest = ">=3.6"
-
-[[package]]
 name = "pytest-twisted"
 version = "1.13.4"
 description = "A twisted plugin for pytest."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
 
@@ -1048,18 +1024,6 @@ pytest = ">=2.3"
 dev = ["pre-commit", "black"]
 pyqt5 = ["qt5reactor[pyqt5] (>=0.6.2)"]
 pyside2 = ["qt5reactor[pyside2] (>=0.6.3)"]
-
-[[package]]
-name = "pytest-xvfb"
-version = "1.2.0"
-description = "A pytest plugin to run Xvfb for tests."
-category = "dev"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-pytest = ">=2.8.1"
-pyvirtualdisplay = ">=0.2.1"
 
 [[package]]
 name = "python-can"
@@ -1083,7 +1047,7 @@ test = ["mock (>=2.0,<3.0)", "pytest (>=4.6,<5.0)", "pytest-timeout (>=1.3,<2.0)
 name = "python-dateutil"
 version = "2.7.5"
 description = "Extensions to the standard Python datetime module"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -1094,7 +1058,7 @@ six = ">=1.5"
 name = "python-docx"
 version = "0.8.7"
 description = "Create and update Microsoft Word .docx files."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1105,23 +1069,12 @@ lxml = ">=2.3.2"
 name = "python-dotenv"
 version = "0.9.1"
 description = "Add .env support to your django/flask apps in development and deployments"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
 [package.extras]
 cli = ["click (>=5.0)"]
-
-[[package]]
-name = "pyvirtualdisplay"
-version = "2.2"
-description = "python wrapper for Xvfb, Xephyr and Xvnc"
-category = "dev"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-EasyProcess = "*"
 
 [[package]]
 name = "pywin32-ctypes"
@@ -1135,7 +1088,7 @@ python-versions = "*"
 name = "qt5reactor"
 version = "0.5"
 description = "Twisted Qt Integration"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1146,7 +1099,7 @@ twisted = "*"
 name = "qtawesome"
 version = "0.6.0"
 description = "FontAwesome icons in PyQt and PySide applications"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1158,7 +1111,7 @@ six = "*"
 name = "qtpy"
 version = "2.0.1"
 description = "Provides an abstraction layer on top of the various Qt bindings (PyQt5/6 and PySide2/6)."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -1217,7 +1170,7 @@ requests = ">=2.0.1,<3.0.0"
 name = "s3transfer"
 version = "0.3.7"
 description = "An Amazon S3 Transfer Manager"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1228,7 +1181,7 @@ botocore = ">=1.12.36,<2.0a.0"
 name = "service-identity"
 version = "21.1.0"
 description = "Service identity verification for pyOpenSSL & cryptography."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1249,7 +1202,7 @@ tests = ["coverage[toml] (>=5.0.2)", "pytest"]
 name = "siphash-cffi"
 version = "0.1.4"
 description = "Tested, performant SipHash bindings for Python 3 with support for double-output-size, half-word and variable-round variants."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1268,7 +1221,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "smmap"
 version = "5.0.0"
 description = "A pure Python implementation of a sliding window memory map manager"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -1276,7 +1229,7 @@ python-versions = ">=3.6"
 name = "smmap2"
 version = "3.0.1"
 description = "A mirror package for smmap"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1320,7 +1273,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "tomlkit"
-version = "0.9.0"
+version = "0.9.2"
 description = "Style preserving TOML library"
 category = "dev"
 optional = false
@@ -1362,7 +1315,7 @@ dev = ["py-make (>=0.1.0)", "twine", "argopt", "pydoc-markdown"]
 name = "treq"
 version = "21.1.0"
 description = "High-level Twisted HTTP Client API"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
 
@@ -1469,7 +1422,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "virtualenv"
-version = "20.13.0"
+version = "20.13.1"
 description = "Virtual Python Environment builder"
 category = "main"
 optional = false
@@ -1490,7 +1443,7 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 name = "wcwidth"
 version = "0.2.5"
 description = "Measures the displayed width of unicode strings in a terminal"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1558,7 +1511,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "fd0217b2a1097aa2bda84a921b46cb3b4a3c6cf3ea19b620723cd30e51e00d6c"
+content-hash = "6bd824f98264544bc3c5bdbef4118ce5e04fd4392c869bdbf2486c95d52f04d3"
 
 [metadata.files]
 aenum = [
@@ -1804,10 +1757,6 @@ dulwich = [
 dunamai = [
     {file = "dunamai-1.8.0-py3-none-any.whl", hash = "sha256:846855e45d5969f6d11835d486bbf4d6ca175d4169a0ab11f619a5135cc86bdf"},
     {file = "dunamai-1.8.0.tar.gz", hash = "sha256:ff1f958af3575ec612e72c84bf96367469f418d31b9685f8311a5de2eb754a85"},
-]
-easyprocess = [
-    {file = "EasyProcess-1.1-py3-none-any.whl", hash = "sha256:82eed523a0a5eb12a81fa4eacd9f342caeb3f900eb4b798740e6696ad07e63f9"},
-    {file = "EasyProcess-1.1.tar.gz", hash = "sha256:885898302a57aab948973e8b5d32a4229392b9fb2d986ab1d4ffd590e5ba90ec"},
 ]
 epyqlib = []
 et-xmlfile = [
@@ -2057,8 +2006,8 @@ paho-mqtt = [
     {file = "paho-mqtt-1.4.0.tar.gz", hash = "sha256:e440a052b46d222e184be3be38676378722072fcd4dfd2c8f509fb861a7b0b79"},
 ]
 pathlib2 = [
-    {file = "pathlib2-2.3.6-py2.py3-none-any.whl", hash = "sha256:3a130b266b3a36134dcc79c17b3c7ac9634f083825ca6ea9d8f557ee6195c9c8"},
-    {file = "pathlib2-2.3.6.tar.gz", hash = "sha256:7d8bcb5555003cdf4a8d2872c538faa3a0f5d20630cb360e518ca3b981795e5f"},
+    {file = "pathlib2-2.3.7.post1-py2.py3-none-any.whl", hash = "sha256:5266a0fd000452f1b3467d782f079a4343c63aaa119221fbdc4e39577489ca5b"},
+    {file = "pathlib2-2.3.7.post1.tar.gz", hash = "sha256:9fe0edad898b83c0c3e199c842b27ed216645d2e177757b2dd67384d4113c641"},
 ]
 pathspec = [
     {file = "pathspec-0.9.0-py2.py3-none-any.whl", hash = "sha256:7d15c4ddb0b5c802d161efc417ec1a2558ea2653c2e8ad9c19098201dc1c993a"},
@@ -2076,8 +2025,8 @@ pkginfo = [
     {file = "pkginfo-1.8.2.tar.gz", hash = "sha256:542e0d0b6750e2e21c20179803e40ab50598d8066d51097a0e382cba9eb02bff"},
 ]
 platformdirs = [
-    {file = "platformdirs-2.4.1-py3-none-any.whl", hash = "sha256:1d7385c7db91728b83efd0ca99a5afb296cab9d0ed8313a45ed8ba17967ecfca"},
-    {file = "platformdirs-2.4.1.tar.gz", hash = "sha256:440633ddfebcc36264232365d7840a970e75e1018d15b4327d11f91909045fda"},
+    {file = "platformdirs-2.5.0-py3-none-any.whl", hash = "sha256:30671902352e97b1eafd74ade8e4a694782bd3471685e78c32d0fdfd3aa7e7bb"},
+    {file = "platformdirs-2.5.0.tar.gz", hash = "sha256:8ec11dfba28ecc0715eb5fb0147a87b1bf325f349f3da9aab2cd6b50b96b692b"},
 ]
 pluggy = [
     {file = "pluggy-0.13.1-py2.py3-none-any.whl", hash = "sha256:966c145cd83c96502c3c3868f50408687b38434af77734af1e9ca461a4081d2d"},
@@ -2201,16 +2150,9 @@ pytest-qt = [
     {file = "pytest-qt-3.3.0.tar.gz", hash = "sha256:714b0bf86c5313413f2d300ac613515db3a1aef595051ab8ba2ffe619dbe8925"},
     {file = "pytest_qt-3.3.0-py2.py3-none-any.whl", hash = "sha256:5f8928288f50489d83f5d38caf2d7d9fcd6e7cf769947902caa4661dc7c851e3"},
 ]
-pytest-rerunfailures = [
-    {file = "pytest-rerunfailures-5.0.tar.gz", hash = "sha256:5601fcec1ae121a56c1b8b0f92e237aea9f701c3c274a8852c0a1dd7e04cfdf4"},
-    {file = "pytest_rerunfailures-5.0-py2.py3-none-any.whl", hash = "sha256:2ff8c6c1f490acafc6cc85ca1005420675680c52a5aada195ca71e48a1e1ceb7"},
-]
 pytest-twisted = [
     {file = "pytest-twisted-1.13.4.tar.gz", hash = "sha256:4b9644258a267f63f8ba24b91b83c9f3372caec393722f8d8263674fc51168e1"},
     {file = "pytest_twisted-1.13.4-py2.py3-none-any.whl", hash = "sha256:1ae215f71247d0d75dc2611fa744291aebf40dbd6c260d528cb82bbbbe252d97"},
-]
-pytest-xvfb = [
-    {file = "pytest-xvfb-1.2.0.tar.gz", hash = "sha256:a7544ca8d0c7c40db4b40d7a417a7b071c68d6ef6bdf9700872d7a167302f979"},
 ]
 python-can = [
     {file = "python-can-3.3.4.tar.gz", hash = "sha256:2d3c223b7adc4dd46ce258d4a33b7e0dbb6c339e002faa40ee4a69d5fdce9449"},
@@ -2225,10 +2167,6 @@ python-docx = [
 python-dotenv = [
     {file = "python-dotenv-0.9.1.tar.gz", hash = "sha256:122290a38ece9fe4f162dc7c95cae3357b983505830a154d3c98ef7f6c6cea77"},
     {file = "python_dotenv-0.9.1-py2.py3-none-any.whl", hash = "sha256:4a205787bc829233de2a823aa328e44fd9996fedb954989a21f1fc67c13d7a77"},
-]
-pyvirtualdisplay = [
-    {file = "PyVirtualDisplay-2.2-py3-none-any.whl", hash = "sha256:3dd8f63d32a134c07c2433f6931e9877172a99a33757f0e5cd146612e1c6380d"},
-    {file = "PyVirtualDisplay-2.2.tar.gz", hash = "sha256:3ecda6b183b03ba65dcfdf0019809722480d7b7e10eea6e3a40bf1ba3146bab7"},
 ]
 pywin32-ctypes = [
     {file = "pywin32-ctypes-0.2.0.tar.gz", hash = "sha256:24ffc3b341d457d48e8922352130cf2644024a4ff09762a2261fd34c36ee5942"},
@@ -2294,8 +2232,8 @@ tomli = [
     {file = "tomli-1.2.3.tar.gz", hash = "sha256:05b6166bff487dc068d322585c7ea4ef78deed501cc124060e0f238e89a9231f"},
 ]
 tomlkit = [
-    {file = "tomlkit-0.9.0-py3-none-any.whl", hash = "sha256:c1b0fc73abd4f1e77c29ea4061ca0f2e11cbfb77342e17df3d3fdd496fc3f899"},
-    {file = "tomlkit-0.9.0.tar.gz", hash = "sha256:5a83672c565f78f5fc8f1e44e5f2726446cc6b765113efd21d03e9331747d9ab"},
+    {file = "tomlkit-0.9.2-py3-none-any.whl", hash = "sha256:daf4f9c5f2fbf6b861d6adfc51940b98dee36c13e1d88749a6dc9fb280fff304"},
+    {file = "tomlkit-0.9.2.tar.gz", hash = "sha256:ebd982d61446af95a1e082b103e250cb9e6d152eae2581d4a07d31a70b34ab0f"},
 ]
 toolz = [
     {file = "toolz-0.9.0.tar.gz", hash = "sha256:929f0a7ea7f61c178bd951bdae93920515d3fbdbafc8e6caf82d752b9b3b31c9"},
@@ -2369,8 +2307,8 @@ urllib3 = [
     {file = "urllib3-1.25.11.tar.gz", hash = "sha256:8d7eaa5a82a1cac232164990f04874c594c9453ec55eef02eab885aa02fc17a2"},
 ]
 virtualenv = [
-    {file = "virtualenv-20.13.0-py2.py3-none-any.whl", hash = "sha256:339f16c4a86b44240ba7223d0f93a7887c3ca04b5f9c8129da7958447d079b09"},
-    {file = "virtualenv-20.13.0.tar.gz", hash = "sha256:d8458cf8d59d0ea495ad9b34c2599487f8a7772d796f9910858376d1600dd2dd"},
+    {file = "virtualenv-20.13.1-py2.py3-none-any.whl", hash = "sha256:45e1d053cad4cd453181ae877c4ffc053546ae99e7dd049b9ff1d9be7491abf7"},
+    {file = "virtualenv-20.13.1.tar.gz", hash = "sha256:e0621bcbf4160e4e1030f05065c8834b4e93f4fcc223255db2a823440aca9c14"},
 ]
 wcwidth = [
     {file = "wcwidth-0.2.5-py2.py3-none-any.whl", hash = "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784"},

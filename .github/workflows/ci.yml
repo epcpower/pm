@@ -43,7 +43,7 @@ jobs:
           set -vx
           .venv/Scripts/black --exclude=.\.venv --check --diff .
           poetry run builduipm
-          poetry run delmebuilduiepyqlib
+          .\\.venv\\Scripts\\builduiepyqlib
           poetry run poetry-dynamic-versioning
           which pip
           pip --version
