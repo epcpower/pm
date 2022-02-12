@@ -188,25 +188,20 @@ class Model:
 
         self.wrapped.children[0].check_offsets_and_length()
 
-        overall_length = sum(
-            child.check_offsets_and_length() for child in self.wrapped.children[1:]
-        )
-
-        add_padding = (overall_length % 2) == 1
-        if add_padding:
-            overall_length += 1
-
-        accumulated_length = 0
-
+        overall_length = 0
+        accumulated_length = 0  # Used for each point row on spreadsheet
         rows = []
 
         model_types = ["Header", "Fixed Block", "Repeating Block"]
-
         zipped = zip(enumerate(self.wrapped.children), model_types)
         for (i, child), model_type in zipped:
+            pre_pad_block_length = child.check_offsets_and_length()
+            # Per SunSpec model specification, pad with a 16-bit pad to force even alignment to 32-bit boundaries.
+            add_padding = (pre_pad_block_length % 2) == 1
+
             builder = builders.wrap(
                 wrapped=child,
-                add_padding=add_padding and i == 1,
+                add_padding=add_padding,
                 padding_type=self.padding_type,
                 model_type=model_type,
                 model_id=self.wrapped.id,
@@ -220,6 +215,12 @@ class Model:
             if len(built_rows) > 0:
                 rows.extend(built_rows)
                 rows.append(Fields())
+
+            if i == 2:
+                # For TableRepeatingBlock only
+                overall_length += block_length * child.get_num_repeats()
+            else:
+                overall_length += block_length
 
         for i, row in enumerate(rows):
             if i == 0:
@@ -241,7 +242,7 @@ class Model:
                     row.as_filtered_tuple(self.column_filter),
                 )
 
-        return overall_length + 2  # add header length
+        return overall_length
 
 
 @builders(epcpm.sunspecmodel.Table)
@@ -689,32 +690,37 @@ class Point:
 
             setattr(row, name, getattr(self.wrapped, field.name))
 
-        if self.repeating_block_reference is not None:
-            target = self.parameter_uuid_finder(self.wrapped.parameter_uuid).original
-            is_array_element = isinstance(
-                target,
-                epyqlib.pm.parametermodel.ArrayParameterElement,
-            )
-            if is_array_element:
-                target = target.tree_parent.children[0]
+        if self.wrapped.parameter_uuid is not None:
+            if self.repeating_block_reference is not None:
+                target = self.parameter_uuid_finder(
+                    self.wrapped.parameter_uuid
+                ).original
+                is_array_element = isinstance(
+                    target,
+                    epyqlib.pm.parametermodel.ArrayParameterElement,
+                )
+                if is_array_element:
+                    target = target.tree_parent.children[0]
 
-            references = [
-                child
-                for child in self.repeating_block_reference.children
-                if target.uuid == child.parameter_uuid
-            ]
-            if len(references) > 0:
-                (reference,) = references
+                references = [
+                    child
+                    for child in self.repeating_block_reference.children
+                    if target.uuid == child.parameter_uuid
+                ]
+                if len(references) > 0:
+                    (reference,) = references
 
-                if reference.factor_uuid is not None:
+                    if reference.factor_uuid is not None:
+                        row.scale_factor = self.parameter_uuid_finder(
+                            self.parameter_uuid_finder(
+                                reference.factor_uuid
+                            ).parameter_uuid
+                        ).abbreviation
+            else:
+                if row.scale_factor is not None:
                     row.scale_factor = self.parameter_uuid_finder(
-                        self.parameter_uuid_finder(reference.factor_uuid).parameter_uuid
+                        self.scale_factor_from_uuid[row.scale_factor].parameter_uuid
                     ).abbreviation
-        else:
-            if row.scale_factor is not None:
-                row.scale_factor = self.parameter_uuid_finder(
-                    self.scale_factor_from_uuid[row.scale_factor].parameter_uuid
-                ).abbreviation
 
         if row.type is not None:
             row.type = self.parameter_uuid_finder(row.type).name

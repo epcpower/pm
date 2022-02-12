@@ -753,6 +753,9 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
     def check_offsets_and_length(self):
         return self.original.check_block_offsets_and_length()
 
+    def get_num_repeats(self):
+        return self.original.repeats
+
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
     internal_move = epyqlib.attrsmodel.default_internal_move
@@ -887,7 +890,7 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
         return False
 
     def check_block_offsets_and_length(self):
-        return self.repeats * check_block_offsets_and_length(self)
+        return check_block_offsets_and_length(self)
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from

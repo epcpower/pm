@@ -186,28 +186,20 @@ class Model:
         """
         self.wrapped.children[0].check_offsets_and_length()
 
-        non_header_block_length = sum(
-            child.check_offsets_and_length() for child in self.wrapped.children[1:]
-        )
-
-        # Per SunSpec model specification, pad with a 16-bit pad to force even alignment to 32-bit boundaries.
-        add_padding = (non_header_block_length % 2) == 1
-        if add_padding:
-            non_header_block_length += 1
-
         # Track the total accumulated length of the model's registers.
         accumulated_length = 0
-
         rows = []
 
         model_types = ["Header", "Fixed Block", "Repeating Block"]
-
         zipped = zip(enumerate(self.wrapped.children), model_types)
         for (model_type_index, child), model_type in zipped:
-            # TODO: Check if this is one of the spots where "add_padding" is incorrect for tables.
+            pre_pad_block_length = child.check_offsets_and_length()
+            # Per SunSpec model specification, pad with a 16-bit pad to force even alignment to 32-bit boundaries.
+            add_padding = (pre_pad_block_length % 2) == 1
+
             builder = builders.wrap(
                 wrapped=child,
-                add_padding=add_padding and model_type_index == 1,
+                add_padding=add_padding,
                 padding_type=self.padding_type,
                 model_type=model_type,
                 model_id=self.wrapped.id,
@@ -228,7 +220,7 @@ class Model:
                 row.value = self.wrapped.id
             elif i == 1:
                 # Set L value with length of fixed block plus repeating block.
-                row.value = non_header_block_length
+                row.value = accumulated_length
 
             self.csv_data.append(row.as_filtered_tuple(self.column_filter))
 
@@ -422,7 +414,7 @@ class DataPointBitfield:
             row.type_uuid = self.wrapped.type_uuid
             row.not_implemented = False
             row.uuid = self.wrapped.uuid
-            row.class_name = "DataPointBitfield"
+            row.class_name = epcpm.sunspecmodel.DataPointBitfield.__name__
 
         # The parent DataPointBitfield row slots in before the DataPointBitfieldMember rows.
         rows = [row]
@@ -496,7 +488,7 @@ class DataPointBitfieldMember:
             row.bit_offset = self.wrapped.bit_offset
             row.bit_length = self.wrapped.bit_length
             row.uuid = self.wrapped.uuid
-            row.class_name = "DataPointBitfieldMember"
+            row.class_name = epcpm.sunspecmodel.DataPointBitfieldMember.__name__
 
         return row
 
@@ -573,12 +565,29 @@ class TableRepeatingBlockReference:
                 row.enumeration_uuid = table_element2.enumeration_uuid
                 row.not_implemented = point.not_implemented
                 row.uuid = point.uuid
-                row.class_name = "TableRepeatingBlockReferenceDataPointReference"
+                row.class_name = (
+                    epcpm.sunspecmodel.TableRepeatingBlockReferenceDataPointReference.__name__
+                )
 
                 rows.append(row)
 
                 # Increase the address offset by the size of the data type.
                 block_size += point.size
+                curve_points += 1
+
+            if self.add_padding:
+                row = Fields()
+                set_pad_info(
+                    row,
+                    epcpm.sunspecmodel.TableRepeatingBlockReferenceDataPointReference.__name__,
+                )
+                row.modbus_address = (
+                    block_size + self.model_offset + self.address_offset
+                )
+                rows.append(row)
+
+                # Increase the address offset by the size of the data type.
+                block_size += row.size
                 curve_points += 1
 
         return rows, block_size
@@ -703,23 +712,40 @@ class Point:
             row.type_uuid = self.wrapped.type_uuid
             row.not_implemented = self.wrapped.not_implemented
             row.uuid = self.wrapped.uuid
-            row.class_name = "DataPoint"
+            row.class_name = epcpm.sunspecmodel.DataPoint.__name__
 
         if self.parameter_uuid_finder(self.wrapped.type_uuid).name == "pad":
-            row.name = "Pad"
-            row.description = "Force even alignment"
-            row.read_write = "R"
-            row.mandatory = "O"
-            row.parameter_uses_interface_item = False
-            pad_uuid = ""
-            # TODO: This pad UUID discovery code should probably be a separate method.
-            # Discover the pad UUID.
-            for sunspec_type in sunspec_types.children:
-                if sunspec_type.name == "pad":
-                    pad_uuid = sunspec_type.uuid
-                    break
-            row.type_uuid = pad_uuid
-            row.not_implemented = False
-            row.class_name = "DataPoint"
+            set_pad_info(row, epcpm.sunspecmodel.DataPoint.__name__)
 
         return [row], row.size
+
+
+def set_pad_info(row: Fields, class_name: str) -> None:
+    """
+    Set pad information for a given row.
+
+    Args:
+        row: Fields object to store pad information
+        class_name: set Fields object class name
+
+    Returns:
+
+    """
+    pad_uuid = ""
+    pad_name = ""
+    pad_size = 0
+    # Discover the pad UUID.
+    for sunspec_type in sunspec_types.children:
+        if sunspec_type.name == "pad":
+            pad_uuid = sunspec_type.uuid
+            pad_name = sunspec_type.name
+            pad_size = sunspec_type.value
+            break
+    row.type_uuid = pad_uuid
+    row.type = pad_name
+    row.size = pad_size
+    row.name = "Pad"
+    row.read_write = "R"
+    row.parameter_uses_interface_item = False
+    row.not_implemented = False
+    row.class_name = class_name
