@@ -188,6 +188,7 @@ class Model:
 
         self.wrapped.children[0].check_offsets_and_length()
 
+        non_header_length = 0
         overall_length = 0
         accumulated_length = 0  # Used for each point row on spreadsheet
         rows = []
@@ -216,17 +217,26 @@ class Model:
                 rows.extend(built_rows)
                 rows.append(Fields())
 
-            if i == 2:
+            # The code keeping track of overall_length, non_header_length, and accumulated_length
+            # could be refactored, but better to keep it simple so that the logic and purpose is clear.
+            # Each of the values has a unique purpose.
+            if i == 0:
+                # For HeaderBlock
+                overall_length += block_length
+            elif i == 1:
+                # For FixedBlock
+                overall_length += block_length
+                non_header_length += block_length
+            elif i == 2:
                 # For TableRepeatingBlock only
                 overall_length += block_length * child.get_num_repeats()
-            else:
-                overall_length += block_length
+                non_header_length += block_length * child.get_num_repeats()
 
         for i, row in enumerate(rows):
             if i == 0:
                 row.value = self.wrapped.id
             elif i == 1:
-                row.value = overall_length
+                row.value = non_header_length
 
             self.worksheet.append(row.as_filtered_tuple(self.column_filter))
 
