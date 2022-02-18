@@ -367,7 +367,7 @@ version = "0.0.0"
 description = ""
 category = "dev"
 optional = false
-python-versions = "^3.7.9"
+python-versions = "3.7.9"
 develop = true
 
 [package.dependencies]
@@ -401,7 +401,7 @@ python-dotenv = "0.9.1"
 qt5reactor = "0.5"
 QtAwesome = "0.6.0"
 siphash-cffi = "^0.1.4"
-sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo", rev = "fabf1a0dfc6e5a95d986c8ba34bf403f5383e459"}
+sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo", rev = "52dd38ff4a3f7fd731ce38bb6e7d00e06cf31728"}
 treq = "21.1.0"
 twine = "1.13.0"
 Twisted = "21.2.0"
@@ -1262,7 +1262,7 @@ smmap = ">=3.0.1"
 
 [[package]]
 name = "sunspecdemo"
-version = "0.0.0"
+version = "0.1.95.post1.dev0+a38984c"
 description = "EPC SunSpec demonstration tool"
 category = "main"
 optional = false
@@ -1274,6 +1274,7 @@ attrs = ">=19.3.0"
 click = "^7.0"
 importlib = "^1.0.4"
 importlib-metadata = "^4.10.1"
+pyserial = "3.4"
 pysunspec = {git = "https://github.com/altendky/pysunspec", rev = "edb9f3f5eead2e50f20c0b752f10695fa0e8be23"}
 toml = "^0.10.2"
 toolz = "0.9.0"
@@ -1283,8 +1284,8 @@ typing-extensions = "^4.0.1"
 [package.source]
 type = "git"
 url = "https://github.com/epcpower/sunspec-demo"
-reference = "fabf1a0dfc6e5a95d986c8ba34bf403f5383e459"
-resolved_reference = "fabf1a0dfc6e5a95d986c8ba34bf403f5383e459"
+reference = "52dd38ff4a3f7fd731ce38bb6e7d00e06cf31728"
+resolved_reference = "52dd38ff4a3f7fd731ce38bb6e7d00e06cf31728"
 
 [[package]]
 name = "toml"
@@ -1544,7 +1545,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.7.9"
-content-hash = "6b35aa14842e99405a02e05829ddb1c910393aa467ab07a761f863c3553895a8"
+content-hash = "81c667edf81ac0985401b92fbd0c9fabe2aef2353fe312351cc4c1b725552f42"
 
 [metadata.files]
 alqtendpy = [

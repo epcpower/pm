@@ -29,7 +29,7 @@ pyserial = "3.4"
 pysunspec = {git = "https://github.com/altendky/pysunspec", rev = "edb9f3f5eead2e50f20c0b752f10695fa0e8be23"}
 pycparser = "2.21"
 #sunspecdemo = "^0.1.9"
-sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo", rev = "fabf1a0dfc6e5a95d986c8ba34bf403f5383e459"}
+sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo", rev = "52dd38ff4a3f7fd731ce38bb6e7d00e06cf31728"}
 
 twine = "1.13.0"
 codecov = "^2.1.12"
