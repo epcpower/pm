@@ -26,9 +26,11 @@ openpyxl = "2.5.12"
 canmatrix = "0.9.1"
 graham = "0.1.11"
 pyserial = "3.4"
-pysunspec = "^2.1.1"
+pysunspec = {git = "https://github.com/altendky/pysunspec", rev = "edb9f3f5eead2e50f20c0b752f10695fa0e8be23"}
 pycparser = "2.21"
-sunspecdemo = "^0.1.9"
+#sunspecdemo = "^0.1.9"
+sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo", rev = "fabf1a0dfc6e5a95d986c8ba34bf403f5383e459"}
+
 twine = "1.13.0"
 codecov = "^2.1.12"
 Twisted = "21.2.0"
