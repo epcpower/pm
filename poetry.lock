@@ -367,7 +367,7 @@ version = "0.0.0"
 description = ""
 category = "dev"
 optional = false
-python-versions = "^3.7"
+python-versions = "^3.7.9"
 develop = true
 
 [package.dependencies]

@@ -32,6 +32,7 @@ sunspecdemo = "^0.1.9"
 twine = "1.13.0"
 codecov = "^2.1.12"
 Twisted = "21.2.0"
+#Remove this, breaks tox poetry  publish
 python-can = {git = "https://github.com/hardbyte/python-can", rev = "2ede107d67002c18463c5276b6a94cdb19fc8320"}
 Jinja2 = "^3.0.3"
 click = "<=7.1.2"
