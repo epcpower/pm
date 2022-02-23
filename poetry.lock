@@ -119,10 +119,7 @@ pathspec = ">=0.9.0,<1"
 platformdirs = ">=2"
 tomli = ">=0.2.6,<2.0.0"
 typed-ast = {version = ">=1.4.2", markers = "python_version < \"3.8\" and implementation_name == \"cpython\""}
-typing-extensions = [
-    {version = ">=3.10.0.0", markers = "python_version < \"3.10\""},
-    {version = "!=3.10.0.1", markers = "python_version >= \"3.10\""},
-]
+typing-extensions = ">=3.10.0.0"
 
 [package.extras]
 colorama = ["colorama (>=0.4.3)"]
@@ -370,7 +367,7 @@ version = "0.0.0"
 description = ""
 category = "dev"
 optional = false
-python-versions = ">=3.7.9, <4.0"
+python-versions = "3.7.9"
 develop = true
 
 [package.dependencies]
@@ -1540,8 +1537,8 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
 lock-version = "1.1"
-python-versions = ">=3.7.9, <4.0"
-content-hash = "f1814189970a82c96736f840628ac9b6a6a0dfcd78927027ca23ed897f65f0f6"
+python-versions = "3.7.9"
+content-hash = "d357bbdd2079c3c39c4aa79c6c348e77264049e825b08f463ca9343cf8403275"
 
 [metadata.files]
 alqtendpy = [
