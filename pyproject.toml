@@ -13,7 +13,7 @@ style = "pep440"
 files = ["src/epcpm/__init__.py"]
 
 [tool.poetry.dependencies]
-python = "3.7.9"
+python = ">=3.7.9, <4.0"
 pluggy = ">=1.0.0"
 attrs = "20.2.0"
 lxml = "4.3.0"
@@ -30,7 +30,7 @@ pyserial = "3.4"
 pysunspec = "2.1.0"
 pycparser = "2.21"
 #sunspecdemo = "^0.1.9"
-sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo", rev = "9d3044d539a2e0c1b394ab630a3f7773145a1173"}
+sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo", rev = "6a07576a9d3c16f00a31121ff96edcbfe0d73822"}
 
 twine = "1.13.0"
 codecov = "^2.1.12"
