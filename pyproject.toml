@@ -5,15 +5,23 @@ description = ""
 authors = ["Alex Anker <alex.anker@epcpower.com>"]
 
 [tool.poetry-dynamic-versioning]
+#set to false.  poetry-dynamic-versioning only needed for CI versioning.
 enable = false
 vcs = "git"
 style = "pep440"
 
 [tool.poetry-dynamic-versioning.substitution]
+#poetry-dynamic-versioning has auto subsitution for __init__.py files,
+#but not for more than 1 directory out of root.
 files = ["src/epcpm/__init__.py"]
 
 [tool.poetry.dependencies]
 python = "3.7.9"
+
+#### EPC Repos ####
+sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo", rev = "6a07576a9d3c16f00a31121ff96edcbfe0d73822"}
+###################
+
 pluggy = ">=1.0.0"
 attrs = "20.2.0"
 lxml = "4.3.0"
@@ -26,19 +34,16 @@ openpyxl = "2.5.12"
 canmatrix = "0.9.1"
 graham = "0.1.11"
 pyserial = "3.4"
-#pysunspec = {git = "https://github.com/altendky/pysunspec", rev = "edb9f3f5eead2e50f20c0b752f10695fa0e8be23"}
 pysunspec = "2.1.0"
 pycparser = "2.21"
-#sunspecdemo = "^0.1.9"
-sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo", rev = "6a07576a9d3c16f00a31121ff96edcbfe0d73822"}
-
 twine = "1.13.0"
 codecov = "^2.1.12"
 Twisted = "21.2.0"
-#Remove this, breaks tox poetry  publish
-python-can = {git = "https://github.com/hardbyte/python-can", rev = "2ede107d67002c18463c5276b6a94cdb19fc8320"}
+python-can = "4.0.0.dev0"
 Jinja2 = "^3.0.3"
 click = "<=7.1.2"
+
+
 
 [tool.poetry.dev-dependencies]
 gitignoreio = "0.1.5"
@@ -66,7 +71,6 @@ epcpm = 'epcpm.__main__:_entry_point'
 target-version =  ['py37']
 include = '''
 ^/(
-    setup.py
     | src/epcpm/.*\.pyi?
 )$
 '''
@@ -82,6 +86,3 @@ requires = [
 
 ]
 build-backend = "poetry.core.masonry.api"
-
-
-#baretest deletethis
