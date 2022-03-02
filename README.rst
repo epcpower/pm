@@ -40,6 +40,8 @@ Windows
 - ``cd pm``
 - ``git submodule update --init``
 - ``poetry install``
+- ``poetry run builduipm``
+- ``poetry run builduiepyqlib``
 
 To launch PM run ``poetry run epcpm``.
 
@@ -59,6 +61,8 @@ Linux
 - ``cd pm``
 - ``git submodule update --init``
 - ``poetry install``
+- ``poetry run builduipm``
+- ``poetry run builduiepyqlib``
 
 To launch PM run ``poetry run epcpm``
 
