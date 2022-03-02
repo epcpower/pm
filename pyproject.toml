@@ -20,6 +20,7 @@ python = "3.7.9"
 
 #### EPC Repos ####
 sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo", rev = "6a07576a9d3c16f00a31121ff96edcbfe0d73822"}
+epyqlib = {path = "./sub/epyqlib",  develop = true}
 ###################
 
 pluggy = ">=1.0.0"
@@ -43,8 +44,6 @@ python-can = "4.0.0.dev0"
 Jinja2 = "^3.0.3"
 click = "<=7.1.2"
 
-
-
 [tool.poetry.dev-dependencies]
 gitignoreio = "0.1.5"
 pyinstaller = "4.2"
@@ -54,7 +53,6 @@ pytest = "6.2.5"
 pytest-qt = "3.3.0"
 pytest-cov = "2.5.1"
 pytest-twisted = "<=1.13.4"
-epyqlib = {path = "./sub/epyqlib",  develop = true}
 
 [tool.poetry.scripts]
 epcpmcli = 'epcpm.cli.main:main'
@@ -64,8 +62,10 @@ epcexportsym = 'epcpm.cli.exportsym:cli'
 epcexportdocx = 'epcpm.cli.exportdocx:cli'
 epcconvertparameters = 'epcpm.cli.convertepp:cli'
 builduipm = 'epcpm.builduipm:compile_ui'
-delmebuilduiepyqlib = 'buildui:compile_ui'
+builduiepyqlib = 'epyqlib.builduiepyqlib:compile_ui'
 epcpm = 'epcpm.__main__:_entry_point'
+genbuildinfo = 'epyqlib.genbuildinfo:write_build_file'
+generateversion = 'epyqlib.cli.generateversion:cli'
 
 [tool.black]
 target-version =  ['py37']

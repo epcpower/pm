@@ -41,21 +41,18 @@ jobs:
       - name: python commands
         run: |
           set -vx
-          .venv/Scripts/black --exclude=.\.venv --check --diff .
+          poetry run black --exclude=./.venv --check --diff .
           poetry run builduipm
-          .\\.venv\\Scripts\\builduiepyqlib
+          poetry run builduiepyqlib
           poetry run poetry-dynamic-versioning
-          which pip
-          pip --version
-          #python boots.py create --group test
 
-          .venv/Scripts/python -c "import sys; print(sys.version)"
+          poetry run python -c "import sys; print(sys.version)"
 
-          .venv/Scripts/pip freeze --all
-          .venv/Scripts/genbuildinfo "src/epcpm/__build.py"
-          .venv/Scripts/generateversion --distribution epcpm --out "src/epcpm/__version.py"
+          poetry run pip freeze --all
+          poetry run genbuildinfo "src/epcpm/__build.py"
+          poetry run generateversion --distribution epcpm --out "src/epcpm/__version.py"
 
-          .venv/Scripts/pyinstaller pyinstaller.spec
+          poetry run pyinstaller pyinstaller.spec
           mv "dist/epcpm" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
           7z a "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}.zip" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
 
@@ -67,7 +64,7 @@ jobs:
           poetry build
           cp dist/* artifacts/
 
-          .venv/Scripts/pytest epcpm.tests --pyargs
+          poetry run pytest epcpm.tests --pyargs
           ls
 
       - name: Publish executable
