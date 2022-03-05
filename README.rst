@@ -2,14 +2,16 @@
 Parameter Manager
 =================
 
-|GitHub|
+.. image:: https://img.shields.io/github/workflow/status/epcpower/pm/CI/master?color=seagreen&logo=GitHub-Actions&logoColor=whitesmoke
+   :alt: tests on GitHub Actions
+   :target: https://github.com/epcpower/pm/actions?query=branch%3Amaster
+
+.. image:: https://img.shields.io/github/last-commit/epcpower/pm/master.svg
+   :alt: source on GitHub
+   :target: https://github.com/epcpower/pm
 
 .. image:: screenshot.png
    :alt: Parameter Manager screenshot
-
-.. |GitHub| image:: https://img.shields.io/github/last-commit/altendky/pm/master.svg
-   :alt: source on GitHub
-   :target: https://github.com/altendky/pm
 
 -------------------
 Running From Binary
