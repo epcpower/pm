@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "epcpm"
 version = "0.0.0"
-description = ""
+description = "EPC Power Parameter Manager"
 authors = ["Alex Anker <alex.anker@epcpower.com>"]
 
 [tool.poetry-dynamic-versioning]
