@@ -17,10 +17,10 @@ style = "pep440"
 files = ["src/epcpm/__init__.py"]
 
 [tool.poetry.dependencies]
-python = "3.7.9"
+python = "^3.7.9"
 
 #### EPC Repos ####
-sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo", rev = "6a07576a9d3c16f00a31121ff96edcbfe0d73822"}
+sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo", rev = "def34227c0bc205083ddffe429c640509ab0bf52"}
 epyqlib = {path = "./sub/epyqlib",  develop = true}
 ###################
 
