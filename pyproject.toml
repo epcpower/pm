@@ -21,7 +21,6 @@ python = "^3.7.9"
 
 #### EPC Repos ####
 sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo", rev = "def34227c0bc205083ddffe429c640509ab0bf52"}
-epyqlib = {path = "./sub/epyqlib",  develop = true}
 ###################
 
 pluggy = ">=1.0.0"
@@ -46,6 +45,7 @@ Jinja2 = "^3.0.3"
 click = "<=7.1.2"
 
 [tool.poetry.dev-dependencies]
+epyqlib = {path = "./sub/epyqlib",  develop = true}
 gitignoreio = "0.1.5"
 pyinstaller = "4.2"
 poetry-dynamic-versioning = "^0.13.1"

@@ -10,7 +10,7 @@ python-versions = "*"
 name = "alqtendpy"
 version = "0.0.4"
 description = "Extras for working with PyQt5."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -28,7 +28,7 @@ test = ["codecov", "pytest", "pytest-cov", "pytest-qt", "pytest-twisted", "pytes
 name = "altendpy"
 version = "0.0.21"
 description = "Extras for working with Python."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -52,7 +52,7 @@ python-versions = "*"
 name = "appdirs"
 version = "1.4.3"
 description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -60,7 +60,7 @@ python-versions = "*"
 name = "arrow"
 version = "0.12.1"
 description = "Better dates and times for Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -156,7 +156,7 @@ webencodings = "*"
 name = "boto3"
 version = "1.14.41"
 description = "The AWS SDK for Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -169,7 +169,7 @@ s3transfer = ">=0.3.0,<0.4.0"
 name = "boto3-type-annotations"
 version = "0.3.1"
 description = "Type annotations for boto3. Adds code completion in IDEs such as PyCharm."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -177,7 +177,7 @@ python-versions = "*"
 name = "botocore"
 version = "1.17.63"
 description = "Low-level, data-driven core of boto 3."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -223,7 +223,7 @@ python-versions = "*"
 name = "certitude"
 version = "1.0.1"
 description = "A library that provides access to system certificate stores."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -234,7 +234,7 @@ cffi = ">=1.0.0"
 name = "cffi"
 version = "1.15.0"
 description = "Foreign Function Interface for Python calling C code."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -303,7 +303,7 @@ toml = ["tomli"]
 name = "cryptography"
 version = "36.0.1"
 description = "cryptography is a package which provides cryptographic recipes and primitives to Python developers."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -346,7 +346,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "dulwich"
 version = "0.20.6"
 description = "Python Git Library"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -376,7 +376,7 @@ packaging = ">=20.9"
 name = "epyqlib"
 version = "0.0.0"
 description = ""
-category = "main"
+category = "dev"
 optional = false
 python-versions = "^3.7.9"
 develop = true
@@ -433,7 +433,7 @@ python-versions = ">=3.6"
 name = "fab"
 version = "3.0.0"
 description = "Wrapper around Phabricator API"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.4"
 
@@ -464,7 +464,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "gitdb2"
 version = "2.0.6"
 description = "Git Object Database"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -487,7 +487,7 @@ requests = "*"
 name = "gitpython"
 version = "2.1.15"
 description = "Python Git Library"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -611,7 +611,7 @@ i18n = ["Babel (>=2.7)"]
 name = "jmespath"
 version = "0.10.0"
 description = "JSON Matching Expressions"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -674,7 +674,7 @@ python-versions = "*"
 name = "natsort"
 version = "5.5.0"
 description = "Simple yet flexible natural sorting in Python."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -709,7 +709,7 @@ pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
 name = "paho-mqtt"
 version = "1.4.0"
 description = "MQTT version 3.1.1 client class"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -747,7 +747,7 @@ future = "*"
 name = "pint"
 version = "0.11"
 description = "Physical quantities module"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -819,7 +819,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "pyasn1"
 version = "0.4.8"
 description = "ASN.1 types and codecs"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -827,7 +827,7 @@ python-versions = "*"
 name = "pyasn1-modules"
 version = "0.2.8"
 description = "A collection of ASN.1-based protocols modules."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -846,7 +846,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "pyelftools"
 version = "0.26"
 description = "Library for analyzing ELF files and DWARF debugging information"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -890,7 +890,7 @@ python-versions = ">=3.7"
 name = "pyopenssl"
 version = "22.0.0"
 description = "Python wrapper module around the OpenSSL library"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -935,7 +935,7 @@ python-versions = ">=3.5"
 name = "pyqt5designer"
 version = "5.14.1"
 description = "PyQt5 Designer"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1050,7 +1050,7 @@ serial = ["pyserial (>=3.0,<4.0)"]
 name = "python-dateutil"
 version = "2.7.5"
 description = "Extensions to the standard Python datetime module"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -1061,7 +1061,7 @@ six = ">=1.5"
 name = "python-docx"
 version = "0.8.7"
 description = "Create and update Microsoft Word .docx files."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1072,7 +1072,7 @@ lxml = ">=2.3.2"
 name = "python-dotenv"
 version = "0.9.1"
 description = "Add .env support to your django/flask apps in development and deployments"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1099,7 +1099,7 @@ python-versions = "*"
 name = "qt5reactor"
 version = "0.5"
 description = "Twisted Qt Integration"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1110,7 +1110,7 @@ twisted = "*"
 name = "qtawesome"
 version = "0.6.0"
 description = "FontAwesome icons in PyQt and PySide applications"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1122,7 +1122,7 @@ six = "*"
 name = "qtpy"
 version = "2.0.1"
 description = "Provides an abstraction layer on top of the various Qt bindings (PyQt5/6 and PySide2/6)."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -1181,7 +1181,7 @@ requests = ">=2.0.1,<3.0.0"
 name = "s3transfer"
 version = "0.3.7"
 description = "An Amazon S3 Transfer Manager"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1192,7 +1192,7 @@ botocore = ">=1.12.36,<2.0a.0"
 name = "service-identity"
 version = "21.1.0"
 description = "Service identity verification for pyOpenSSL & cryptography."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1213,7 +1213,7 @@ tests = ["coverage[toml] (>=5.0.2)", "pytest"]
 name = "siphash-cffi"
 version = "0.1.4"
 description = "Tested, performant SipHash bindings for Python 3 with support for double-output-size, half-word and variable-round variants."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1232,7 +1232,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "smmap"
 version = "5.0.0"
 description = "A pure Python implementation of a sliding window memory map manager"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -1240,7 +1240,7 @@ python-versions = ">=3.6"
 name = "smmap2"
 version = "3.0.1"
 description = "A mirror package for smmap"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1344,7 +1344,7 @@ dev = ["py-make (>=0.1.0)", "twine", "argopt", "pydoc-markdown"]
 name = "treq"
 version = "21.1.0"
 description = "High-level Twisted HTTP Client API"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
 
@@ -1532,7 +1532,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.9"
-content-hash = "dad92fbbd6496ea815798b01107f5992b5102538f80e9e6a009839af30735359"
+content-hash = "718298d37f54d729647e4df009a058da38b90e9b0e74f76b1ad5d8ac35cd2cd3"
 
 [metadata.files]
 aenum = [
