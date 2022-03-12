@@ -27,7 +27,7 @@ pluggy = ">=1.0.0"
 attrs = "20.2.0"
 lxml = "4.3.0"
 PyQt5 = "5.13.2"
-requests = "2.26.0"
+requests = "2.27.1"
 toolz = "0.9.0"
 tox = "3.24.5"
 xmldiff = "2.2"
@@ -37,12 +37,12 @@ graham = "0.1.11"
 pyserial = "3.4"
 pysunspec = "2.1.0"
 pycparser = "2.21"
-twine = "1.13.0"
 codecov = "^2.1.12"
 Twisted = "21.2.0"
 python-can = "4.0.0"
 Jinja2 = "^3.0.3"
 click = "<=7.1.2"
+qt5reactor = "0.5"
 
 [tool.poetry.dev-dependencies]
 epyqlib = {path = "./sub/epyqlib",  develop = true}
@@ -54,6 +54,7 @@ pytest = "6.2.5"
 pytest-qt = "3.3.0"
 pytest-cov = "2.5.1"
 pytest-twisted = "<=1.13.4"
+twine = "1.13.0"
 
 [tool.poetry.scripts]
 epcpmcli = 'epcpm.cli.main:main'
