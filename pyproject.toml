@@ -54,7 +54,7 @@ pytest = "6.2.5"
 pytest-qt = "3.3.0"
 pytest-cov = "2.5.1"
 pytest-twisted = "<=1.13.4"
-twine = "1.13.0"
+twine = "3.1.1"
 
 [tool.poetry.scripts]
 epcpmcli = 'epcpm.cli.main:main'
