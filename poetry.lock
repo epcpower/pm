@@ -395,7 +395,6 @@ paho-mqtt = "1.4.0"
 Pint = "0.11"
 pyelftools = "0.26"
 PyQt5 = ">=5.13.0"
-pyqt5-tools = {version = "5.13.2.1.6rc1", markers = "sys_platform == \"win32\""}
 pysunspec = "2.1.0"
 python-can = "4.0.0"
 python-dateutil = "2.7.5"
@@ -961,19 +960,6 @@ description = "The sip module support for PyQt5"
 category = "main"
 optional = false
 python-versions = ">=3.5"
-
-[[package]]
-name = "pyqt5-tools"
-version = "5.13.2.1.6rc1"
-description = "Tools to supplement the official PyQt5 wheels"
-category = "dev"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-click = "*"
-pyqt5 = "5.13.2"
-python-dotenv = "*"
 
 [[package]]
 name = "pyserial"
@@ -2218,16 +2204,6 @@ pyqt5-sip = [
     {file = "PyQt5_sip-12.9.1-cp39-cp39-win32.whl", hash = "sha256:ee188eac5fd94dfe8d9e04a9e7fbda65c3535d5709278d8b7367ebd54f00e27f"},
     {file = "PyQt5_sip-12.9.1-cp39-cp39-win_amd64.whl", hash = "sha256:989d51c41456cc496cb96f0b341464932b957040d26561f0bb4cf5a0914d6b36"},
     {file = "PyQt5_sip-12.9.1.tar.gz", hash = "sha256:2f24f299b44c511c23796aafbbb581bfdebf78d0905657b7cee2141b4982030e"},
-]
-pyqt5-tools = [
-    {file = "pyqt5_tools-5.13.2.1.6rc1-cp35-none-win32.whl", hash = "sha256:7a87988fc945ac8072748fa71853e0fcba65016aab356b0ee23f9a5160493ea6"},
-    {file = "pyqt5_tools-5.13.2.1.6rc1-cp35-none-win_amd64.whl", hash = "sha256:48da7ebe7b73904542e866505a7c48d02d0b4d1371246bd2adb0287d27c9fe55"},
-    {file = "pyqt5_tools-5.13.2.1.6rc1-cp36-none-win32.whl", hash = "sha256:1fb09717054cc289eb1b223d9be736e9faf631fe7bae9d6d23860286a8379d4a"},
-    {file = "pyqt5_tools-5.13.2.1.6rc1-cp36-none-win_amd64.whl", hash = "sha256:771a487a742ff4a5eb13e3d08f584948af3aece411af0ace25f0839a617627f9"},
-    {file = "pyqt5_tools-5.13.2.1.6rc1-cp37-none-win32.whl", hash = "sha256:c97f19e056da13c57eda18fecf2c7714a14a42d20a833ef119c4a1c4c308e324"},
-    {file = "pyqt5_tools-5.13.2.1.6rc1-cp37-none-win_amd64.whl", hash = "sha256:fe1e7d576f8435fdfd600b6c99f47c408b11fa755a5ec7d75daffe2454c54cf2"},
-    {file = "pyqt5_tools-5.13.2.1.6rc1-cp38-none-win32.whl", hash = "sha256:f81003afb1c94981095f6f0b95172418c863168cbeff0503db40c7a7bb1d4681"},
-    {file = "pyqt5_tools-5.13.2.1.6rc1-cp38-none-win_amd64.whl", hash = "sha256:ecfad0704e3192da1b0d7a707938b8bb96954c3d120da9f922fdc349e964592e"},
 ]
 pyserial = [
     {file = "pyserial-3.4-py2.py3-none-any.whl", hash = "sha256:e0770fadba80c31013896c7e6ef703f72e7834965954a78e71a3049488d4d7d8"},
