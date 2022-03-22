@@ -47,7 +47,7 @@ jobs:
       - name: python commands
         run: |
           set -vx
-          poetry add javabridge --source epc-power
+          poetry add pscad-ci --source epc-power
           poetry run black --check --diff .
           poetry run builduipm
           poetry run builduiepyqlib
