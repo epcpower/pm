@@ -16,6 +16,12 @@ style = "pep440"
 #but not for more than 1 directory out of root.
 files = ["src/epcpm/__init__.py"]
 
+[[tool.poetry.source]]
+name = "epc-power"
+url = "https://epc-power-us-890711758583.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/simple"
+secondary = true
+
+
 [tool.poetry.dependencies]
 python = "^3.7.9"
 
