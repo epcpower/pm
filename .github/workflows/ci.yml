@@ -46,6 +46,51 @@ jobs:
 
           #setup connection to aws server
           poetry config repositories.epc-power https://epc-power-us-890711758583.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/
-          aws codeartifact get-authorization-token --domain epc-power-us --domain-owner 890711758583 --query authorizationToken --output text
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain epc-power-us --domain-owner 890711758583 --query authorizationToken --output text`
           echo "CODEARTIFACT_AUTH_TOKEN"
+          poetry config http-basic.epc-power aws $CODEARTIFACT_AUTH_TOKEN
+          poetry install
+      - name: python commands
+        run: |
+          set -vx
+          poetry add decorator --source epc-power
+          poetry run black --check --diff .
+          poetry run builduipm
+          poetry run builduiepyqlib
+          poetry run poetry-dynamic-versioning
+
+          poetry run python -c "import sys; print(sys.version)"
+
+          poetry run pip freeze --all
+          poetry run genbuildinfo "src/epcpm/__build.py"
+          poetry run generateversion --distribution epcpm --out "src/epcpm/__version.py"
+
+          poetry run pyinstaller pyinstaller.spec
+          mv "dist/epcpm" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
+          7z a "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}.zip" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
+
+
+          mkdir artifacts
+          mv *.zip artifacts/
+
+          rm -rf dist
+          poetry build
+          cp dist/* artifacts/
+
+          poetry run pytest epcpm.tests --pyargs
+          ls
+
+      - name: Publish executable
+        #only run if a new tag is created
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          #poetry publish -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }}
+          #publish to aws
+          poetry publish --repository epc-power
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: pm
+          path: |
+            artifacts/*
