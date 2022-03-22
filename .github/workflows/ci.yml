@@ -41,8 +41,7 @@ jobs:
           #setup connection to aws server
           poetry config repositories.epc-power https://epc-power-us-890711758583.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain epc-power-us --domain-owner 890711758583 --query authorizationToken --output text`
-          echo ${CODEARTIFACT_AUTH_TOKEN}
-          #poetry config http-basic.epc-power aws ${CODEARTIFACT_AUTH_TOKEN}
+          poetry config http-basic.epc-power aws eyJ2ZXIiOjEsImlzdSI6MTY0Nzk4MzAxNCwiZW5jIjoiQTEyOEdDTSIsInRhZyI6IkVrRmo0VGVPRGZFa3VVclB6TUZLMmciLCJleHAiOjE2NDgwMjYyMTQsImFsZyI6IkExMjhHQ01LVyIsIml2IjoiTFIxbXZjQ1E0XzQzS2RwRyJ9.eUHGFfHn7BvnJExkhilJgQ.zVK0uGsUlfGBJt-I.85g07geMhGkWVt736I9QasrDdle2jGMkhUrZgLW5K2iTf7z72HkNBpy1vshWRg8Pef4TVr-t6KnOUQHPvi1yQIvDHNsvt-FbtvOyGklxcKZiR33mPrfm3IDaSxtV40ywOqV-1pTCn-0GMROnl2qL0SeO4T41J3dpCXBL3jHokT43895s6OYYMw_wctHLs_J6MvMiXDkIkLHyZRuGaoinyBi6Bez7nQ83b-EWhNrcjypfnN1f3gjL4nZYcRKyxYI0dmd4AdPsw_Zx53tmcVU-802E8ioDQrRTJlvekiCRtWJCGTl4CBCTqMpDiYwxWR6k4Tzk6oQ7BdUm-OA67VxreFhY8Yo2JIYxGUk8qjH_4AF6oPHadCQeAl8hY2bbUQs9haJbni9Wdw7osJXuyzqJf_WiIA6MPdT3VpH2RfJaFdDGGqZh-HbsMMIX4umHhizne3cZcAg4OYBRnjx2mLJ4Pg-FRpHdHCc6QMOyluFWDKwOrqBYvMFhLmbja9JyPfYW6BI0DUmzVf6jfK4rnrvdI_PJJ5hpy1zAf34xnnN__zsGmk0UE34pNBEk7poa6lbZ-9eraKvEzXHRBYPu7scsPNEIqOvYN0D2UbhbKoVii4u8byYMPyKxkKJkRoNup2pvAOF9iIN6nbdv8kRXnw9oHyENBVlOvnSP5LfApTFPWyHSaxwCCiQgVkLrNMLydSa18tLw4f-oSrYoQTdEI0sy7EhIa3kPdZIhqJWnTRxCkZPTcSnGr5IIjw_gG6E_JuopxkdtoQy3ylgSqBHBZZaMJzozAk7dYAmglV9shehIbQa56_Gk7c1ht780fToIUPjGdD-G6r_uMlq7_t4eruj5ViVPBb0PsJ82_yXd62KBqa0Y2UYPwtpcOFkTwh_eApTEcm_Vpxr2mAQabsOmLJd_HGoFPhERy0Z9cVSxkyzDcd9XrNLX-g78ZQ.uCDc-G_QR5kagPFFwIisyw
 
           poetry install
       - name: python commands
