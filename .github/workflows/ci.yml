@@ -46,8 +46,8 @@ jobs:
           poetry config virtualenvs.path .
 
           #setup connection to aws server
-          poetry config repositories.epc-power https://epc-power-us-890711758583.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain epc-power-us --domain-owner 890711758583 --query authorizationToken --output text`
+          poetry config repositories.epc-power https://epc-power-us-${{ secrets.AWS_ACCOUNT_ID }}.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/
+          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain epc-power-us --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} --query authorizationToken --output text`
           echo "CODEARTIFACT_AUTH_TOKEN"
           poetry config http-basic.epc-power aws $CODEARTIFACT_AUTH_TOKEN
           poetry install
@@ -96,11 +96,11 @@ jobs:
           #poetry publish --repository epc-power
           #publish with twine
           #connect pip (do we need this?)
-          aws codeartifact login --tool pip --repository epc-power --domain epc-power-us --domain-owner 890711758583
+          aws codeartifact login --tool pip --repository epc-power --domain epc-power-us --domain-owner ${{ secrets.AWS_ACCOUNT_ID }}
           #aws twine login
-          aws codeartifact login --tool twine --repository epc-power --domain epc-power-us --domain-owner 890711758583
-          #poetry run twine upload --repository codeartifact dist/* --repository-url https://epc-power-us-890711758583.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/ -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }}
-          twine upload --repository codeartifact dist/* --repository-url https://epc-power-us-890711758583.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/ -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }}
+          aws codeartifact login --tool twine --repository epc-power --domain epc-power-us --domain-owner ${{ secrets.AWS_ACCOUNT_ID }}
+          #poetry run twine upload --repository codeartifact dist/* --repository-url https://epc-power-us-${{ secrets.AWS_ACCOUNT_ID }}.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/ -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }}
+          twine upload --repository codeartifact dist/* --repository-url https://epc-power-us-${{ secrets.AWS_ACCOUNT_ID }}.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/ -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }}
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
