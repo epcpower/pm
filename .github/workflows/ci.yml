@@ -77,7 +77,6 @@ jobs:
           rm -rf dist
           poetry build
           cp dist/* artifacts/
-          cp tox.ini dist/tox.zip  #DELETE THIS LINE
           poetry run pytest epcpm.tests --pyargs
           ls
 
@@ -87,6 +86,9 @@ jobs:
         run: |
           #install twine
           pip install twine
+          pip install zip
+          zip tox.zip tox.ini
+          cp tox.zip dist/  #DELETE THIS LINE
 
           #poetry publish -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }}
           #publish to aws
