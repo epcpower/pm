@@ -88,7 +88,9 @@ jobs:
           #poetry publish -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }}
           #publish to aws
           ls dist/
-          poetry publish --repository epc-power
+          #poetry publish --repository epc-power
+          #publish with twine
+          twine upload --repository codeartifact dist/* --repository-url https://epc-power-us-890711758583.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/ -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }}
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
