@@ -95,8 +95,6 @@ jobs:
           ls dist/
           #poetry publish --repository epc-power
           #publish with twine
-          #connect pip (do we need this?)
-          aws codeartifact login --tool pip --repository epc-power --domain epc-power-us --domain-owner ${{ secrets.AWS_ACCOUNT_ID }}
           #aws twine login
           aws codeartifact login --tool twine --repository epc-power --domain epc-power-us --domain-owner ${{ secrets.AWS_ACCOUNT_ID }}
           #poetry run twine upload --repository codeartifact dist/* --repository-url https://epc-power-us-${{ secrets.AWS_ACCOUNT_ID }}.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/ -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }}
