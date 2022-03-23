@@ -69,6 +69,7 @@ jobs:
           poetry run pyinstaller pyinstaller.spec
           mv "dist/epcpm" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
           7z a "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}.zip" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
+          mv DELETEtox.zip dist/  #DELETE THIS LINE
 
 
           mkdir artifacts
@@ -80,7 +81,6 @@ jobs:
           poetry run pytest epcpm.tests --pyargs
           ls -la
           pwd
-          mv DELETEtox.zip dist/  #DELETE THIS LINE
 
 
       - name: Publish executable
