@@ -87,6 +87,7 @@ jobs:
         run: |
           #poetry publish -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }}
           #publish to aws
+          ls dist/
           poetry publish --repository epc-power
 
       - name: Archive artifacts
