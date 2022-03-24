@@ -76,7 +76,7 @@ jobs:
 
           rm -rf dist
           poetry build
-          mv DELETEtox.zip dist/  #DELETE THIS LINE
+          #mv DELETEtox.zip dist/  #DELETE THIS LINE
 
           cp dist/* artifacts/
           poetry run pytest epcpm.tests --pyargs
