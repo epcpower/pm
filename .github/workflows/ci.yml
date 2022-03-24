@@ -69,14 +69,15 @@ jobs:
           poetry run pyinstaller pyinstaller.spec
           mv "dist/epcpm" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
           7z a "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}.zip" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
-          mv DELETEtox.zip dist/  #DELETE THIS LINE
 
 
           mkdir artifacts
-          mv *.zip artifacts/
+          #mv *.zip artifacts/  #uncomment this line!
 
           rm -rf dist
           poetry build
+          mv DELETEtox.zip dist/  #DELETE THIS LINE
+
           cp dist/* artifacts/
           poetry run pytest epcpm.tests --pyargs
           ls -la
