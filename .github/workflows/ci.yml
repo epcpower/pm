@@ -45,16 +45,10 @@ jobs:
           poetry config virtualenvs.in-project true
           poetry config virtualenvs.path .
 
-          #setup connection to aws server
-          poetry config repositories.epc-power https://epc-power-us-${{ secrets.AWS_ACCOUNT_ID }}.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain epc-power-us --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} --query authorizationToken --output text`
-          echo "CODEARTIFACT_AUTH_TOKEN"
-          poetry config http-basic.epc-power aws $CODEARTIFACT_AUTH_TOKEN
           poetry install
       - name: python commands
         run: |
           set -vx
-          #poetry add decorator --source epc-power
           poetry run black --check --diff .
           poetry run builduipm
           poetry run builduiepyqlib
@@ -72,34 +66,20 @@ jobs:
 
 
           mkdir artifacts
-          #mv *.zip artifacts/  #uncomment this line!
+          mv *.zip artifacts/
 
           rm -rf dist
           poetry build
-          #mv DELETEtox.zip dist/  #DELETE THIS LINE
 
           cp dist/* artifacts/
           poetry run pytest epcpm.tests --pyargs
-          ls -la
-          pwd
-
-
       - name: Publish executable
         #only run if a new tag is created
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          #install twine
-          pip install twine
-
-          #poetry publish -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }}
-          #publish to aws
-          ls dist/
-          #poetry publish --repository epc-power
-          #publish with twine
-          #aws twine login
           aws codeartifact login --tool twine --repository epc-power --domain epc-power-us --domain-owner ${{ secrets.AWS_ACCOUNT_ID }}
-          #poetry run twine upload --repository codeartifact dist/* --repository-url https://epc-power-us-${{ secrets.AWS_ACCOUNT_ID }}.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/ -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }}
-          twine upload --repository codeartifact dist/*
+          poetry run twine upload --repository codeartifact dist/*
+          #twine upload --repository codeartifact dist/*
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
