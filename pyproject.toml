@@ -21,9 +21,13 @@ name = "epc-power"
 url = "https://epc-power-us-890711758583.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/simple"
 secondary = true
 
+[[tool.poetry.source]]
+name = "third-party"
+url = "https://epc-power-us-890711758583.d.codeartifact.us-east-2.amazonaws.com/pypi/third-party/simple"
+secondary = true
 
 [tool.poetry.dependencies]
-python = "^3.7.9"
+python = ">=3.7.9,<3.11"
 
 #### EPC Repos ####
 sunspecdemo = {version = "1.2.306", source = "epc-power"}
