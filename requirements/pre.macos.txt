@@ -5,30 +5,30 @@
 #    python boots.py lock
 #
 bleach==4.1.0             # via readme-renderer
-certifi==2021.5.30        # via requests
-charset-normalizer==2.0.4  # via requests
-click==8.0.1              # via pip-tools, romp
-docutils==0.17.1          # via readme-renderer
-idna==3.2                 # via requests
-importlib-metadata==4.8.1  # via click, keyring, twine
-keyring==23.1.0           # via twine
-packaging==21.0           # via bleach
+certifi==2021.10.8        # via requests
+charset-normalizer==2.0.7  # via requests
+click==8.0.3              # via pip-tools, romp
+docutils==0.18            # via readme-renderer
+idna==3.3                 # via requests
+importlib-metadata==4.8.2  # via click, keyring, twine
+keyring==23.2.1           # via twine
+packaging==21.2           # via bleach
 pip-tools==5.1.0          # via -r /Users/runner/work/1/s/work/requirements/pre.in
 pkginfo==1.7.1            # via twine
 pygments==2.10.0          # via readme-renderer
 pyparsing==2.4.7          # via packaging
-readme-renderer==29.0     # via twine
+readme-renderer==30.0     # via twine
 requests-toolbelt==0.9.1  # via twine
 requests==2.26.0          # via requests-toolbelt, romp, twine
-romp==2020.3              # via -r /Users/runner/work/1/s/work/requirements/pre.in
-six==1.16.0               # via bleach, pip-tools, readme-renderer
-tqdm==4.62.2              # via twine
+romp==2021.11             # via -r /Users/runner/work/1/s/work/requirements/pre.in
+six==1.16.0               # via bleach, pip-tools
+tqdm==4.62.3              # via twine
 twine==3.1.1              # via -r /Users/runner/work/1/s/work/requirements/pre.in
 typing-extensions==3.10.0.2  # via importlib-metadata
-urllib3==1.26.6           # via requests
+urllib3==1.26.7           # via requests
 webencodings==0.5.1       # via bleach
 wheel==0.34.2             # via -r /Users/runner/work/1/s/work/requirements/pre.in
-zipp==3.5.0               # via importlib-metadata
+zipp==3.6.0               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 pip==20.1                 # via -r /Users/runner/work/1/s/work/requirements/pre.in, pip-tools
