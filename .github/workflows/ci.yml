@@ -83,9 +83,6 @@ jobs:
         #only run if a new tag is created
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          #aws codeartifact login --tool twine --repository epc-power --domain epc-power-us --domain-owner ${{ secrets.AWS_ACCOUNT_ID }}
-          #poetry run twine upload --repository codeartifact dist/*
-          #twine upload --repository codeartifact dist/*
           poetry publish --repository epc-power
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
