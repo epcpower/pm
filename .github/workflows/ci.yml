@@ -52,7 +52,6 @@ jobs:
           poetry config repositories.third-party https://epc-power-us-${{ secrets.AWS_ACCOUNT_ID }}.d.codeartifact.us-east-2.amazonaws.com/pypi/third-party/
           poetry config http-basic.third-party aws $CODEARTIFACT_AUTH_TOKEN
 
-
           poetry install
       - name: python commands
         run: |
@@ -71,7 +70,6 @@ jobs:
           poetry run pyinstaller pyinstaller.spec
           mv "dist/epcpm" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
           7z a "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}.zip" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
-
 
           mkdir artifacts
           mv *.zip artifacts/
