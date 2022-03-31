@@ -10,6 +10,7 @@ import lxml.etree
 
 import epcpm.__main__
 import epcpm.cli.exportdocx
+import epcpm.cli.sunspectostaticmodbus
 import epcpm.cli.utils
 import epcpm.importexport
 import epcpm.importexportdialog
@@ -102,7 +103,7 @@ def build(
         target_directory=target_path,
         paths=paths,
         first_time=False,
-        skip_sunspec=skip_sunspec,
+        skip_output=skip_sunspec,
         include_uuid_in_item=include_uuid_in_item,
     )
 
@@ -212,7 +213,16 @@ def batch(reference, schema, subject, smdx_glob):
     sys.exit(failed)
 
 
-@main.command()
+@main.group()
+def utility():
+    """Utilities for administrative purposes"""
+    pass
+
+
+utility.add_command(epcpm.cli.sunspectostaticmodbus.cli, name="sunspec-to-staticmodbus")
+
+
+@utility.command()
 @epcpm.cli.utils.target_path_option(required=True)
 def transition(target_path):
     """Don't use this unless you know"""

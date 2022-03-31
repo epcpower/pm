@@ -1,6 +1,7 @@
 import attr
 
 import epcpm.c
+import epcpm.pm_helper
 import epcpm.sunspecmodel
 import epcpm.sunspectoxlsx
 import epyqlib.utils.general
@@ -121,9 +122,7 @@ class DataPointBitfield:
     parameter_uuid_finder = attr.ib()
 
     def gen(self):
-        # TODO: CAMPid 07954360685417610543064316843160
-
-        name_uuid = str(self.wrapped.uuid).replace("-", "_")
+        name_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(self.wrapped.uuid)
         members = self.wrapped.children
         array_name = f"sunspecBitfieldItems_{name_uuid}"
 
