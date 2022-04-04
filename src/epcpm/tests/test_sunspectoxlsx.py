@@ -1,6 +1,7 @@
 import csv
 import pathlib
 
+import epcpm.pm_helper
 import epcpm.project
 import epcpm.smdxtosunspec
 import epcpm.sunspectoxlsx
@@ -67,7 +68,7 @@ def test_x():
         wrapped=attrs_model.root,
         parameter_uuid_finder=attrs_model.node_from_uuid,
         parameter_model=project.models.parameters,
-        column_filter=epcpm.sunspectoxlsx.attr_fill(epcpm.sunspectoxlsx.Fields, True),
+        column_filter=epcpm.pm_helper.attr_fill(epcpm.sunspectoxlsx.Fields, True),
     )
 
     workbook = builder.gen()

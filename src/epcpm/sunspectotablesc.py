@@ -2,6 +2,7 @@ import attr
 import epyqlib.utils.general
 import epyqlib.pm.parametermodel
 
+import epcpm.pm_helper
 import epcpm.sunspecmodel
 
 
@@ -265,8 +266,9 @@ class DataPoint:
             body_lines = []
 
             if parameter.uses_interface_item():
-                # TODO: CAMPid 9685439641536675431653179671436
-                item_uuid_string = str(table_element.uuid).replace("-", "_")
+                item_uuid_string = epcpm.pm_helper.convert_uuid_to_variable_name(
+                    table_element.uuid
+                )
                 item_name = f"interfaceItem_{item_uuid_string}"
 
                 if True:  # is_group:

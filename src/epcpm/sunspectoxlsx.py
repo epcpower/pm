@@ -1,13 +1,18 @@
+from __future__ import (
+    annotations,
+)  # See PEP 563, check to remove in future Python version higher than 3.7
 import itertools
 import math
 
 import attr
 import openpyxl
+import typing
 
 import epyqlib.pm.parametermodel
 import epyqlib.utils.general
 
 import epcpm.c
+import epcpm.pm_helper
 import epcpm.sunspecmodel
 
 
@@ -23,36 +28,29 @@ epc_enumerator_fields = attr.fields(
 bitfield_fields = attr.fields(epcpm.sunspecmodel.DataPointBitfield)
 
 
-def attr_fill(cls, value):
-    return cls(**{field.name: value for field in attr.fields(cls) if field.init})
-
-
 @attr.s
-class Fields:
-    field_type = attr.ib(default=None)
-    applicable_point = attr.ib(default=None)
-    address_offset = attr.ib(default=None)
-    block_offset = attr.ib(default=None)
-    size = attr.ib(default=None)
-    name = attr.ib(default=None)
-    label = attr.ib(default=None)
-    value = attr.ib(default=None)
-    type = attr.ib(default=None)
-    units = attr.ib(default=None)
-    scale_factor = attr.ib(default=None)
-    read_write = attr.ib(default=None)
-    mandatory = attr.ib(default=None)
-    description = attr.ib(default=None)
-    notes = attr.ib(default=None)
-    modbus_address = attr.ib(default=None)
-    get = attr.ib(default=None)
-    set = attr.ib(default=None)
-    item = attr.ib(default=None)
+class Fields(epcpm.pm_helper.FieldsInterface):
+    """The fields defined for a given row in the output XLS file."""
 
-    def as_filtered_tuple(self, filter_):
-        return tuple(
-            value for value, f in zip(attr.astuple(self), attr.astuple(filter_)) if f
-        )
+    field_type = attr.ib(default=None, type=typing.Union[str, bool])
+    applicable_point = attr.ib(default=None, type=typing.Union[str, bool])
+    address_offset = attr.ib(default=None, type=typing.Union[str, bool, int])
+    block_offset = attr.ib(default=None, type=typing.Union[str, bool, int])
+    size = attr.ib(default=None, type=typing.Union[str, bool])
+    name = attr.ib(default=None, type=typing.Union[str, bool])
+    label = attr.ib(default=None, type=typing.Union[str, bool])
+    value = attr.ib(default=None, type=typing.Union[str, bool, int])
+    type = attr.ib(default=None, type=typing.Union[str, bool])
+    units = attr.ib(default=None, type=typing.Union[str, bool])
+    scale_factor = attr.ib(default=None, type=typing.Union[str, bool])
+    read_write = attr.ib(default=None, type=typing.Union[str, bool])
+    mandatory = attr.ib(default=None, type=typing.Union[str, bool])
+    description = attr.ib(default=None, type=typing.Union[str, bool])
+    notes = attr.ib(default=None, type=typing.Union[str, bool])
+    modbus_address = attr.ib(default=None, type=typing.Union[str, bool, int])
+    get = attr.ib(default=None, type=typing.Union[str, bool])
+    set = attr.ib(default=None, type=typing.Union[str, bool])
+    item = attr.ib(default=None, type=typing.Union[str, bool])
 
 
 field_names = Fields(
@@ -106,7 +104,7 @@ def export(
     path, sunspec_model, parameters_model, column_filter=None, skip_sunspec=False
 ):
     if column_filter is None:
-        column_filter = attr_fill(Fields, True)
+        column_filter = epcpm.pm_helper.attr_fill(Fields, True)
 
     builder = epcpm.sunspectoxlsx.builders.wrap(
         wrapped=sunspec_model.root,
@@ -333,6 +331,7 @@ class Enumerator:
 
 
 def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
+    # TODO: CAMPid 45002738594281495565841631423784
     scale_factor_from_uuid = {}
     for point in points:
         if point.type_uuid is None:
@@ -464,8 +463,9 @@ class DataPointBitfield:
 
         # TODO: should we just require that it does and assume etc?
         if uses_interface_item:
-            # TODO: CAMPid 9685439641536675431653179671436
-            parameter_uuid = str(parameter.uuid).replace("-", "_")
+            parameter_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
+                parameter.uuid
+            )
             item_name = f"interfaceItem_{parameter_uuid}"
 
             getter.extend(
@@ -918,8 +918,9 @@ class Point:
                 # minimum_variable = parameter.nv_format.format('[Meta_Min]')
                 # maximum_variable = parameter.nv_format.format('[Meta_Max]')
             elif uses_interface_item:
-                # TODO: CAMPid 9685439641536675431653179671436
-                parameter_uuid = str(parameter.uuid).replace("-", "_")
+                parameter_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
+                    parameter.uuid
+                )
                 item_name = f"interfaceItem_{parameter_uuid}"
 
                 getter.extend(
