@@ -1670,8 +1670,6 @@ def create_common_initializers(
             f".variable = {can_variable},",
             f".getter = {can_getter},",
             f".setter = {can_setter},",
-            f".handGetter = NULL,",
-            f".handSetter = NULL,",
         ],
         f"}},",
         f".access_level = {access_level},",
