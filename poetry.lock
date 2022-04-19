@@ -408,7 +408,7 @@ QtAwesome = "0.6.0"
 requests = "2.27.1"
 selenium = "3.141.0"
 siphash-cffi = "0.1.4"
-sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo.git", rev = "ead80c958b024a2d5e256c4db5a25952e4088184"}
+sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo.git", rev = "6155522b0cf2e8bd7f5c4cb0bf044f95f154f0a7"}
 treq = "21.1.0"
 Twisted = "21.2.0"
 
@@ -1318,8 +1318,8 @@ typing-extensions = "^4.0.1"
 [package.source]
 type = "git"
 url = "https://github.com/epcpower/sunspec-demo.git"
-reference = "ead80c958b024a2d5e256c4db5a25952e4088184"
-resolved_reference = "ead80c958b024a2d5e256c4db5a25952e4088184"
+reference = "6155522b0cf2e8bd7f5c4cb0bf044f95f154f0a7"
+resolved_reference = "6155522b0cf2e8bd7f5c4cb0bf044f95f154f0a7"
 
 [[package]]
 name = "toml"
@@ -1577,7 +1577,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7.9,<3.11"
-content-hash = "707a46e85d55467929c4fb6fb4d30421e775609edb021a068bc324a4ca337482"
+content-hash = "a7c480b756de6a66f80d5020bee0a537056150dadec77a934950c500852a9576"
 
 [metadata.files]
 alqtendpy = [
