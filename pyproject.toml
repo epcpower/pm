@@ -30,7 +30,11 @@ secondary = true
 python = ">=3.7.9,<3.11"
 
 #### EPC Repos ####
-sunspecdemo = {version = "0.3.0", source = "epc-power"}
+#if referencing commit hashes:
+sunspecdemo = { git = "https://github.com/epcpower/sunspec-demo.git", rev = "6155522b0cf2e8bd7f5c4cb0bf044f95f154f0a7" }
+
+#if referencing tags:
+#sunspecdemo = {version = "0.3.0", source = "epc-power"}
 ###################
 
 attrs = "20.2.0"
