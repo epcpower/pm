@@ -315,6 +315,7 @@ def cli(input_sunspec_filename: str, output_staticmodbus_filename: str) -> None:
             "scale_factor_uuid",
             "enumeration_uuid",
             "type_uuid",
+            "access_level",
             "not_implemented",
             "uuid",
             "class_name",

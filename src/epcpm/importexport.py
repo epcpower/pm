@@ -161,6 +161,7 @@ def full_export(
             scale_factor_uuid=True,
             enumeration_uuid=True,
             type_uuid=True,
+            access_level=True,
             not_implemented=True,
             uuid=True,
             class_name=True,
