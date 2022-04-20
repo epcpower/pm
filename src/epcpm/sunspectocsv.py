@@ -492,9 +492,8 @@ class DataPointBitfieldMember:
             row.parameter_uuid = parameter.uuid
             row.parameter_uses_interface_item = uses_interface_item
             row.type_uuid = self.wrapped.type_uuid
-            access_level_uuid = parameter.access_level_uuid
-            if access_level_uuid is not None:
-                access_level = self.parameter_uuid_finder(access_level_uuid)
+            if parameter.access_level_uuid is not None:
+                access_level = self.parameter_uuid_finder(parameter.access_level_uuid)
                 row.access_level = access_level.value
             row.not_implemented = False
             row.size = 0
@@ -576,9 +575,10 @@ class TableRepeatingBlockReference:
                 #     ).abbreviation
 
                 row.enumeration_uuid = table_element2.enumeration_uuid
-                access_level_uuid = parameter.access_level_uuid
-                if access_level_uuid is not None:
-                    access_level = self.parameter_uuid_finder(access_level_uuid)
+                if parameter.access_level_uuid is not None:
+                    access_level = self.parameter_uuid_finder(
+                        parameter.access_level_uuid
+                    )
                     row.access_level = access_level.value
                 row.not_implemented = point.not_implemented
                 row.uuid = point.uuid
@@ -710,9 +710,8 @@ class Point:
             row.scale_factor_uuid = row_scale_factor_uuid
             row.enumeration_uuid = parameter.enumeration_uuid
             row.type_uuid = self.wrapped.type_uuid
-            access_level_uuid = parameter.access_level_uuid
-            if access_level_uuid is not None:
-                access_level = self.parameter_uuid_finder(access_level_uuid)
+            if parameter.access_level_uuid is not None:
+                access_level = self.parameter_uuid_finder(parameter.access_level_uuid)
                 row.access_level = access_level.value
             row.not_implemented = self.wrapped.not_implemented
             row.uuid = self.wrapped.uuid

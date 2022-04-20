@@ -159,9 +159,8 @@ class FunctionData:
                 and parameter.uses_interface_item()
             )
             row.parameter_uses_interface_item = uses_interface_item
-            access_level_uuid = parameter.access_level_uuid
-            if access_level_uuid is not None:
-                access_level = self.parameter_uuid_finder(access_level_uuid)
+            if parameter.access_level_uuid is not None:
+                access_level = self.parameter_uuid_finder(parameter.access_level_uuid)
                 row.access_level = access_level.value
 
         if type_node.name == "pad":
@@ -245,9 +244,8 @@ class FunctionDataBitfieldMember:
                 and parameter.uses_interface_item()
             )
             row.parameter_uses_interface_item = uses_interface_item
-            access_level_uuid = parameter.access_level_uuid
-            if access_level_uuid is not None:
-                access_level = self.parameter_uuid_finder(access_level_uuid)
+            if parameter.access_level_uuid is not None:
+                access_level = self.parameter_uuid_finder(parameter.access_level_uuid)
                 row.access_level = access_level.value
 
         return row
