@@ -1,3 +1,9 @@
+"""
+Testing for parameterstoc script cli.
+
+It is possible that the parameterstoc module is either out of date
+or no longer applicable for normal use.
+"""
 import pathlib
 import textwrap
 
@@ -29,7 +35,9 @@ def test_declaration():
     {
       RedType red;
     };
-    typedef struct GreenType_s GreenType_t;
+    typedef struct GreenType_s
+    {
+    } GreenType_t;
     """
     )
 

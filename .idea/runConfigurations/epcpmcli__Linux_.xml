@@ -11,7 +11,7 @@
     <option name="IS_MODULE_SDK" value="true" />
     <option name="ADD_CONTENT_ROOTS" value="false" />
     <option name="ADD_SOURCE_ROOTS" value="false" />
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/venv/Scripts/epcpmcli" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/.venv/Scripts/epcpmcli" />
     <option name="PARAMETERS" value="gui" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />

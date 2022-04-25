@@ -27,6 +27,7 @@ def Type(name, type):
     return pycparser.c_ast.TypeDecl(
         declname=name,
         quals=[],
+        align=None,
         type=pycparser.c_ast.IdentifierType(
             names=(type,),
         ),
@@ -37,6 +38,7 @@ Decl = functools.partial(
     pycparser.c_ast.Decl,
     name=None,
     quals=[],
+    align=None,
     storage=[],
     funcspec=[],
     init=None,
@@ -61,6 +63,7 @@ def function(name):
             pycparser.c_ast.Typename(
                 name=None,
                 quals=[],
+                align=None,
                 type=pycparser.c_ast.IdentifierType(
                     names=["void"],
                 ),

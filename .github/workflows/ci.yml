@@ -16,6 +16,7 @@ defaults:
 
 env:
   PYTHON_VERSION: 3.7
+  AWS_REGION: us-east-2
 
 jobs:
   build:
@@ -30,35 +31,59 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Install Poetry and Venv
+        run: |
+          python3 -m ensurepip
+          python3 -m pip install --upgrade pip
+          python3 -m pip install poetry
+          poetry config virtualenvs.in-project true
+          poetry config virtualenvs.path .
+
+          #Setup AWS Connection
+          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain epc-power-us --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} --query authorizationToken --output text`
+          poetry config repositories.epc-power https://epc-power-us-${{ secrets.AWS_ACCOUNT_ID }}.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/
+          poetry config http-basic.epc-power aws $CODEARTIFACT_AUTH_TOKEN
+          poetry config repositories.third-party https://epc-power-us-${{ secrets.AWS_ACCOUNT_ID }}.d.codeartifact.us-east-2.amazonaws.com/pypi/third-party/
+          poetry config http-basic.third-party aws $CODEARTIFACT_AUTH_TOKEN
+
+          poetry install
       - name: python commands
         run: |
           set -vx
-          which pip
-          pip --version
-          python boots.py create --group test
-          venv/Scripts/black --check --diff .
-          venv/Scripts/python -c "import sys; print(sys.version)"
+          poetry run black --check --diff .
+          poetry run builduipm
+          poetry run builduiepyqlib
+          poetry run poetry-dynamic-versioning
 
-          venv/Scripts/pip freeze --all
-          venv/Scripts/genbuildinfo "src/epcpm/__build.py"
-          venv/Scripts/generateversion --distribution epcpm --out "src/epcpm/__version.py"
+          poetry run python -c "import sys; print(sys.version)"
 
-          venv/Scripts/pyinstaller pyinstaller.spec
+          poetry run pip freeze --all
+          poetry run genbuildinfo "src/epcpm/__build.py"
+          poetry run generateversion --distribution epcpm --out "src/epcpm/__version.py"
+
+          poetry run pyinstaller pyinstaller.spec
           mv "dist/epcpm" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
           7z a "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}.zip" "EPCPM_${GITHUB_RUN_ID}_${GITHUB_RUN_NUMBER}"
-
 
           mkdir artifacts
           mv *.zip artifacts/
 
           rm -rf dist
-          python boots.py build
-          mv dist/* artifacts/
+          poetry build
 
-          venv/Scripts/pytest epcpm.tests --pyargs
-
-          python boots.py publish
-
+          cp dist/* artifacts/
+          poetry run pytest epcpm.tests --pyargs
+      - name: Publish executable
+        #only run if a new tag is created
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          poetry publish --repository epc-power
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
         with:
