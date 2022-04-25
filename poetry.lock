@@ -408,7 +408,7 @@ QtAwesome = "0.6.0"
 requests = "2.27.1"
 selenium = "3.141.0"
 siphash-cffi = "0.1.4"
-sunspecdemo = "0.3.0"
+sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo.git", rev = "474cdaa4d085eb8de064a73844b1b5b4b39de6dd"}
 treq = "21.1.0"
 Twisted = "21.2.0"
 
@@ -876,11 +876,11 @@ python-versions = "*"
 
 [[package]]
 name = "pygments"
-version = "2.11.2"
+version = "2.12.0"
 description = "Pygments is a syntax highlighting package written in Python."
 category = "dev"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.6"
 
 [[package]]
 name = "pyinstaller"
@@ -1298,26 +1298,28 @@ smmap = ">=3.0.1"
 
 [[package]]
 name = "sunspecdemo"
-version = "0.3.0"
+version = "0.0.0"
 description = "EPC SunSpec demonstration tool"
 category = "main"
 optional = false
 python-versions = ">=3.7.9,<3.11"
+develop = false
 
 [package.dependencies]
 attrs = ">=19.3.0"
-click = ">=7.0,<8.0"
+click = "^7.0"
 pyserial = "3.4"
 pysunspec = "2.1.0"
-toml = ">=0.10.2,<0.11.0"
+toml = "^0.10.2"
 toolz = "0.9.0"
 tqdm = "4.32.1"
-typing-extensions = ">=4.0.1,<5.0.0"
+typing-extensions = "^4.0.1"
 
 [package.source]
-type = "legacy"
-url = "https://epc-power-us-890711758583.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/simple"
-reference = "epc-power"
+type = "git"
+url = "https://github.com/epcpower/sunspec-demo.git"
+reference = "474cdaa4d085eb8de064a73844b1b5b4b39de6dd"
+resolved_reference = "474cdaa4d085eb8de064a73844b1b5b4b39de6dd"
 
 [[package]]
 name = "toml"
@@ -1337,7 +1339,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "tomlkit"
-version = "0.10.1"
+version = "0.10.2"
 description = "Style preserving TOML library"
 category = "dev"
 optional = false
@@ -1575,7 +1577,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7.9,<3.11"
-content-hash = "5a079f1ae43d0b58bbf89679dbc88f90c34358be9566c61a484fb663b2da5f75"
+content-hash = "5a88f29d19171441994bdd4febffbb3aad6872a89921ae1204e2cf002646789c"
 
 [metadata.files]
 alqtendpy = [
@@ -2150,8 +2152,8 @@ pyelftools = [
     {file = "pyelftools-0.26.tar.gz", hash = "sha256:86ac6cee19f6c945e8dedf78c6ee74f1112bd14da5a658d8c9d4103aed5756a2"},
 ]
 pygments = [
-    {file = "Pygments-2.11.2-py3-none-any.whl", hash = "sha256:44238f1b60a76d78fc8ca0528ee429702aae011c265fe6a8dd8b63049ae41c65"},
-    {file = "Pygments-2.11.2.tar.gz", hash = "sha256:4e426f72023d88d03b2fa258de560726ce890ff3b630f88c21cbb8b2503b8c6a"},
+    {file = "Pygments-2.12.0-py3-none-any.whl", hash = "sha256:dc9c10fb40944260f6ed4c688ece0cd2048414940f1cea51b8b226318411c519"},
+    {file = "Pygments-2.12.0.tar.gz", hash = "sha256:5eb116118f9612ff1ee89ac96437bb6b49e8f04d8a13b514ba26f620208e26eb"},
 ]
 pyinstaller = [
     {file = "pyinstaller-4.4-py3-none-macosx_10_13_universal2.whl", hash = "sha256:0e802c082487719aab6b2a93575819944c008e6e1ba44c7836fc45660a9586c0"},
@@ -2345,10 +2347,7 @@ smmap2 = [
     {file = "smmap2-3.0.1-py3-none-any.whl", hash = "sha256:0cb6ea470b1ad9a65a02ca7f4c7ae601861f7dd24a43812ca51cfca2892bb524"},
     {file = "smmap2-3.0.1.tar.gz", hash = "sha256:44cc8bdaf96442dbb9a8e2e14377d074b3d0eea292eee3c95c8c449b6c92c557"},
 ]
-sunspecdemo = [
-    {file = "sunspecdemo-0.3.0-py3-none-any.whl", hash = "sha256:ed551dc4c96bc46063f83cfaa4dfbddb97f2c9557240924c964e63647f1c0dfb"},
-    {file = "sunspecdemo-0.3.0.tar.gz", hash = "sha256:54d9b1eaecb327bba8606b0be3bbd67a9d2920b1c632eb99e4b66aa10b06d473"},
-]
+sunspecdemo = []
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
     {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
@@ -2358,8 +2357,8 @@ tomli = [
     {file = "tomli-1.2.3.tar.gz", hash = "sha256:05b6166bff487dc068d322585c7ea4ef78deed501cc124060e0f238e89a9231f"},
 ]
 tomlkit = [
-    {file = "tomlkit-0.10.1-py3-none-any.whl", hash = "sha256:3eba517439dcb2f84cf39f4f85fd2c3398309823a3c75ac3e73003638daf7915"},
-    {file = "tomlkit-0.10.1.tar.gz", hash = "sha256:3c517894eadef53e9072d343d37e4427b8f0b6200a70b7c9a19b2ebd1f53b951"},
+    {file = "tomlkit-0.10.2-py3-none-any.whl", hash = "sha256:905cf92c2111ef80d355708f47ac24ad1b6fc2adc5107455940088c9bbecaedb"},
+    {file = "tomlkit-0.10.2.tar.gz", hash = "sha256:30d54c0b914e595f3d10a87888599eab5321a2a69abc773bbefff51599b72db6"},
 ]
 toolz = [
     {file = "toolz-0.9.0.tar.gz", hash = "sha256:929f0a7ea7f61c178bd951bdae93920515d3fbdbafc8e6caf82d752b9b3b31c9"},
