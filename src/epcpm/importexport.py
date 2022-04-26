@@ -238,7 +238,7 @@ def full_export(
 
 
 def run_generation_scripts(base_path):
-    scripts = base_path / "venv" / "Scripts"
+    scripts = base_path / ".venv" / "Scripts"
     interface = base_path / "interface"
 
     subprocess.run(

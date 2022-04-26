@@ -1,3 +1,9 @@
+"""
+Used by parameterstoc script to build a parameters model.
+
+It is possible that this module is either out of date or
+no longer applicable for normal use.
+"""
 import itertools
 import functools
 
@@ -163,6 +169,7 @@ def Type(name, type):
     return pycparser.c_ast.TypeDecl(
         declname=name,
         quals=[],
+        align=None,
         type=pycparser.c_ast.IdentifierType(
             names=(type,),
         ),
@@ -173,6 +180,7 @@ Decl = functools.partial(
     pycparser.c_ast.Decl,
     name=None,
     quals=[],
+    align=None,
     storage=[],
     funcspec=[],
     init=None,
@@ -188,6 +196,7 @@ TypeDecl = functools.partial(
     pycparser.c_ast.TypeDecl,
     declname="",
     quals=[],
+    align=None,
 )
 
 
@@ -199,6 +208,7 @@ def typedef(target, name):
         type=pycparser.c_ast.TypeDecl(
             declname=name,
             quals=[],
+            align=None,
             type=target,
         ),
     )
@@ -256,6 +266,7 @@ def struct(name, member_decls=()):
     decl = pycparser.c_ast.Decl(
         name=None,
         quals=[],
+        align=None,
         storage=[],
         funcspec=[],
         type=struct,
