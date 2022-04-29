@@ -41,6 +41,7 @@ staticmodbus_types = {
     "uint16": "sunsU16",
     "enum16": "sunsU16",
     "int16": "sunsS16",
+    "staticmodbussf": "staticmodbussf",
     "uint32": "sunsU32",
     "int32": "sunsS32",
     "string": "PackedString",
@@ -613,7 +614,7 @@ class Parameter:
                     str(x) for x in getter_setter_list + ["setter"]
                 )
             else:
-                # Constant is ReadOnly, doesnt need a setter
+                # Constant/indexed is read only, doesn't need a setter
                 sunspec_setter = "NULL"
 
         if staticmodbus_point is None:
@@ -636,9 +637,13 @@ class Parameter:
             staticmodbus_getter = "_".join(
                 str(x) for x in getter_setter_list + ["getter"]
             )
-            staticmodbus_setter = "_".join(
-                str(x) for x in getter_setter_list + ["setter"]
-            )
+            if interface_type != "constant" and interface_type != "indexed":
+                staticmodbus_setter = "_".join(
+                    str(x) for x in getter_setter_list + ["setter"]
+                )
+            else:
+                # Constant/indexed is read only, doesn't need a setter
+                staticmodbus_setter = "NULL"
 
         interface_item_type = (
             f"InterfaceItem_{interface_type}_{types[parameter.internal_type].name}"
