@@ -30,6 +30,7 @@ class Fields(epcpm.pm_helper.FieldsInterface):
     description = attr.ib(default=None, type=typing.Union[str, bool])
     field_type = attr.ib(default=None, type=typing.Union[str, bool])
     parameter_uses_interface_item = attr.ib(default=False, type=typing.Union[str, bool])
+    access_level = attr.ib(default=None, type=typing.Union[str, bool, int])
 
 
 field_names = Fields(
@@ -43,6 +44,7 @@ field_names = Fields(
     description="Description",
     field_type="Field Type",
     parameter_uses_interface_item="Implemented",
+    access_level="Access Level",
 )
 
 
@@ -157,6 +159,9 @@ class FunctionData:
                 and parameter.uses_interface_item()
             )
             row.parameter_uses_interface_item = uses_interface_item
+            if parameter.access_level_uuid is not None:
+                access_level = self.parameter_uuid_finder(parameter.access_level_uuid)
+                row.access_level = access_level.value
 
         if type_node.name == "pad":
             row.name = "Pad"
@@ -239,5 +244,8 @@ class FunctionDataBitfieldMember:
                 and parameter.uses_interface_item()
             )
             row.parameter_uses_interface_item = uses_interface_item
+            if parameter.access_level_uuid is not None:
+                access_level = self.parameter_uuid_finder(parameter.access_level_uuid)
+                row.access_level = access_level.value
 
         return row

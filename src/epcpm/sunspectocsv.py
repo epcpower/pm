@@ -49,6 +49,7 @@ class Fields(epcpm.pm_helper.FieldsInterface):
     scale_factor_uuid = attr.ib(default=None, type=typing.Union[str, bool])
     enumeration_uuid = attr.ib(default=None, type=typing.Union[str, bool])
     type_uuid = attr.ib(default=None, type=typing.Union[str, bool])
+    access_level = attr.ib(default=None, type=typing.Union[str, bool])
     not_implemented = attr.ib(default=None, type=typing.Union[str, bool])
     uuid = attr.ib(default=None, type=typing.Union[str, bool])
     class_name = attr.ib(default=None, type=typing.Union[str, bool])
@@ -491,6 +492,9 @@ class DataPointBitfieldMember:
             row.parameter_uuid = parameter.uuid
             row.parameter_uses_interface_item = uses_interface_item
             row.type_uuid = self.wrapped.type_uuid
+            if parameter.access_level_uuid is not None:
+                access_level = self.parameter_uuid_finder(parameter.access_level_uuid)
+                row.access_level = access_level.value
             row.not_implemented = False
             row.size = 0
             row.bit_offset = self.wrapped.bit_offset
@@ -571,6 +575,11 @@ class TableRepeatingBlockReference:
                 #     ).abbreviation
 
                 row.enumeration_uuid = table_element2.enumeration_uuid
+                if parameter.access_level_uuid is not None:
+                    access_level = self.parameter_uuid_finder(
+                        parameter.access_level_uuid
+                    )
+                    row.access_level = access_level.value
                 row.not_implemented = point.not_implemented
                 row.uuid = point.uuid
                 row.class_name = "TableRepeatingBlockReferenceDataPointReference"
@@ -701,6 +710,9 @@ class Point:
             row.scale_factor_uuid = row_scale_factor_uuid
             row.enumeration_uuid = parameter.enumeration_uuid
             row.type_uuid = self.wrapped.type_uuid
+            if parameter.access_level_uuid is not None:
+                access_level = self.parameter_uuid_finder(parameter.access_level_uuid)
+                row.access_level = access_level.value
             row.not_implemented = self.wrapped.not_implemented
             row.uuid = self.wrapped.uuid
             row.class_name = "DataPoint"
