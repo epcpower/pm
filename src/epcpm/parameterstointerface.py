@@ -1590,7 +1590,6 @@ def create_item(
             common_initializers,
             "},",
             *variable_or_getter_setter,
-            f".rejectedCallback = {rejected_callback},",
             *meta_initializer,
         ],
         "};",
