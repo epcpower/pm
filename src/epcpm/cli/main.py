@@ -5,6 +5,7 @@ import sys
 import textwrap
 
 import click
+import epyqlib.pm.valueset
 import epyqlib.pm.valuesetmodel
 import lxml.etree
 
@@ -105,6 +106,54 @@ def build(
         first_time=False,
         skip_output=skip_sunspec,
         include_uuid_in_item=include_uuid_in_item,
+    )
+
+    click.echo()
+    click.echo("done")
+
+
+@export.command()
+@epcpm.cli.utils.project_option(required=True)
+@epcpm.cli.utils.target_path_option(required=True)
+@epcpm.cli.utils.pmvs_overlay_recipes_path_option(required=True)
+@click.option(
+    "--include-uuid-in-item/--exclude-uuid-from-item",
+    "include_uuid_in_item",
+    default=False,
+)
+def docs(
+    project: str,
+    target_path: str,
+    pmvs_overlay_recipes_path: str,
+    include_uuid_in_item: bool,
+) -> None:
+    """
+    Export PM documentation to embedded project directory
+
+    Args:
+        project: path to PM project file
+        target_path: path to root target directory
+        pmvs_overlay_recipes_path: path to PMVS overlay recipes directory (contains base.json)
+        include_uuid_in_item: flag to include UUID in item interface generation
+
+    Returns:
+
+    """
+    project = pathlib.Path(project)
+    target_path = pathlib.Path(target_path)
+
+    pmvs_base = pathlib.Path(pmvs_overlay_recipes_path) / "base.json"
+    pmvs_configuration = epyqlib.pm.valueset.OverlayConfiguration.load(pmvs_base)
+    pmvs_output_path = pmvs_configuration.reference_output_path()
+
+    paths = epcpm.importexportdialog.paths_from_directory(target_path)
+
+    loaded_project = epcpm.project.loadp(project)
+
+    epcpm.importexport.generate_docs(
+        project=loaded_project,
+        pmvs_path=pmvs_output_path,
+        paths=paths,
     )
 
     click.echo()

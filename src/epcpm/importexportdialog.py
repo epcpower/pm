@@ -86,6 +86,8 @@ class ImportPaths:
     sunspec_c = attr.ib(converter=path_or_none)
     sil_c = attr.ib(converter=path_or_none)
     interface_c = attr.ib(converter=path_or_none)
+    # No UI handling for spreadsheet_can since it is not part of normal import/export
+    spreadsheet_can = attr.ib(converter=path_or_none)
 
 
 def paths_from_directory(directory):
@@ -108,6 +110,7 @@ def paths_from_directory(directory):
         sunspec_c=sunspec,
         sil_c=path / "sil" / "libEpcControlInterfaceGen.c",
         interface_c=interface / "interfaceGen.c",
+        spreadsheet_can=embedded / "EPC-CAN.xlsx",
     )
 
 

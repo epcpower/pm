@@ -8,6 +8,8 @@ import attr
 import graham
 
 import epcpm.cantosym
+import epcpm.cantoxlsx
+import epcpm.importexportdialog
 import epcpm.parameterstobitfieldsc
 import epcpm.parameterstohierarchy
 import epcpm.parameterstointerface
@@ -335,3 +337,27 @@ def is_stale(project, paths, skip_sunspec=False):
     destination_newer_by = destination_modification_time - source_modification_time
 
     return destination_newer_by < 1
+
+
+def generate_docs(
+    project: epcpm.project.Project,
+    paths: epcpm.importexportdialog.ImportPaths,
+    pmvs_path: pathlib.Path,
+) -> None:
+    """
+    Generate the CAN model parameter data documentation.
+
+    Args:
+        project: PM project (pmp)
+        paths: import/export dialog paths
+        pmvs_path: PMVS output path
+
+    Returns:
+
+    """
+    epcpm.cantoxlsx.export(
+        path=paths.spreadsheet_can,
+        can_model=project.models.can,
+        parameters_model=project.models.parameters,
+        pmvs_path=pmvs_path,
+    )
