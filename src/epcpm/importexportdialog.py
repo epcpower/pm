@@ -170,6 +170,7 @@ class Dialog(QtWidgets.QDialog):
             sunspec_c=self.ui.sunspec_c.text(),
             sil_c=self.ui.sil_c.text(),
             interface_c=self.ui.interface_c.text(),
+            spreadsheet_can=None,
         )
         super().accept()
 
