@@ -116,16 +116,10 @@ def build(
 @epcpm.cli.utils.project_option(required=True)
 @epcpm.cli.utils.target_path_option(required=True)
 @epcpm.cli.utils.pmvs_overlay_recipes_path_option(required=True)
-@click.option(
-    "--include-uuid-in-item/--exclude-uuid-from-item",
-    "include_uuid_in_item",
-    default=False,
-)
 def docs(
     project: str,
     target_path: str,
     pmvs_overlay_recipes_path: str,
-    include_uuid_in_item: bool,
 ) -> None:
     """
     Export PM documentation to embedded project directory
@@ -134,7 +128,6 @@ def docs(
         project: path to PM project file
         target_path: path to root target directory
         pmvs_overlay_recipes_path: path to PMVS overlay recipes directory (contains base.json)
-        include_uuid_in_item: flag to include UUID in item interface generation
 
     Returns:
 
