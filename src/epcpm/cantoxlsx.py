@@ -306,6 +306,7 @@ class GenericNode:
 
     wrapped = attr.ib(
         type=typing.Union[
+            epcpm.canmodel.CanTable,
             epcpm.canmodel.Message,
             epcpm.canmodel.Multiplexer,
             epcpm.canmodel.MultiplexedMessage,
