@@ -343,6 +343,7 @@ def generate_docs(
     project: epcpm.project.Project,
     paths: epcpm.importexportdialog.ImportPaths,
     pmvs_path: pathlib.Path,
+    generate_formatted_output: bool,
 ) -> None:
     """
     Generate the CAN model parameter data documentation.
@@ -351,6 +352,7 @@ def generate_docs(
         project: PM project (pmp)
         paths: import/export dialog paths
         pmvs_path: PMVS output path
+        generate_formatted_output: generate formatted output (takes a long time)
 
     Returns:
 
@@ -358,6 +360,10 @@ def generate_docs(
     epcpm.cantoxlsx.export(
         path=paths.spreadsheet_can,
         can_model=project.models.can,
-        parameters_model=project.models.parameters,
         pmvs_path=pmvs_path,
     )
+
+    if generate_formatted_output:
+        epcpm.cantoxlsx.format_for_manual(
+            input_path=paths.spreadsheet_can,
+        )

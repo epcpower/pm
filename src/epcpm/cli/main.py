@@ -116,10 +116,12 @@ def build(
 @epcpm.cli.utils.project_option(required=True)
 @epcpm.cli.utils.target_path_option(required=True)
 @epcpm.cli.utils.pmvs_overlay_recipes_path_option(required=True)
+@click.option("--generate-formatted-output", "generate_formatted_output", is_flag=True)
 def docs(
     project: str,
     target_path: str,
     pmvs_overlay_recipes_path: str,
+    generate_formatted_output: bool,
 ) -> None:
     """
     Export PM documentation to embedded project directory
@@ -128,7 +130,7 @@ def docs(
         project: path to PM project file
         target_path: path to root target directory
         pmvs_overlay_recipes_path: path to PMVS overlay recipes directory (contains base.json)
-
+        generate_formatted_output: generate formatted output of the documentation (takes a long time)
     Returns:
 
     """
@@ -147,6 +149,7 @@ def docs(
         project=loaded_project,
         pmvs_path=pmvs_output_path,
         paths=paths,
+        generate_formatted_output=generate_formatted_output,
     )
 
     click.echo()
