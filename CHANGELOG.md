@@ -9,6 +9,7 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### Added
 
+- SC-629: Added CAN parameter to .xlsx output.
 - SC-590: Added access level column to the SunSpec and static modbus spreadsheet output.
 - SC-572: Added changelog for release notes.
 
