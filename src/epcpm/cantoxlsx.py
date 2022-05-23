@@ -11,10 +11,12 @@ import epcpm.pm_helper
 import epyqlib.treenode
 import epyqlib.utils.general
 from tqdm import tqdm
-from time import sleep
 
 
 PMVS_UUID_TO_DECIMAL_LIST = typing.List[typing.Dict[uuid.UUID, decimal.Decimal]]
+
+# The parameter query prefix on a large portion of the CAN parameter paths.
+PARAMETER_QUERY_PREFIX = "ParameterQuery -> "
 
 builders = epyqlib.utils.general.TypeMap()
 
@@ -52,6 +54,7 @@ class Fields(epcpm.pm_helper.FieldsInterface):
     parameter_path = attr.ib(default=None, type=typing.Union[str, bool])
     enumerator_list = attr.ib(default=None, type=typing.Union[str, bool])
     parameter_uuid = attr.ib(default=None, type=typing.Union[str, bool])
+    epyq_can_parameter_name = attr.ib(default=None, type=typing.Union[str, bool])
 
 
 field_names = Fields(
@@ -74,6 +77,7 @@ field_names = Fields(
     parameter_path="Parameter Path",
     enumerator_list="Enumerator List",
     parameter_uuid="Parameter UUID",
+    epyq_can_parameter_name="EPyQ CAN Parameter Name",
 )
 
 
@@ -245,7 +249,13 @@ class Signal:
             parameter_path_list = self._generate_path_list(parameter)
             row.parameter_path = " -> ".join(parameter_path_list)
             can_path_list = self._generate_path_list(self.wrapped)
-            row.can_path = " -> ".join(can_path_list)
+            can_path_joined = " -> ".join(can_path_list)
+            row.can_path = can_path_joined
+            can_parameter_path = can_path_joined
+            if can_parameter_path.startswith(PARAMETER_QUERY_PREFIX):
+                # Chop off the parameter query prefix to match what is seen in the EPyQ parameters tab.
+                can_parameter_path = can_parameter_path[len(PARAMETER_QUERY_PREFIX) :]
+            row.epyq_can_parameter_name = f"{can_parameter_path}: {self.wrapped.name}"
 
             return [row]
         return []
@@ -360,9 +370,6 @@ def format_for_manual(
     Returns:
 
     """
-    # The parameter query prefix on a large portion of the CAN parameter paths.
-    PARAMETER_QUERY_PREFIX = "ParameterQuery -> "
-
     input_workbook = openpyxl.load_workbook(filename=input_path)
     input_worksheet = input_workbook.active
     input_worksheet_row_count = input_worksheet.max_row
@@ -387,11 +394,7 @@ def format_for_manual(
         for row in input_worksheet.iter_rows(
             min_row=2, max_col=input_worksheet_col_count
         ):
-            can_parameter_path = row[15].value
-            if can_parameter_path.startswith(PARAMETER_QUERY_PREFIX):
-                # Chop off the parameter query prefix to match what is seen in the EPyQ parameters tab.
-                can_parameter_path = can_parameter_path[len(PARAMETER_QUERY_PREFIX) :]
-            parameter_name_out = f"{can_parameter_path}: {row[1].value}"
+            parameter_name_out = row[19].value
             description_out = row[2].value
             access_level_out = row[3].value
             units_out = row[4].value
