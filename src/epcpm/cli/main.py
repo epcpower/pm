@@ -153,7 +153,7 @@ def docs(
     )
 
     click.echo()
-    click.echo("done")
+    click.echo("Export documentation complete.")
 
 
 @main.group()
