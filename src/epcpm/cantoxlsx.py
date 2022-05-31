@@ -10,6 +10,7 @@ import uuid
 import epcpm.pm_helper
 import epyqlib.treenode
 import epyqlib.utils.general
+from natsort import natsorted
 from tqdm import tqdm
 
 
@@ -168,7 +169,6 @@ class Root:
     wrapped = attr.ib(type=epcpm.canmodel.Root)
     column_filter = attr.ib(type=Fields)
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
-    # parameter_model = attr.ib(default=None, type=epyqlib.attrsmodel.Model)
     pmvs_uuid_to_value_list = attr.ib(default=None, type=PMVS_UUID_TO_DECIMAL_LIST)
 
     def gen(self) -> openpyxl.workbook.workbook.Workbook:
@@ -183,6 +183,7 @@ class Root:
         worksheet = workbook.create_sheet("Parameters")
         worksheet.append(field_names.as_filtered_tuple(self.column_filter))
 
+        unsorted_rows = []
         for child in self.wrapped.children:
             rows = builders.wrap(
                 wrapped=child,
@@ -191,7 +192,12 @@ class Root:
             ).gen()
 
             for row in rows:
-                worksheet.append(row.as_filtered_tuple(self.column_filter))
+                unsorted_rows.append(row)
+
+        sorted_rows = natsorted(unsorted_rows, key=lambda x: x.parameter_path)
+
+        for row in sorted_rows:
+            worksheet.append(row.as_filtered_tuple(self.column_filter))
 
         return workbook
 
