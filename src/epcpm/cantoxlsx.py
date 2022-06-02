@@ -18,6 +18,8 @@ PMVS_UUID_TO_DECIMAL_LIST = typing.List[typing.Dict[uuid.UUID, decimal.Decimal]]
 
 # The parameter query prefix on a large portion of the CAN parameter paths.
 PARAMETER_QUERY_PREFIX = "ParameterQuery -> "
+# The parameters prefix on a large portion of the parameter paths.
+PARAMETERS_PREFIX = "Parameters -> "
 
 builders = epyqlib.utils.general.TypeMap()
 
@@ -261,7 +263,9 @@ class Signal:
             if can_parameter_path.startswith(PARAMETER_QUERY_PREFIX):
                 # Chop off the parameter query prefix to match what is seen in the EPyQ parameters tab.
                 can_parameter_path = can_parameter_path[len(PARAMETER_QUERY_PREFIX) :]
-            row.epyq_can_parameter_name = f"{can_parameter_path}: {self.wrapped.name}"
+                # Replace '->' with nothing to match EPyQ name. This is for table parameters.
+                can_parameter_path = can_parameter_path.replace("->", "")
+            row.epyq_can_parameter_name = f"{can_parameter_path}:{self.wrapped.name}"
 
             return [row]
         return []
@@ -397,9 +401,14 @@ def format_for_manual(
     # Display a progress bar since the generation of the output takes a long time.
     print("Be patient. Generation of the output spreadsheet takes a long time.")
     with tqdm(total=input_worksheet_row_count) as progress_bar:
+        current_parameter_path = ""
         for row in input_worksheet.iter_rows(
             min_row=2, max_col=input_worksheet_col_count
         ):
+            parameter_path = row[16].value
+            if not parameter_path.startswith(PARAMETERS_PREFIX):
+                # Only output parameters that are in EPyQ.
+                continue
             parameter_name_out = row[19].value
             description_out = row[2].value
             access_level_out = row[3].value
@@ -443,6 +452,22 @@ def format_for_manual(
                 cab1k_3l1_2700hz_out,
             ]
             all_defaults_same = len(set(all_defaults)) == 1
+
+            # If applicable, add a header description for a set of parameters.
+            # Chop off the parameters prefix to match the path that is seen in the EPyQ parameters tab.
+            parameter_path_to_check = parameter_path[len(PARAMETERS_PREFIX) :]
+            if parameter_path_to_check != current_parameter_path:
+                # Add the parameter path for this section of parameters.
+                current_parameter_path = parameter_path_to_check
+                output_worksheet.append([current_parameter_path])
+                # Merge cells for header description.
+                output_worksheet.merge_cells(
+                    start_row=current_row,
+                    start_column=1,
+                    end_row=current_row,
+                    end_column=7,
+                )
+                current_row += 1
 
             # Track the rows used for each parameter entry.
             rows_used = 0
