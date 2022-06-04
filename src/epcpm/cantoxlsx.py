@@ -20,6 +20,7 @@ PMVS_UUID_TO_DECIMAL_LIST = typing.List[typing.Dict[uuid.UUID, decimal.Decimal]]
 PARAMETER_QUERY_PREFIX = "ParameterQuery -> "
 # The parameters prefix on a large portion of the parameter paths.
 PARAMETERS_PREFIX = "Parameters -> "
+TABLES_TREE_STR = "Tables -> Tree"
 
 builders = epyqlib.utils.general.TypeMap()
 
@@ -402,6 +403,7 @@ def format_for_manual(
     print("Be patient. Generation of the output spreadsheet takes a long time.")
     with tqdm(total=input_worksheet_row_count) as progress_bar:
         current_parameter_path = ""
+        entered_tables_section = False
         for row in input_worksheet.iter_rows(
             min_row=2, max_col=input_worksheet_col_count
         ):
@@ -468,207 +470,294 @@ def format_for_manual(
                     end_column=7,
                 )
                 current_row += 1
+                # Reset the tables section logic.
+                entered_tables_section = False
 
             # Track the rows used for each parameter entry.
             rows_used = 0
 
-            # Add the parameter name and description cells.
-            output_worksheet.append([parameter_name_out, description_out])
-            if enumerator_list:
-                # Add the enumerator list cell / row.
-                output_worksheet.append(["", enumerator_list])
-                rows_used += 1
-            if all_defaults_same:
-                # Output single Default cells section.
-                output_worksheet.append(
-                    [
-                        "",
-                        field_names.access_level,
-                        "",
-                        "",
-                        field_names.minimum,
-                        field_names.maximum,
-                        "Default",
-                    ]
-                )
-                output_worksheet.append(
-                    ["", access_level_out, "", "", minimum_out, maximum_out, pd250_out]
-                )
-                rows_used += 2
-            else:
-                # Output multiple Default cells sections.
-                output_worksheet.append(
-                    [
-                        "",
-                        field_names.access_level,
-                        "",
-                        field_names.minimum,
-                        "",
-                        field_names.maximum,
-                        "",
-                    ]
-                )
-                output_worksheet.append(
-                    ["", access_level_out, "", minimum_out, "", maximum_out, ""]
-                )
-                output_worksheet.append(
-                    [
-                        "",
-                        field_names.pd250_default,
-                        field_names.pd500_default,
-                        field_names.hy_default,
-                        field_names.c1k_2l_2700_default,
-                        field_names.c1k_2l_3500_default,
-                        field_names.c1k_3l1_2700_default,
-                    ]
-                )
-                output_worksheet.append(
-                    [
-                        "",
-                        pd250_out,
-                        pd500_out,
-                        hy_out,
-                        cab1k_2l_2700hz_out,
-                        cab1k_2l_3500hz_out,
-                        cab1k_3l1_2700hz_out,
-                    ]
-                )
-                rows_used += 4
+            if entered_tables_section:
+                if all_defaults_same:
+                    # Output single Default cells section for additional table row.
+                    output_worksheet.append(
+                        [
+                            parameter_name_out,
+                            access_level_out,
+                            "",
+                            "",
+                            minimum_out,
+                            maximum_out,
+                            pd250_out,
+                        ]
+                    )
+                    rows_used += 1
+                else:
+                    # Output multiple Default cells sections for additional table row.
+                    output_worksheet.append(
+                        [
+                            parameter_name_out,
+                            pd250_out,
+                            pd500_out,
+                            hy_out,
+                            cab1k_2l_2700hz_out,
+                            cab1k_2l_3500hz_out,
+                            cab1k_3l1_2700hz_out,
+                        ]
+                    )
+                    rows_used += 1
 
-            # Merge cells for parameter name.
-            output_worksheet.merge_cells(
-                start_row=current_row,
-                start_column=1,
-                end_row=current_row + rows_used,
-                end_column=1,
-            )
-            # Set horizontal & vertical alignment for parameter name.
-            output_worksheet[
-                "A" + str(current_row)
-            ].alignment = openpyxl.styles.alignment.Alignment(
-                horizontal="left", vertical="top"
-            )
-            # Merge cells for description.
-            output_worksheet.merge_cells(
-                start_row=current_row, start_column=2, end_row=current_row, end_column=7
-            )
-            if enumerator_list:
-                # Merge cells for enumerator list cell.
+                # Set horizontal & vertical alignment for parameter name.
+                output_worksheet[
+                    "A" + str(current_row)
+                ].alignment = openpyxl.styles.alignment.Alignment(
+                    horizontal="left", vertical="top"
+                )
+
+                if all_defaults_same:
+                    # Merge access level is 3 columns; minimum, maximum, and default stay at 1 column.
+                    output_worksheet.merge_cells(
+                        start_row=current_row,
+                        start_column=2,
+                        end_row=current_row,
+                        end_column=4,
+                    )
+                else:
+                    # Merge each of access level, minimum, maximum, to 2 columns; no default column.
+                    # The product specific defaults each get their own column.
+                    output_worksheet.merge_cells(
+                        start_row=current_row,
+                        start_column=2,
+                        end_row=current_row,
+                        end_column=3,
+                    )
+                    output_worksheet.merge_cells(
+                        start_row=current_row,
+                        start_column=4,
+                        end_row=current_row,
+                        end_column=5,
+                    )
+                    output_worksheet.merge_cells(
+                        start_row=current_row,
+                        start_column=6,
+                        end_row=current_row,
+                        end_column=7,
+                    )
+
+            else:
+                # Check and set if this parameter is the start of table rows section.
+                entered_tables_section = TABLES_TREE_STR in parameter_path
+
+                # Add the parameter name and description cells.
+                output_worksheet.append([parameter_name_out, description_out])
+                rows_used += 1
+
+                if enumerator_list:
+                    # Add the enumerator list cell / row.
+                    output_worksheet.append(["", enumerator_list])
+                    rows_used += 1
+
+                if all_defaults_same:
+                    # Output single Default cells section.
+                    output_worksheet.append(
+                        [
+                            "",
+                            field_names.access_level,
+                            "",
+                            "",
+                            field_names.minimum,
+                            field_names.maximum,
+                            "Default",
+                        ]
+                    )
+                    output_worksheet.append(
+                        [
+                            "",
+                            access_level_out,
+                            "",
+                            "",
+                            minimum_out,
+                            maximum_out,
+                            pd250_out,
+                        ]
+                    )
+                    rows_used += 2
+                else:
+                    # Output multiple Default cells sections.
+                    output_worksheet.append(
+                        [
+                            "",
+                            field_names.access_level,
+                            "",
+                            field_names.minimum,
+                            "",
+                            field_names.maximum,
+                            "",
+                        ]
+                    )
+                    output_worksheet.append(
+                        ["", access_level_out, "", minimum_out, "", maximum_out, ""]
+                    )
+                    output_worksheet.append(
+                        [
+                            "",
+                            field_names.pd250_default,
+                            field_names.pd500_default,
+                            field_names.hy_default,
+                            field_names.c1k_2l_2700_default,
+                            field_names.c1k_2l_3500_default,
+                            field_names.c1k_3l1_2700_default,
+                        ]
+                    )
+                    output_worksheet.append(
+                        [
+                            "",
+                            pd250_out,
+                            pd500_out,
+                            hy_out,
+                            cab1k_2l_2700hz_out,
+                            cab1k_2l_3500hz_out,
+                            cab1k_3l1_2700hz_out,
+                        ]
+                    )
+                    rows_used += 4
+
+                # Merge cells for parameter name.
                 output_worksheet.merge_cells(
-                    start_row=current_row + 1,
+                    start_row=current_row,
+                    start_column=1,
+                    end_row=current_row + rows_used - 1,
+                    end_column=1,
+                )
+                # Set horizontal & vertical alignment for parameter name.
+                output_worksheet[
+                    "A" + str(current_row)
+                ].alignment = openpyxl.styles.alignment.Alignment(
+                    horizontal="left", vertical="top"
+                )
+                # Merge cells for description.
+                output_worksheet.merge_cells(
+                    start_row=current_row,
                     start_column=2,
-                    end_row=current_row + 1,
+                    end_row=current_row,
                     end_column=7,
                 )
+                if enumerator_list:
+                    # Merge cells for enumerator list cell.
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 1,
+                        start_column=2,
+                        end_row=current_row + 1,
+                        end_column=7,
+                    )
 
-            if all_defaults_same:
-                # Merge access level is 3 columns; minimum, maximum, and default stay at 1 column.
-                if enumerator_list:
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 2,
-                        start_column=2,
-                        end_row=current_row + 2,
-                        end_column=4,
-                    )
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 3,
-                        start_column=2,
-                        end_row=current_row + 3,
-                        end_column=4,
-                    )
+                if all_defaults_same:
+                    # Merge access level is 3 columns; minimum, maximum, and default stay at 1 column.
+                    if enumerator_list:
+                        output_worksheet.merge_cells(
+                            start_row=current_row + 2,
+                            start_column=2,
+                            end_row=current_row + 2,
+                            end_column=4,
+                        )
+                        output_worksheet.merge_cells(
+                            start_row=current_row + 3,
+                            start_column=2,
+                            end_row=current_row + 3,
+                            end_column=4,
+                        )
+                    else:
+                        output_worksheet.merge_cells(
+                            start_row=current_row + 1,
+                            start_column=2,
+                            end_row=current_row + 1,
+                            end_column=4,
+                        )
+                        output_worksheet.merge_cells(
+                            start_row=current_row + 2,
+                            start_column=2,
+                            end_row=current_row + 2,
+                            end_column=4,
+                        )
                 else:
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 1,
-                        start_column=2,
-                        end_row=current_row + 1,
-                        end_column=4,
-                    )
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 2,
-                        start_column=2,
-                        end_row=current_row + 2,
-                        end_column=4,
-                    )
-            else:
-                # Merge each of access level, minimum, maximum, to 2 columns; no default column.
-                # The product specific defaults each get their own column.
-                if enumerator_list:
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 2,
-                        start_column=2,
-                        end_row=current_row + 2,
-                        end_column=3,
-                    )
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 2,
-                        start_column=4,
-                        end_row=current_row + 2,
-                        end_column=5,
-                    )
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 2,
-                        start_column=6,
-                        end_row=current_row + 2,
-                        end_column=7,
-                    )
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 3,
-                        start_column=2,
-                        end_row=current_row + 3,
-                        end_column=3,
-                    )
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 3,
-                        start_column=4,
-                        end_row=current_row + 3,
-                        end_column=5,
-                    )
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 3,
-                        start_column=6,
-                        end_row=current_row + 3,
-                        end_column=7,
-                    )
-                else:
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 1,
-                        start_column=2,
-                        end_row=current_row + 1,
-                        end_column=3,
-                    )
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 1,
-                        start_column=4,
-                        end_row=current_row + 1,
-                        end_column=5,
-                    )
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 1,
-                        start_column=6,
-                        end_row=current_row + 1,
-                        end_column=7,
-                    )
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 2,
-                        start_column=2,
-                        end_row=current_row + 2,
-                        end_column=3,
-                    )
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 2,
-                        start_column=4,
-                        end_row=current_row + 2,
-                        end_column=5,
-                    )
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 2,
-                        start_column=6,
-                        end_row=current_row + 2,
-                        end_column=7,
-                    )
+                    # Merge each of access level, minimum, maximum, to 2 columns; no default column.
+                    # The product specific defaults each get their own column.
+                    if enumerator_list:
+                        output_worksheet.merge_cells(
+                            start_row=current_row + 2,
+                            start_column=2,
+                            end_row=current_row + 2,
+                            end_column=3,
+                        )
+                        output_worksheet.merge_cells(
+                            start_row=current_row + 2,
+                            start_column=4,
+                            end_row=current_row + 2,
+                            end_column=5,
+                        )
+                        output_worksheet.merge_cells(
+                            start_row=current_row + 2,
+                            start_column=6,
+                            end_row=current_row + 2,
+                            end_column=7,
+                        )
+                        output_worksheet.merge_cells(
+                            start_row=current_row + 3,
+                            start_column=2,
+                            end_row=current_row + 3,
+                            end_column=3,
+                        )
+                        output_worksheet.merge_cells(
+                            start_row=current_row + 3,
+                            start_column=4,
+                            end_row=current_row + 3,
+                            end_column=5,
+                        )
+                        output_worksheet.merge_cells(
+                            start_row=current_row + 3,
+                            start_column=6,
+                            end_row=current_row + 3,
+                            end_column=7,
+                        )
+                    else:
+                        output_worksheet.merge_cells(
+                            start_row=current_row + 1,
+                            start_column=2,
+                            end_row=current_row + 1,
+                            end_column=3,
+                        )
+                        output_worksheet.merge_cells(
+                            start_row=current_row + 1,
+                            start_column=4,
+                            end_row=current_row + 1,
+                            end_column=5,
+                        )
+                        output_worksheet.merge_cells(
+                            start_row=current_row + 1,
+                            start_column=6,
+                            end_row=current_row + 1,
+                            end_column=7,
+                        )
+                        output_worksheet.merge_cells(
+                            start_row=current_row + 2,
+                            start_column=2,
+                            end_row=current_row + 2,
+                            end_column=3,
+                        )
+                        output_worksheet.merge_cells(
+                            start_row=current_row + 2,
+                            start_column=4,
+                            end_row=current_row + 2,
+                            end_column=5,
+                        )
+                        output_worksheet.merge_cells(
+                            start_row=current_row + 2,
+                            start_column=6,
+                            end_row=current_row + 2,
+                            end_column=7,
+                        )
 
             # Update the current row with the number of rows used plus one to go to the next row.
-            current_row += rows_used + 1
+            current_row += rows_used
             progress_bar.update(1)
 
     output_workbook.save(output_path)
