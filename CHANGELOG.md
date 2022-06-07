@@ -9,10 +9,10 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### Added
 
-- SC-662: STLib to Private
 - SC-590: Added access level column to the SunSpec and static modbus spreadsheet output.
 - SC-572: Added changelog for release notes.
 
 CI
 
+- SC-662: Global PAT, STLib to Private
 - SC-401: Romp Removal / Poetry Implementation
