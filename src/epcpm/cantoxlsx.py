@@ -383,7 +383,6 @@ def format_for_manual(
     """
     input_workbook = openpyxl.load_workbook(filename=input_path)
     input_worksheet = input_workbook.active
-    input_worksheet_row_count = input_worksheet.max_row
     input_worksheet_col_count = input_worksheet.max_column
 
     output_path = input_path.with_name(
@@ -391,22 +390,31 @@ def format_for_manual(
     )
     print(f"input spreadsheet: {input_path}")
     print(f"output spreadsheet: {output_path}")
+    print("Be patient. Generation of the output spreadsheet takes a long time.")
 
     output_workbook = openpyxl.Workbook()
     output_workbook.remove(output_workbook.active)
     output_worksheet = output_workbook.create_sheet("Parameters")
 
+    filtered_rows = []
+    for row in input_worksheet.iter_rows(min_row=2, max_col=input_worksheet_col_count):
+        parameter_path = row[16].value
+        if not parameter_path.startswith(PARAMETERS_PREFIX):
+            # Only output parameters that are in EPyQ.
+            continue
+        access_level_out = row[3].value
+        if access_level_out in ["Service_Tech", "Service_Eng"]:
+            filtered_rows.append(row)
+
     # Track the current row in the output worksheet.
     current_row = 1
 
     # Display a progress bar since the generation of the output takes a long time.
-    print("Be patient. Generation of the output spreadsheet takes a long time.")
-    with tqdm(total=input_worksheet_row_count) as progress_bar:
+    with tqdm(total=len(filtered_rows)) as progress_bar:
         current_parameter_path = ""
         entered_tables_section = False
-        for row in input_worksheet.iter_rows(
-            min_row=2, max_col=input_worksheet_col_count
-        ):
+
+        for row in filtered_rows:
             parameter_path = row[16].value
             if not parameter_path.startswith(PARAMETERS_PREFIX):
                 # Only output parameters that are in EPyQ.
