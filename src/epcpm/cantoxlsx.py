@@ -21,6 +21,12 @@ PARAMETER_QUERY_PREFIX = "ParameterQuery -> "
 # The parameters prefix on a large portion of the parameter paths.
 PARAMETERS_PREFIX = "Parameters -> "
 TABLES_TREE_STR = "Tables -> Tree"
+CELL_SIDE = openpyxl.styles.Side(border_style="thin", color="000000")
+CELL_BORDER = openpyxl.styles.Border(
+    top=CELL_SIDE, left=CELL_SIDE, right=CELL_SIDE, bottom=CELL_SIDE
+)
+CELL_FONT = openpyxl.styles.Font(size=8)
+
 
 builders = epyqlib.utils.general.TypeMap()
 
@@ -470,6 +476,7 @@ def format_for_manual(
                 # Add the parameter path for this section of parameters.
                 current_parameter_path = parameter_path_to_check
                 output_worksheet.append([current_parameter_path])
+
                 # Merge cells for header description.
                 output_worksheet.merge_cells(
                     start_row=current_row,
@@ -477,6 +484,11 @@ def format_for_manual(
                     end_row=current_row,
                     end_column=7,
                 )
+
+                # Set the font size for header description.
+                for col in ["A", "B", "C", "D", "E", "F", "G"]:
+                    output_worksheet[col + str(current_row)].font = CELL_FONT
+
                 current_row += 1
                 # Reset the tables section logic.
                 entered_tables_section = False
@@ -636,12 +648,20 @@ def format_for_manual(
                     end_row=current_row + rows_used - 1,
                     end_column=1,
                 )
+
                 # Set horizontal & vertical alignment for parameter name.
                 output_worksheet[
                     "A" + str(current_row)
                 ].alignment = openpyxl.styles.alignment.Alignment(
                     horizontal="left", vertical="top"
                 )
+
+                # Set alignment of description to wrap text.
+                for col in ["B", "C", "D", "E", "F", "G"]:
+                    output_worksheet[
+                        col + str(current_row)
+                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
+
                 # Merge cells for description.
                 output_worksheet.merge_cells(
                     start_row=current_row,
@@ -649,6 +669,7 @@ def format_for_manual(
                     end_row=current_row,
                     end_column=7,
                 )
+
                 if enumerator_list:
                     # Merge cells for enumerator list cell.
                     output_worksheet.merge_cells(
@@ -763,6 +784,12 @@ def format_for_manual(
                             end_row=current_row + 2,
                             end_column=7,
                         )
+
+            # Set the font size and border for non header description rows.
+            for style_row in range(current_row, current_row + rows_used):
+                for col in ["A", "B", "C", "D", "E", "F", "G"]:
+                    output_worksheet[col + str(style_row)].font = CELL_FONT
+                    output_worksheet[col + str(style_row)].border = CELL_BORDER
 
             # Update the current row with the number of rows used plus one to go to the next row.
             current_row += rows_used
