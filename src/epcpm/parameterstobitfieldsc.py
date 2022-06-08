@@ -189,8 +189,12 @@ class Root:
                     )
                     members_info_c_lines.extend(builder.gen_members_interface())
                 else:
-                    common_c_lines.extend(DataPointBitfield.gen_default_common_interface())
-                    members_info_c_lines.extend(DataPointBitfield.gen_default_members_interface())
+                    common_c_lines.extend(
+                        DataPointBitfield.gen_default_common_interface()
+                    )
+                    members_info_c_lines.extend(
+                        DataPointBitfield.gen_default_members_interface()
+                    )
 
                 # Generate C lines for static modbus node
                 if "staticmodbus" in modbus_nodes:
@@ -204,8 +208,12 @@ class Root:
                     )
                     members_info_c_lines.extend(builder.gen_members_interface())
                 else:
-                    common_c_lines.extend(FunctionDataBitfield.gen_default_common_interface())
-                    members_info_c_lines.extend(FunctionDataBitfield.gen_default_members_interface())
+                    common_c_lines.extend(
+                        FunctionDataBitfield.gen_default_common_interface()
+                    )
+                    members_info_c_lines.extend(
+                        FunctionDataBitfield.gen_default_members_interface()
+                    )
 
                 c_lines.extend(members_interface_c_lines)
 
