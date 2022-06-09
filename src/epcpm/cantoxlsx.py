@@ -442,21 +442,21 @@ def format_for_manual(
             if units_out:
                 # If there is a units value, append it to the end of the numeric default value.
                 if minimum_out is not None:
-                    minimum_out = str(minimum_out) + units_out
+                    minimum_out = f"{minimum_out} {units_out}"
                 if maximum_out is not None:
-                    maximum_out = str(maximum_out) + units_out
+                    maximum_out = f"{maximum_out} {units_out}"
                 if pd250_out is not None:
-                    pd250_out = str(pd250_out) + units_out
+                    pd250_out = f"{pd250_out} {units_out}"
                 if pd500_out is not None:
-                    pd500_out = str(pd500_out) + units_out
+                    pd500_out = f"{pd500_out} {units_out}"
                 if hy_out is not None:
-                    hy_out = str(hy_out) + units_out
+                    hy_out = f"{hy_out} {units_out}"
                 if cab1k_2l_2700hz_out is not None:
-                    cab1k_2l_2700hz_out = str(cab1k_2l_2700hz_out) + units_out
+                    cab1k_2l_2700hz_out = f"{cab1k_2l_2700hz_out} {units_out}"
                 if cab1k_2l_3500hz_out is not None:
-                    cab1k_2l_3500hz_out = str(cab1k_2l_3500hz_out) + units_out
+                    cab1k_2l_3500hz_out = f"{cab1k_2l_3500hz_out} {units_out}"
                 if cab1k_3l1_2700hz_out is not None:
-                    cab1k_3l1_2700hz_out = str(cab1k_3l1_2700hz_out) + units_out
+                    cab1k_3l1_2700hz_out = f"{cab1k_3l1_2700hz_out} {units_out}"
 
             # Discover if all the product defaults are equal.
             all_defaults = [
