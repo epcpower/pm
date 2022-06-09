@@ -12,6 +12,10 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 - SC-590: Added access level column to the SunSpec and static modbus spreadsheet output.
 - SC-572: Added changelog for release notes.
 
-CI
+### Fixed
+
+- SC-654: Fix modbus bitfield interface generation.
+
+### CI
 
 - SC-401: Romp Removal / Poetry Implementation
