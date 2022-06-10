@@ -21,6 +21,13 @@ PARAMETER_QUERY_PREFIX = "ParameterQuery -> "
 # The parameters prefix on a large portion of the parameter paths.
 PARAMETERS_PREFIX = "Parameters -> "
 TABLES_TREE_STR = "Tables -> Tree"
+FILTER_GROUPS = [
+    "2. DC",
+    "9. Simulation Mode",
+    "A. ABB",
+    "B. Other -> Authorization",
+    "B. Other -> Debug",
+]
 CELL_SIDE = openpyxl.styles.Side(border_style="thin", color="000000")
 CELL_BORDER = openpyxl.styles.Border(
     top=CELL_SIDE, left=CELL_SIDE, right=CELL_SIDE, bottom=CELL_SIDE
@@ -402,12 +409,23 @@ def format_for_manual(
     output_workbook.remove(output_workbook.active)
     output_worksheet = output_workbook.create_sheet("Parameters")
 
+    # Perform all filtering activities.
     filtered_rows = []
     for row in input_worksheet.iter_rows(min_row=2, max_col=input_worksheet_col_count):
+        # Only output parameters that are in EPyQ.
         parameter_path = row[16].value
         if not parameter_path.startswith(PARAMETERS_PREFIX):
-            # Only output parameters that are in EPyQ.
             continue
+
+        # Filter out parameter groups in FILTER_GROUPS list.
+        filter_out = False
+        for group_parameter_filter in FILTER_GROUPS:
+            if parameter_path.startswith(PARAMETERS_PREFIX + group_parameter_filter):
+                filter_out = True
+        if filter_out:
+            continue
+
+        # Only allow access levels: Service_Tech and Service_Eng.
         access_level_out = row[3].value
         if access_level_out in ["Service_Tech", "Service_Eng"]:
             filtered_rows.append(row)
