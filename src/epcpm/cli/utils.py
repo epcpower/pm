@@ -17,3 +17,12 @@ def target_path_option(required):
         required=required,
         help="Path to the embedded project to operate on",
     )
+
+
+def pmvs_overlay_recipes_path_option(required):
+    return click.option(
+        "--pmvs-overlay-recipes-path",
+        type=click.Path(exists=True, file_okay=False, resolve_path=True),
+        required=required,
+        help="Path to the pmvs overlay recipes directory",
+    )
