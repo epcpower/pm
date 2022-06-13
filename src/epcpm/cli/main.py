@@ -35,7 +35,7 @@ def _import():
 @epcpm.cli.utils.project_option(required=True)
 @epcpm.cli.utils.target_path_option(required=True)
 def full(project, target_path):
-    """Import PM data from embedded project directory"""
+    """Import PM data from project directory"""
     project = pathlib.Path(project)
 
     paths = epcpm.importexportdialog.paths_from_directory(target_path)
@@ -75,7 +75,7 @@ def build(
     skip_sunspec,
     include_uuid_in_item,
 ):
-    """Export PM data to embedded project directory"""
+    """Export PM data to project directory"""
     project = pathlib.Path(project)
     target_path = pathlib.Path(target_path)
 
@@ -230,43 +230,43 @@ def transition(target_path):
 
     c_project = target_path / ".cproject"
 
-    library_path = target_path / "embedded-library"
+    core_path = target_path / "core"
 
-    original_spreadsheet = library_path / "MODBUS_SunSpec-EPC.xls"
+    original_spreadsheet = target_path / "interface" / "sunspec" / "MODBUS_SunSpec-EPC.xls"
     new_spreadsheet = original_spreadsheet.with_suffix(".xlsx")
 
-    tables_py = library_path / "python" / "embeddedlibrary" / "tables.py"
-    sunspecparser_py = library_path / "python" / "embeddedlibrary" / "sunspecparser.py"
+    tables_py = target_path / "python" / "rmdc" / "tables.py"
+    sunspecparser_py = target_path / "python" / "rmdc" / "sunspecparser.py"
 
-    subprocess.run(["git", "reset", "."], check=True, cwd=library_path)
-    subprocess.run(["git", "checkout", "--", "."], check=True, cwd=library_path)
-    subprocess.run(["git", "clean", "-fdx"], check=True, cwd=library_path)
+    subprocess.run(["git", "reset", "."], check=True, cwd=core_path)
+    subprocess.run(["git", "checkout", "--", "."], check=True, cwd=core_path)
+    subprocess.run(["git", "clean", "-fdx"], check=True, cwd=core_path)
     subprocess.run(
         [
             "libreoffice",
             "--convert-to",
             "xlsx",
             "--outdir",
-            os.fspath(library_path),
+            os.fspath(core_path),
             os.fspath(original_spreadsheet),
         ],
         check=True,
-        cwd=library_path,
+        cwd=core_path,
     )
     subprocess.run(
         ["git", "rm", os.fspath(tables_py)],
         check=True,
-        cwd=library_path,
+        cwd=core_path,
     )
     subprocess.run(
         ["git", "rm", os.fspath(original_spreadsheet)],
         check=True,
-        cwd=library_path,
+        cwd=core_path,
     )
     subprocess.run(
         ["git", "add", os.fspath(new_spreadsheet)],
         check=True,
-        cwd=library_path,
+        cwd=core_path,
     )
 
     subprocess.run(["git", "reset", "."], check=True, cwd=target_path)
@@ -284,7 +284,7 @@ def transition(target_path):
     subprocess.run(
         [target_path / "venv" / "bin" / "sunspecparser", os.fspath(new_spreadsheet)],
         check=True,
-        cwd=library_path,  # it expects to be in _some_ subdirectory and then ..
+        cwd=core_path,  # it expects to be in _some_ subdirectory and then ..
     )
     subprocess.run(
         ["sed", "-i", r"s/\.xls/\.xlsx/g", os.fspath(c_project)],
@@ -311,7 +311,7 @@ def transition(target_path):
     subprocess.run(
         ["git", "add", os.fspath(sunspecparser_py)],
         check=True,
-        cwd=library_path,
+        cwd=core_path,
     )
 
     paths = epcpm.importexportdialog.paths_from_directory(target_path)

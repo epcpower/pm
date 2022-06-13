@@ -83,23 +83,23 @@ class ImportPaths:
 
 
 def paths_from_directory(directory):
-    path = pathlib.Path(directory)
-    interface = path / "interface"
-    embedded = path / "embedded-library"
-    sunspec = embedded / "system" / "sunspec"
+    project_path = pathlib.Path(directory)
+    interface_path = project_path / "interface"
+    sunspec_path = interface_path / "sunspec"
+    devices_path = interface_path / "devices"
 
     return ImportPaths(
-        can=interface / "EPC_DG_ID247_FACTORY.sym",
-        hierarchy=interface / "EPC_DG_ID247_FACTORY.parameters.json",
-        tables_c=interface / "canInterfaceGenTables.c",
-        sunspec_tables_c=sunspec / "sunspecInterfaceGenTables.c",
-        sunspec_bitfields_c=sunspec / "sunspecInterfaceBitfieldsGen.c",
-        spreadsheet=embedded / "MODBUS_SunSpec-EPC.xlsx",
-        spreadsheet_user=embedded / "EPCSunspec.xlsx",
-        smdx=sorted(sunspec.glob("smdx_*.xml")),
-        sunspec_c=sunspec,
-        sil_c=path / "sil" / "libEpcControlInterfaceGen.c",
-        interface_c=interface / "interfaceGen.c",
+        can=devices_path / "EPC_ID247.sym",
+        hierarchy=devices_path / "EPC_ID247.hierarchy.json",
+        tables_c=interface_path / "canInterfaceGenTables.c",
+        sunspec_tables_c=sunspec_path / "sunspecInterfaceGenTables.c",
+        sunspec_bitfields_c=sunspec_path / "sunspecInterfaceBitfieldsGen.c",
+        spreadsheet=sunspec_path / "MODBUS_SunSpec-EPC.xlsx",
+        spreadsheet_user=sunspec_path / "EPCSunspec.xlsx",
+        smdx=sorted(sunspec_path.glob("smdx_*.xml")),
+        sunspec_c=sunspec_path,
+        sil_c=project_path / "sil" / "libEpcControlInterfaceGen.c",
+        interface_c=interface_path / "interfaceGen.c",
     )
 
 
