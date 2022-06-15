@@ -6,7 +6,6 @@ import re
 import uuid
 
 import attr
-import jinja2
 import toolz
 
 import epyqlib.pm.parametermodel
@@ -68,6 +67,7 @@ class InvalidAccessLevelError(Exception):
 def export(
     c_path,
     h_path,
+    c_path_rejected_callback,
     parameters_model,
     can_model,
     sunspec_model,
@@ -92,7 +92,7 @@ def export(
 
     c_path.parent.mkdir(parents=True, exist_ok=True)
 
-    built_c, built_h, model_ids = builder.gen()
+    built_c, built_h, model_ids, rejected_callback_dict = builder.gen()
 
     template_context = {
         "sunspec_interface_gen_headers": (
@@ -115,6 +115,28 @@ def export(
         source=h_path.with_suffix(f"{h_path.suffix}_pm"),
         destination=h_path,
         context=template_context,
+    )
+
+    # Render the rejected callback handler .c file.
+    uuid_list = []
+    intf_func_list = []
+    for uuid_rejected_callback in rejected_callback_dict:
+        uuid_text = epcpm.pm_helper.convert_uuid_to_variable_name(
+            uuid_rejected_callback
+        )
+        uuid_list.append(uuid_text)
+        intf_func_list.append(rejected_callback_dict[uuid_rejected_callback])
+
+    rejected_callback_context = {
+        "num_rejected_callbacks": (len(rejected_callback_dict)),
+        "uuid_list": uuid_list,
+        "intf_func_list": intf_func_list,
+    }
+
+    epcpm.c.render(
+        source=c_path_rejected_callback.with_suffix(f"{c_path.suffix}_pm"),
+        destination=c_path_rejected_callback,
+        context=rejected_callback_context,
     )
 
 
@@ -210,6 +232,7 @@ class Root:
         c = []
         h = []
         sunspec_models = set()
+        rejected_callback_dict = dict()
 
         for child in self.wrapped.children:
             if not isinstance(
@@ -223,7 +246,12 @@ class Root:
             ):
                 continue
 
-            c_built, h_built, sunspec_models_built = builders.wrap(
+            (
+                c_built,
+                h_built,
+                sunspec_models_built,
+                rejected_callback_built,
+            ) = builders.wrap(
                 wrapped=child,
                 can_root=self.can_root,
                 sunspec_root=self.sunspec_root,
@@ -240,8 +268,9 @@ class Root:
             c.extend(c_built)
             h.extend(h_built)
             sunspec_models |= sunspec_models_built
+            rejected_callback_dict.update(rejected_callback_built)
 
-        return c, h, sunspec_models
+        return c, h, sunspec_models, rejected_callback_dict
 
         # return itertools.chain.from_iterable(
         #     builders.wrap(
@@ -283,6 +312,7 @@ class Group:
         c = []
         h = []
         sunspec_models = set()
+        rejected_callback_dict = {}
 
         for child in self.wrapped.children:
             if not isinstance(
@@ -296,7 +326,12 @@ class Group:
             ):
                 continue
 
-            c_built, h_built, sunspec_models_built = builders.wrap(
+            (
+                c_built,
+                h_built,
+                sunspec_models_built,
+                rejected_callback_built,
+            ) = builders.wrap(
                 wrapped=child,
                 can_root=self.can_root,
                 sunspec_root=self.sunspec_root,
@@ -313,8 +348,9 @@ class Group:
             c.extend(c_built)
             h.extend(h_built)
             sunspec_models |= sunspec_models_built
+            rejected_callback_dict.update(rejected_callback_built)
 
-        return c, h, sunspec_models
+        return c, h, sunspec_models, rejected_callback_dict
         # return itertools.chain.from_iterable(
         #     result
         #     for result in (
@@ -436,7 +472,7 @@ class Parameter:
         sunspec_models = set()
 
         if not uses_interface_item or all(x is None for x in interface_data):
-            return [[], [], sunspec_models]
+            return [[], [], sunspec_models, {}]
 
         scale_factor_variable = "NULL"
         scale_factor_updater = "NULL"
@@ -591,10 +627,10 @@ class Parameter:
             parameter_uuid_finder=self.parameter_uuid_finder,
         )
 
-        if parameter.rejected_callback is None:
-            rejected_callback = "NULL"
+        if parameter.rejected_callback:
+            rejected_callback_dict = {parameter.uuid: parameter.rejected_callback}
         else:
-            rejected_callback = f"&{parameter.rejected_callback}"
+            rejected_callback_dict = {}
 
         result = create_item(
             item_uuid=parameter.uuid,
@@ -617,12 +653,11 @@ class Parameter:
             staticmodbus_getter=staticmodbus_getter,
             staticmodbus_setter=staticmodbus_setter,
             variable_or_getter_setter=variable_or_getter_setter,
-            rejected_callback=rejected_callback,
             can_scale_factor=getattr(can_signal, "factor", None),
             reject_from_inactive_interfaces=parameter.reject_from_inactive_interfaces,
         )
 
-        return [*result, sunspec_models]
+        return [*result, sunspec_models, rejected_callback_dict]
 
 
 @attr.s(frozen=True)
@@ -1419,6 +1454,7 @@ class Table:
                 *item_code[1],
             ],
             set(),
+            {},
         ]
 
 
@@ -1543,7 +1579,6 @@ def create_item(
     staticmodbus_getter,
     staticmodbus_setter,
     variable_or_getter_setter,
-    rejected_callback,
     can_scale_factor,
     reject_from_inactive_interfaces,
 ):
@@ -1590,7 +1625,6 @@ def create_item(
             common_initializers,
             "},",
             *variable_or_getter_setter,
-            f".rejectedCallback = {rejected_callback},",
             *meta_initializer,
         ],
         "};",

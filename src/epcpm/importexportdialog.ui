@@ -261,6 +261,26 @@
     </widget>
    </item>
    <item row="12" column="0">
+    <widget class="QLabel" name="rejected_callback_c_label">
+     <property name="text">
+      <string>Rejected Callback C:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="1">
+    <widget class="QLineEdit" name="rejected_callback_c"/>
+   </item>
+   <item row="12" column="2">
+    <widget class="QPushButton" name="pick_rejected_callback_c">
+     <property name="text">
+      <string>...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="0">
     <widget class="QLabel" name="smdx_label">
      <property name="text">
       <string>SunSpec SMDX:</string>
@@ -270,28 +290,28 @@
      </property>
     </widget>
    </item>
-   <item row="12" column="1" rowspan="2">
+   <item row="13" column="1" rowspan="2">
     <widget class="QListWidget" name="smdx_list">
      <property name="selectionMode">
       <enum>QAbstractItemView::ExtendedSelection</enum>
      </property>
     </widget>
    </item>
-   <item row="12" column="2">
+   <item row="13" column="2">
     <widget class="QPushButton" name="pick_smdx">
      <property name="text">
       <string>...</string>
      </property>
     </widget>
    </item>
-   <item row="13" column="2">
+   <item row="14" column="2">
     <widget class="QPushButton" name="remove_smdx">
      <property name="text">
       <string>Remove</string>
      </property>
     </widget>
    </item>
-   <item row="14" column="0" colspan="2">
+   <item row="15" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="from_directory">

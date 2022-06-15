@@ -134,6 +134,7 @@ def full_export(
     epcpm.parameterstointerface.export(
         c_path=paths.interface_c,
         h_path=paths.interface_c.with_suffix(".h"),
+        c_path_rejected_callback=paths.rejected_callback_c,
         can_model=project.models.can,
         sunspec_model=project.models.sunspec,
         staticmodbus_model=project.models.staticmodbus,
