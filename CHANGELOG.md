@@ -9,12 +9,17 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### Added
 
+- SC-629: Added CAN parameter excel manual output.
 - SC-590: Added access level column to the SunSpec and static modbus spreadsheet output.
 - SC-572: Added changelog for release notes.
 
 ### Removed
 
 - SC-623: Removed rejected callback field from c interface structures.
+
+### Fixed
+
+- SC-654: Fix modbus bitfield interface generation.
 
 CI
 
