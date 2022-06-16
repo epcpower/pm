@@ -21,6 +21,6 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 - SC-654: Fix modbus bitfield interface generation.
 
-CI
+### CI
 
 - SC-401: Romp Removal / Poetry Implementation
