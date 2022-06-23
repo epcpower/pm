@@ -56,6 +56,10 @@ def import_dialog():
     dialog.ui.interface_c.hide()
     dialog.ui.pick_interface_c.hide()
 
+    dialog.ui.rejected_callback_c_label.hide()
+    dialog.ui.rejected_callback_c.hide()
+    dialog.ui.pick_rejected_callback_c.hide()
+
     return dialog
 
 
@@ -86,6 +90,7 @@ class ImportPaths:
     sunspec_c = attr.ib(converter=path_or_none)
     sil_c = attr.ib(converter=path_or_none)
     interface_c = attr.ib(converter=path_or_none)
+    rejected_callback_c = attr.ib(converter=path_or_none)
     # No UI handling for spreadsheet_can since it is not part of normal import/export
     spreadsheet_can = attr.ib(converter=path_or_none)
 
@@ -110,6 +115,7 @@ def paths_from_directory(directory):
         sunspec_c=sunspec,
         sil_c=path / "sil" / "libEpcControlInterfaceGen.c",
         interface_c=interface / "interfaceGen.c",
+        rejected_callback_c=interface / "rejectedCallbackHandler.c",
         spreadsheet_can=embedded / "EPC-CAN.xlsx",
     )
 
@@ -146,6 +152,7 @@ class Dialog(QtWidgets.QDialog):
         self.ui.pick_sunspec_c.clicked.connect(self.pick_sunspec_c)
         self.ui.pick_sil_c.clicked.connect(self.pick_sil_c)
         self.ui.pick_interface_c.clicked.connect(self.pick_interface_c)
+        self.ui.pick_rejected_callback_c.clicked.connect(self.pick_rejected_callback_c)
         self.ui.pick_smdx.clicked.connect(self.pick_smdx)
         self.ui.remove_smdx.clicked.connect(self.remove_smdx)
         self.ui.from_directory.clicked.connect(self.from_directory)
@@ -170,6 +177,7 @@ class Dialog(QtWidgets.QDialog):
             sunspec_c=self.ui.sunspec_c.text(),
             sil_c=self.ui.sil_c.text(),
             interface_c=self.ui.interface_c.text(),
+            rejected_callback_c=self.ui.rejected_callback_c.text(),
             spreadsheet_can=None,
         )
         super().accept()
@@ -197,6 +205,7 @@ class Dialog(QtWidgets.QDialog):
         self.ui.sunspec_c.setText(os.fspath(paths.sunspec_c))
         self.ui.sil_c.setText(os.fspath(paths.sil_c))
         self.ui.interface_c.setText(os.fspath(paths.interface_c))
+        self.ui.rejected_callback_c.setText(os.fspath(paths.rejected_callback_c))
 
         self.clear_smdx_list()
         if not self.for_save:
@@ -347,6 +356,18 @@ class Dialog(QtWidgets.QDialog):
 
         self.file_dialog(
             target=self.ui.sunspec_tables_c,
+            filters=filters,
+            multiple=False,
+        )
+
+    def pick_rejected_callback_c(self):
+        filters = (
+            ("Rejected Callback C", ["c"]),
+            all_files_filter,
+        )
+
+        self.file_dialog(
+            target=self.ui.rejected_callback_c,
             filters=filters,
             multiple=False,
         )

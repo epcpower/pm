@@ -24,6 +24,7 @@ def test_blank(qtbot):
         sunspec_c=None,
         sil_c=None,
         interface_c=None,
+        rejected_callback_c=None,
         spreadsheet_can=None,
     )
 
