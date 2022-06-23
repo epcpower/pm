@@ -17,6 +17,10 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 - SC-683: Changed rejected callback handling to use automatically generated interface
 
+### Removed
+
+- SC-623: Removed rejected callback field from c interface structures.
+
 ### Fixed
 
 - SC-654: Fix modbus bitfield interface generation.
