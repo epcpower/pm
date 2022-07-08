@@ -104,7 +104,7 @@ def paths_from_directory(directory):
 
     return ImportPaths(
         can                      = devices_path / "EPC_ID247.sym",
-        hierarchy                = devices_path / "EPC_ID247.parameters.json",
+        hierarchy                = devices_path / "EPC_ID247.hierarchy.json",
         tables_c                 = can_path / "canInterfaceGenTables.c",
         bitfields_c              = interface_path / "interfaceBitfieldsGen.c",
         staticmodbus_c           = sunspec_path / "staticmodbusInterfaceGen.c",
