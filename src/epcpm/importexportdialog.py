@@ -96,27 +96,28 @@ class ImportPaths:
 
 
 def paths_from_directory(directory):
-    path = pathlib.Path(directory)
-    interface = path / "interface"
-    embedded = path / "embedded-library"
-    sunspec = embedded / "system" / "sunspec"
+    project_path   = pathlib.Path(directory)
+    interface_path = project_path / "interface"
+    can_path       = interface_path / "can"
+    sunspec_path   = interface_path / "sunspec"
+    devices_path   = interface_path / "devices"
 
     return ImportPaths(
-        can=interface / "EPC_DG_ID247_FACTORY.sym",
-        hierarchy=interface / "EPC_DG_ID247_FACTORY.parameters.json",
-        tables_c=interface / "canInterfaceGenTables.c",
-        bitfields_c=interface / "interfaceBitfieldsGen.c",
-        staticmodbus_c=interface / "staticmodbusInterfaceGen.c",
-        sunspec_tables_c=sunspec / "sunspecInterfaceGenTables.c",
-        spreadsheet=embedded / "MODBUS_SunSpec-EPC.xlsx",
-        spreadsheet_user=embedded / "EPCSunspec.xlsx",
-        staticmodbus_spreadsheet=embedded / "MODBUS-EPC.xlsx",
-        smdx=sorted(sunspec.glob("smdx_*.xml")),
-        sunspec_c=sunspec,
-        sil_c=path / "sil" / "libEpcControlInterfaceGen.c",
-        interface_c=interface / "interfaceGen.c",
-        rejected_callback_c=interface / "rejectedCallbackHandler.c",
-        spreadsheet_can=embedded / "EPC-CAN.xlsx",
+        can                      = devices_path / "EPC_ID247.sym",
+        hierarchy                = devices_path / "EPC_ID247.parameters.json",
+        tables_c                 = can_path / "canInterfaceGenTables.c",
+        bitfields_c              = interface_path / "interfaceBitfieldsGen.c",
+        staticmodbus_c           = sunspec_path / "staticmodbusInterfaceGen.c",
+        sunspec_tables_c         = sunspec_path / "sunspecInterfaceGenTables.c",
+        spreadsheet              = sunspec_path / "MODBUS_SunSpec-EPC.xlsx",
+        spreadsheet_user         = sunspec_path / "EPCSunspec.xlsx",
+        staticmodbus_spreadsheet = sunspec_path / "MODBUS-EPC.xlsx",
+        smdx                     = sorted(sunspec_path.glob("smdx_*.xml")),
+        sunspec_c                = sunspec_path,
+        sil_c                    = project_path / "sil" / "libEpcControlInterfaceGen.c",
+        interface_c              = interface_path / "interfaceGen.c",
+        rejected_callback_c      = interface_path / "rejectedCallbackHandler.c",
+        spreadsheet_can          = can_path / "EPC-CAN.xlsx",
     )
 
 
