@@ -23,6 +23,7 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### Fixed
 
+- SC-726: Fixed python dependency atomicwrites 1.4.0 -> 1.4.1
 - SC-654: Fix modbus bitfield interface generation.
 
 ### CI
