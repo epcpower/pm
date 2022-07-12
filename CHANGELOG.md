@@ -28,4 +28,5 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### CI
 
+- SC-662: Add ability to clone private repos using poetry
 - SC-401: Romp Removal / Poetry Implementation
