@@ -223,13 +223,10 @@ class Root:
                 for node in staticmodbus_nodes_with_parameter_uuid
             }
 
-        lengths_equal = len(can_nodes_with_parameter_uuid) == len(
-            parameter_uuid_to_can_node
-        )
-        if not lengths_equal:
+        if len(can_nodes_with_parameter_uuid) != len(parameter_uuid_to_can_node):
             uuids = [u.parameter_uuid for u in can_nodes_with_parameter_uuid]
             print("\n".join(set(str(u) for u in uuids if uuids.count(u) > 1)))
-            raise Exception()
+            raise Exception(f"Lengths not equal: {len(can_nodes_with_parameter_uuid)} vs {len(parameter_uuid_to_can_node)}")
 
         c = []
         h = []
