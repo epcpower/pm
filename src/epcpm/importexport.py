@@ -248,6 +248,11 @@ def run_generation_scripts(base_path):
     sunspec_path   = interface_path / "sunspec"
     devices_path   = interface_path / "devices"
 
+    if os.name == 'nt':
+        subprocessArgs = {"check": True, "shell": True}
+    else:
+        subprocessArgs = {"check": True}
+
     subprocess.run(
         [
             os.fspath(scripts_path / "generatestripcollect"),
@@ -256,7 +261,7 @@ def run_generation_scripts(base_path):
             "--devices-directory", os.fspath(devices_path),
             "--can-directory", os.fspath(can_path)
         ],
-        check=True,
+        **subprocessArgs
     )
 
     subprocess.run(
@@ -264,9 +269,8 @@ def run_generation_scripts(base_path):
             os.fspath(scripts_path / "sunspecparser"),
             os.fspath(sunspec_path / "MODBUS_SunSpec-EPC.xlsx"),
         ],
-        check=True,
+        **subprocessArgs
     )
-
 
 def modification_time_or(path, alternative):
     try:
