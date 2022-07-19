@@ -192,9 +192,9 @@ class FunctionData:
                 self.wrapped.address, self.wrapped.address + self.wrapped.size
             ):
                 if is_table_item:
-                    c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_TABLE, .interface = {uuid_interface_val}),"
+                    c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_TABLE, .interface = (InterfaceItem_void *){uuid_interface_val}),"
                 else:
-                    c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_NORMAL, .interface = {uuid_interface_val}),"
+                    c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_NORMAL, .interface = (InterfaceItem_void *){uuid_interface_val}),"
                 c_lines.append(c_line)
         else:
             # Generate one or more ("size") lines with default NULL interface.
@@ -232,7 +232,7 @@ class FunctionDataBitfield:
             self.wrapped.address, self.wrapped.address + self.wrapped.size
         ):
             if not self.skip_output:
-                c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_BITFIELD, .interface = {uuid_interface_val}),"
+                c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_BITFIELD, .interface = (InterfaceItem_void *){uuid_interface_val}),"
             else:
                 c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(),"
             c_lines.append(c_line)
