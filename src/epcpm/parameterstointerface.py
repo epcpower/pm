@@ -45,6 +45,7 @@ staticmodbus_types = {
     "string": "PackedString",
     "bitfield16": "sunsU16",
     "bitfield32": "sunsU32",
+    "staticmodbussf": "sunsS16"
 }
 
 
