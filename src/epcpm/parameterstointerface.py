@@ -419,8 +419,8 @@ class FunctionData:
     parameter_uuid_finder = attr.ib()
 
     def interface_variable_name(self):
-        # TODO: Remove when staticmodbus.common.variable is eliminated in the future.
-        return "NULL"
+        parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+        return f"&{parameter.internal_variable}"
 
 
 @builders(epcpm.staticmodbusmodel.FunctionDataBitfieldMember)
@@ -611,6 +611,17 @@ class Parameter:
             staticmodbus_setter = "_".join(
                 str(x) for x in getter_setter_list + ["setter"]
             )
+
+            if getattr(staticmodbus_point, "factor_uuid", False):
+                factor_point = self.staticmodbus_root.model.node_from_uuid(
+                    staticmodbus_point.factor_uuid,
+                )
+
+                staticmodbus_factor_builder = builders.wrap(
+                    wrapped=factor_point,
+                    parameter_uuid_finder=self.parameter_uuid_finder,
+                )
+                scale_factor_variable = staticmodbus_factor_builder.interface_variable_name()
 
         interface_item_type = (
             f"InterfaceItem_{var_or_func}_{types[parameter.internal_type].name}"
