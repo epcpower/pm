@@ -45,7 +45,7 @@ staticmodbus_types = {
     "string": "PackedString",
     "bitfield16": "sunsU16",
     "bitfield32": "sunsU32",
-    "staticmodbussf": "sunsS16"
+    "staticmodbussf": "sunsS16",
 }
 
 
@@ -227,7 +227,9 @@ class Root:
         if len(can_nodes_with_parameter_uuid) != len(parameter_uuid_to_can_node):
             uuids = [u.parameter_uuid for u in can_nodes_with_parameter_uuid]
             print("\n".join(set(str(u) for u in uuids if uuids.count(u) > 1)))
-            raise Exception(f"Lengths not equal: {len(can_nodes_with_parameter_uuid)} vs {len(parameter_uuid_to_can_node)}")
+            raise Exception(
+                f"Lengths not equal: {len(can_nodes_with_parameter_uuid)} vs {len(parameter_uuid_to_can_node)}"
+            )
 
         c = []
         h = []
@@ -621,7 +623,9 @@ class Parameter:
                     wrapped=factor_point,
                     parameter_uuid_finder=self.parameter_uuid_finder,
                 )
-                scale_factor_variable = staticmodbus_factor_builder.interface_variable_name()
+                scale_factor_variable = (
+                    staticmodbus_factor_builder.interface_variable_name()
+                )
 
         interface_item_type = (
             f"InterfaceItem_{var_or_func}_{types[parameter.internal_type].name}"
@@ -887,11 +891,8 @@ def can_getter_setter_variable(can_signal, parameter, var_or_func_or_table):
             f"{can_signal.tree_parent.name}"
             f".{can_signal.name}"
         )
-    elif can_signal.tree_parent.tree_parent.name == 'CAN':
-        can_variable = (
-            f"&{can_signal.tree_parent.name}"
-            f".{can_signal.name}"
-        )
+    elif can_signal.tree_parent.tree_parent.name == "CAN":
+        can_variable = f"&{can_signal.tree_parent.name}" f".{can_signal.name}"
     else:
         can_variable = (
             f"&{can_signal.tree_parent.tree_parent.name}"
