@@ -56,7 +56,6 @@ jobs:
       - name: python commands
         run: |
           set -vx
-          poetry run black --check --diff .
           poetry run builduipm
           poetry run builduiepyqlib
           poetry run poetry-dynamic-versioning
