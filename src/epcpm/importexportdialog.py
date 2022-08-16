@@ -82,8 +82,11 @@ class ImportPaths:
     tables_c = attr.ib(converter=path_or_none)
     bitfields_c = attr.ib(converter=path_or_none)
     staticmodbus_c = attr.ib(converter=path_or_none)
+    # TODO: rename sunspec_tables_c to sunspec1_tables_c
     sunspec_tables_c = attr.ib(converter=path_or_none)
-    spreadsheet = attr.ib(converter=path_or_none)
+    sunspec2_tables_c = attr.ib(converter=path_or_none)
+    sunspec1_spreadsheet = attr.ib(converter=path_or_none)
+    sunspec2_spreadsheet = attr.ib(converter=path_or_none)
     spreadsheet_user = attr.ib(converter=path_or_none)
     staticmodbus_spreadsheet = attr.ib(converter=path_or_none)
     smdx = attr.ib(converter=paths_or_none)
@@ -107,8 +110,10 @@ def paths_from_directory(directory):
         tables_c=interface / "canInterfaceGenTables.c",
         bitfields_c=interface / "interfaceBitfieldsGen.c",
         staticmodbus_c=interface / "staticmodbusInterfaceGen.c",
-        sunspec_tables_c=sunspec / "sunspecInterfaceGenTables.c",
-        spreadsheet=embedded / "MODBUS_SunSpec-EPC.xlsx",
+        sunspec_tables_c=sunspec / "sunspec1InterfaceGenTables.c",
+        sunspec2_tables_c=sunspec / "sunspec2InterfaceGenTables.c",
+        sunspec1_spreadsheet=embedded / "MODBUS_SunSpec-EPC.xlsx",
+        sunspec2_spreadsheet=embedded / "MODBUS_SunSpec2-EPC.xlsx",
         spreadsheet_user=embedded / "EPCSunspec.xlsx",
         staticmodbus_spreadsheet=embedded / "MODBUS-EPC.xlsx",
         smdx=sorted(sunspec.glob("smdx_*.xml")),
@@ -197,7 +202,7 @@ class Dialog(QtWidgets.QDialog):
         self.ui.bitfields_c.setText(os.fspath(paths.bitfields_c))
         self.ui.staticmodbus_c.setText(os.fspath(paths.staticmodbus_c))
         self.ui.sunspec_tables_c.setText(os.fspath(paths.sunspec_tables_c))
-        self.ui.spreadsheet.setText(os.fspath(paths.spreadsheet))
+        self.ui.spreadsheet.setText(os.fspath(paths.sunspec1_spreadsheet))
         self.ui.spreadsheet_user.setText(os.fspath(paths.spreadsheet_user))
         self.ui.staticmodbus_spreadsheet.setText(
             os.fspath(paths.staticmodbus_spreadsheet)

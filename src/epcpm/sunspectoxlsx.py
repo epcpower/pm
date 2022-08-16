@@ -101,7 +101,12 @@ enumerator_fields = Fields(
 
 
 def export(
-    path, sunspec_model, parameters_model, column_filter=None, skip_sunspec=False
+    path,
+    sunspec_model,
+    sunspec_id,
+    parameters_model,
+    column_filter=None,
+    skip_sunspec=False,
 ):
     if column_filter is None:
         column_filter = epcpm.pm_helper.attr_fill(Fields, True)
@@ -110,6 +115,7 @@ def export(
         wrapped=sunspec_model.root,
         parameter_uuid_finder=sunspec_model.node_from_uuid,
         parameter_model=parameters_model,
+        sunspec_id=sunspec_id,
         skip_sunspec=skip_sunspec,
         column_filter=column_filter,
     )
@@ -128,6 +134,7 @@ class Root:
     skip_sunspec = attr.ib(default=False)
     parameter_uuid_finder = attr.ib(default=None)
     parameter_model = attr.ib(default=None)
+    sunspec_id = attr.ib(default=None)
     sort_models = attr.ib(default=False)
 
     def gen(self):
@@ -165,6 +172,7 @@ class Root:
                         "sunspec types"
                     ].child_by_name("pad"),
                     parameter_uuid_finder=self.parameter_uuid_finder,
+                    sunspec_id=self.sunspec_id,
                     column_filter=self.column_filter,
                     model_offset=model_offset,
                 ).gen()
@@ -181,6 +189,7 @@ class Model:
     column_filter = attr.ib()
     model_offset = attr.ib()  # starting Modbus address for the model
     parameter_uuid_finder = attr.ib(default=None)
+    sunspec_id = attr.ib(default=None)
 
     def gen(self):
         self.worksheet.title = str(self.wrapped.id)
@@ -212,6 +221,7 @@ class Model:
                 model_id=self.wrapped.id,
                 model_offset=self.model_offset,
                 parameter_uuid_finder=self.parameter_uuid_finder,
+                sunspec_id=self.sunspec_id,
                 address_offset=accumulated_length,
             )
 
@@ -362,6 +372,7 @@ class Block:
     address_offset = attr.ib()
     repeating_block_reference = attr.ib(default=None)
     parameter_uuid_finder = attr.ib(default=None)
+    sunspec_id = attr.ib(default=None)
     is_table = attr.ib(default=False)
 
     def gen(self):
@@ -404,6 +415,7 @@ class Block:
                 is_table=self.is_table,
                 repeating_block_reference=self.repeating_block_reference,
                 address_offset=self.address_offset + summed_increments,
+                sunspec_id=self.sunspec_id,
             )
             built_rows, address_offset_increment = builder.gen()
             summed_increments += address_offset_increment
@@ -424,6 +436,7 @@ class DataPointBitfield:
     is_table = attr.ib()
     repeating_block_reference = attr.ib()
     address_offset = attr.ib()
+    sunspec_id = attr.ib(default=None)
 
     def gen(self):
         row = Fields()
@@ -470,7 +483,7 @@ class DataPointBitfield:
 
             getter.extend(
                 [
-                    f"{item_name}.common.sunspec.getter(",
+                    f"{item_name}.common.sunspec{self.sunspec_id}.getter(",
                     [
                         f"(InterfaceItem_void *) &{item_name},",
                         f"Meta_Value",
@@ -480,7 +493,7 @@ class DataPointBitfield:
             )
             setter.extend(
                 [
-                    f"{item_name}.common.sunspec.setter(",
+                    f"{item_name}.common.sunspec{self.sunspec_id}.setter(",
                     [
                         f"(InterfaceItem_void *) &{item_name},",
                         f"true,",
@@ -646,6 +659,7 @@ class TableRepeatingBlockReference:
     model_offset = attr.ib()
     address_offset = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
+    sunspec_id = attr.ib(default=None)
 
     def gen(self):
         builder = builders.wrap(
@@ -659,6 +673,7 @@ class TableRepeatingBlockReference:
             is_table=True,
             repeating_block_reference=self.wrapped,
             address_offset=self.address_offset,
+            sunspec_id=self.sunspec_id,
         )
 
         return builder.gen()
@@ -676,6 +691,7 @@ class Point:
     address_offset = attr.ib()
     repeating_block_reference = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
+    sunspec_id = attr.ib(default=None)
 
     # TODO: CAMPid 07397546759269756456100183066795496952476951653
     def gen(self):
@@ -764,21 +780,21 @@ class Point:
 
             hand_coded_getter_function_name = getter_name(
                 parameter=parameter,
+                sunspec_id=self.sunspec_id,
                 model_id=self.model_id,
                 is_table=self.is_table,
             )
 
             hand_coded_setter_function_name = setter_name(
                 parameter=parameter,
+                sunspec_id=self.sunspec_id,
                 model_id=self.model_id,
                 is_table=self.is_table,
             )
 
             if not uses_interface_item and not self.wrapped.not_implemented:
                 if row.scale_factor is not None:
-                    scale_factor_updater_name = (
-                        f"getSUNSPEC_MODEL{self.model_id}_{row.scale_factor}"
-                    )
+                    scale_factor_updater_name = f"getSUNSPEC{self.sunspec_id}_MODEL{self.model_id}_{row.scale_factor}"
 
                     f = f"{scale_factor_updater_name}();"
                     get_scale_factor = f.format(
@@ -790,7 +806,9 @@ class Point:
 
                 getter.append(f"{hand_coded_getter_function_name}();")
 
-            sunspec_model_variable = f"sunspecInterface.model{self.model_id}"
+            sunspec_model_variable = (
+                f"sunspec{self.sunspec_id}Interface.model{self.model_id}"
+            )
 
             sunspec_variable = f"{sunspec_model_variable}.{parameter.abbreviation}"
 
@@ -925,7 +943,7 @@ class Point:
 
                 getter.extend(
                     [
-                        f"{item_name}.common.sunspec.getter(",
+                        f"{item_name}.common.sunspec{self.sunspec_id}.getter(",
                         [
                             f"(InterfaceItem_void *) &{item_name},",
                             f"Meta_Value",
@@ -935,7 +953,7 @@ class Point:
                 )
                 setter.extend(
                     [
-                        f"{item_name}.common.sunspec.setter(",
+                        f"{item_name}.common.sunspec{self.sunspec_id}.setter(",
                         [
                             f"(InterfaceItem_void *) &{item_name},",
                             f"true,",
@@ -1011,35 +1029,40 @@ def adjust_assignment(
     return result
 
 
-def getter_setter_name(get_set, parameter, model_id, is_table):
+def getter_setter_name(get_set, parameter, sunspec_id, model_id, is_table):
     if is_table:
         table_option = "_{table_option}"
     else:
         table_option = ""
 
-    format_string = "{get_set}SunspecModel{model_id}{table_option}_{abbreviation}"
+    format_string = (
+        "{get_set}Sunspec{sunspec_id}Model{model_id}{table_option}_{abbreviation}"
+    )
 
     return format_string.format(
         get_set=get_set,
+        sunspec_id=sunspec_id,
         model_id=model_id,
         abbreviation=parameter.abbreviation,
         table_option=table_option,
     )
 
 
-def getter_name(parameter, model_id, is_table):
+def getter_name(parameter, sunspec_id, model_id, is_table):
     return getter_setter_name(
         get_set="get",
         parameter=parameter,
+        sunspec_id=sunspec_id,
         model_id=model_id,
         is_table=is_table,
     )
 
 
-def setter_name(parameter, model_id, is_table):
+def setter_name(parameter, sunspec_id, model_id, is_table):
     return getter_setter_name(
         get_set="set",
         parameter=parameter,
+        sunspec_id=sunspec_id,
         model_id=model_id,
         is_table=is_table,
     )

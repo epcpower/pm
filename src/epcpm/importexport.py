@@ -87,7 +87,7 @@ def full_import(paths):
         for point in block.children
     )
 
-    get_set = epcpm.smdxtosunspec.import_get_set(paths.spreadsheet)
+    get_set = epcpm.smdxtosunspec.import_get_set(paths.sunspec1_spreadsheet)
 
     for model, block, point in points:
         parameter = project.models.sunspec.node_from_uuid(
@@ -136,16 +136,18 @@ def full_export(
         h_path=paths.interface_c.with_suffix(".h"),
         c_path_rejected_callback=paths.rejected_callback_c,
         can_model=project.models.can,
-        sunspec_model=project.models.sunspec,
+        sunspec1_model=project.models.sunspec1,
+        sunspec2_model=project.models.sunspec2,
         staticmodbus_model=project.models.staticmodbus,
         parameters_model=project.models.parameters,
         skip_output=skip_output,
         include_uuid_in_item=include_uuid_in_item,
     )
 
+    # TODO: Either add second sunspectocsv for sunspec2 model or change sunspectocsv to handle two models.
     epcpm.sunspectocsv.export(
-        path=paths.spreadsheet,
-        sunspec_model=project.models.sunspec,
+        path=paths.sunspec1_spreadsheet,
+        sunspec_model=project.models.sunspec1,
         parameters_model=project.models.parameters,
         skip_output=skip_output,
         column_filter=attr.evolve(
@@ -172,15 +174,26 @@ def full_export(
     )
 
     epcpm.sunspectoxlsx.export(
-        path=paths.spreadsheet,
-        sunspec_model=project.models.sunspec,
+        path=paths.sunspec1_spreadsheet,
+        sunspec_model=project.models.sunspec1,
+        sunspec_id=1,
         parameters_model=project.models.parameters,
         skip_sunspec=skip_output,
     )
 
     epcpm.sunspectoxlsx.export(
+        path=paths.sunspec2_spreadsheet,
+        sunspec_model=project.models.sunspec2,
+        sunspec_id=2,
+        parameters_model=project.models.parameters,
+        skip_sunspec=skip_output,
+    )
+
+    # TODO: Add sunspec2 model output if necessary (probably is needed).
+    epcpm.sunspectoxlsx.export(
         path=paths.spreadsheet_user,
-        sunspec_model=project.models.sunspec,
+        sunspec_model=project.models.sunspec1,
+        sunspec_id=1,
         parameters_model=project.models.parameters,
         skip_sunspec=skip_output,
         column_filter=attr.evolve(
@@ -201,7 +214,16 @@ def full_export(
     epcpm.sunspectotablesc.export(
         c_path=paths.sunspec_tables_c,
         h_path=paths.sunspec_tables_c.with_suffix(".h"),
-        sunspec_model=project.models.sunspec,
+        sunspec_model=project.models.sunspec1,
+        sunspec_id=1,
+        skip_sunspec=skip_output,
+    )
+
+    epcpm.sunspectotablesc.export(
+        c_path=paths.sunspec2_tables_c,
+        h_path=paths.sunspec2_tables_c.with_suffix(".h"),
+        sunspec_model=project.models.sunspec2,
+        sunspec_id=2,
         skip_sunspec=skip_output,
     )
 
@@ -223,7 +245,8 @@ def full_export(
         h_path=paths.bitfields_c.with_suffix(".h"),
         parameters_model=project.models.parameters,
         staticmodbus_model=project.models.staticmodbus,
-        sunspec_model=project.models.sunspec,
+        sunspec1_model=project.models.sunspec1,
+        sunspec2_model=project.models.sunspec2,
         skip_output=skip_output,
     )
 
@@ -263,11 +286,23 @@ def run_generation_scripts(base_path):
         check=True,
     )
 
+    # TODO: change filename of MODBUS_SunSpec-EPC.xlsx to MODBUS_SunSpec1-EPC.xlsx
     emb_lib = base_path / "embedded-library"
     subprocess.run(
         [
             os.fspath(scripts / "sunspecparser"),
             os.fspath(emb_lib / "MODBUS_SunSpec-EPC.xlsx"),
+            "1",
+        ],
+        check=True,
+    )
+
+    emb_lib = base_path / "embedded-library"
+    subprocess.run(
+        [
+            os.fspath(scripts / "sunspecparser"),
+            os.fspath(emb_lib / "MODBUS_SunSpec2-EPC.xlsx"),
+            "2",
         ],
         check=True,
     )
@@ -322,7 +357,7 @@ def is_stale(project, paths, skip_sunspec=False):
         paths.can,
         paths.hierarchy,
         *paths.smdx,
-        paths.spreadsheet,
+        paths.sunspec1_spreadsheet,
         paths.spreadsheet_user,
         *smdx,
         *sunspec_c_h,

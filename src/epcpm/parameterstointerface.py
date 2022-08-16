@@ -72,35 +72,47 @@ def export(
     c_path_rejected_callback,
     parameters_model,
     can_model,
-    sunspec_model,
+    sunspec1_model,
+    sunspec2_model,
     staticmodbus_model,
     skip_output=False,
     include_uuid_in_item=False,
 ):
     if skip_output:
-        sunspec_root = None
+        sunspec1_root = None
+        sunspec2_root = None
         staticmodbus_root = None
     else:
-        sunspec_root = sunspec_model.root
+        sunspec1_root = sunspec1_model.root
+        sunspec2_root = sunspec2_model.root
         staticmodbus_root = staticmodbus_model.root
 
     builder = builders.wrap(
         wrapped=parameters_model.root,
         can_root=can_model.root,
-        sunspec_root=sunspec_root,
+        sunspec1_root=sunspec1_root,
+        sunspec2_root=sunspec2_root,
         staticmodbus_root=staticmodbus_root,
         include_uuid_in_item=include_uuid_in_item,
     )
 
     c_path.parent.mkdir(parents=True, exist_ok=True)
 
-    built_c, built_h, model_ids, rejected_callback_dict = builder.gen()
+    built_c, built_h, model1_ids, model2_ids, rejected_callback_dict = builder.gen()
 
     template_context = {
-        "sunspec_interface_gen_headers": (
-            f"sunspecInterfaceGen{id}.h" for id in model_ids
+        "sunspec1_interface_gen_headers": (
+            f"sunspec1InterfaceGen{id}.h" for id in model1_ids
         ),
-        "sunspec_interface_headers": (f"sunspecInterface{id:05}.h" for id in model_ids),
+        "sunspec2_interface_gen_headers": (
+            f"sunspec2InterfaceGen{id}.h" for id in model2_ids
+        ),
+        "sunspec1_interface_headers": (
+            f"sunspec1Interface{id:05}.h" for id in model1_ids
+        ),
+        "sunspec2_interface_headers": (
+            f"sunspec2Interface{id:05}.h" for id in model2_ids
+        ),
         "interface_items": epcpm.c.format_nested_lists(
             built_c,
         ).strip(),
@@ -147,7 +159,8 @@ def export(
 class Root:
     wrapped = attr.ib()
     can_root = attr.ib()
-    sunspec_root = attr.ib()
+    sunspec1_root = attr.ib()
+    sunspec2_root = attr.ib()
     staticmodbus_root = attr.ib()
     include_uuid_in_item = attr.ib()
 
@@ -185,14 +198,25 @@ class Root:
 
             return True
 
-        if self.sunspec_root is None:
-            parameter_uuid_to_sunspec_node = {}
+        if self.sunspec1_root is None:
+            parameter_uuid_to_sunspec1_node = {}
         else:
-            sunspec_nodes_with_parameter_uuid = self.sunspec_root.nodes_by_filter(
+            sunspec_nodes_with_parameter_uuid = self.sunspec1_root.nodes_by_filter(
                 filter=sunspec_node_wanted,
             )
 
-            parameter_uuid_to_sunspec_node = {
+            parameter_uuid_to_sunspec1_node = {
+                node.parameter_uuid: node for node in sunspec_nodes_with_parameter_uuid
+            }
+
+        if self.sunspec2_root is None:
+            parameter_uuid_to_sunspec2_node = {}
+        else:
+            sunspec_nodes_with_parameter_uuid = self.sunspec2_root.nodes_by_filter(
+                filter=sunspec_node_wanted,
+            )
+
+            parameter_uuid_to_sunspec2_node = {
                 node.parameter_uuid: node for node in sunspec_nodes_with_parameter_uuid
             }
 
@@ -233,7 +257,8 @@ class Root:
 
         c = []
         h = []
-        sunspec_models = set()
+        sunspec1_models = set()
+        sunspec2_models = set()
         rejected_callback_dict = dict()
 
         for child in self.wrapped.children:
@@ -251,16 +276,19 @@ class Root:
             (
                 c_built,
                 h_built,
-                sunspec_models_built,
+                sunspec1_models_built,
+                sunspec2_models_built,
                 rejected_callback_built,
             ) = builders.wrap(
                 wrapped=child,
                 can_root=self.can_root,
-                sunspec_root=self.sunspec_root,
+                sunspec1_root=self.sunspec1_root,
+                sunspec2_root=self.sunspec2_root,
                 staticmodbus_root=self.staticmodbus_root,
                 include_uuid_in_item=self.include_uuid_in_item,
                 parameter_uuid_to_can_node=parameter_uuid_to_can_node,
-                parameter_uuid_to_sunspec_node=(parameter_uuid_to_sunspec_node),
+                parameter_uuid_to_sunspec1_node=(parameter_uuid_to_sunspec1_node),
+                parameter_uuid_to_sunspec2_node=(parameter_uuid_to_sunspec2_node),
                 parameter_uuid_to_staticmodbus_node=(
                     parameter_uuid_to_staticmodbus_node
                 ),
@@ -269,10 +297,11 @@ class Root:
 
             c.extend(c_built)
             h.extend(h_built)
-            sunspec_models |= sunspec_models_built
+            sunspec1_models |= sunspec1_models_built
+            sunspec2_models |= sunspec2_models_built
             rejected_callback_dict.update(rejected_callback_built)
 
-        return c, h, sunspec_models, rejected_callback_dict
+        return c, h, sunspec1_models, sunspec2_models, rejected_callback_dict
 
         # return itertools.chain.from_iterable(
         #     builders.wrap(
@@ -302,18 +331,21 @@ class Root:
 class Group:
     wrapped = attr.ib()
     can_root = attr.ib()
-    sunspec_root = attr.ib()
+    sunspec1_root = attr.ib()
+    sunspec2_root = attr.ib()
     staticmodbus_root = attr.ib()
     include_uuid_in_item = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
-    parameter_uuid_to_sunspec_node = attr.ib()
+    parameter_uuid_to_sunspec1_node = attr.ib()
+    parameter_uuid_to_sunspec2_node = attr.ib()
     parameter_uuid_to_staticmodbus_node = attr.ib()
     parameter_uuid_finder = attr.ib()
 
     def gen(self):
         c = []
         h = []
-        sunspec_models = set()
+        sunspec1_models = set()
+        sunspec2_models = set()
         rejected_callback_dict = {}
 
         for child in self.wrapped.children:
@@ -331,16 +363,19 @@ class Group:
             (
                 c_built,
                 h_built,
-                sunspec_models_built,
+                sunspec1_models_built,
+                sunspec2_models_built,
                 rejected_callback_built,
             ) = builders.wrap(
                 wrapped=child,
                 can_root=self.can_root,
-                sunspec_root=self.sunspec_root,
+                sunspec1_root=self.sunspec1_root,
+                sunspec2_root=self.sunspec2_root,
                 staticmodbus_root=self.staticmodbus_root,
                 include_uuid_in_item=self.include_uuid_in_item,
                 parameter_uuid_to_can_node=(self.parameter_uuid_to_can_node),
-                parameter_uuid_to_sunspec_node=(self.parameter_uuid_to_sunspec_node),
+                parameter_uuid_to_sunspec1_node=(self.parameter_uuid_to_sunspec1_node),
+                parameter_uuid_to_sunspec2_node=(self.parameter_uuid_to_sunspec2_node),
                 parameter_uuid_to_staticmodbus_node=(
                     self.parameter_uuid_to_staticmodbus_node
                 ),
@@ -349,10 +384,12 @@ class Group:
 
             c.extend(c_built)
             h.extend(h_built)
-            sunspec_models |= sunspec_models_built
+            sunspec1_models |= sunspec1_models_built
+            sunspec2_models |= sunspec2_models_built
             rejected_callback_dict.update(rejected_callback_built)
 
-        return c, h, sunspec_models, rejected_callback_dict
+        return c, h, sunspec1_models, sunspec2_models, rejected_callback_dict
+
         # return itertools.chain.from_iterable(
         #     result
         #     for result in (
@@ -386,6 +423,7 @@ class Group:
 class DataPoint:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
+    sunspec_id = attr.ib()
 
     def interface_variable_name(self):
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
@@ -396,7 +434,7 @@ class DataPoint:
             maybe_model = maybe_model.tree_parent
 
         model = maybe_model
-        model_variable = f"sunspecInterface.model{model.id}"
+        model_variable = f"sunspec{self.sunspec_id}Interface.model{model.id}"
 
         return f"&{model_variable}.{parameter.abbreviation}"
 
@@ -406,6 +444,7 @@ class DataPoint:
 class DataPointBitfieldMember:
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
+    sunspec_id = attr.ib()
 
     def interface_variable_name(self):
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
@@ -443,18 +482,21 @@ class FunctionDataBitfieldMember:
 class Parameter:
     wrapped = attr.ib()
     can_root = attr.ib()
-    sunspec_root = attr.ib()
+    sunspec1_root = attr.ib()
+    sunspec2_root = attr.ib()
     staticmodbus_root = attr.ib()
     include_uuid_in_item = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
-    parameter_uuid_to_sunspec_node = attr.ib()
+    parameter_uuid_to_sunspec1_node = attr.ib()
+    parameter_uuid_to_sunspec2_node = attr.ib()
     parameter_uuid_to_staticmodbus_node = attr.ib()
     parameter_uuid_finder = attr.ib()
 
     def gen(self):
         parameter = self.wrapped
         can_signal = self.parameter_uuid_to_can_node.get(parameter.uuid)
-        sunspec_point = self.parameter_uuid_to_sunspec_node.get(parameter.uuid)
+        sunspec1_point = self.parameter_uuid_to_sunspec1_node.get(parameter.uuid)
+        sunspec2_point = self.parameter_uuid_to_sunspec2_node.get(parameter.uuid)
         # TODO: might want to rename staticmodbus_point to ... ???
         staticmodbus_point = self.parameter_uuid_to_staticmodbus_node.get(
             parameter.uuid
@@ -462,7 +504,8 @@ class Parameter:
 
         interface_data = [
             can_signal,
-            sunspec_point,
+            sunspec1_point,
+            sunspec2_point,
             staticmodbus_point,
         ]
 
@@ -471,10 +514,11 @@ class Parameter:
             and parameter.uses_interface_item()
         )
 
-        sunspec_models = set()
+        sunspec1_models = set()
+        sunspec2_models = set()
 
         if not uses_interface_item or all(x is None for x in interface_data):
-            return [[], [], sunspec_models, {}]
+            return [[], [], sunspec1_models, sunspec2_models, {}]
 
         scale_factor_variable = "NULL"
         scale_factor_updater = "NULL"
@@ -504,91 +548,34 @@ class Parameter:
 
         variable_or_getter_setter.append(f".setter = {setter_function},")
 
-        if sunspec_point is None:
-            sunspec_variable = "NULL"
-            sunspec_getter = "NULL"
-            sunspec_setter = "NULL"
-            hand_coded_sunspec_getter_function = "NULL"
-            hand_coded_sunspec_setter_function = "NULL"
-        else:
-            maybe_model = sunspec_point.tree_parent
-
-            while not isinstance(maybe_model, epcpm.sunspecmodel.Model):
-                maybe_model = maybe_model.tree_parent
-
-            model = maybe_model
-
-            sunspec_models.add(model.id)
-
-            # TODO: move this somewhere common in python code...
-            sunspec_type = sunspec_types[
-                self.parameter_uuid_finder(sunspec_point.type_uuid).name
-            ]
-
-            # TODO: handle tables with repeating blocks and references
-
-            hand_coded_getter_function_name = epcpm.sunspectoxlsx.getter_name(
-                parameter=parameter,
-                model_id=model.id,
-                is_table=False,
-            )
-
-            hand_coded_setter_function_name = epcpm.sunspectoxlsx.setter_name(
-                parameter=parameter,
-                model_id=model.id,
-                is_table=False,
-            )
-
-            if getattr(sunspec_point, "hand_coded_getter", False):
-                hand_coded_sunspec_getter_function = (
-                    f"&{hand_coded_getter_function_name}"
-                )
-            else:
-                hand_coded_sunspec_getter_function = "NULL"
-
-            if getattr(sunspec_point, "hand_coded_setter", False):
-                hand_coded_sunspec_setter_function = (
-                    f"&{hand_coded_setter_function_name}"
-                )
-            else:
-                hand_coded_sunspec_setter_function = "NULL"
-
-            # TODO: CAMPid 67549654267913467967436
-            if getattr(sunspec_point, "factor_uuid", False):
-                factor_point = self.sunspec_root.model.node_from_uuid(
-                    sunspec_point.factor_uuid,
-                )
-                sunspec_scale_factor = self.parameter_uuid_finder(
-                    factor_point.parameter_uuid,
-                ).abbreviation
-
-                sunspec_factor_builder = builders.wrap(
-                    wrapped=factor_point,
-                    parameter_uuid_finder=self.parameter_uuid_finder,
-                )
-                scale_factor_variable = sunspec_factor_builder.interface_variable_name()
-                scale_factor_updater_name = (
-                    f"getSUNSPEC_MODEL{model.id}_{sunspec_scale_factor}"
-                )
-                scale_factor_updater = f"&{scale_factor_updater_name}"
-
-            sunspec_point_builder = builders.wrap(
-                wrapped=sunspec_point,
-                parameter_uuid_finder=self.parameter_uuid_finder,
-            )
-            sunspec_variable = sunspec_point_builder.interface_variable_name()
-
-            # TODO: CAMPid 9675436715674367943196954756419543975314
-            getter_setter_list = [
-                "InterfaceItem",
-                var_or_func,
-                types[parameter.internal_type].name,
-                "sunspec",
-                sunspec_type,
-            ]
-
-            sunspec_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
-            sunspec_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
+        (
+            sunspec1_variable,
+            sunspec1_getter,
+            sunspec1_setter,
+            hand_coded_sunspec1_getter_function,
+            hand_coded_sunspec1_setter_function,
+        ) = self._local_sunspec_parameter_gen(
+            1,
+            parameter,
+            sunspec1_point,
+            self.sunspec1_root,
+            sunspec1_models,
+            var_or_func,
+        )
+        (
+            sunspec2_variable,
+            sunspec2_getter,
+            sunspec2_setter,
+            hand_coded_sunspec2_getter_function,
+            hand_coded_sunspec2_setter_function,
+        ) = self._local_sunspec_parameter_gen(
+            2,
+            parameter,
+            sunspec2_point,
+            self.sunspec2_root,
+            sunspec2_models,
+            var_or_func,
+        )
 
         if staticmodbus_point is None:
             staticmodbus_getter = "NULL"
@@ -641,17 +628,22 @@ class Parameter:
             can_getter=can_getter,
             can_setter=can_setter,
             can_variable=can_variable,
-            hand_coded_sunspec_getter_function=hand_coded_sunspec_getter_function,
-            hand_coded_sunspec_setter_function=hand_coded_sunspec_setter_function,
+            hand_coded_sunspec1_getter_function=hand_coded_sunspec1_getter_function,
+            hand_coded_sunspec1_setter_function=hand_coded_sunspec1_setter_function,
+            hand_coded_sunspec2_getter_function=hand_coded_sunspec2_getter_function,
+            hand_coded_sunspec2_setter_function=hand_coded_sunspec2_setter_function,
             interface_item_type=interface_item_type,
             internal_scale=parameter.internal_scale_factor,
             meta_initializer_values=create_meta_initializer_values(parameter),
             parameter=parameter,
             scale_factor_updater=scale_factor_updater,
             scale_factor_variable=scale_factor_variable,
-            sunspec_getter=sunspec_getter,
-            sunspec_setter=sunspec_setter,
-            sunspec_variable=sunspec_variable,
+            sunspec1_getter=sunspec1_getter,
+            sunspec1_setter=sunspec1_setter,
+            sunspec1_variable=sunspec1_variable,
+            sunspec2_getter=sunspec2_getter,
+            sunspec2_setter=sunspec2_setter,
+            sunspec2_variable=sunspec2_variable,
             staticmodbus_getter=staticmodbus_getter,
             staticmodbus_setter=staticmodbus_setter,
             variable_or_getter_setter=variable_or_getter_setter,
@@ -659,7 +651,114 @@ class Parameter:
             reject_from_inactive_interfaces=parameter.reject_from_inactive_interfaces,
         )
 
-        return [*result, sunspec_models, rejected_callback_dict]
+        return [*result, sunspec1_models, sunspec2_models, rejected_callback_dict]
+
+    def _local_sunspec_parameter_gen(
+        self,
+        sunspec_id,
+        parameter,
+        sunspec_point,
+        sunspec_root,
+        sunspec_models,
+        var_or_func,
+    ):
+        if sunspec_point is None:
+            sunspec_variable = "NULL"
+            sunspec_getter = "NULL"
+            sunspec_setter = "NULL"
+            hand_coded_sunspec_getter_function = "NULL"
+            hand_coded_sunspec_setter_function = "NULL"
+        else:
+            maybe_model = sunspec_point.tree_parent
+
+            while not isinstance(maybe_model, epcpm.sunspecmodel.Model):
+                maybe_model = maybe_model.tree_parent
+
+            model = maybe_model
+
+            sunspec_models.add(model.id)
+
+            # TODO: move this somewhere common in python code...
+            sunspec_type = sunspec_types[
+                self.parameter_uuid_finder(sunspec_point.type_uuid).name
+            ]
+
+            # TODO: handle tables with repeating blocks and references
+
+            hand_coded_getter_function_name = epcpm.sunspectoxlsx.getter_name(
+                parameter=parameter,
+                sunspec_id=sunspec_id,
+                model_id=model.id,
+                is_table=False,
+            )
+
+            hand_coded_setter_function_name = epcpm.sunspectoxlsx.setter_name(
+                parameter=parameter,
+                sunspec_id=sunspec_id,
+                model_id=model.id,
+                is_table=False,
+            )
+
+            if getattr(sunspec_point, "hand_coded_getter", False):
+                hand_coded_sunspec_getter_function = (
+                    f"&{hand_coded_getter_function_name}"
+                )
+            else:
+                hand_coded_sunspec_getter_function = "NULL"
+
+            if getattr(sunspec_point, "hand_coded_setter", False):
+                hand_coded_sunspec_setter_function = (
+                    f"&{hand_coded_setter_function_name}"
+                )
+            else:
+                hand_coded_sunspec_setter_function = "NULL"
+
+            # TODO: CAMPid 67549654267913467967436
+            if getattr(sunspec_point, "factor_uuid", False):
+                factor_point = sunspec_root.model.node_from_uuid(
+                    sunspec_point.factor_uuid,
+                )
+                sunspec_scale_factor = self.parameter_uuid_finder(
+                    factor_point.parameter_uuid,
+                ).abbreviation
+
+                sunspec_factor_builder = builders.wrap(
+                    wrapped=factor_point,
+                    parameter_uuid_finder=self.parameter_uuid_finder,
+                    sunspec_id=sunspec_id,
+                )
+                scale_factor_variable = sunspec_factor_builder.interface_variable_name()
+                scale_factor_updater_name = (
+                    f"getSUNSPEC{sunspec_id}_MODEL{model.id}_{sunspec_scale_factor}"
+                )
+                scale_factor_updater = f"&{scale_factor_updater_name}"
+
+            sunspec_point_builder = builders.wrap(
+                wrapped=sunspec_point,
+                parameter_uuid_finder=self.parameter_uuid_finder,
+                sunspec_id=sunspec_id,
+            )
+            sunspec_variable = sunspec_point_builder.interface_variable_name()
+
+            # TODO: CAMPid 9675436715674367943196954756419543975314
+            getter_setter_list = [
+                "InterfaceItem",
+                var_or_func,
+                types[parameter.internal_type].name,
+                f"sunspec{sunspec_id}",
+                sunspec_type,
+            ]
+
+            sunspec_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
+            sunspec_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
+
+        return [
+            sunspec_variable,
+            sunspec_getter,
+            sunspec_setter,
+            hand_coded_sunspec_getter_function,
+            hand_coded_sunspec_setter_function,
+        ]
 
 
 @attr.s(frozen=True)
@@ -972,7 +1071,8 @@ class NestedArrays:
 class TableBaseStructures:
     array_nests = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
-    parameter_uuid_to_sunspec_node = attr.ib()
+    parameter_uuid_to_sunspec1_node = attr.ib()
+    parameter_uuid_to_sunspec2_node = attr.ib()
     parameter_uuid_to_staticmodbus_node = attr.ib()
     parameter_uuid_finder = attr.ib()
     include_uuid_in_item = attr.ib()
@@ -1070,7 +1170,9 @@ class TableBaseStructures:
 
         return name
 
-    def create_item(self, table_element, layers, sunspec_point, staticmodbus_point):
+    def create_item(
+        self, table_element, layers, sunspec1_point, sunspec2_point, staticmodbus_point
+    ):
         # TODO: CAMPid 9655426754319431461354643167
         array_element = table_element.original
 
@@ -1114,18 +1216,21 @@ class TableBaseStructures:
             can_factor = can_signal.factor
 
         # TODO: CAMPid 954679654745154274579654265294624765247569765479
-        sunspec_getter = "NULL"
-        sunspec_setter = "NULL"
-        sunspec_variable = None
+        sunspec1_getter = "NULL"
+        sunspec1_setter = "NULL"
+        sunspec1_variable = None
+        sunspec2_getter = "NULL"
+        sunspec2_setter = "NULL"
+        sunspec2_variable = None
         scale_factor_variable = "NULL"
         scale_factor_updater = "NULL"
         sunspec_model_variable = "NULL"
         staticmodbus_getter = "NULL"
         staticmodbus_setter = "NULL"
 
-        if sunspec_point is not None:
+        if sunspec1_point is not None:
             sunspec_type = sunspec_types[
-                self.parameter_uuid_finder(sunspec_point.type_uuid).name
+                self.parameter_uuid_finder(sunspec1_point.type_uuid).name
             ]
 
             # TODO: CAMPid 9675436715674367943196954756419543975314
@@ -1133,28 +1238,28 @@ class TableBaseStructures:
                 "InterfaceItem",
                 "table",
                 types[parameter.internal_type].name,
-                "sunspec",
+                "sunspec1",
                 sunspec_type,
             ]
 
             node_in_model = get_sunspec_point_from_table_element(
-                sunspec_point=sunspec_point,
+                sunspec_point=sunspec1_point,
                 table_element=table_element,
             )
 
             if node_in_model is not None:
                 model_id = node_in_model.tree_parent.tree_parent.id
-                sunspec_model_variable = f"sunspecInterface.model{model_id}"
+                sunspec_model_variable = f"sunspec1Interface.model{model_id}"
                 abbreviation = table_element.abbreviation
-                sunspec_variable = (
+                sunspec1_variable = (
                     f"{sunspec_model_variable}"
                     f".Curve_{curve_index:>02}_{abbreviation}"
                 )
 
-                sunspec_getter = "_".join(
+                sunspec1_getter = "_".join(
                     str(x) for x in getter_setter_list + ["getter"]
                 )
-                sunspec_setter = "_".join(
+                sunspec1_setter = "_".join(
                     str(x) for x in getter_setter_list + ["setter"]
                 )
 
@@ -1179,10 +1284,47 @@ class TableBaseStructures:
                 scale_factor_variable = (
                     f"&{sunspec_model_variable}.{sunspec_scale_factor}"
                 )
+                # TODO: Possibly need two scaleFactorUpdater (one for each sunspec?) !!!!!!!!
                 scale_factor_updater_name = (
-                    f"getSUNSPEC_MODEL{model_id}_{sunspec_scale_factor}"
+                    f"getSUNSPEC1_MODEL{model_id}_{sunspec_scale_factor}"
                 )
                 scale_factor_updater = f"&{scale_factor_updater_name}"
+
+        # TODO: possible refactor with above?
+        if sunspec2_point is not None:
+            sunspec_type = sunspec_types[
+                self.parameter_uuid_finder(sunspec2_point.type_uuid).name
+            ]
+
+            # TODO: CAMPid 9675436715674367943196954756419543975314
+            getter_setter_list = [
+                "InterfaceItem",
+                "table",
+                types[parameter.internal_type].name,
+                "sunspec2",
+                sunspec_type,
+            ]
+
+            node_in_model = get_sunspec_point_from_table_element(
+                sunspec_point=sunspec2_point,
+                table_element=table_element,
+            )
+
+            if node_in_model is not None:
+                model_id = node_in_model.tree_parent.tree_parent.id
+                sunspec_model_variable = f"sunspec2Interface.model{model_id}"
+                abbreviation = table_element.abbreviation
+                sunspec2_variable = (
+                    f"{sunspec_model_variable}"
+                    f".Curve_{curve_index:>02}_{abbreviation}"
+                )
+
+                sunspec2_getter = "_".join(
+                    str(x) for x in getter_setter_list + ["getter"]
+                )
+                sunspec2_setter = "_".join(
+                    str(x) for x in getter_setter_list + ["setter"]
+                )
 
         if not staticmodbus_point is None:
             staticmodbus_type = staticmodbus_types[
@@ -1211,15 +1353,21 @@ class TableBaseStructures:
             can_setter=can_setter,
             # not to be used so really hardcode NULL
             can_variable="NULL",
-            hand_coded_sunspec_getter_function="NULL",
-            hand_coded_sunspec_setter_function="NULL",
+            hand_coded_sunspec1_getter_function="NULL",
+            hand_coded_sunspec1_setter_function="NULL",
+            hand_coded_sunspec2_getter_function="NULL",
+            hand_coded_sunspec2_setter_function="NULL",
             internal_scale=parameter.internal_scale_factor,
             scale_factor_updater=scale_factor_updater,
             scale_factor_variable=scale_factor_variable,
-            sunspec_getter=sunspec_getter,
-            sunspec_setter=sunspec_setter,
+            sunspec1_getter=sunspec1_getter,
+            sunspec1_setter=sunspec1_setter,
             # not to be used so really hardcode NULL
-            sunspec_variable="NULL",
+            sunspec1_variable="NULL",
+            sunspec2_getter=sunspec2_getter,
+            sunspec2_setter=sunspec2_setter,
+            # not to be used so really hardcode NULL
+            sunspec2_variable="NULL",
             staticmodbus_getter=staticmodbus_getter,
             staticmodbus_setter=staticmodbus_setter,
             can_scale_factor=can_factor,
@@ -1258,15 +1406,24 @@ class TableBaseStructures:
         if self.include_uuid_in_item:
             maybe_uuid = [f".uuid = {uuid_initializer(table_element.uuid)},"]
 
-        maybe_sunspec_variable_length = []
-        if sunspec_variable is None:
-            sunspec_variable_initializer = "NULL"
+        maybe_sunspec1_variable_length = []
+        if sunspec1_variable is None:
+            sunspec1_variable_initializer = "NULL"
         else:
             if parameter.internal_type == "PackedString":
-                maybe_sunspec_variable_length = [
-                    f".sunspec_variable_length = sizeof({sunspec_variable}),",
+                maybe_sunspec1_variable_length = [
+                    f".sunspec1_variable_length = sizeof({sunspec1_variable}),",
                 ]
-            sunspec_variable_initializer = f"&{sunspec_variable}"
+            sunspec1_variable_initializer = f"&{sunspec1_variable}"
+        maybe_sunspec2_variable_length = []
+        if sunspec1_variable is None:
+            sunspec2_variable_initializer = "NULL"
+        else:
+            if parameter.internal_type == "PackedString":
+                maybe_sunspec2_variable_length = [
+                    f".sunspec2_variable_length = sizeof({sunspec1_variable}),",
+                ]
+            sunspec2_variable_initializer = f"&{sunspec1_variable}"
 
         c = [
             f'#pragma DATA_SECTION({item_name}, "Interface")',
@@ -1276,8 +1433,10 @@ class TableBaseStructures:
             [
                 f".table_common = &{common_structure_name},",
                 f".can_variable = {can_variable},",
-                f".sunspec_variable = {sunspec_variable_initializer},",
-                *maybe_sunspec_variable_length,
+                f".sunspec1_variable = {sunspec2_variable_initializer},",
+                *maybe_sunspec1_variable_length,
+                f".sunspec2_variable = {sunspec2_variable_initializer},",
+                *maybe_sunspec2_variable_length,
                 f'.zone = {curve_type if curve_type is not None else "0"},',
                 f".curve = {str(int(curve_index - 1))},",
                 f".point = {0 if point_index is None else point_index},",
@@ -1371,11 +1530,13 @@ def get_sunspec_model_from_table_group_element(sunspec_point, table_element):
 class Table:
     wrapped = attr.ib()
     can_root = attr.ib()
-    sunspec_root = attr.ib()
+    sunspec1_root = attr.ib()
+    sunspec2_root = attr.ib()
     staticmodbus_root = attr.ib()
     include_uuid_in_item = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
-    parameter_uuid_to_sunspec_node = attr.ib()
+    parameter_uuid_to_sunspec1_node = attr.ib()
+    parameter_uuid_to_sunspec2_node = attr.ib()
     parameter_uuid_to_staticmodbus_node = attr.ib()
     parameter_uuid_finder = attr.ib()
 
@@ -1421,7 +1582,8 @@ class Table:
         table_base_structures = TableBaseStructures(
             array_nests={**array_nests, **non_array_nests},
             parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
-            parameter_uuid_to_sunspec_node=(self.parameter_uuid_to_sunspec_node),
+            parameter_uuid_to_sunspec1_node=(self.parameter_uuid_to_sunspec1_node),
+            parameter_uuid_to_sunspec2_node=(self.parameter_uuid_to_sunspec2_node),
             parameter_uuid_to_staticmodbus_node=(
                 self.parameter_uuid_to_staticmodbus_node
             ),
@@ -1432,11 +1594,13 @@ class Table:
         item_code = builders.wrap(
             wrapped=group,
             can_root=self.can_root,
-            sunspec_root=self.sunspec_root,
+            sunspec1_root=self.sunspec1_root,
+            sunspec2_root=self.sunspec2_root,
             staticmodbus_root=self.staticmodbus_root,
             table_base_structures=table_base_structures,
             parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
-            parameter_uuid_to_sunspec_node=(self.parameter_uuid_to_sunspec_node),
+            parameter_uuid_to_sunspec1_node=(self.parameter_uuid_to_sunspec1_node),
+            parameter_uuid_to_sunspec2_node=(self.parameter_uuid_to_sunspec2_node),
             parameter_uuid_to_staticmodbus_node=(
                 self.parameter_uuid_to_staticmodbus_node
             ),
@@ -1456,6 +1620,7 @@ class Table:
                 *item_code[1],
             ],
             set(),
+            set(),
             {},
         ]
 
@@ -1465,12 +1630,14 @@ class Table:
 class TableGroupElement:
     wrapped = attr.ib()
     can_root = attr.ib()
-    sunspec_root = attr.ib()
+    sunspec1_root = attr.ib()
+    sunspec2_root = attr.ib()
     staticmodbus_root = attr.ib()
     table_base_structures = attr.ib()
     include_uuid_in_item = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
-    parameter_uuid_to_sunspec_node = attr.ib()
+    parameter_uuid_to_sunspec1_node = attr.ib()
+    parameter_uuid_to_sunspec2_node = attr.ib()
     parameter_uuid_to_staticmodbus_node = attr.ib()
     parameter_uuid_finder = attr.ib()
     layers = attr.ib(default=[])
@@ -1492,11 +1659,13 @@ class TableGroupElement:
             result = builders.wrap(
                 wrapped=child,
                 can_root=self.can_root,
-                sunspec_root=self.sunspec_root,
+                sunspec1_root=self.sunspec1_root,
+                sunspec2_root=self.sunspec2_root,
                 staticmodbus_root=self.staticmodbus_root,
                 table_base_structures=self.table_base_structures,
                 parameter_uuid_to_can_node=self.parameter_uuid_to_can_node,
-                parameter_uuid_to_sunspec_node=(self.parameter_uuid_to_sunspec_node),
+                parameter_uuid_to_sunspec1_node=(self.parameter_uuid_to_sunspec1_node),
+                parameter_uuid_to_sunspec2_node=(self.parameter_uuid_to_sunspec2_node),
                 parameter_uuid_to_staticmodbus_node=(
                     self.parameter_uuid_to_staticmodbus_node
                 ),
@@ -1528,13 +1697,15 @@ def get_curve_type(combination_string):
 class TableArrayElement:
     wrapped = attr.ib()
     can_root = attr.ib()
-    sunspec_root = attr.ib()
+    sunspec1_root = attr.ib()
+    sunspec2_root = attr.ib()
     staticmodbus_root = attr.ib()
     table_base_structures = attr.ib()
     layers = attr.ib()
     include_uuid_in_item = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
-    parameter_uuid_to_sunspec_node = attr.ib()
+    parameter_uuid_to_sunspec1_node = attr.ib()
+    parameter_uuid_to_sunspec2_node = attr.ib()
     parameter_uuid_to_staticmodbus_node = attr.ib()
     parameter_uuid_finder = attr.ib()
 
@@ -1547,7 +1718,8 @@ class TableArrayElement:
             self.wrapped.name,
         )
 
-        sunspec_point = self.parameter_uuid_to_sunspec_node.get(parameter.uuid)
+        sunspec1_point = self.parameter_uuid_to_sunspec1_node.get(parameter.uuid)
+        sunspec2_point = self.parameter_uuid_to_sunspec2_node.get(parameter.uuid)
         staticmodbus_point = self.parameter_uuid_to_staticmodbus_node.get(
             parameter.uuid
         )
@@ -1555,7 +1727,8 @@ class TableArrayElement:
         return self.table_base_structures.create_item(
             table_element=self.wrapped,
             layers=self.layers,
-            sunspec_point=sunspec_point,
+            sunspec1_point=sunspec1_point,
+            sunspec2_point=sunspec2_point,
             staticmodbus_point=staticmodbus_point,
         )
 
@@ -1567,17 +1740,22 @@ def create_item(
     can_getter,
     can_setter,
     can_variable,
-    hand_coded_sunspec_getter_function,
-    hand_coded_sunspec_setter_function,
+    hand_coded_sunspec1_getter_function,
+    hand_coded_sunspec1_setter_function,
+    hand_coded_sunspec2_getter_function,
+    hand_coded_sunspec2_setter_function,
     interface_item_type,
     internal_scale,
     meta_initializer_values,
     parameter,
     scale_factor_updater,
     scale_factor_variable,
-    sunspec_getter,
-    sunspec_setter,
-    sunspec_variable,
+    sunspec1_getter,
+    sunspec1_setter,
+    sunspec1_variable,
+    sunspec2_getter,
+    sunspec2_setter,
+    sunspec2_variable,
     staticmodbus_getter,
     staticmodbus_setter,
     variable_or_getter_setter,
@@ -1601,14 +1779,19 @@ def create_item(
         can_getter=can_getter,
         can_setter=can_setter,
         can_variable=can_variable,
-        hand_coded_sunspec_getter_function=hand_coded_sunspec_getter_function,
-        hand_coded_sunspec_setter_function=hand_coded_sunspec_setter_function,
+        hand_coded_sunspec1_getter_function=hand_coded_sunspec1_getter_function,
+        hand_coded_sunspec1_setter_function=hand_coded_sunspec1_setter_function,
+        hand_coded_sunspec2_getter_function=hand_coded_sunspec2_getter_function,
+        hand_coded_sunspec2_setter_function=hand_coded_sunspec2_setter_function,
         internal_scale=internal_scale,
         scale_factor_updater=scale_factor_updater,
         scale_factor_variable=scale_factor_variable,
-        sunspec_getter=sunspec_getter,
-        sunspec_setter=sunspec_setter,
-        sunspec_variable=sunspec_variable,
+        sunspec1_getter=sunspec1_getter,
+        sunspec1_setter=sunspec1_setter,
+        sunspec1_variable=sunspec1_variable,
+        sunspec2_getter=sunspec2_getter,
+        sunspec2_setter=sunspec2_setter,
+        sunspec2_variable=sunspec2_variable,
         staticmodbus_getter=staticmodbus_getter,
         staticmodbus_setter=staticmodbus_setter,
         can_scale_factor=can_scale_factor,
@@ -1653,14 +1836,19 @@ def create_common_initializers(
     can_getter,
     can_setter,
     can_variable,
-    hand_coded_sunspec_getter_function,
-    hand_coded_sunspec_setter_function,
+    hand_coded_sunspec1_getter_function,
+    hand_coded_sunspec1_setter_function,
+    hand_coded_sunspec2_getter_function,
+    hand_coded_sunspec2_setter_function,
     internal_scale,
     scale_factor_updater,
     scale_factor_variable,
-    sunspec_getter,
-    sunspec_setter,
-    sunspec_variable,
+    sunspec1_getter,
+    sunspec1_setter,
+    sunspec1_variable,
+    sunspec2_getter,
+    sunspec2_setter,
+    sunspec2_variable,
     staticmodbus_getter,
     staticmodbus_setter,
     can_scale_factor,
@@ -1686,13 +1874,22 @@ def create_common_initializers(
         f".scaleFactorUpdater = {scale_factor_updater},",
         f".internalScaleFactor = {internal_scale},",
         f".rejectFromInactiveInterface = {reject_from_inactive_interfaces_literal},",
-        f".sunspec = {{",
+        f".sunspec1 = {{",
         [
-            f".variable = {sunspec_variable},",
-            f".getter = {sunspec_getter},",
-            f".setter = {sunspec_setter},",
-            f".handGetter = {hand_coded_sunspec_getter_function},",
-            f".handSetter = {hand_coded_sunspec_setter_function},",
+            f".variable = {sunspec1_variable},",
+            f".getter = {sunspec1_getter},",
+            f".setter = {sunspec1_setter},",
+            f".handGetter = {hand_coded_sunspec1_getter_function},",
+            f".handSetter = {hand_coded_sunspec1_setter_function},",
+        ],
+        f"}},",
+        f".sunspec2 = {{",
+        [
+            f".variable = {sunspec2_variable},",
+            f".getter = {sunspec2_getter},",
+            f".setter = {sunspec2_setter},",
+            f".handGetter = {hand_coded_sunspec2_getter_function},",
+            f".handSetter = {hand_coded_sunspec2_setter_function},",
         ],
         f"}},",
         f".staticmodbus = {{",
