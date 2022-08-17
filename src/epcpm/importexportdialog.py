@@ -44,9 +44,13 @@ def import_dialog():
     dialog.ui.bitfields_c.hide()
     dialog.ui.pick_bitfields_c.hide()
 
-    dialog.ui.sunspec_tables_c_label.hide()
-    dialog.ui.sunspec_tables_c.hide()
-    dialog.ui.pick_sunspec_tables_c.hide()
+    dialog.ui.sunspec1_tables_c_label.hide()
+    dialog.ui.sunspec1_tables_c.hide()
+    dialog.ui.pick_sunspec1_tables_c.hide()
+
+    dialog.ui.sunspec2_tables_c_label.hide()
+    dialog.ui.sunspec2_tables_c.hide()
+    dialog.ui.pick_sunspec2_tables_c.hide()
 
     dialog.ui.sil_tables_c_label.hide()
     dialog.ui.sil_tables_c.hide()
@@ -147,11 +151,24 @@ class Dialog(QtWidgets.QDialog):
         self.ui.pick_tables_c.clicked.connect(self.pick_tables_c)
         self.ui.pick_bitfields_c.clicked.connect(self.pick_bitfields_c)
         self.ui.pick_staticmodbus_c.clicked.connect(self.pick_staticmodbus_c)
-        self.ui.pick_sunspec_tables_c.clicked.connect(
-            self.pick_sunspec_tables_c,
+        self.ui.pick_sunspec1_tables_c.clicked.connect(
+            self.pick_sunspec1_tables_c,
         )
-        self.ui.pick_spreadsheet.clicked.connect(self.pick_spreadsheet)
-        self.ui.pick_spreadsheet_user.clicked.connect(self.pick_spreadsheet_user)
+        self.ui.pick_sunspec2_tables_c.clicked.connect(
+            self.pick_sunspec2_tables_c,
+        )
+        self.ui.pick_sunspec1_spreadsheet.clicked.connect(
+            self.pick_sunspec1_spreadsheet
+        )
+        self.ui.pick_sunspec2_spreadsheet.clicked.connect(
+            self.pick_sunspec2_spreadsheet
+        )
+        self.ui.pick_sunspec1_spreadsheet_user.clicked.connect(
+            self.pick_sunspec1_spreadsheet_user
+        )
+        self.ui.pick_sunspec2_spreadsheet_user.clicked.connect(
+            self.pick_sunspec2_spreadsheet_user
+        )
         self.ui.pick_staticmodbus_spreadsheet.clicked.connect(
             self.pick_staticmodbus_spreadsheet
         )
@@ -174,12 +191,12 @@ class Dialog(QtWidgets.QDialog):
             hierarchy=self.ui.hierarchy.text(),
             tables_c=self.ui.tables_c.text(),
             bitfields_c=self.ui.bitfields_c.text(),
-            sunspec1_tables_c=self.ui.sunspec_tables_c.text(),
-            sunspec2_tables_c=None,
-            sunspec1_spreadsheet=self.ui.spreadsheet.text(),
-            sunspec2_spreadsheet=None,
-            sunspec1_spreadsheet_user=self.ui.spreadsheet_user.text(),
-            sunspec2_spreadsheet_user=None,
+            sunspec1_tables_c=self.ui.sunspec1_tables_c.text(),
+            sunspec2_tables_c=self.ui.sunspec2_tables_c.text(),
+            sunspec1_spreadsheet=self.ui.sunspec1_spreadsheet.text(),
+            sunspec2_spreadsheet=self.ui.sunspec2_spreadsheet.text(),
+            sunspec1_spreadsheet_user=self.ui.sunspec1_spreadsheet_user.text(),
+            sunspec2_spreadsheet_user=self.ui.sunspec2_spreadsheet_user.text(),
             staticmodbus_spreadsheet=self.ui.staticmodbus_spreadsheet.text(),
             smdx=smdx,
             staticmodbus_c=self.ui.staticmodbus_c.text(),
@@ -205,9 +222,16 @@ class Dialog(QtWidgets.QDialog):
         self.ui.tables_c.setText(os.fspath(paths.tables_c))
         self.ui.bitfields_c.setText(os.fspath(paths.bitfields_c))
         self.ui.staticmodbus_c.setText(os.fspath(paths.staticmodbus_c))
-        self.ui.sunspec_tables_c.setText(os.fspath(paths.sunspec_tables_c))
-        self.ui.spreadsheet.setText(os.fspath(paths.sunspec1_spreadsheet))
-        self.ui.spreadsheet_user.setText(os.fspath(paths.spreadsheet_user))
+        self.ui.sunspec1_tables_c.setText(os.fspath(paths.sunspec1_tables_c))
+        self.ui.sunspec2_tables_c.setText(os.fspath(paths.sunspec2_tables_c))
+        self.ui.sunspec1_spreadsheet.setText(os.fspath(paths.sunspec1_spreadsheet))
+        self.ui.sunspec2_spreadsheet.setText(os.fspath(paths.sunspec2_spreadsheet))
+        self.ui.sunspec1_spreadsheet_user.setText(
+            os.fspath(paths.sunspec1_spreadsheet_user)
+        )
+        self.ui.sunspec2_spreadsheet_user.setText(
+            os.fspath(paths.sunspec2_spreadsheet_user)
+        )
         self.ui.staticmodbus_spreadsheet.setText(
             os.fspath(paths.staticmodbus_spreadsheet)
         )
@@ -293,38 +317,74 @@ class Dialog(QtWidgets.QDialog):
 
         self.ui.staticmodbus_c.setText(directory)
 
-    def pick_sunspec_tables_c(self):
+    def pick_sunspec1_tables_c(self):
         filters = (
             ("SunSpec Tables C", ["c"]),
             all_files_filter,
         )
 
         self.file_dialog(
-            target=self.ui.sunspec_tables_c,
+            target=self.ui.sunspec1_tables_c,
             filters=filters,
             multiple=False,
         )
 
-    def pick_spreadsheet(self):
+    def pick_sunspec2_tables_c(self):
+        filters = (
+            ("SunSpec Tables C", ["c"]),
+            all_files_filter,
+        )
+
+        self.file_dialog(
+            target=self.ui.sunspec2_tables_c,
+            filters=filters,
+            multiple=False,
+        )
+
+    def pick_sunspec1_spreadsheet(self):
         filters = (
             ("SunSpec Spreadsheet", ["xls"]),
             all_files_filter,
         )
 
         self.file_dialog(
-            target=self.ui.spreadsheet,
+            target=self.ui.sunspec1_spreadsheet,
             filters=filters,
             multiple=False,
         )
 
-    def pick_spreadsheet_user(self):
+    def pick_sunspec2_spreadsheet(self):
         filters = (
             ("SunSpec Spreadsheet", ["xls"]),
             all_files_filter,
         )
 
         self.file_dialog(
-            target=self.ui.spreadsheet_user,
+            target=self.ui.sunspec2_spreadsheet,
+            filters=filters,
+            multiple=False,
+        )
+
+    def pick_sunspec1_spreadsheet_user(self):
+        filters = (
+            ("SunSpec Spreadsheet", ["xls"]),
+            all_files_filter,
+        )
+
+        self.file_dialog(
+            target=self.ui.sunspec1_spreadsheet_user,
+            filters=filters,
+            multiple=False,
+        )
+
+    def pick_sunspec2_spreadsheet_user(self):
+        filters = (
+            ("SunSpec Spreadsheet", ["xls"]),
+            all_files_filter,
+        )
+
+        self.file_dialog(
+            target=self.ui.sunspec2_spreadsheet_user,
             filters=filters,
             multiple=False,
         )
