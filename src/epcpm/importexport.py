@@ -144,10 +144,39 @@ def full_export(
         include_uuid_in_item=include_uuid_in_item,
     )
 
-    # TODO: Either add second sunspectocsv for sunspec2 model or change sunspectocsv to handle two models.
     epcpm.sunspectocsv.export(
         path=paths.sunspec1_spreadsheet,
         sunspec_model=project.models.sunspec1,
+        sunspec_id=1,
+        parameters_model=project.models.parameters,
+        skip_output=skip_output,
+        column_filter=attr.evolve(
+            epcpm.pm_helper.attr_fill(epcpm.sunspectocsv.Fields, False),
+            model_id=True,
+            size=True,
+            name=True,
+            label=True,
+            type=True,
+            units=True,
+            bit_offset=True,
+            bit_length=True,
+            modbus_address=True,
+            parameter_uuid=True,
+            parameter_uses_interface_item=True,
+            scale_factor_uuid=True,
+            enumeration_uuid=True,
+            type_uuid=True,
+            access_level=True,
+            not_implemented=True,
+            uuid=True,
+            class_name=True,
+        ),
+    )
+
+    epcpm.sunspectocsv.export(
+        path=paths.sunspec2_spreadsheet,
+        sunspec_model=project.models.sunspec2,
+        sunspec_id=2,
         parameters_model=project.models.parameters,
         skip_output=skip_output,
         column_filter=attr.evolve(
