@@ -82,12 +82,12 @@ class ImportPaths:
     tables_c = attr.ib(converter=path_or_none)
     bitfields_c = attr.ib(converter=path_or_none)
     staticmodbus_c = attr.ib(converter=path_or_none)
-    # TODO: rename sunspec_tables_c to sunspec1_tables_c
-    sunspec_tables_c = attr.ib(converter=path_or_none)
+    sunspec1_tables_c = attr.ib(converter=path_or_none)
     sunspec2_tables_c = attr.ib(converter=path_or_none)
     sunspec1_spreadsheet = attr.ib(converter=path_or_none)
     sunspec2_spreadsheet = attr.ib(converter=path_or_none)
-    spreadsheet_user = attr.ib(converter=path_or_none)
+    sunspec1_spreadsheet_user = attr.ib(converter=path_or_none)
+    sunspec2_spreadsheet_user = attr.ib(converter=path_or_none)
     staticmodbus_spreadsheet = attr.ib(converter=path_or_none)
     smdx = attr.ib(converter=paths_or_none)
     sunspec_c = attr.ib(converter=path_or_none)
@@ -110,11 +110,12 @@ def paths_from_directory(directory):
         tables_c=interface / "canInterfaceGenTables.c",
         bitfields_c=interface / "interfaceBitfieldsGen.c",
         staticmodbus_c=interface / "staticmodbusInterfaceGen.c",
-        sunspec_tables_c=sunspec / "sunspec1InterfaceGenTables.c",
+        sunspec1_tables_c=sunspec / "sunspec1InterfaceGenTables.c",
         sunspec2_tables_c=sunspec / "sunspec2InterfaceGenTables.c",
-        sunspec1_spreadsheet=embedded / "MODBUS_SunSpec-EPC.xlsx",
+        sunspec1_spreadsheet=embedded / "MODBUS_SunSpec1-EPC.xlsx",
         sunspec2_spreadsheet=embedded / "MODBUS_SunSpec2-EPC.xlsx",
-        spreadsheet_user=embedded / "EPCSunspec.xlsx",
+        sunspec1_spreadsheet_user=embedded / "EPCSunspec1.xlsx",
+        sunspec2_spreadsheet_user=embedded / "EPCSunspec2.xlsx",
         staticmodbus_spreadsheet=embedded / "MODBUS-EPC.xlsx",
         smdx=sorted(sunspec.glob("smdx_*.xml")),
         sunspec_c=sunspec,
@@ -173,9 +174,12 @@ class Dialog(QtWidgets.QDialog):
             hierarchy=self.ui.hierarchy.text(),
             tables_c=self.ui.tables_c.text(),
             bitfields_c=self.ui.bitfields_c.text(),
-            sunspec_tables_c=self.ui.sunspec_tables_c.text(),
-            spreadsheet=self.ui.spreadsheet.text(),
-            spreadsheet_user=self.ui.spreadsheet_user.text(),
+            sunspec1_tables_c=self.ui.sunspec_tables_c.text(),
+            sunspec2_tables_c=None,
+            sunspec1_spreadsheet=self.ui.spreadsheet.text(),
+            sunspec2_spreadsheet=None,
+            sunspec1_spreadsheet_user=self.ui.spreadsheet_user.text(),
+            sunspec2_spreadsheet_user=None,
             staticmodbus_spreadsheet=self.ui.staticmodbus_spreadsheet.text(),
             smdx=smdx,
             staticmodbus_c=self.ui.staticmodbus_c.text(),
