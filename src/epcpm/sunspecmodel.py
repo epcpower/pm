@@ -45,6 +45,9 @@ def build_sunspec_types_enumeration():
             name="uint32", value=2, uuid="eb8cdc87-05e2-4593-994e-ab3363236168"
         ),
         epyqlib.pm.parametermodel.Enumerator(
+            name="uint64", value=4, uuid="b361ca90-94bb-433b-a1a8-914472d4f411"
+        ),
+        epyqlib.pm.parametermodel.Enumerator(
             name="sunssf", value=1, uuid="02e70616-4986-4f3e-8ac4-98ac153e66f9"
         ),
         epyqlib.pm.parametermodel.Enumerator(
