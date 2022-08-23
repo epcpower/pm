@@ -105,7 +105,8 @@ def full_import(paths):
 
     project.paths["parameters"] = "parameters.json"
     project.paths["can"] = "can.json"
-    project.paths["sunspec"] = "sunspec.json"
+    project.paths["sunspec1"] = "sunspec1.json"
+    project.paths["sunspec2"] = "sunspec2.json"
     project.paths["staticmodbus"] = "staticmodbus.json"
 
     return project
@@ -379,17 +380,26 @@ def is_stale(project, paths, skip_sunspec=False):
     source_modification_time = max(path.stat().st_mtime for path in source_paths)
 
     if skip_sunspec:
-        sunspec_models = []
+        sunspec1_models = []
+        sunspec2_models = []
     else:
-        sunspec_models = get_sunspec_models(
-            project.parent / loaded_project.paths.sunspec,
+        sunspec1_models = get_sunspec_models(
+            project.parent / loaded_project.paths.sunspec1,
+        )
+        sunspec2_models = get_sunspec_models(
+            project.parent / loaded_project.paths.sunspec2,
         )
 
-    smdx = tuple(paths.sunspec_c / f"smdx_{model:05}.xml" for model in sunspec_models)
+    smdx1 = tuple(paths.sunspec_c / f"smdx1_{model:05}.xml" for model in sunspec1_models)
+    smdx2 = tuple(paths.sunspec_c / f"smdx2_{model:05}.xml" for model in sunspec2_models)
 
-    sunspec_c_h = tuple(
-        paths.sunspec_c / f"sunspecInterfaceGen{model}.{extension}"
-        for model, extension in itertools.product(sunspec_models, ("c", "h"))
+    sunspec1_c_h = tuple(
+        paths.sunspec_c / f"sunspec1InterfaceGen{model}.{extension}"
+        for model, extension in itertools.product(sunspec1_models, ("c", "h"))
+    )
+    sunspec2_c_h = tuple(
+        paths.sunspec_c / f"sunspec2InterfaceGen{model}.{extension}"
+        for model, extension in itertools.product(sunspec2_models, ("c", "h"))
     )
 
     sil_c_h = (paths.sil_c, paths.sil_c.with_suffix(".h"))
@@ -399,10 +409,15 @@ def is_stale(project, paths, skip_sunspec=False):
         paths.hierarchy,
         *paths.smdx,
         paths.sunspec1_spreadsheet,
-        paths.spreadsheet_user,
-        *smdx,
-        *sunspec_c_h,
-        paths.tables_c,
+        paths.sunspec2_spreadsheet,
+        paths.sunspec1_spreadsheet_user,
+        paths.sunspec2_spreadsheet_user,
+        *smdx1,
+        *smdx2,
+        *sunspec1_c_h,
+        *sunspec2_c_h,
+        paths.sunspec1_tables_c,
+        paths.sunspec2_tables_c,
         *sil_c_h,
     ]
 
