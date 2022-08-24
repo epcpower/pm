@@ -263,15 +263,10 @@ class Window:
             root=can_root,
             columns=epcpm.canmodel.columns,
         )
-        # TODO: Sort out sunspec_root into sunspec1_root, sunspec2_root
         project.models.sunspec = epyqlib.attrsmodel.Model(
             root=sunspec_root,
             columns=epcpm.sunspecmodel.columns,
         )
-        # project.models.static_modbus = epyqlib.attrsmodel.Model(
-        #     root=static_modbus_root,
-        #     columns=epcpm.staticmodbusmodel.columns,
-        # )
 
         epcpm.project._post_load(project)
 
