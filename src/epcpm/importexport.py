@@ -390,8 +390,12 @@ def is_stale(project, paths, skip_sunspec=False):
             project.parent / loaded_project.paths.sunspec2,
         )
 
-    smdx1 = tuple(paths.sunspec_c / f"smdx1_{model:05}.xml" for model in sunspec1_models)
-    smdx2 = tuple(paths.sunspec_c / f"smdx2_{model:05}.xml" for model in sunspec2_models)
+    smdx1 = tuple(
+        paths.sunspec_c / f"smdx1_{model:05}.xml" for model in sunspec1_models
+    )
+    smdx2 = tuple(
+        paths.sunspec_c / f"smdx2_{model:05}.xml" for model in sunspec2_models
+    )
 
     sunspec1_c_h = tuple(
         paths.sunspec_c / f"sunspec1InterfaceGen{model}.{extension}"

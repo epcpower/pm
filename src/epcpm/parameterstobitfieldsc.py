@@ -507,7 +507,7 @@ class DataPointBitfield:
             [
                 f".getter = InterfaceItem_bitfield_{bit_length}_sunspec{sunspec_id}_getter,",
                 f".setter = InterfaceItem_bitfield_{bit_length}_sunspec{sunspec_id}_setter,",
-                f".variable = &sunspec1Interface.model{model:05}.{parameter.abbreviation},",
+                f".variable = &sunspec{sunspec_id}Interface.model{model:05}.{parameter.abbreviation},",
             ],
             f"}},",
         ]
