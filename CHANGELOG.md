@@ -8,7 +8,7 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 ## [Unreleased] - YYYY-MM-DD
 
 ### Added
-
+- SC-656: Add secondary SunSpec interface generation
 - SC-661: Add SunSpec uint64 support
 - SC-629: Added CAN parameter excel manual output.
 - SC-590: Added access level column to the SunSpec and static modbus spreadsheet output.
