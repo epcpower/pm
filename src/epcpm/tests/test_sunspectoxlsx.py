@@ -70,6 +70,7 @@ def test_x():
         parameter_uuid_finder=attrs_model.node_from_uuid,
         parameter_model=project.models.parameters,
         column_filter=epcpm.pm_helper.attr_fill(epcpm.sunspectoxlsx.Fields, True),
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
     )
 
     workbook = builder.gen()
