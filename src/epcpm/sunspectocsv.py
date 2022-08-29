@@ -77,7 +77,7 @@ bitfield_member_fields = Fields(
 def export(
     path: pathlib.Path,
     sunspec_model: epyqlib.attrsmodel.Model,
-    sunspec_id: int,
+    sunspec_id: epcpm.pm_helper.SunSpecSection,
     parameters_model: epyqlib.attrsmodel.Model,
     column_filter: epcpm.pm_helper.FieldsInterface = None,
     skip_output: bool = False,
@@ -125,7 +125,7 @@ class Root:
 
     wrapped = attr.ib(type=epcpm.sunspecmodel.Root)
     column_filter = attr.ib(type=Fields)
-    sunspec_id = attr.ib(type=int)
+    sunspec_id = attr.ib(type=epcpm.pm_helper.SunSpecSection)
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
     parameter_model = attr.ib(default=None, type=epyqlib.attrsmodel.Model)
     sort_models = attr.ib(default=False, type=bool)
@@ -179,7 +179,7 @@ class Model:
     wrapped = attr.ib(type=epcpm.sunspecmodel.Model)
     csv_data = attr.ib(type=typing.List[str])
     column_filter = attr.ib(type=Fields)
-    sunspec_id = attr.ib(type=int)
+    sunspec_id = attr.ib(type=epcpm.pm_helper.SunSpecSection)
     padding_type = attr.ib(type=epyqlib.pm.parametermodel.Enumerator)
     model_offset = attr.ib(type=int)  # starting Modbus address for the model
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
@@ -208,7 +208,10 @@ class Model:
             # in the original code for SunSpec1 that must continue being in place so that the registers
             # aren't shifted for customers using SunSpec statically by directly calling modbus registers
             # instead of using SunSpec properly.
-            if self.sunspec_id == 1 and model_type == "Repeating Block":
+            if (
+                self.sunspec_id == epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE
+                and model_type == "Repeating Block"
+            ):
                 add_padding = False
 
             builder = builders.wrap(

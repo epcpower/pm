@@ -148,7 +148,7 @@ def full_export(
     epcpm.sunspectocsv.export(
         path=paths.sunspec1_spreadsheet,
         sunspec_model=project.models.sunspec1,
-        sunspec_id=1,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
         parameters_model=project.models.parameters,
         skip_output=skip_output,
         column_filter=attr.evolve(
@@ -177,7 +177,7 @@ def full_export(
     epcpm.sunspectocsv.export(
         path=paths.sunspec2_spreadsheet,
         sunspec_model=project.models.sunspec2,
-        sunspec_id=2,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO,
         parameters_model=project.models.parameters,
         skip_output=skip_output,
         column_filter=attr.evolve(
@@ -206,7 +206,7 @@ def full_export(
     epcpm.sunspectoxlsx.export(
         path=paths.sunspec1_spreadsheet,
         sunspec_model=project.models.sunspec1,
-        sunspec_id=1,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
         parameters_model=project.models.parameters,
         skip_sunspec=skip_output,
     )
@@ -214,7 +214,7 @@ def full_export(
     epcpm.sunspectoxlsx.export(
         path=paths.sunspec2_spreadsheet,
         sunspec_model=project.models.sunspec2,
-        sunspec_id=2,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO,
         parameters_model=project.models.parameters,
         skip_sunspec=skip_output,
     )
@@ -222,7 +222,7 @@ def full_export(
     epcpm.sunspectoxlsx.export(
         path=paths.sunspec1_spreadsheet_user,
         sunspec_model=project.models.sunspec1,
-        sunspec_id=1,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
         parameters_model=project.models.parameters,
         skip_sunspec=skip_output,
         column_filter=attr.evolve(
@@ -236,7 +236,7 @@ def full_export(
     epcpm.sunspectoxlsx.export(
         path=paths.sunspec2_spreadsheet_user,
         sunspec_model=project.models.sunspec2,
-        sunspec_id=2,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO,
         parameters_model=project.models.parameters,
         skip_sunspec=skip_output,
         column_filter=attr.evolve(
@@ -258,7 +258,7 @@ def full_export(
         c_path=paths.sunspec1_tables_c,
         h_path=paths.sunspec1_tables_c.with_suffix(".h"),
         sunspec_model=project.models.sunspec1,
-        sunspec_id=1,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
         skip_sunspec=skip_output,
     )
 
@@ -266,7 +266,7 @@ def full_export(
         c_path=paths.sunspec2_tables_c,
         h_path=paths.sunspec2_tables_c.with_suffix(".h"),
         sunspec_model=project.models.sunspec2,
-        sunspec_id=2,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO,
         skip_sunspec=skip_output,
     )
 
@@ -334,7 +334,7 @@ def run_generation_scripts(base_path):
         [
             os.fspath(scripts / "sunspecparser"),
             os.fspath(emb_lib / "MODBUS_SunSpec1-EPC.xlsx"),
-            "1",
+            str(epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE.value),
         ],
         check=True,
     )
@@ -344,7 +344,7 @@ def run_generation_scripts(base_path):
         [
             os.fspath(scripts / "sunspecparser"),
             os.fspath(emb_lib / "MODBUS_SunSpec2-EPC.xlsx"),
-            "2",
+            str(epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO.value),
         ],
         check=True,
     )

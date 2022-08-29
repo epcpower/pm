@@ -219,14 +219,20 @@ class Root:
                         wrapped=modbus_nodes["sunspec1"],
                         parameter_uuid_finder=self.sunspec1_model.node_from_uuid,
                     )
-                    common_c_lines.extend(builder.gen_common_interface(1))
+                    common_c_lines.extend(
+                        builder.gen_common_interface(
+                            epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE
+                        )
+                    )
                     members_interface_c_lines.extend(
                         builder.gen_bitfield_members_interface()
                     )
                     members_info_c_lines.extend(builder.gen_members_interface())
                 else:
                     common_c_lines.extend(
-                        DataPointBitfield.gen_default_common_interface(1)
+                        DataPointBitfield.gen_default_common_interface(
+                            epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE
+                        )
                     )
                     members_info_c_lines.extend(
                         DataPointBitfield.gen_default_members_interface()
@@ -237,14 +243,20 @@ class Root:
                         wrapped=modbus_nodes["sunspec2"],
                         parameter_uuid_finder=self.sunspec2_model.node_from_uuid,
                     )
-                    common_c_lines.extend(builder.gen_common_interface(2))
+                    common_c_lines.extend(
+                        builder.gen_common_interface(
+                            epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO
+                        )
+                    )
                     members_interface_c_lines.extend(
                         builder.gen_bitfield_members_interface()
                     )
                     members_info_c_lines.extend(builder.gen_members_interface())
                 else:
                     common_c_lines.extend(
-                        DataPointBitfield.gen_default_common_interface(2)
+                        DataPointBitfield.gen_default_common_interface(
+                            epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO
+                        )
                     )
                     members_info_c_lines.extend(
                         DataPointBitfield.gen_default_members_interface()
@@ -490,9 +502,14 @@ class DataPointBitfield:
 
         return c_lines, h_lines
 
-    def gen_common_interface(self, sunspec_id: int) -> typing.List[str]:
+    def gen_common_interface(
+        self, sunspec_id: epcpm.pm_helper.SunSpecSection
+    ) -> typing.List[str]:
         """
         Generate a SunSpec bitfield common definitions for the interface item.
+
+        Args:
+            sunspec_id: SunSpec section internal identifier
 
         Returns:
             list: bitfield common definitions
@@ -503,11 +520,11 @@ class DataPointBitfield:
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
         c_lines = [
-            f".sunspec{sunspec_id} = {{",
+            f".sunspec{sunspec_id.value} = {{",
             [
-                f".getter = InterfaceItem_bitfield_{bit_length}_sunspec{sunspec_id}_getter,",
-                f".setter = InterfaceItem_bitfield_{bit_length}_sunspec{sunspec_id}_setter,",
-                f".variable = &sunspec{sunspec_id}Interface.model{model:05}.{parameter.abbreviation},",
+                f".getter = InterfaceItem_bitfield_{bit_length}_sunspec{sunspec_id.value}_getter,",
+                f".setter = InterfaceItem_bitfield_{bit_length}_sunspec{sunspec_id.value}_setter,",
+                f".variable = &sunspec{sunspec_id.value}Interface.model{model:05}.{parameter.abbreviation},",
             ],
             f"}},",
         ]
@@ -515,15 +532,20 @@ class DataPointBitfield:
         return c_lines
 
     @staticmethod
-    def gen_default_common_interface(sunspec_id: int) -> typing.List[str]:
+    def gen_default_common_interface(
+        sunspec_id: epcpm.pm_helper.SunSpecSection,
+    ) -> typing.List[str]:
         """
         Generate a default (empty) SunSpec bitfield common definitions for the interface item.
+
+        Args:
+            sunspec_id: SunSpec section internal identifier
 
         Returns:
             list: default bitfield common definitions
         """
         return [
-            f".sunspec{sunspec_id} = {{",
+            f".sunspec{sunspec_id.value} = {{",
             [
                 f".getter = NULL,",
                 f".setter = NULL,",

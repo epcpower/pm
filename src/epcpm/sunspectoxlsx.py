@@ -213,7 +213,10 @@ class Model:
             # in the original code for SunSpec1 that must continue being in place so that the registers
             # aren't shifted for customers using SunSpec statically by directly calling modbus registers
             # instead of using SunSpec properly.
-            if self.sunspec_id == 1 and model_type == "Repeating Block":
+            if (
+                self.sunspec_id == epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE
+                and model_type == "Repeating Block"
+            ):
                 add_padding = False
 
             builder = builders.wrap(
@@ -501,7 +504,7 @@ class DataPointBitfield:
 
             getter.extend(
                 [
-                    f"{item_name}.common.sunspec{self.sunspec_id}.getter(",
+                    f"{item_name}.common.sunspec{self.sunspec_id.value}.getter(",
                     [
                         f"(InterfaceItem_void *) &{item_name},",
                         f"Meta_Value",
@@ -511,7 +514,7 @@ class DataPointBitfield:
             )
             setter.extend(
                 [
-                    f"{item_name}.common.sunspec{self.sunspec_id}.setter(",
+                    f"{item_name}.common.sunspec{self.sunspec_id.value}.setter(",
                     [
                         f"(InterfaceItem_void *) &{item_name},",
                         f"true,",
@@ -817,7 +820,7 @@ class Point:
 
             if not uses_interface_item and not self.wrapped.not_implemented:
                 if row.scale_factor is not None:
-                    scale_factor_updater_name = f"getSUNSPEC{self.sunspec_id}_MODEL{self.model_id}_{row.scale_factor}"
+                    scale_factor_updater_name = f"getSUNSPEC{self.sunspec_id.value}_MODEL{self.model_id}_{row.scale_factor}"
 
                     f = f"{scale_factor_updater_name}();"
                     get_scale_factor = f.format(
@@ -830,7 +833,7 @@ class Point:
                 getter.append(f"{hand_coded_getter_function_name}();")
 
             sunspec_model_variable = (
-                f"sunspec{self.sunspec_id}Interface.model{self.model_id}"
+                f"sunspec{self.sunspec_id.value}Interface.model{self.model_id}"
             )
 
             sunspec_variable = f"{sunspec_model_variable}.{parameter.abbreviation}"
@@ -966,7 +969,7 @@ class Point:
 
                 getter.extend(
                     [
-                        f"{item_name}.common.sunspec{self.sunspec_id}.getter(",
+                        f"{item_name}.common.sunspec{self.sunspec_id.value}.getter(",
                         [
                             f"(InterfaceItem_void *) &{item_name},",
                             f"Meta_Value",
@@ -976,7 +979,7 @@ class Point:
                 )
                 setter.extend(
                     [
-                        f"{item_name}.common.sunspec{self.sunspec_id}.setter(",
+                        f"{item_name}.common.sunspec{self.sunspec_id.value}.setter(",
                         [
                             f"(InterfaceItem_void *) &{item_name},",
                             f"true,",
@@ -1064,7 +1067,7 @@ def getter_setter_name(get_set, parameter, sunspec_id, model_id, is_table):
 
     return format_string.format(
         get_set=get_set,
-        sunspec_id=sunspec_id,
+        sunspec_id=sunspec_id.value,
         model_id=model_id,
         abbreviation=parameter.abbreviation,
         table_option=table_option,

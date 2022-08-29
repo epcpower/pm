@@ -2,12 +2,14 @@ import decimal
 import itertools
 import os
 import string
+import typing
 import re
 import uuid
 
 import attr
 import toolz
 
+import epyqlib.attrsmodel
 import epyqlib.pm.parametermodel
 import epyqlib.utils.general
 
@@ -434,7 +436,7 @@ class DataPoint:
             maybe_model = maybe_model.tree_parent
 
         model = maybe_model
-        model_variable = f"sunspec{self.sunspec_id}Interface.model{model.id}"
+        model_variable = f"sunspec{self.sunspec_id.value}Interface.model{model.id}"
 
         return f"&{model_variable}.{parameter.abbreviation}"
 
@@ -555,7 +557,7 @@ class Parameter:
             hand_coded_sunspec1_getter_function,
             hand_coded_sunspec1_setter_function,
         ) = self._local_sunspec_parameter_gen(
-            1,
+            epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
             parameter,
             sunspec1_point,
             self.sunspec1_root,
@@ -569,7 +571,7 @@ class Parameter:
             hand_coded_sunspec2_getter_function,
             hand_coded_sunspec2_setter_function,
         ) = self._local_sunspec_parameter_gen(
-            2,
+            epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO,
             parameter,
             sunspec2_point,
             self.sunspec2_root,
@@ -655,13 +657,15 @@ class Parameter:
 
     def _local_sunspec_parameter_gen(
         self,
-        sunspec_id,
-        parameter,
-        sunspec_point,
-        sunspec_root,
-        sunspec_models,
-        var_or_func,
-    ):
+        sunspec_id: epcpm.pm_helper.SunSpecSection,
+        parameter: epyqlib.pm.parametermodel.Parameter,
+        sunspec_point: typing.Union[
+            epcpm.sunspecmodel.DataPoint, epcpm.sunspecmodel.DataPointBitfield
+        ],
+        sunspec_root: epyqlib.attrsmodel.Root,
+        sunspec_models: typing.Set,
+        var_or_func: str,
+    ) -> typing.List[str]:
         if sunspec_point is None:
             sunspec_variable = "NULL"
             sunspec_getter = "NULL"
@@ -728,9 +732,7 @@ class Parameter:
                     sunspec_id=sunspec_id,
                 )
                 scale_factor_variable = sunspec_factor_builder.interface_variable_name()
-                scale_factor_updater_name = (
-                    f"getSUNSPEC{sunspec_id}_MODEL{model.id}_{sunspec_scale_factor}"
-                )
+                scale_factor_updater_name = f"getSUNSPEC{sunspec_id.value}_MODEL{model.id}_{sunspec_scale_factor}"
                 scale_factor_updater = f"&{scale_factor_updater_name}"
 
             sunspec_point_builder = builders.wrap(
@@ -745,7 +747,7 @@ class Parameter:
                 "InterfaceItem",
                 var_or_func,
                 types[parameter.internal_type].name,
-                f"sunspec{sunspec_id}",
+                f"sunspec{sunspec_id.value}",
                 sunspec_type,
             ]
 
