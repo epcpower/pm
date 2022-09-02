@@ -1890,8 +1890,6 @@ def create_common_initializers(
             f".variable = {sunspec2_variable},",
             f".getter = {sunspec2_getter},",
             f".setter = {sunspec2_setter},",
-            f".handGetter = {hand_coded_sunspec2_getter_function},",
-            f".handSetter = {hand_coded_sunspec2_setter_function},",
         ],
         f"}},",
         f".staticmodbus = {{",
