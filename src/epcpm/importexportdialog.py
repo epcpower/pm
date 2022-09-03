@@ -4,6 +4,7 @@ import pathlib
 import attr
 import epyqlib.utils.qt
 from PyQt5 import QtWidgets
+from functools import partial
 
 import epcpm.importexportdialog_ui
 
@@ -152,22 +153,26 @@ class Dialog(QtWidgets.QDialog):
         self.ui.pick_bitfields_c.clicked.connect(self.pick_bitfields_c)
         self.ui.pick_staticmodbus_c.clicked.connect(self.pick_staticmodbus_c)
         self.ui.pick_sunspec1_tables_c.clicked.connect(
-            self.pick_sunspec1_tables_c,
+            partial(self.pick_sunspec_tables_c, self.ui.sunspec1_tables_c)
         )
         self.ui.pick_sunspec2_tables_c.clicked.connect(
-            self.pick_sunspec2_tables_c,
+            partial(self.pick_sunspec_tables_c, self.ui.sunspec2_tables_c)
         )
         self.ui.pick_sunspec1_spreadsheet.clicked.connect(
-            self.pick_sunspec1_spreadsheet
+            partial(self.pick_sunspec_spreadsheet, self.ui.sunspec1_spreadsheet)
         )
         self.ui.pick_sunspec2_spreadsheet.clicked.connect(
-            self.pick_sunspec2_spreadsheet
+            partial(self.pick_sunspec_spreadsheet, self.ui.sunspec2_spreadsheet)
         )
         self.ui.pick_sunspec1_spreadsheet_user.clicked.connect(
-            self.pick_sunspec1_spreadsheet_user
+            partial(
+                self.pick_sunspec_spreadsheet_user, self.ui.sunspec1_spreadsheet_user
+            )
         )
         self.ui.pick_sunspec2_spreadsheet_user.clicked.connect(
-            self.pick_sunspec2_spreadsheet_user
+            partial(
+                self.pick_sunspec_spreadsheet_user, self.ui.sunspec2_spreadsheet_user
+            )
         )
         self.ui.pick_staticmodbus_spreadsheet.clicked.connect(
             self.pick_staticmodbus_spreadsheet
@@ -317,74 +322,43 @@ class Dialog(QtWidgets.QDialog):
 
         self.ui.staticmodbus_c.setText(directory)
 
-    def pick_sunspec1_tables_c(self):
+    def pick_sunspec_tables_c(self, sunspec_tables_c: QtWidgets.QLineEdit) -> None:
         filters = (
             ("SunSpec Tables C", ["c"]),
             all_files_filter,
         )
 
         self.file_dialog(
-            target=self.ui.sunspec1_tables_c,
+            target=sunspec_tables_c,
             filters=filters,
             multiple=False,
         )
 
-    def pick_sunspec2_tables_c(self):
+    def pick_sunspec_spreadsheet(
+        self, sunspec_spreadsheet: QtWidgets.QLineEdit
+    ) -> None:
+        print(f"{type(sunspec_spreadsheet)}")
         filters = (
-            ("SunSpec Tables C", ["c"]),
+            ("SunSpec Spreadsheet", ["xlsx"]),
             all_files_filter,
         )
 
         self.file_dialog(
-            target=self.ui.sunspec2_tables_c,
+            target=sunspec_spreadsheet,
             filters=filters,
             multiple=False,
         )
 
-    def pick_sunspec1_spreadsheet(self):
+    def pick_sunspec_spreadsheet_user(
+        self, sunspec_spreadsheet_user: QtWidgets.QLineEdit
+    ) -> None:
         filters = (
-            ("SunSpec Spreadsheet", ["xls"]),
+            ("SunSpec Spreadsheet", ["xlsx"]),
             all_files_filter,
         )
 
         self.file_dialog(
-            target=self.ui.sunspec1_spreadsheet,
-            filters=filters,
-            multiple=False,
-        )
-
-    def pick_sunspec2_spreadsheet(self):
-        filters = (
-            ("SunSpec Spreadsheet", ["xls"]),
-            all_files_filter,
-        )
-
-        self.file_dialog(
-            target=self.ui.sunspec2_spreadsheet,
-            filters=filters,
-            multiple=False,
-        )
-
-    def pick_sunspec1_spreadsheet_user(self):
-        filters = (
-            ("SunSpec Spreadsheet", ["xls"]),
-            all_files_filter,
-        )
-
-        self.file_dialog(
-            target=self.ui.sunspec1_spreadsheet_user,
-            filters=filters,
-            multiple=False,
-        )
-
-    def pick_sunspec2_spreadsheet_user(self):
-        filters = (
-            ("SunSpec Spreadsheet", ["xls"]),
-            all_files_filter,
-        )
-
-        self.file_dialog(
-            target=self.ui.sunspec2_spreadsheet_user,
+            target=sunspec_spreadsheet_user,
             filters=filters,
             multiple=False,
         )
