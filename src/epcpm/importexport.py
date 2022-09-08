@@ -87,7 +87,7 @@ def full_import(paths):
         for point in block.children
     )
 
-    get_set = epcpm.smdxtosunspec.import_get_set(paths.spreadsheet)
+    get_set = epcpm.smdxtosunspec.import_get_set(paths.sunspec1_spreadsheet)
 
     for model, block, point in points:
         parameter = project.models.sunspec.node_from_uuid(
@@ -105,7 +105,8 @@ def full_import(paths):
 
     project.paths["parameters"] = "parameters.json"
     project.paths["can"] = "can.json"
-    project.paths["sunspec"] = "sunspec.json"
+    project.paths["sunspec1"] = "sunspec1.json"
+    project.paths["sunspec2"] = "sunspec2.json"
     project.paths["staticmodbus"] = "staticmodbus.json"
 
     return project
@@ -136,7 +137,8 @@ def full_export(
         h_path=paths.interface_c.with_suffix(".h"),
         c_path_rejected_callback=paths.rejected_callback_c,
         can_model=project.models.can,
-        sunspec_model=project.models.sunspec,
+        sunspec1_model=project.models.sunspec1,
+        sunspec2_model=project.models.sunspec2,
         staticmodbus_model=project.models.staticmodbus,
         parameters_model=project.models.parameters,
         skip_output=skip_output,
@@ -144,8 +146,38 @@ def full_export(
     )
 
     epcpm.sunspectocsv.export(
-        path=paths.spreadsheet,
-        sunspec_model=project.models.sunspec,
+        path=paths.sunspec1_spreadsheet,
+        sunspec_model=project.models.sunspec1,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
+        parameters_model=project.models.parameters,
+        skip_output=skip_output,
+        column_filter=attr.evolve(
+            epcpm.pm_helper.attr_fill(epcpm.sunspectocsv.Fields, False),
+            model_id=True,
+            size=True,
+            name=True,
+            label=True,
+            type=True,
+            units=True,
+            bit_offset=True,
+            bit_length=True,
+            modbus_address=True,
+            parameter_uuid=True,
+            parameter_uses_interface_item=True,
+            scale_factor_uuid=True,
+            enumeration_uuid=True,
+            type_uuid=True,
+            access_level=True,
+            not_implemented=True,
+            uuid=True,
+            class_name=True,
+        ),
+    )
+
+    epcpm.sunspectocsv.export(
+        path=paths.sunspec2_spreadsheet,
+        sunspec_model=project.models.sunspec2,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO,
         parameters_model=project.models.parameters,
         skip_output=skip_output,
         column_filter=attr.evolve(
@@ -172,15 +204,39 @@ def full_export(
     )
 
     epcpm.sunspectoxlsx.export(
-        path=paths.spreadsheet,
-        sunspec_model=project.models.sunspec,
+        path=paths.sunspec1_spreadsheet,
+        sunspec_model=project.models.sunspec1,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
         parameters_model=project.models.parameters,
         skip_sunspec=skip_output,
     )
 
     epcpm.sunspectoxlsx.export(
-        path=paths.spreadsheet_user,
-        sunspec_model=project.models.sunspec,
+        path=paths.sunspec2_spreadsheet,
+        sunspec_model=project.models.sunspec2,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO,
+        parameters_model=project.models.parameters,
+        skip_sunspec=skip_output,
+    )
+
+    epcpm.sunspectoxlsx.export(
+        path=paths.sunspec1_spreadsheet_user,
+        sunspec_model=project.models.sunspec1,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
+        parameters_model=project.models.parameters,
+        skip_sunspec=skip_output,
+        column_filter=attr.evolve(
+            epcpm.pm_helper.attr_fill(epcpm.sunspectoxlsx.Fields, True),
+            get=False,
+            set=False,
+            item=False,
+        ),
+    )
+
+    epcpm.sunspectoxlsx.export(
+        path=paths.sunspec2_spreadsheet_user,
+        sunspec_model=project.models.sunspec2,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO,
         parameters_model=project.models.parameters,
         skip_sunspec=skip_output,
         column_filter=attr.evolve(
@@ -199,9 +255,18 @@ def full_export(
     )
 
     epcpm.sunspectotablesc.export(
-        c_path=paths.sunspec_tables_c,
-        h_path=paths.sunspec_tables_c.with_suffix(".h"),
-        sunspec_model=project.models.sunspec,
+        c_path=paths.sunspec1_tables_c,
+        h_path=paths.sunspec1_tables_c.with_suffix(".h"),
+        sunspec_model=project.models.sunspec1,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
+        skip_sunspec=skip_output,
+    )
+
+    epcpm.sunspectotablesc.export(
+        c_path=paths.sunspec2_tables_c,
+        h_path=paths.sunspec2_tables_c.with_suffix(".h"),
+        sunspec_model=project.models.sunspec2,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO,
         skip_sunspec=skip_output,
     )
 
@@ -223,7 +288,8 @@ def full_export(
         h_path=paths.bitfields_c.with_suffix(".h"),
         parameters_model=project.models.parameters,
         staticmodbus_model=project.models.staticmodbus,
-        sunspec_model=project.models.sunspec,
+        sunspec1_model=project.models.sunspec1,
+        sunspec2_model=project.models.sunspec2,
         skip_output=skip_output,
     )
 
@@ -267,7 +333,18 @@ def run_generation_scripts(base_path):
     subprocess.run(
         [
             os.fspath(scripts / "sunspecparser"),
-            os.fspath(emb_lib / "MODBUS_SunSpec-EPC.xlsx"),
+            os.fspath(emb_lib / "MODBUS_SunSpec1-EPC.xlsx"),
+            str(epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE.value),
+        ],
+        check=True,
+    )
+
+    emb_lib = base_path / "embedded-library"
+    subprocess.run(
+        [
+            os.fspath(scripts / "sunspecparser"),
+            os.fspath(emb_lib / "MODBUS_SunSpec2-EPC.xlsx"),
+            str(epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO.value),
         ],
         check=True,
     )
@@ -303,17 +380,30 @@ def is_stale(project, paths, skip_sunspec=False):
     source_modification_time = max(path.stat().st_mtime for path in source_paths)
 
     if skip_sunspec:
-        sunspec_models = []
+        sunspec1_models = []
+        sunspec2_models = []
     else:
-        sunspec_models = get_sunspec_models(
-            project.parent / loaded_project.paths.sunspec,
+        sunspec1_models = get_sunspec_models(
+            project.parent / loaded_project.paths.sunspec1,
+        )
+        sunspec2_models = get_sunspec_models(
+            project.parent / loaded_project.paths.sunspec2,
         )
 
-    smdx = tuple(paths.sunspec_c / f"smdx_{model:05}.xml" for model in sunspec_models)
+    smdx1 = tuple(
+        paths.sunspec_c / f"smdx1_{model:05}.xml" for model in sunspec1_models
+    )
+    smdx2 = tuple(
+        paths.sunspec_c / f"smdx2_{model:05}.xml" for model in sunspec2_models
+    )
 
-    sunspec_c_h = tuple(
-        paths.sunspec_c / f"sunspecInterfaceGen{model}.{extension}"
-        for model, extension in itertools.product(sunspec_models, ("c", "h"))
+    sunspec1_c_h = tuple(
+        paths.sunspec_c / f"sunspec1InterfaceGen{model}.{extension}"
+        for model, extension in itertools.product(sunspec1_models, ("c", "h"))
+    )
+    sunspec2_c_h = tuple(
+        paths.sunspec_c / f"sunspec2InterfaceGen{model}.{extension}"
+        for model, extension in itertools.product(sunspec2_models, ("c", "h"))
     )
 
     sil_c_h = (paths.sil_c, paths.sil_c.with_suffix(".h"))
@@ -322,11 +412,16 @@ def is_stale(project, paths, skip_sunspec=False):
         paths.can,
         paths.hierarchy,
         *paths.smdx,
-        paths.spreadsheet,
-        paths.spreadsheet_user,
-        *smdx,
-        *sunspec_c_h,
-        paths.tables_c,
+        paths.sunspec1_spreadsheet,
+        paths.sunspec2_spreadsheet,
+        paths.sunspec1_spreadsheet_user,
+        paths.sunspec2_spreadsheet_user,
+        *smdx1,
+        *smdx2,
+        *sunspec1_c_h,
+        *sunspec2_c_h,
+        paths.sunspec1_tables_c,
+        paths.sunspec2_tables_c,
         *sil_c_h,
     ]
 

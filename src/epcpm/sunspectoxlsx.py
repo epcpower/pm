@@ -101,7 +101,12 @@ enumerator_fields = Fields(
 
 
 def export(
-    path, sunspec_model, parameters_model, column_filter=None, skip_sunspec=False
+    path,
+    sunspec_model,
+    sunspec_id,
+    parameters_model,
+    column_filter=None,
+    skip_sunspec=False,
 ):
     if column_filter is None:
         column_filter = epcpm.pm_helper.attr_fill(Fields, True)
@@ -110,6 +115,7 @@ def export(
         wrapped=sunspec_model.root,
         parameter_uuid_finder=sunspec_model.node_from_uuid,
         parameter_model=parameters_model,
+        sunspec_id=sunspec_id,
         skip_sunspec=skip_sunspec,
         column_filter=column_filter,
     )
@@ -128,6 +134,7 @@ class Root:
     skip_sunspec = attr.ib(default=False)
     parameter_uuid_finder = attr.ib(default=None)
     parameter_model = attr.ib(default=None)
+    sunspec_id = attr.ib(default=None)
     sort_models = attr.ib(default=False)
 
     def gen(self):
@@ -165,6 +172,7 @@ class Root:
                         "sunspec types"
                     ].child_by_name("pad"),
                     parameter_uuid_finder=self.parameter_uuid_finder,
+                    sunspec_id=self.sunspec_id,
                     column_filter=self.column_filter,
                     model_offset=model_offset,
                 ).gen()
@@ -181,6 +189,7 @@ class Model:
     column_filter = attr.ib()
     model_offset = attr.ib()  # starting Modbus address for the model
     parameter_uuid_finder = attr.ib(default=None)
+    sunspec_id = attr.ib(default=None)
 
     def gen(self):
         self.worksheet.title = str(self.wrapped.id)
@@ -188,30 +197,37 @@ class Model:
 
         self.wrapped.children[0].check_offsets_and_length()
 
-        overall_length = sum(
-            child.check_offsets_and_length() for child in self.wrapped.children[1:]
-        )
-
-        add_padding = (overall_length % 2) == 1
-        if add_padding:
-            overall_length += 1
-
-        accumulated_length = 0
-
+        non_header_length = 0
+        overall_length = 0
+        accumulated_length = 0  # Used for each point row on spreadsheet
         rows = []
 
         model_types = ["Header", "Fixed Block", "Repeating Block"]
-
         zipped = zip(enumerate(self.wrapped.children), model_types)
         for (i, child), model_type in zipped:
+            pre_pad_block_length = child.check_offsets_and_length()
+            # Per SunSpec model specification, pad with a 16-bit pad to force even alignment to 32-bit boundaries.
+            add_padding = (pre_pad_block_length % 2) == 1
+
+            # Specifically for SunSpec1 and repeating blocks, do not add padding. This is actually a bug
+            # in the original code for SunSpec1 that must continue being in place so that the registers
+            # aren't shifted for customers using SunSpec statically by directly calling modbus registers
+            # instead of using SunSpec properly.
+            if (
+                self.sunspec_id == epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE
+                and model_type == "Repeating Block"
+            ):
+                add_padding = False
+
             builder = builders.wrap(
                 wrapped=child,
-                add_padding=add_padding and i == 1,
+                add_padding=add_padding,
                 padding_type=self.padding_type,
                 model_type=model_type,
                 model_id=self.wrapped.id,
                 model_offset=self.model_offset,
                 parameter_uuid_finder=self.parameter_uuid_finder,
+                sunspec_id=self.sunspec_id,
                 address_offset=accumulated_length,
             )
 
@@ -221,11 +237,26 @@ class Model:
                 rows.extend(built_rows)
                 rows.append(Fields())
 
+            # The code keeping track of overall_length, non_header_length, and accumulated_length
+            # could be refactored, but better to keep it simple so that the logic and purpose is clear.
+            # Each of the values has a unique purpose.
+            if i == 0:
+                # For HeaderBlock
+                overall_length += block_length
+            elif i == 1:
+                # For FixedBlock
+                overall_length += block_length
+                non_header_length += block_length
+            elif i == 2:
+                # For TableRepeatingBlock only
+                overall_length += block_length * child.get_num_repeats()
+                non_header_length += block_length * child.get_num_repeats()
+
         for i, row in enumerate(rows):
             if i == 0:
                 row.value = self.wrapped.id
             elif i == 1:
-                row.value = overall_length
+                row.value = non_header_length
 
             self.worksheet.append(row.as_filtered_tuple(self.column_filter))
 
@@ -241,7 +272,7 @@ class Model:
                     row.as_filtered_tuple(self.column_filter),
                 )
 
-        return overall_length + 2  # add header length
+        return overall_length
 
 
 @builders(epcpm.sunspecmodel.Table)
@@ -362,6 +393,7 @@ class Block:
     address_offset = attr.ib()
     repeating_block_reference = attr.ib(default=None)
     parameter_uuid_finder = attr.ib(default=None)
+    sunspec_id = attr.ib(default=None)
     is_table = attr.ib(default=False)
 
     def gen(self):
@@ -404,6 +436,7 @@ class Block:
                 is_table=self.is_table,
                 repeating_block_reference=self.repeating_block_reference,
                 address_offset=self.address_offset + summed_increments,
+                sunspec_id=self.sunspec_id,
             )
             built_rows, address_offset_increment = builder.gen()
             summed_increments += address_offset_increment
@@ -424,6 +457,7 @@ class DataPointBitfield:
     is_table = attr.ib()
     repeating_block_reference = attr.ib()
     address_offset = attr.ib()
+    sunspec_id = attr.ib(default=None)
 
     def gen(self):
         row = Fields()
@@ -470,7 +504,7 @@ class DataPointBitfield:
 
             getter.extend(
                 [
-                    f"{item_name}.common.sunspec.getter(",
+                    f"{item_name}.common.sunspec{self.sunspec_id.value}.getter(",
                     [
                         f"(InterfaceItem_void *) &{item_name},",
                         f"Meta_Value",
@@ -480,7 +514,7 @@ class DataPointBitfield:
             )
             setter.extend(
                 [
-                    f"{item_name}.common.sunspec.setter(",
+                    f"{item_name}.common.sunspec{self.sunspec_id.value}.setter(",
                     [
                         f"(InterfaceItem_void *) &{item_name},",
                         f"true,",
@@ -646,6 +680,7 @@ class TableRepeatingBlockReference:
     model_offset = attr.ib()
     address_offset = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
+    sunspec_id = attr.ib(default=None)
 
     def gen(self):
         builder = builders.wrap(
@@ -659,6 +694,7 @@ class TableRepeatingBlockReference:
             is_table=True,
             repeating_block_reference=self.wrapped,
             address_offset=self.address_offset,
+            sunspec_id=self.sunspec_id,
         )
 
         return builder.gen()
@@ -676,6 +712,7 @@ class Point:
     address_offset = attr.ib()
     repeating_block_reference = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
+    sunspec_id = attr.ib(default=None)
 
     # TODO: CAMPid 07397546759269756456100183066795496952476951653
     def gen(self):
@@ -689,32 +726,37 @@ class Point:
 
             setattr(row, name, getattr(self.wrapped, field.name))
 
-        if self.repeating_block_reference is not None:
-            target = self.parameter_uuid_finder(self.wrapped.parameter_uuid).original
-            is_array_element = isinstance(
-                target,
-                epyqlib.pm.parametermodel.ArrayParameterElement,
-            )
-            if is_array_element:
-                target = target.tree_parent.children[0]
+        if self.wrapped.parameter_uuid is not None:
+            if self.repeating_block_reference is not None:
+                target = self.parameter_uuid_finder(
+                    self.wrapped.parameter_uuid
+                ).original
+                is_array_element = isinstance(
+                    target,
+                    epyqlib.pm.parametermodel.ArrayParameterElement,
+                )
+                if is_array_element:
+                    target = target.tree_parent.children[0]
 
-            references = [
-                child
-                for child in self.repeating_block_reference.children
-                if target.uuid == child.parameter_uuid
-            ]
-            if len(references) > 0:
-                (reference,) = references
+                references = [
+                    child
+                    for child in self.repeating_block_reference.children
+                    if target.uuid == child.parameter_uuid
+                ]
+                if len(references) > 0:
+                    (reference,) = references
 
-                if reference.factor_uuid is not None:
+                    if reference.factor_uuid is not None:
+                        row.scale_factor = self.parameter_uuid_finder(
+                            self.parameter_uuid_finder(
+                                reference.factor_uuid
+                            ).parameter_uuid
+                        ).abbreviation
+            else:
+                if row.scale_factor is not None:
                     row.scale_factor = self.parameter_uuid_finder(
-                        self.parameter_uuid_finder(reference.factor_uuid).parameter_uuid
+                        self.scale_factor_from_uuid[row.scale_factor].parameter_uuid
                     ).abbreviation
-        else:
-            if row.scale_factor is not None:
-                row.scale_factor = self.parameter_uuid_finder(
-                    self.scale_factor_from_uuid[row.scale_factor].parameter_uuid
-                ).abbreviation
 
         if row.type is not None:
             row.type = self.parameter_uuid_finder(row.type).name
@@ -764,21 +806,21 @@ class Point:
 
             hand_coded_getter_function_name = getter_name(
                 parameter=parameter,
+                sunspec_id=self.sunspec_id,
                 model_id=self.model_id,
                 is_table=self.is_table,
             )
 
             hand_coded_setter_function_name = setter_name(
                 parameter=parameter,
+                sunspec_id=self.sunspec_id,
                 model_id=self.model_id,
                 is_table=self.is_table,
             )
 
             if not uses_interface_item and not self.wrapped.not_implemented:
                 if row.scale_factor is not None:
-                    scale_factor_updater_name = (
-                        f"getSUNSPEC_MODEL{self.model_id}_{row.scale_factor}"
-                    )
+                    scale_factor_updater_name = f"getSUNSPEC{self.sunspec_id.value}_MODEL{self.model_id}_{row.scale_factor}"
 
                     f = f"{scale_factor_updater_name}();"
                     get_scale_factor = f.format(
@@ -790,7 +832,9 @@ class Point:
 
                 getter.append(f"{hand_coded_getter_function_name}();")
 
-            sunspec_model_variable = f"sunspecInterface.model{self.model_id}"
+            sunspec_model_variable = (
+                f"sunspec{self.sunspec_id.value}Interface.model{self.model_id}"
+            )
 
             sunspec_variable = f"{sunspec_model_variable}.{parameter.abbreviation}"
 
@@ -925,7 +969,7 @@ class Point:
 
                 getter.extend(
                     [
-                        f"{item_name}.common.sunspec.getter(",
+                        f"{item_name}.common.sunspec{self.sunspec_id.value}.getter(",
                         [
                             f"(InterfaceItem_void *) &{item_name},",
                             f"Meta_Value",
@@ -935,7 +979,7 @@ class Point:
                 )
                 setter.extend(
                     [
-                        f"{item_name}.common.sunspec.setter(",
+                        f"{item_name}.common.sunspec{self.sunspec_id.value}.setter(",
                         [
                             f"(InterfaceItem_void *) &{item_name},",
                             f"true,",
@@ -1011,35 +1055,40 @@ def adjust_assignment(
     return result
 
 
-def getter_setter_name(get_set, parameter, model_id, is_table):
+def getter_setter_name(get_set, parameter, sunspec_id, model_id, is_table):
     if is_table:
         table_option = "_{table_option}"
     else:
         table_option = ""
 
-    format_string = "{get_set}SunspecModel{model_id}{table_option}_{abbreviation}"
+    format_string = (
+        "{get_set}Sunspec{sunspec_id}Model{model_id}{table_option}_{abbreviation}"
+    )
 
     return format_string.format(
         get_set=get_set,
+        sunspec_id=sunspec_id.value,
         model_id=model_id,
         abbreviation=parameter.abbreviation,
         table_option=table_option,
     )
 
 
-def getter_name(parameter, model_id, is_table):
+def getter_name(parameter, sunspec_id, model_id, is_table):
     return getter_setter_name(
         get_set="get",
         parameter=parameter,
+        sunspec_id=sunspec_id,
         model_id=model_id,
         is_table=is_table,
     )
 
 
-def setter_name(parameter, model_id, is_table):
+def setter_name(parameter, sunspec_id, model_id, is_table):
     return getter_setter_name(
         get_set="set",
         parameter=parameter,
+        sunspec_id=sunspec_id,
         model_id=model_id,
         is_table=is_table,
     )

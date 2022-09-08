@@ -6,6 +6,12 @@ import attr
 import typing
 import uuid
 from abc import ABC
+from enum import Enum
+
+
+class SunSpecSection(Enum):
+    SUNSPEC_ONE = 1
+    SUNSPEC_TWO = 2
 
 
 def convert_uuid_to_variable_name(input_uuid: uuid.UUID) -> str:

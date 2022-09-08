@@ -45,6 +45,9 @@ def build_sunspec_types_enumeration():
             name="uint32", value=2, uuid="eb8cdc87-05e2-4593-994e-ab3363236168"
         ),
         epyqlib.pm.parametermodel.Enumerator(
+            name="uint64", value=4, uuid="b361ca90-94bb-433b-a1a8-914472d4f411"
+        ),
+        epyqlib.pm.parametermodel.Enumerator(
             name="sunssf", value=1, uuid="02e70616-4986-4f3e-8ac4-98ac153e66f9"
         ),
         epyqlib.pm.parametermodel.Enumerator(
@@ -753,6 +756,9 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
     def check_offsets_and_length(self):
         return self.original.check_block_offsets_and_length()
 
+    def get_num_repeats(self):
+        return self.original.repeats
+
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
     internal_move = epyqlib.attrsmodel.default_internal_move
@@ -887,7 +893,7 @@ class TableRepeatingBlock(epyqlib.treenode.TreeNode):
         return False
 
     def check_block_offsets_and_length(self):
-        return self.repeats * check_block_offsets_and_length(self)
+        return check_block_offsets_and_length(self)
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from

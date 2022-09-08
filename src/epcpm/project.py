@@ -81,16 +81,31 @@ def _post_load(project):
                 columns=epcpm.canmodel.columns,
             )
 
-    if models.sunspec is None:
-        if project.paths.sunspec is None:
-            models.sunspec = epyqlib.attrsmodel.Model(
+    if models.sunspec1 is None:
+        if project.paths.sunspec1 is None:
+            models.sunspec1 = epyqlib.attrsmodel.Model(
                 root=epcpm.sunspecmodel.Root(),
                 columns=epcpm.sunspecmodel.columns,
             )
         else:
-            models.sunspec = load_model(
+            models.sunspec1 = load_model(
                 project=project,
-                path=project.paths.sunspec,
+                path=project.paths.sunspec1,
+                root_type=epcpm.sunspecmodel.Root,
+                columns=epcpm.sunspecmodel.columns,
+                drop_sources=(models.parameters,),
+            )
+
+    if models.sunspec2 is None:
+        if project.paths.sunspec2 is None:
+            models.sunspec2 = epyqlib.attrsmodel.Model(
+                root=epcpm.sunspecmodel.Root(),
+                columns=epcpm.sunspecmodel.columns,
+            )
+        else:
+            models.sunspec2 = load_model(
+                project=project,
+                path=project.paths.sunspec2,
                 root_type=epcpm.sunspecmodel.Root,
                 columns=epcpm.sunspecmodel.columns,
                 drop_sources=(models.parameters,),
@@ -117,8 +132,11 @@ def _post_load(project):
     models.can.droppable_from.add(models.parameters)
     models.can.droppable_from.add(models.can)
 
-    models.sunspec.droppable_from.add(models.parameters)
-    models.sunspec.droppable_from.add(models.sunspec)
+    models.sunspec1.droppable_from.add(models.parameters)
+    models.sunspec1.droppable_from.add(models.sunspec1)
+
+    models.sunspec2.droppable_from.add(models.parameters)
+    models.sunspec2.droppable_from.add(models.sunspec2)
 
     models.update_enumeration_roots()
 
@@ -134,7 +152,11 @@ class Models:
         default=None,
         metadata=graham.create_metadata(field=marshmallow.fields.String()),
     )
-    sunspec = attr.ib(
+    sunspec1 = attr.ib(
+        default=None,
+        metadata=graham.create_metadata(field=marshmallow.fields.String()),
+    )
+    sunspec2 = attr.ib(
         default=None,
         metadata=graham.create_metadata(field=marshmallow.fields.String()),
     )
@@ -150,7 +172,8 @@ class Models:
     def set_all(self, value):
         self.parameters = value
         self.can = value
-        self.sunspec = value
+        self.sunspec1 = value
+        self.sunspec2 = value
         self.staticmodbus = value
 
     def items(self):
@@ -229,8 +252,10 @@ class Models:
                 staticmodbus_types_root = None
 
         self.parameters.list_selection_roots["sunspec types"] = sunspec_types_root
-        self.sunspec.list_selection_roots["sunspec types"] = sunspec_types_root
-        self.sunspec.list_selection_roots["enumerations"] = enumerations_root
+        self.sunspec1.list_selection_roots["sunspec types"] = sunspec_types_root
+        self.sunspec1.list_selection_roots["enumerations"] = enumerations_root
+        self.sunspec2.list_selection_roots["sunspec types"] = sunspec_types_root
+        self.sunspec2.list_selection_roots["enumerations"] = enumerations_root
 
         self.staticmodbus.list_selection_roots[
             "staticmodbus types"
@@ -240,7 +265,8 @@ class Models:
         self.can.list_selection_roots["enumerations"] = enumerations_root
         self.parameters.update_nodes()
         self.can.update_nodes()
-        self.sunspec.update_nodes()
+        self.sunspec1.update_nodes()
+        self.sunspec2.update_nodes()
         self.staticmodbus.update_nodes()
 
 
