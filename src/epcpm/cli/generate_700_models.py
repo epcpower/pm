@@ -590,7 +590,7 @@ class ModelConversion:
             for point in points:
                 point_name = point["name"]
 
-                if point["type"] != "pad":
+                if point["type"] != "pad" and point_name not in ["ID", "L"]:
                     h_function_list.append(
                         f"void getSunspec2Model{model_id}_{point_name}(void);"
                     )
