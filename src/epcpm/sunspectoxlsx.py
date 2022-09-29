@@ -213,9 +213,13 @@ class Model:
             # in the original code for SunSpec1 that must continue being in place so that the registers
             # aren't shifted for customers using SunSpec statically by directly calling modbus registers
             # instead of using SunSpec properly.
+            # Specifically for SunSpec2, only add padding for model 1. The 700 series models don't require padding.
             if (
                 self.sunspec_id == epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE
                 and model_type == "Repeating Block"
+            ) or (
+                self.sunspec_id == epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO
+                and self.wrapped.id != 1
             ):
                 add_padding = False
 
