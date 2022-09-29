@@ -1,3 +1,7 @@
+# TODO: Remove this script prior to merge into develop.
+# This is script will no longer be necessary once the 700 series models
+# are generated and in a working state.
+
 import json
 import typing
 import uuid
