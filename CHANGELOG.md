@@ -9,6 +9,7 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### Added
 
+- SC-795: Add units to SunSpec2/parameters for 700 series models
 - SC-754: Add SunSpec 700 series models to SunSpec2
 - SC-656: Add secondary SunSpec interface generation
 - SC-661: Add SunSpec uint64 support

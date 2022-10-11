@@ -437,6 +437,8 @@ class ModelConversion:
             parameters_child.comment = point["desc"]
             if "static" in point and point["static"] == "S":
                 parameters_child.read_only = True
+            if "units" in point:
+                parameters_child.units = point["units"]
 
             model_curve_info_key = f"{model_id}|{point_name}"
             if model_curve_info_key in MODEL_CURVE_INFO:
@@ -454,6 +456,8 @@ class ModelConversion:
             if point["type"] == "sunssf":
                 is_scale_factor = True
             sunspec_child.size = point["size"]
+            if "units" in point:
+                sunspec_child.units = point["units"]
 
             if "mandatory" in point and point["mandatory"] == "M":
                 sunspec_child.mandatory = True
