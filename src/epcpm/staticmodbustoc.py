@@ -178,7 +178,6 @@ class FunctionData:
             and uses_interface_item
             and not self.wrapped.not_implemented
             and type_node is not None
-            and type_node.name != "staticmodbussf"
         ):
             parameter_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
                 self.wrapped.parameter_uuid
