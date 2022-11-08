@@ -704,6 +704,7 @@ class TableRepeatingBlockReferenceDataPointReference(epyqlib.treenode.TreeNode):
     can_delete = epyqlib.attrsmodel.childless_can_delete
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
 
 
 @graham.schemify(tag="sunspec_table_repeating_block", register=True)
