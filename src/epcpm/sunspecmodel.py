@@ -295,6 +295,15 @@ class DataPoint(epyqlib.treenode.TreeNode):
         ),
     )
 
+    common_table_parameter_uuid = epyqlib.attrsmodel.attr_uuid(
+        default=None,
+        allow_none=True,
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=common_table_parameter_uuid,
+        human_name="Common Table Parameter UUID",
+    )
+
     uuid = epyqlib.attrsmodel.attr_uuid()
     # value  doesn't make sense here, this is interface definition, not a
     #       value set
@@ -684,15 +693,17 @@ class TableRepeatingBlockReferenceDataPointReference(epyqlib.treenode.TreeNode):
         super().__init__()
 
     def can_drop_on(self, node):
-        return False
+        return isinstance(node, epyqlib.pm.parametermodel.Parameter)
+        # return False
+
+    def child_from(self, node):
+        self.parameter_uuid = node.uuid
+
+        return None
 
     can_delete = epyqlib.attrsmodel.childless_can_delete
-    all_addable_types = epyqlib.attrsmodel.empty_all_addable_types
-    addable_types = epyqlib.attrsmodel.empty_addable_types
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
-    child_from = epyqlib.attrsmodel.default_child_from
     internal_move = epyqlib.attrsmodel.default_internal_move
-    check = epyqlib.attrsmodel.check_just_children
 
 
 @graham.schemify(tag="sunspec_table_repeating_block", register=True)
@@ -719,6 +730,8 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
         metadata=graham.create_metadata(
             field=graham.fields.MixedList(
                 fields=(
+                    marshmallow.fields.Nested(graham.schema(DataPoint)),
+                    marshmallow.fields.Nested(graham.schema(DataPointBitfield)),
                     marshmallow.fields.Nested(
                         graham.schema(
                             TableRepeatingBlockReferenceDataPointReference,
@@ -736,14 +749,6 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
     def __attrs_post_init__(self):
         super().__init__()
 
-    @classmethod
-    def all_addable_types(cls):
-        return epyqlib.attrsmodel.create_addable_types(())
-
-    @staticmethod
-    def addable_types():
-        return {}
-
     def can_drop_on(self, node):
         return False
 
@@ -751,7 +756,7 @@ class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
         if node is None:
             return self.tree_parent.can_delete(node=self)
 
-        return False
+        return isinstance(node, (DataPoint, DataPointBitfield))
 
     def check_offsets_and_length(self):
         return self.original.check_block_offsets_and_length()
@@ -1132,6 +1137,80 @@ class Table(epyqlib.treenode.TreeNode):
     check = epyqlib.attrsmodel.check_just_children
 
 
+@graham.schemify(tag="sunspec_table_block", register=True)
+@epyqlib.attrsmodel.ify()
+@epyqlib.utils.qt.pyqtify()
+@epyqlib.utils.qt.pyqtify_passthrough_properties(
+    original="original",
+    field_names=("name",),
+)
+@attr.s(hash=False)
+class TableBlock(epyqlib.treenode.TreeNode):
+    name = attr.ib(
+        default="Table Block",
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    offset = attr.ib(
+        default=2,
+        converter=int,
+    )
+    children = attr.ib(
+        factory=list,
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(
+                fields=(
+                    marshmallow.fields.Nested(graham.schema(DataPoint)),
+                    marshmallow.fields.Nested(graham.schema(DataPointBitfield)),
+                    # marshmallow.fields.Nested(
+                    #     graham.schema(
+                    #         TableRepeatingBlockReferenceDataPointReference,
+                    #     )
+                    # ),
+                )
+            ),
+        ),
+    )
+
+    original = epyqlib.attrsmodel.create_reference_attribute()
+
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    # @classmethod
+    # def all_addable_types(cls):
+    #     return epyqlib.attrsmodel.create_addable_types(())
+    #
+    # @staticmethod
+    # def addable_types():
+    #     return {}
+
+    def can_drop_on(self, node):
+        return False
+
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+        return isinstance(node, (DataPoint, DataPointBitfield))
+        # return False
+
+    # def check_offsets_and_length(self):
+    #     return self.original.check_block_offsets_and_length()
+
+    def get_num_repeats(self):
+        return 1
+
+    check_offsets_and_length = check_block_offsets_and_length
+    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    child_from = epyqlib.attrsmodel.default_child_from
+    internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
+
+
 @graham.schemify(tag="sunspec_model", register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
@@ -1172,6 +1251,7 @@ class Model(epyqlib.treenode.TreeNode):
                     marshmallow.fields.Nested(
                         graham.schema(TableRepeatingBlockReference)
                     ),
+                    marshmallow.fields.Nested(graham.schema(TableBlock)),
                 )
             ),
         ),
@@ -1208,7 +1288,7 @@ class Model(epyqlib.treenode.TreeNode):
         if node is None:
             return self.tree_parent.can_delete(node=self)
 
-        return not isinstance(node, (HeaderBlock, FixedBlock))
+        return not isinstance(node, (HeaderBlock, FixedBlock, TableBlock))
 
     def check_offsets_and_length(self):
         length = 0
@@ -1244,6 +1324,7 @@ types = epyqlib.attrsmodel.Types(
         TableRepeatingBlock,
         TableRepeatingBlockReference,
         TableRepeatingBlockReferenceDataPointReference,
+        TableBlock,
     ),
 )
 
@@ -1262,6 +1343,7 @@ columns = epyqlib.attrsmodel.columns(
             Table,
             TableRepeatingBlock,
             TableRepeatingBlockReference,
+            TableBlock,
         )
         + merge("id", Model)
         + merge(
@@ -1289,6 +1371,7 @@ columns = epyqlib.attrsmodel.columns(
     merge("bit_length", DataPointBitfieldMember),
     merge("bit_offset", DataPointBitfieldMember),
     merge("parameter_table_uuid", Table),
+    merge("common_table_parameter_uuid", DataPoint),
     merge("mandatory", DataPoint),
     merge(
         "offset",
@@ -1297,6 +1380,7 @@ columns = epyqlib.attrsmodel.columns(
         FixedBlock,
         TableRepeatingBlockReference,
         TableRepeatingBlock,
+        TableBlock,
     ),
     merge("block_offset", DataPoint, DataPointBitfield),
     merge("uuid", *types.types.values()),

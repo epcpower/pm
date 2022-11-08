@@ -383,6 +383,7 @@ def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
     return scale_factor_from_uuid
 
 
+@builders(epcpm.sunspecmodel.TableBlock)
 @builders(epcpm.sunspecmodel.TableRepeatingBlock)
 @builders(epcpm.sunspecmodel.HeaderBlock)
 @builders(epcpm.sunspecmodel.FixedBlock)
@@ -630,6 +631,7 @@ class DataPointBitfieldMember:
 @enumeration_builders(epcpm.sunspecmodel.HeaderBlock)
 @enumeration_builders(epcpm.sunspecmodel.FixedBlock)
 @enumeration_builders(epcpm.sunspecmodel.TableRepeatingBlockReference)
+@enumeration_builders(epcpm.sunspecmodel.TableBlock)
 @attr.s
 class GenericEnumeratorBuilder:
     wrapped = attr.ib()

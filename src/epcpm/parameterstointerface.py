@@ -1290,7 +1290,6 @@ class TableBaseStructures:
                 )
                 scale_factor_updater = f"&{scale_factor_updater_name}"
 
-        # TODO: possible refactor with above?
         if sunspec2_point is not None:
             sunspec_type = sunspec_types[
                 self.parameter_uuid_finder(sunspec2_point.type_uuid).name
@@ -1305,26 +1304,15 @@ class TableBaseStructures:
                 sunspec_type,
             ]
 
-            node_in_model = get_sunspec_point_from_table_element(
-                sunspec_point=sunspec2_point,
-                table_element=table_element,
+            model_id = sunspec2_point.tree_parent.tree_parent.id
+            sunspec_model_variable = f"sunspec2Interface.model{model_id}"
+            abbreviation = table_element.abbreviation
+            sunspec2_variable = (
+                f"{sunspec_model_variable}" f".Curve_{curve_index:>02}_{abbreviation}"
             )
 
-            if node_in_model is not None:
-                model_id = node_in_model.tree_parent.tree_parent.id
-                sunspec_model_variable = f"sunspec2Interface.model{model_id}"
-                abbreviation = table_element.abbreviation
-                sunspec2_variable = (
-                    f"{sunspec_model_variable}"
-                    f".Curve_{curve_index:>02}_{abbreviation}"
-                )
-
-                sunspec2_getter = "_".join(
-                    str(x) for x in getter_setter_list + ["getter"]
-                )
-                sunspec2_setter = "_".join(
-                    str(x) for x in getter_setter_list + ["setter"]
-                )
+            sunspec2_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
+            sunspec2_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
 
         if not staticmodbus_point is None:
             staticmodbus_type = staticmodbus_types[
@@ -1414,14 +1402,14 @@ class TableBaseStructures:
                 ]
             sunspec1_variable_initializer = f"&{sunspec1_variable}"
         maybe_sunspec2_variable_length = []
-        if sunspec1_variable is None:
+        if sunspec2_variable is None:
             sunspec2_variable_initializer = "NULL"
         else:
             if parameter.internal_type == "PackedString":
                 maybe_sunspec2_variable_length = [
-                    f".sunspec2_variable_length = sizeof({sunspec1_variable}),",
+                    f".sunspec2_variable_length = sizeof({sunspec2_variable}),",
                 ]
-            sunspec2_variable_initializer = f"&{sunspec1_variable}"
+            sunspec2_variable_initializer = f"&{sunspec2_variable}"
 
         c = [
             f'#pragma DATA_SECTION({item_name}, "Interface")',
@@ -1431,7 +1419,7 @@ class TableBaseStructures:
             [
                 f".table_common = &{common_structure_name},",
                 f".can_variable = {can_variable},",
-                f".sunspec1_variable = {sunspec2_variable_initializer},",
+                f".sunspec1_variable = {sunspec1_variable_initializer},",
                 *maybe_sunspec1_variable_length,
                 f".sunspec2_variable = {sunspec2_variable_initializer},",
                 *maybe_sunspec2_variable_length,

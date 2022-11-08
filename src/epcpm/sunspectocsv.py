@@ -650,6 +650,77 @@ class TableRepeatingBlock:
         return [], 0
 
 
+@builders(epcpm.sunspecmodel.TableBlock)
+@attr.s
+class TableBlock:
+    """CSV generator for the SunSpec TableBlock class."""
+
+    wrapped = attr.ib(type=epcpm.sunspecmodel.TableBlock)
+    add_padding = attr.ib(type=bool)
+    padding_type = attr.ib(type=epyqlib.pm.parametermodel.Enumerator)
+    model_type = attr.ib(type=str)
+    model_id = attr.ib(type=int)
+    model_offset = attr.ib(type=int)
+    address_offset = attr.ib(type=int)
+    parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
+    # TODO: what are repeating_block_reference and is_table doing?????????????????
+    repeating_block_reference = attr.ib(
+        default=None, type=epcpm.sunspecmodel.TableRepeatingBlockReference
+    )
+    is_table = attr.ib(default=False, type=bool)
+
+    def gen(self) -> typing.Tuple[typing.List[Fields], int]:
+        """
+        CSV generator for the SunSpec TableBlock class.
+
+        Returns:
+            list, int: list of point data, total register size of block
+        """
+        scale_factor_from_uuid = build_uuid_scale_factor_dict(
+            points=self.wrapped.children,
+            parameter_uuid_finder=self.parameter_uuid_finder,
+        )
+
+        rows = []
+
+        points = list(self.wrapped.children)
+
+        if self.add_padding:
+            point = epcpm.sunspecmodel.DataPoint(
+                type_uuid=self.padding_type.uuid,
+                block_offset=(
+                    self.wrapped.children[-1].block_offset
+                    + self.wrapped.children[-1].size
+                ),
+                size=self.padding_type.value,
+            )
+            # TODO: ack!  just to get the address offset calculated but
+            #       not calling append_child() because i don't want to shove
+            #       this into the model.  :[
+            point.tree_parent = self.wrapped
+            points.append(point)
+
+        summed_increments = 0
+
+        for child in points:
+            builder = builders.wrap(
+                wrapped=child,
+                model_type=self.model_type,
+                scale_factor_from_uuid=scale_factor_from_uuid,
+                parameter_uuid_finder=self.parameter_uuid_finder,
+                model_id=self.model_id,
+                model_offset=self.model_offset,
+                is_table=self.is_table,
+                repeating_block_reference=self.repeating_block_reference,
+                address_offset=self.address_offset + summed_increments,
+            )
+            built_rows, address_offset_increment = builder.gen()
+            summed_increments += address_offset_increment
+            rows.extend(built_rows)
+
+        return rows, summed_increments
+
+
 @builders(epcpm.sunspecmodel.DataPoint)
 @attr.s
 class Point:

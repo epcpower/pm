@@ -1,4 +1,5 @@
 import attr
+import re
 import epyqlib.utils.general
 import epyqlib.pm.parametermodel
 
@@ -7,6 +8,8 @@ import epcpm.sunspecmodel
 
 
 builders = epyqlib.utils.general.TypeMap()
+
+re_digit_expr = re.compile(r"\d+")
 
 
 def export(c_path, h_path, sunspec_model, sunspec_id, skip_sunspec=False):
@@ -123,7 +126,10 @@ class Model:
         for child in self.wrapped.children:
             found = isinstance(
                 child,
-                epcpm.sunspecmodel.TableRepeatingBlockReference,
+                (
+                    epcpm.sunspecmodel.TableRepeatingBlockReference,
+                    epcpm.sunspecmodel.TableBlock,
+                ),
             )
             if found:
                 break
@@ -383,5 +389,150 @@ class DataPoint:
             both_lines[1].append(
                 f"{function_signature};",
             )
+
+        return both_lines
+
+    def gen_for_table_block(self):
+        # TODO: Need to clean up unused variables in this method...
+
+        parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+        common_parameter = self.parameter_uuid_finder(
+            self.wrapped.common_table_parameter_uuid
+        )
+
+        interface_variable = (
+            f"sunspec{self.sunspec_id.value}Interface"
+            f".model{self.model_id}"
+            f".{parameter.abbreviation}"
+            # f".Curve_{self.curve_index + 1:02}_{parameter.abbreviation}"
+        )
+
+        both_lines = [[], []]
+
+        getter_setter = {
+            "get": common_parameter.can_getter,
+            "set": common_parameter.can_setter,
+        }
+
+        for get_set, embedded in getter_setter.items():
+            # TODO: CAMPid 075780541068182645821856068542023499
+            converter = {
+                "uint32": {
+                    "get": "sunspecUint32ToSSU32_returns",
+                    "set": "sunspecSSU32ToUint32",
+                },
+                "int32": {
+                    # TODO: add this to embedded?
+                    # 'get': 'sunspecInt32ToSSS32',
+                    "set": "sunspecSSS32ToInt32",
+                },
+                "uint64": {
+                    "get": "sunspecUint64ToSSU64_returns",
+                    "set": "sunspecSSU64ToUint64",
+                },
+            }.get(self.parameter_uuid_finder(self.wrapped.type_uuid).name)
+
+            body_lines = []
+            axis = "<no axis>"
+
+            print("gen2 before parameter.uses_interface_item")
+            if parameter.uses_interface_item():
+                print("gen2 inside parameter.uses_interface_item")
+                item_uuid_string = epcpm.pm_helper.convert_uuid_to_variable_name(
+                    parameter.uuid
+                )
+                item_name = f"interfaceItem_{item_uuid_string}"
+
+                if True:  # is_group:
+                    if get_set == "get":
+                        body_lines.extend(
+                            [
+                                f"{item_name}.table_common->common.sunspec{self.sunspec_id.value}.getter(",
+                                [
+                                    f"(InterfaceItem_void *) &{item_name},",
+                                    f"Meta_Value",
+                                ],
+                                f");",
+                            ]
+                        )
+                    elif get_set == "set":
+                        body_lines.extend(
+                            [
+                                f"{item_name}.table_common->common.sunspec{self.sunspec_id.value}.setter(",
+                                [
+                                    f"(InterfaceItem_void *) &{item_name},",
+                                    f"true,",
+                                    f"Meta_Value",
+                                ],
+                                f");",
+                            ]
+                        )
+
+            function_name = "_".join(
+                [
+                    f"{get_set}Sunspec{self.sunspec_id.value}Model{self.model_id}",
+                    "Curve",
+                    f"{self.curve_index + 1:02}",
+                    parameter.abbreviation,
+                ]
+            )
+            function_signature = f"void {function_name} (void)"
+
+            both_lines[0].extend(
+                [
+                    f"{function_signature} {{",
+                    body_lines,
+                    "}",
+                    "",
+                ]
+            )
+
+            both_lines[1].append(
+                f"{function_signature};",
+            )
+
+        return both_lines
+
+
+@builders(epcpm.sunspecmodel.TableBlock)
+@attr.s
+class TableBlock:
+    wrapped = attr.ib()
+    model_id = attr.ib()
+    parameter_uuid_finder = attr.ib()
+    sunspec_id = attr.ib()
+
+    def gen(self):
+        both_lines = [[], []]
+        for point in self.wrapped.children:
+            parameter = self.parameter_uuid_finder(point.parameter_uuid)
+
+            if point.common_table_parameter_uuid:
+                curve_point_list = [
+                    int(s) for s in re.findall(re_digit_expr, parameter.abbreviation)
+                ]
+                if len(curve_point_list) > 1:
+                    curve_index = curve_point_list[0]
+                else:
+                    curve_index = -1
+                curve_type = ""
+
+                builder = builders.wrap(
+                    wrapped=point,
+                    model_id=self.model_id,
+                    sunspec_id=self.sunspec_id,
+                    curve_index=curve_index,
+                    curve_type=curve_type,
+                    parameter_uuid_finder=self.parameter_uuid_finder,
+                )
+
+                for lines, more_lines in zip(both_lines, builder.gen_for_table_block()):
+                    lines.extend(more_lines)
+                    lines.append("")
+            else:
+                # TODO: Only printing out for now until other logic is figured out.
+                print(
+                    f"TableBlock::gen() -- common_parameter was null for {parameter.uuid}"
+                )
 
         return both_lines
