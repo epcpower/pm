@@ -1500,7 +1500,6 @@ def get_sunspec2_point_from_table_element(sunspec_point, table_element):
             attribute_name="common_table_parameter_uuid",
             raise_=False,
         )
-
         if isinstance(
             node,
             epcpm.sunspecmodel.DataPoint,
