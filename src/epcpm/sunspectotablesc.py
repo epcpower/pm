@@ -259,6 +259,26 @@ class DataPoint:
         if getter_setter["set"] is None:
             getter_setter["set"] = ""
 
+        return self._gen_common(table_element, parameter, getter_setter)
+
+    def gen_for_table_block(self):
+        table_element = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+        common_parameter = self.parameter_uuid_finder(
+            self.wrapped.common_table_parameter_uuid
+        )
+        # parameter = table_element
+
+        getter_setter = {
+            "get": common_parameter.can_getter,
+            "set": common_parameter.can_setter,
+        }
+
+        # TODO: Need to come up with a way to define "curves". !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        self.curve_index = 0
+
+        return self._gen_common(table_element, table_element, getter_setter)
+
+    def _gen_common(self, table_element, parameter, getter_setter):
         axis = table_element.tree_parent.axis
         if axis is None:
             axis = "<no axis>"
@@ -373,107 +393,6 @@ class DataPoint:
                     "Curve",
                     f"{self.curve_index + 1:02}",
                     table_element.abbreviation,
-                ]
-            )
-            function_signature = f"void {function_name} (void)"
-
-            both_lines[0].extend(
-                [
-                    f"{function_signature} {{",
-                    body_lines,
-                    "}",
-                    "",
-                ]
-            )
-
-            both_lines[1].append(
-                f"{function_signature};",
-            )
-
-        return both_lines
-
-    def gen_for_table_block(self):
-        # TODO: Need to clean up unused variables in this method...
-
-        parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
-        common_parameter = self.parameter_uuid_finder(
-            self.wrapped.common_table_parameter_uuid
-        )
-
-        interface_variable = (
-            f"sunspec{self.sunspec_id.value}Interface"
-            f".model{self.model_id}"
-            f".{parameter.abbreviation}"
-            # f".Curve_{self.curve_index + 1:02}_{parameter.abbreviation}"
-        )
-
-        both_lines = [[], []]
-
-        getter_setter = {
-            "get": common_parameter.can_getter,
-            "set": common_parameter.can_setter,
-        }
-
-        for get_set, embedded in getter_setter.items():
-            # TODO: CAMPid 075780541068182645821856068542023499
-            converter = {
-                "uint32": {
-                    "get": "sunspecUint32ToSSU32_returns",
-                    "set": "sunspecSSU32ToUint32",
-                },
-                "int32": {
-                    # TODO: add this to embedded?
-                    # 'get': 'sunspecInt32ToSSS32',
-                    "set": "sunspecSSS32ToInt32",
-                },
-                "uint64": {
-                    "get": "sunspecUint64ToSSU64_returns",
-                    "set": "sunspecSSU64ToUint64",
-                },
-            }.get(self.parameter_uuid_finder(self.wrapped.type_uuid).name)
-
-            body_lines = []
-            axis = "<no axis>"
-
-            print("gen2 before parameter.uses_interface_item")
-            if parameter.uses_interface_item():
-                print("gen2 inside parameter.uses_interface_item")
-                item_uuid_string = epcpm.pm_helper.convert_uuid_to_variable_name(
-                    parameter.uuid
-                )
-                item_name = f"interfaceItem_{item_uuid_string}"
-
-                if True:  # is_group:
-                    if get_set == "get":
-                        body_lines.extend(
-                            [
-                                f"{item_name}.table_common->common.sunspec{self.sunspec_id.value}.getter(",
-                                [
-                                    f"(InterfaceItem_void *) &{item_name},",
-                                    f"Meta_Value",
-                                ],
-                                f");",
-                            ]
-                        )
-                    elif get_set == "set":
-                        body_lines.extend(
-                            [
-                                f"{item_name}.table_common->common.sunspec{self.sunspec_id.value}.setter(",
-                                [
-                                    f"(InterfaceItem_void *) &{item_name},",
-                                    f"true,",
-                                    f"Meta_Value",
-                                ],
-                                f");",
-                            ]
-                        )
-
-            function_name = "_".join(
-                [
-                    f"{get_set}Sunspec{self.sunspec_id.value}Model{self.model_id}",
-                    "Curve",
-                    f"{self.curve_index + 1:02}",
-                    parameter.abbreviation,
                 ]
             )
             function_signature = f"void {function_name} (void)"

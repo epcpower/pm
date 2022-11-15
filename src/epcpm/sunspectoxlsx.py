@@ -233,6 +233,7 @@ class Model:
                 parameter_uuid_finder=self.parameter_uuid_finder,
                 sunspec_id=self.sunspec_id,
                 address_offset=accumulated_length,
+                is_table=model_type == "Repeating Block",
             )
 
             built_rows, block_length = builder.gen()
@@ -687,6 +688,7 @@ class TableRepeatingBlockReference:
     address_offset = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
     sunspec_id = attr.ib(default=None)
+    is_table = attr.ib(default=False)
 
     def gen(self):
         builder = builders.wrap(
@@ -697,7 +699,7 @@ class TableRepeatingBlockReference:
             padding_type=self.padding_type,
             model_id=self.model_id,
             model_offset=self.model_offset,
-            is_table=True,
+            is_table=self.is_table,
             repeating_block_reference=self.wrapped,
             address_offset=self.address_offset,
             sunspec_id=self.sunspec_id,
@@ -842,7 +844,14 @@ class Point:
                 f"sunspec{self.sunspec_id.value}Interface.model{self.model_id}"
             )
 
-            sunspec_variable = f"{sunspec_model_variable}.{parameter.abbreviation}"
+            if self.is_table:
+                table_option = "{table_option}_"
+            else:
+                table_option = ""
+
+            sunspec_variable = (
+                f"{sunspec_model_variable}.{table_option}{parameter.abbreviation}"
+            )
 
             if row.type == "pad":
                 getter.append(f"{sunspec_variable} = 0x8000;")
