@@ -273,9 +273,6 @@ class DataPoint:
             "set": common_parameter.can_setter,
         }
 
-        # TODO: Need to come up with a way to define "curves". !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        self.curve_index = 0
-
         return self._gen_common(table_element, table_element, getter_setter)
 
     def _gen_common(self, table_element, parameter, getter_setter):
@@ -424,34 +421,81 @@ class TableBlock:
     def gen(self):
         both_lines = [[], []]
         for point in self.wrapped.children:
-            parameter = self.parameter_uuid_finder(point.parameter_uuid)
+            # Should always be a TableGroup.
+            builder = builders.wrap(
+                wrapped=point,
+                model_id=self.model_id,
+                sunspec_id=self.sunspec_id,
+                parameter_uuid_finder=self.parameter_uuid_finder,
+            )
 
-            if point.common_table_parameter_uuid:
-                curve_point_list = [
-                    int(s) for s in re.findall(re_digit_expr, parameter.abbreviation)
-                ]
-                if len(curve_point_list) > 1:
-                    curve_index = curve_point_list[0]
-                else:
-                    curve_index = -1
-                curve_type = ""
+            for lines, more_lines in zip(both_lines, builder.gen()):
+                lines.extend(more_lines)
+                lines.append("")
 
+        return both_lines
+
+
+@builders(epcpm.sunspecmodel.TableGroup)
+@attr.s
+class TableGroup:
+    wrapped = attr.ib()
+    model_id = attr.ib()
+    parameter_uuid_finder = attr.ib()
+    sunspec_id = attr.ib()
+
+    def gen(self):
+        both_lines = [[], []]
+        for point in self.wrapped.children:
+            if isinstance(point, epcpm.sunspecmodel.TableGroup):
                 builder = builders.wrap(
                     wrapped=point,
                     model_id=self.model_id,
                     sunspec_id=self.sunspec_id,
-                    curve_index=curve_index,
-                    curve_type=curve_type,
                     parameter_uuid_finder=self.parameter_uuid_finder,
                 )
 
-                for lines, more_lines in zip(both_lines, builder.gen_for_table_block()):
+                for lines, more_lines in zip(both_lines, builder.gen()):
                     lines.extend(more_lines)
                     lines.append("")
             else:
-                # TODO: Only printing out for now until other logic is figured out.
-                print(
-                    f"TableBlock::gen() -- common_parameter was null for {parameter.uuid}"
-                )
+                parameter = self.parameter_uuid_finder(point.parameter_uuid)
+
+                if point.common_table_parameter_uuid:
+                    curve_index = find_curve_for_point(point)
+                    curve_type = ""
+
+                    builder = builders.wrap(
+                        wrapped=point,
+                        model_id=self.model_id,
+                        sunspec_id=self.sunspec_id,
+                        curve_index=curve_index,
+                        curve_type=curve_type,
+                        parameter_uuid_finder=self.parameter_uuid_finder,
+                    )
+
+                    for lines, more_lines in zip(
+                        both_lines, builder.gen_for_table_block()
+                    ):
+                        lines.extend(more_lines)
+                        lines.append("")
+                else:
+                    # TODO: Only printing out for now until other logic is figured out.
+                    print(
+                        f"TableBlock::gen() -- common_parameter was null for {parameter.uuid}"
+                    )
 
         return both_lines
+
+
+def find_curve_for_point(point) -> int:
+    tree_path = list()
+    current_tree_node = point.tree_parent
+    while not isinstance(current_tree_node, epcpm.sunspecmodel.TableBlock):
+        tree_path.append(current_tree_node)
+        current_tree_node = current_tree_node.tree_parent
+
+    for curve_index, child in enumerate(current_tree_node.children):
+        if child == tree_path[-1]:
+            return curve_index
+    return -1

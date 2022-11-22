@@ -7,6 +7,7 @@ import math
 import attr
 import openpyxl
 import typing
+import uuid
 
 import epyqlib.pm.parametermodel
 import epyqlib.utils.general
@@ -202,6 +203,14 @@ class Model:
         accumulated_length = 0  # Used for each point row on spreadsheet
         rows = []
 
+        # Discover the FixedBlock for future use in the TableBlock.
+        for block in self.wrapped.children:
+            if isinstance(block, epcpm.sunspecmodel.FixedBlock):
+                fixed_block_reference = block
+                break
+        else:
+            fixed_block_reference = None
+
         model_types = ["Header", "Fixed Block", "Repeating Block"]
         zipped = zip(enumerate(self.wrapped.children), model_types)
         for (i, child), model_type in zipped:
@@ -234,6 +243,7 @@ class Model:
                 sunspec_id=self.sunspec_id,
                 address_offset=accumulated_length,
                 is_table=model_type == "Repeating Block",
+                fixed_block_reference=fixed_block_reference,
             )
 
             built_rows, block_length = builder.gen()
@@ -384,7 +394,6 @@ def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
     return scale_factor_from_uuid
 
 
-@builders(epcpm.sunspecmodel.TableBlock)
 @builders(epcpm.sunspecmodel.TableRepeatingBlock)
 @builders(epcpm.sunspecmodel.HeaderBlock)
 @builders(epcpm.sunspecmodel.FixedBlock)
@@ -401,6 +410,7 @@ class Block:
     parameter_uuid_finder = attr.ib(default=None)
     sunspec_id = attr.ib(default=None)
     is_table = attr.ib(default=False)
+    fixed_block_reference = attr.ib(default=None, type=epcpm.sunspecmodel.FixedBlock)
 
     def gen(self):
         # TODO: CAMPid 07548795421667967542697543743987
@@ -434,6 +444,8 @@ class Block:
         for child in points:
             builder = builders.wrap(
                 wrapped=child,
+                add_padding=self.add_padding,
+                padding_type=self.padding_type,
                 model_type=self.model_type,
                 scale_factor_from_uuid=scale_factor_from_uuid,
                 parameter_uuid_finder=self.parameter_uuid_finder,
@@ -451,10 +463,129 @@ class Block:
         return rows, summed_increments
 
 
+@builders(epcpm.sunspecmodel.TableBlock)
+@attr.s
+class TableBlock:
+    wrapped = attr.ib()
+    add_padding = attr.ib()
+    padding_type = attr.ib()
+    model_type = attr.ib()
+    model_id = attr.ib()
+    model_offset = attr.ib()
+    address_offset = attr.ib()
+    repeating_block_reference = attr.ib(default=None)
+    parameter_uuid_finder = attr.ib(default=None)
+    sunspec_id = attr.ib(default=None)
+    is_table = attr.ib(default=False)
+    fixed_block_reference = attr.ib(default=None, type=epcpm.sunspecmodel.FixedBlock)
+
+    def gen(self):
+        rows = []
+
+        groups = list(self.wrapped.children)
+
+        summed_increments = 0
+
+        scale_factor_from_uuid = build_uuid_scale_factor_dict(
+            points=self.fixed_block_reference.children,
+            parameter_uuid_finder=self.parameter_uuid_finder,
+        )
+
+        for child in groups:
+            builder = builders.wrap(
+                wrapped=child,
+                add_padding=self.add_padding,
+                padding_type=self.padding_type,
+                model_type=self.model_type,
+                scale_factor_from_uuid=scale_factor_from_uuid,
+                parameter_uuid_finder=self.parameter_uuid_finder,
+                model_id=self.model_id,
+                model_offset=self.model_offset,
+                is_table=self.is_table,
+                repeating_block_reference=self.repeating_block_reference,
+                address_offset=self.address_offset + summed_increments,
+                sunspec_id=self.sunspec_id,
+            )
+            built_rows, address_offset_increment = builder.gen()
+            summed_increments += address_offset_increment
+            rows.extend(built_rows)
+
+        return rows, summed_increments
+
+
+@builders(epcpm.sunspecmodel.TableGroup)
+@attr.s
+class TableGroup:
+    wrapped = attr.ib()
+    add_padding = attr.ib()
+    padding_type = attr.ib()
+    model_type = attr.ib()
+    scale_factor_from_uuid = attr.ib(
+        type=typing.Dict[uuid.UUID, epcpm.sunspecmodel.DataPoint]
+    )
+    model_id = attr.ib()
+    model_offset = attr.ib()
+    address_offset = attr.ib()
+    repeating_block_reference = attr.ib(default=None)
+    parameter_uuid_finder = attr.ib(default=None)
+    sunspec_id = attr.ib(default=None)
+    is_table = attr.ib(default=False)
+
+    def gen(self):
+        rows = []
+
+        points = list(self.wrapped.children)
+
+        # TODO: Padding most likely not necessary for TableGroup. Run tests and remove if necessary.
+        if self.add_padding:
+            point = epcpm.sunspecmodel.DataPoint(
+                type_uuid=self.padding_type.uuid,
+                block_offset=(
+                    self.wrapped.children[-1].block_offset
+                    + self.wrapped.children[-1].size
+                ),
+                size=self.padding_type.value,
+            )
+            # TODO: ack!  just to get the address offset calculated but
+            #       not calling append_child() because i don't want to shove
+            #       this into the model.  :[
+            point.tree_parent = self.wrapped
+            points.append(point)
+
+        summed_increments = 0
+
+        for child in points:
+            builder = builders.wrap(
+                wrapped=child,
+                add_padding=self.add_padding,
+                padding_type=self.padding_type,
+                model_type=self.model_type,
+                scale_factor_from_uuid=self.scale_factor_from_uuid,
+                parameter_uuid_finder=self.parameter_uuid_finder,
+                model_id=self.model_id,
+                model_offset=self.model_offset,
+                is_table=self.is_table,
+                repeating_block_reference=self.repeating_block_reference,
+                address_offset=self.address_offset + summed_increments,
+                sunspec_id=self.sunspec_id,
+            )
+            built_rows, address_offset_increment = builder.gen()
+            summed_increments += address_offset_increment
+
+            if isinstance(child, epcpm.sunspecmodel.TableGroup):
+                rows.extend(built_rows)
+            else:
+                rows.append(built_rows)
+
+        return rows, summed_increments
+
+
 @builders(epcpm.sunspecmodel.DataPointBitfield)
 @attr.s
 class DataPointBitfield:
     wrapped = attr.ib()
+    add_padding = attr.ib()
+    padding_type = attr.ib()
     model_type = attr.ib()
     scale_factor_from_uuid = attr.ib()
     parameter_uuid_finder = attr.ib()
@@ -632,7 +763,7 @@ class DataPointBitfieldMember:
 @enumeration_builders(epcpm.sunspecmodel.HeaderBlock)
 @enumeration_builders(epcpm.sunspecmodel.FixedBlock)
 @enumeration_builders(epcpm.sunspecmodel.TableRepeatingBlockReference)
-@enumeration_builders(epcpm.sunspecmodel.TableBlock)
+# @enumeration_builders(epcpm.sunspecmodel.TableGroup)
 @attr.s
 class GenericEnumeratorBuilder:
     wrapped = attr.ib()
@@ -647,6 +778,61 @@ class GenericEnumeratorBuilder:
                 point=child,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
+
+            new_rows = builder.gen()
+
+            if len(new_rows) > 0:
+                rows.extend(new_rows)
+                rows.append(Fields())
+
+        return rows
+
+
+@enumeration_builders(epcpm.sunspecmodel.TableBlock)
+@attr.s
+class TableBlockEnumeratorBuilder:
+    wrapped = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
+
+    def gen(self):
+        rows = []
+
+        for child in self.wrapped.children:
+            builder = enumeration_builders.wrap(
+                wrapped=child,
+                parameter_uuid_finder=self.parameter_uuid_finder,
+            )
+
+            new_rows = builder.gen()
+
+            if len(new_rows) > 0:
+                rows.extend(new_rows)
+                rows.append(Fields())
+
+        return rows
+
+
+@enumeration_builders(epcpm.sunspecmodel.TableGroup)
+@attr.s
+class TableGroupEnumeratorBuilder:
+    wrapped = attr.ib()
+    parameter_uuid_finder = attr.ib(default=None)
+
+    def gen(self):
+        rows = []
+
+        for child in self.wrapped.children:
+            if isinstance(child, epcpm.sunspecmodel.TableGroup):
+                builder = enumeration_builders.wrap(
+                    wrapped=child,
+                    parameter_uuid_finder=self.parameter_uuid_finder,
+                )
+            else:
+                builder = enumeration_builders.wrap(
+                    wrapped=child,
+                    point=child,
+                    parameter_uuid_finder=self.parameter_uuid_finder,
+                )
 
             new_rows = builder.gen()
 
@@ -689,6 +875,7 @@ class TableRepeatingBlockReference:
     parameter_uuid_finder = attr.ib(default=None)
     sunspec_id = attr.ib(default=None)
     is_table = attr.ib(default=False)
+    fixed_block_reference = attr.ib(default=None, type=epcpm.sunspecmodel.FixedBlock)
 
     def gen(self):
         builder = builders.wrap(
@@ -712,6 +899,8 @@ class TableRepeatingBlockReference:
 @attr.s
 class Point:
     wrapped = attr.ib()
+    add_padding = attr.ib()
+    padding_type = attr.ib()
     scale_factor_from_uuid = attr.ib()
     model_type = attr.ib()
     model_id = attr.ib()

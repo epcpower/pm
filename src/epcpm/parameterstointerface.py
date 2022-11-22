@@ -1304,28 +1304,21 @@ class TableBaseStructures:
                 sunspec_type,
             ]
 
-            node_in_model = get_sunspec2_point_from_table_element(
-                sunspec_point=sunspec2_point,
-                table_element=table_element,
+            maybe_model = sunspec2_point.tree_parent
+            while not isinstance(maybe_model, epcpm.sunspecmodel.Model):
+                maybe_model = maybe_model.tree_parent
+            model = maybe_model
+            model_id = model.id
+            sunspec_model_variable = f"sunspec2Interface.model{model_id}"
+            abbreviation = table_element.abbreviation
+            sunspec2_variable = (
+                f"{sunspec_model_variable}" f".Curve_{curve_index:>02}_{abbreviation}"
             )
 
-            if node_in_model is not None:
-                model_id = node_in_model.tree_parent.tree_parent.id
-                sunspec_model_variable = f"sunspec2Interface.model{model_id}"
-                abbreviation = table_element.abbreviation
-                sunspec2_variable = (
-                    f"{sunspec_model_variable}"
-                    f".Curve_{curve_index:>02}_{abbreviation}"
-                )
+            sunspec2_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
+            sunspec2_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
 
-                sunspec2_getter = "_".join(
-                    str(x) for x in getter_setter_list + ["getter"]
-                )
-                sunspec2_setter = "_".join(
-                    str(x) for x in getter_setter_list + ["setter"]
-                )
-
-        if not staticmodbus_point is None:
+        if staticmodbus_point is not None:
             staticmodbus_type = staticmodbus_types[
                 self.parameter_uuid_finder(staticmodbus_point.type_uuid).name
             ]
@@ -1474,42 +1467,6 @@ def get_sunspec_point_from_table_element(sunspec_point, table_element):
     for node in nodes_in_model:
         for child in node.tree_parent.original.children:
             if child.parameter_uuid == sunspec_point.parameter_uuid:
-                node_in_model = node
-                break
-        else:
-            continue
-
-        break
-    else:
-        node_in_model = None
-    return node_in_model
-
-
-def get_sunspec2_point_from_table_element(sunspec_point, table_element):
-    value = table_element.original
-
-    if isinstance(value, epyqlib.pm.parametermodel.ArrayParameterElement):
-        value = value.original
-
-    value = value.uuid
-
-    nodes_in_model = [
-        node
-        for node in sunspec_point.find_root().nodes_by_attribute(
-            attribute_value=value,
-            attribute_name="common_table_parameter_uuid",
-            raise_=False,
-        )
-        if isinstance(
-            node,
-            epcpm.sunspecmodel.DataPoint,
-        )
-    ]
-
-    for node in nodes_in_model:
-        for child in node.tree_parent.children:
-            if table_element.uuid == child.parameter_uuid:
-                print("sunspec2 found!!!")
                 node_in_model = node
                 break
         else:
@@ -1752,7 +1709,7 @@ class TableArrayElement:
         )
 
         sunspec1_point = self.parameter_uuid_to_sunspec1_node.get(parameter.uuid)
-        sunspec2_point = self.parameter_uuid_to_sunspec2_node.get(parameter.uuid)
+        sunspec2_point = self.parameter_uuid_to_sunspec2_node.get(table_element.uuid)
         staticmodbus_point = self.parameter_uuid_to_staticmodbus_node.get(
             parameter.uuid
         )

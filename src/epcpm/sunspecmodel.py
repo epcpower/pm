@@ -1,3 +1,4 @@
+from __future__ import annotations
 import itertools
 
 import attr
@@ -510,6 +511,9 @@ def check_block_offsets_and_length(self):
             raise TypeNotFoundError(
                 f"Point {point_name!r}" f" has unknown type uuid {point.type_uuid!r}"
             )
+        except AttributeError:
+            length += point.check_offsets_and_length()
+            continue
 
         if type_.name != "string" and point.size != type_.value:
             point_name = root.model.node_from_uuid(point.parameter_uuid).name
@@ -1138,7 +1142,7 @@ class Table(epyqlib.treenode.TreeNode):
     check = epyqlib.attrsmodel.check_just_children
 
 
-@graham.schemify(tag="sunspec_table_block", register=True)
+@graham.schemify(tag="sunspec_table_group", register=True)
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
 @epyqlib.utils.qt.pyqtify_passthrough_properties(
@@ -1146,9 +1150,9 @@ class Table(epyqlib.treenode.TreeNode):
     field_names=("name",),
 )
 @attr.s(hash=False)
-class TableBlock(epyqlib.treenode.TreeNode):
+class TableGroup(epyqlib.treenode.TreeNode):
     name = attr.ib(
-        default="Table Block",
+        default="Table Group",
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(),
         ),
@@ -1162,13 +1166,9 @@ class TableBlock(epyqlib.treenode.TreeNode):
         metadata=graham.create_metadata(
             field=graham.fields.MixedList(
                 fields=(
+                    marshmallow.fields.Nested("TableGroup"),
                     marshmallow.fields.Nested(graham.schema(DataPoint)),
                     marshmallow.fields.Nested(graham.schema(DataPointBitfield)),
-                    # marshmallow.fields.Nested(
-                    #     graham.schema(
-                    #         TableRepeatingBlockReferenceDataPointReference,
-                    #     )
-                    # ),
                 )
             ),
         ),
@@ -1199,13 +1199,85 @@ class TableBlock(epyqlib.treenode.TreeNode):
         return isinstance(node, (DataPoint, DataPointBitfield))
         # return False
 
-    # def check_offsets_and_length(self):
-    #     return self.original.check_block_offsets_and_length()
-
     def get_num_repeats(self):
         return 1
 
     check_offsets_and_length = check_block_offsets_and_length
+    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    child_from = epyqlib.attrsmodel.default_child_from
+    internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
+
+
+@graham.schemify(tag="sunspec_table_block", register=True)
+@epyqlib.attrsmodel.ify()
+@epyqlib.utils.qt.pyqtify()
+@epyqlib.utils.qt.pyqtify_passthrough_properties(
+    original="original",
+    field_names=("name",),
+)
+@attr.s(hash=False)
+class TableBlock(epyqlib.treenode.TreeNode):
+    name = attr.ib(
+        default="Table Block",
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+    offset = attr.ib(
+        default=2,
+        converter=int,
+    )
+    children = attr.ib(
+        factory=list,
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(
+                fields=(marshmallow.fields.Nested(graham.schema(TableGroup)),)
+            ),
+        ),
+    )
+
+    original = epyqlib.attrsmodel.create_reference_attribute()
+
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    # @classmethod
+    # def all_addable_types(cls):
+    #     return epyqlib.attrsmodel.create_addable_types(())
+    #
+    # @staticmethod
+    # def addable_types():
+    #     return {}
+
+    def can_drop_on(self, node):
+        return False
+
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+        return isinstance(node, (TableGroup))
+        # return isinstance(node, (DataPoint, DataPointBitfield))
+        # return False
+
+    # def check_offsets_and_length(self):
+    #     return self.original.check_block_offsets_and_length()
+
+    def check_offsets_and_length(self):
+        length = 0
+
+        for block in self.children:
+            length += block.check_offsets_and_length()
+
+        return length
+
+    def get_num_repeats(self):
+        # TODO: actually return a value??????
+        return 1
+
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
     child_from = epyqlib.attrsmodel.default_child_from
     internal_move = epyqlib.attrsmodel.default_internal_move
@@ -1326,6 +1398,7 @@ types = epyqlib.attrsmodel.Types(
         TableRepeatingBlockReference,
         TableRepeatingBlockReferenceDataPointReference,
         TableBlock,
+        TableGroup,
     ),
 )
 
@@ -1345,6 +1418,7 @@ columns = epyqlib.attrsmodel.columns(
             TableRepeatingBlock,
             TableRepeatingBlockReference,
             TableBlock,
+            TableGroup,
         )
         + merge("id", Model)
         + merge(
@@ -1382,6 +1456,7 @@ columns = epyqlib.attrsmodel.columns(
         TableRepeatingBlockReference,
         TableRepeatingBlock,
         TableBlock,
+        TableGroup,
     ),
     merge("block_offset", DataPoint, DataPointBitfield),
     merge("uuid", *types.types.values()),
