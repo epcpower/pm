@@ -667,6 +667,10 @@ class Parameter:
         sunspec_models: typing.Set,
         var_or_func: str,
     ) -> typing.List[str]:
+
+        scale_factor_variable = "NULL"
+        scale_factor_updater = "NULL"
+
         if sunspec_point is None:
             sunspec_variable = "NULL"
             sunspec_getter = "NULL"
