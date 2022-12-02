@@ -19,6 +19,7 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### Changed
 
+- SC-869: Changed interface to support both sunspec1 and sunspec2 scaling factors
 - SC-683: Changed rejected callback handling to use automatically generated interface
 
 ### Removed
