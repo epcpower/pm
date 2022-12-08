@@ -60,3 +60,39 @@ def attr_fill(cls: typing.Type[FieldsInterface], value: bool) -> FieldsInterface
         fields: Fields object to be used as a filter
     """
     return cls(**{field.name: value for field in attr.fields(cls) if field.init})
+
+
+def add_padding_to_block(
+    block: epyqlib.treenode.TreeNode,
+    sunspec_id: SunSpecSection,
+    model_id: int,
+    block_type: str,
+) -> bool:
+    """
+    Returns whether padding should be added to a given block.
+    Contains specific rules for SunSpec1 vs. SunSpec2.
+
+    Args:
+        block: tree node block
+        sunspec_id: SunSpec section internal identifier
+        model_id: SunSpec model ID
+        block_type: type of block
+
+    Returns:
+        add_padding: True/False if padding should be added to the given block
+    """
+    pre_pad_block_length = block.check_offsets_and_length()
+    # Per SunSpec model specification, pad with a 16-bit pad to force even alignment to 32-bit boundaries.
+    add_padding = (pre_pad_block_length % 2) == 1
+
+    # Specifically for SunSpec1 and repeating blocks, do not add padding. This is actually a bug
+    # in the original code for SunSpec1 that must continue being in place so that the registers
+    # aren't shifted for customers using SunSpec statically by directly calling modbus registers
+    # instead of using SunSpec properly.
+    # Specifically for SunSpec2, only add padding for model 1. The 700 series models don't require padding.
+    if (
+        sunspec_id == SunSpecSection.SUNSPEC_ONE and block_type == "Repeating Block"
+    ) or (sunspec_id == SunSpecSection.SUNSPEC_TWO and model_id != 1):
+        add_padding = False
+
+    return add_padding

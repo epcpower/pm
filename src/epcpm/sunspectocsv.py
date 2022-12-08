@@ -208,23 +208,9 @@ class Model:
         model_types = ["Header", "Fixed Block", "Repeating Block"]
         zipped = zip(enumerate(self.wrapped.children), model_types)
         for (model_type_index, child), model_type in zipped:
-            pre_pad_block_length = child.check_offsets_and_length()
-            # Per SunSpec model specification, pad with a 16-bit pad to force even alignment to 32-bit boundaries.
-            add_padding = (pre_pad_block_length % 2) == 1
-
-            # Specifically for SunSpec1 and repeating blocks, do not add padding. This is actually a bug
-            # in the original code for SunSpec1 that must continue being in place so that the registers
-            # aren't shifted for customers using SunSpec statically by directly calling modbus registers
-            # instead of using SunSpec properly.
-            # Specifically for SunSpec2, only add padding for model 1. The 700 series models don't require padding.
-            if (
-                self.sunspec_id == epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE
-                and model_type == "Repeating Block"
-            ) or (
-                self.sunspec_id == epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO
-                and self.wrapped.id != 1
-            ):
-                add_padding = False
+            add_padding = epcpm.pm_helper.add_padding_to_block(
+                child, self.sunspec_id, self.wrapped.id, model_type
+            )
 
             builder = builders.wrap(
                 wrapped=child,
