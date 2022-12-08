@@ -1044,6 +1044,7 @@ class Point:
                     "bitfield32": "sunspecUint32ToSSU32_returns(UINT32_C(0xffffffff))",
                     "ipaddr": "sunspecUint32ToSSU32_returns(UINT32_C(0x00000000))",
                     "int64": "sunspecInt64ToSS64_returns(INT64_C(0x8000000000000000))",
+                    "uint64": "sunspecUint64ToSSU64_returns(UINT64_C(0xffffffffffffffff))",
                     # yes, acc64 seems to be an int64, not a uint64
                     "acc64": "sunspecInt64ToSS64_returns(INT64_C(0x0000000000000000))",
                     # 'ipv6addr': 'INT128_C(0x00000000000000000000000000000000)',
