@@ -522,9 +522,6 @@ class Parameter:
         if not uses_interface_item or all(x is None for x in interface_data):
             return [[], [], sunspec1_models, sunspec2_models, {}]
 
-        scale_factor_variable = "NULL"
-        scale_factor_updater = "NULL"
-
         if parameter.getter_function is None:
             getter_function = "NULL"
         else:
@@ -556,6 +553,8 @@ class Parameter:
             sunspec1_setter,
             hand_coded_sunspec1_getter_function,
             hand_coded_sunspec1_setter_function,
+            scale_factor1_variable,
+            scale_factor1_updater,
         ) = self._local_sunspec_parameter_gen(
             epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
             parameter,
@@ -570,6 +569,8 @@ class Parameter:
             sunspec2_setter,
             _,
             _,
+            scale_factor2_variable,
+            scale_factor2_updater,
         ) = self._local_sunspec_parameter_gen(
             epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO,
             parameter,
@@ -636,8 +637,10 @@ class Parameter:
             internal_scale=parameter.internal_scale_factor,
             meta_initializer_values=create_meta_initializer_values(parameter),
             parameter=parameter,
-            scale_factor_updater=scale_factor_updater,
-            scale_factor_variable=scale_factor_variable,
+            scale_factor1_updater=scale_factor1_updater,
+            scale_factor2_updater=scale_factor2_updater,
+            scale_factor1_variable=scale_factor1_variable,
+            scale_factor2_variable=scale_factor2_variable,
             sunspec1_getter=sunspec1_getter,
             sunspec1_setter=sunspec1_setter,
             sunspec1_variable=sunspec1_variable,
@@ -664,6 +667,10 @@ class Parameter:
         sunspec_models: typing.Set,
         var_or_func: str,
     ) -> typing.List[str]:
+
+        scale_factor_variable = "NULL"
+        scale_factor_updater = "NULL"
+
         if sunspec_point is None:
             sunspec_variable = "NULL"
             sunspec_getter = "NULL"
@@ -758,6 +765,8 @@ class Parameter:
             sunspec_setter,
             hand_coded_sunspec_getter_function,
             hand_coded_sunspec_setter_function,
+            scale_factor_variable,
+            scale_factor_updater,
         ]
 
 
@@ -1222,8 +1231,10 @@ class TableBaseStructures:
         sunspec2_getter = "NULL"
         sunspec2_setter = "NULL"
         sunspec2_variable = None
-        scale_factor_variable = "NULL"
-        scale_factor_updater = "NULL"
+        scale_factor1_variable = "NULL"
+        scale_factor1_updater = "NULL"
+        scale_factor2_variable = "NULL"
+        scale_factor2_updater = "NULL"
         sunspec_model_variable = "NULL"
         staticmodbus_getter = "NULL"
         staticmodbus_setter = "NULL"
@@ -1281,14 +1292,13 @@ class TableBaseStructures:
                 sunspec_scale_factor = sunspec_scale_factor_node.abbreviation
 
             if sunspec_scale_factor is not None:
-                scale_factor_variable = (
+                scale_factor1_variable = (
                     f"&{sunspec_model_variable}.{sunspec_scale_factor}"
                 )
-                # TODO: Possibly need two scaleFactorUpdater (one for each sunspec?) !!!!!!!!
                 scale_factor_updater_name = (
                     f"getSUNSPEC1_MODEL{model_id}_{sunspec_scale_factor}"
                 )
-                scale_factor_updater = f"&{scale_factor_updater_name}"
+                scale_factor1_updater = f"&{scale_factor_updater_name}"
 
         if sunspec2_point is not None:
             sunspec_type = sunspec_types[
@@ -1317,6 +1327,31 @@ class TableBaseStructures:
 
             sunspec2_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
             sunspec2_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
+
+            sunspec_scale_factor = None
+            factor_uuid = None
+            if node_in_model is not None:
+                if node_in_model.factor_uuid is not None:
+                    factor_uuid = node_in_model.factor_uuid
+
+            if factor_uuid is not None:
+                root = node_in_model.find_root()
+                factor_point = root.model.node_from_uuid(
+                    node_in_model.factor_uuid,
+                )
+                sunspec_scale_factor_node = self.parameter_uuid_finder(
+                    factor_point.parameter_uuid,
+                )
+                sunspec_scale_factor = sunspec_scale_factor_node.abbreviation
+
+            if sunspec_scale_factor is not None:
+                scale_factor2_variable = (
+                    f"&{sunspec_model_variable}.{sunspec_scale_factor}"
+                )
+                scale_factor_updater_name = (
+                    f"getSUNSPEC2_MODEL{model_id}_{sunspec_scale_factor}"
+                )
+                scale_factor2_updater = f"&{scale_factor_updater_name}"
 
         if staticmodbus_point is not None:
             staticmodbus_type = staticmodbus_types[
@@ -1348,8 +1383,10 @@ class TableBaseStructures:
             hand_coded_sunspec1_getter_function="NULL",
             hand_coded_sunspec1_setter_function="NULL",
             internal_scale=parameter.internal_scale_factor,
-            scale_factor_updater=scale_factor_updater,
-            scale_factor_variable=scale_factor_variable,
+            scale_factor1_updater=scale_factor1_updater,
+            scale_factor2_updater=scale_factor2_updater,
+            scale_factor1_variable=scale_factor1_variable,
+            scale_factor2_variable=scale_factor2_variable,
             sunspec1_getter=sunspec1_getter,
             sunspec1_setter=sunspec1_setter,
             # not to be used so really hardcode NULL
@@ -1405,6 +1442,7 @@ class TableBaseStructures:
                     f".sunspec1_variable_length = sizeof({sunspec1_variable}),",
                 ]
             sunspec1_variable_initializer = f"&{sunspec1_variable}"
+
         maybe_sunspec2_variable_length = []
         if sunspec2_variable is None:
             sunspec2_variable_initializer = "NULL"
@@ -1736,8 +1774,10 @@ def create_item(
     internal_scale,
     meta_initializer_values,
     parameter,
-    scale_factor_updater,
-    scale_factor_variable,
+    scale_factor1_updater,
+    scale_factor1_variable,
+    scale_factor2_updater,
+    scale_factor2_variable,
     sunspec1_getter,
     sunspec1_setter,
     sunspec1_variable,
@@ -1770,8 +1810,10 @@ def create_item(
         hand_coded_sunspec1_getter_function=hand_coded_sunspec1_getter_function,
         hand_coded_sunspec1_setter_function=hand_coded_sunspec1_setter_function,
         internal_scale=internal_scale,
-        scale_factor_updater=scale_factor_updater,
-        scale_factor_variable=scale_factor_variable,
+        scale_factor1_updater=scale_factor1_updater,
+        scale_factor1_variable=scale_factor1_variable,
+        scale_factor2_updater=scale_factor2_updater,
+        scale_factor2_variable=scale_factor2_variable,
         sunspec1_getter=sunspec1_getter,
         sunspec1_setter=sunspec1_setter,
         sunspec1_variable=sunspec1_variable,
@@ -1825,8 +1867,10 @@ def create_common_initializers(
     hand_coded_sunspec1_getter_function,
     hand_coded_sunspec1_setter_function,
     internal_scale,
-    scale_factor_updater,
-    scale_factor_variable,
+    scale_factor1_updater,
+    scale_factor1_variable,
+    scale_factor2_updater,
+    scale_factor2_variable,
     sunspec1_getter,
     sunspec1_setter,
     sunspec1_variable,
@@ -1853,9 +1897,7 @@ def create_common_initializers(
     )
 
     common_initializers = [
-        f".sunspecScaleFactor = {scale_factor_variable},",
         f".canScaleFactor = {float(can_scale_factor)}f,",
-        f".scaleFactorUpdater = {scale_factor_updater},",
         f".internalScaleFactor = {internal_scale},",
         f".rejectFromInactiveInterface = {reject_from_inactive_interfaces_literal},",
         f".sunspec1 = {{",
@@ -1865,6 +1907,8 @@ def create_common_initializers(
             f".setter = {sunspec1_setter},",
             f".handGetter = {hand_coded_sunspec1_getter_function},",
             f".handSetter = {hand_coded_sunspec1_setter_function},",
+            f".sunspecScaleFactor = {scale_factor1_variable},",
+            f".scaleFactorUpdater = {scale_factor1_updater},",
         ],
         f"}},",
         f".sunspec2 = {{",
@@ -1872,6 +1916,8 @@ def create_common_initializers(
             f".variable = {sunspec2_variable},",
             f".getter = {sunspec2_getter},",
             f".setter = {sunspec2_setter},",
+            f".sunspecScaleFactor = {scale_factor2_variable},",
+            f".scaleFactorUpdater = {scale_factor2_updater},",
         ],
         f"}},",
         f".staticmodbus = {{",
