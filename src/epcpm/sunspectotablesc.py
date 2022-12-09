@@ -1,5 +1,4 @@
 import attr
-import re
 import typing
 import epyqlib.utils.general
 import epyqlib.pm.parametermodel
@@ -9,8 +8,6 @@ import epcpm.sunspecmodel
 
 
 builders = epyqlib.utils.general.TypeMap()
-
-re_digit_expr = re.compile(r"\d+")
 
 
 def export(c_path, h_path, sunspec_model, sunspec_id, skip_sunspec=False):
