@@ -1,5 +1,6 @@
 import attr
 import re
+import typing
 import epyqlib.utils.general
 import epyqlib.pm.parametermodel
 
@@ -266,7 +267,6 @@ class DataPoint:
         common_parameter = self.parameter_uuid_finder(
             self.wrapped.common_table_parameter_uuid
         )
-        # parameter = table_element
 
         getter_setter = {
             "get": common_parameter.can_getter,
@@ -413,20 +413,29 @@ class DataPoint:
 @builders(epcpm.sunspecmodel.TableBlock)
 @attr.s
 class TableBlock:
+    """Table generator for the SunSpec TableBlock class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     parameter_uuid_finder = attr.ib()
     sunspec_id = attr.ib()
 
-    def gen(self):
+    def gen(self) -> typing.List[typing.List[str]]:
+        """
+        C table generator for the SunSpec TableBlock class.
+
+        Returns:
+            list of lists of strings: C output for table generation
+        """
         both_lines = [[], []]
-        for point in self.wrapped.children:
+        for child_index, point in enumerate(self.wrapped.children):
             # Should always be a TableGroup.
             builder = builders.wrap(
                 wrapped=point,
                 model_id=self.model_id,
                 sunspec_id=self.sunspec_id,
                 parameter_uuid_finder=self.parameter_uuid_finder,
+                curve_index=child_index,
             )
 
             for lines, more_lines in zip(both_lines, builder.gen()):
@@ -439,38 +448,44 @@ class TableBlock:
 @builders(epcpm.sunspecmodel.TableGroup)
 @attr.s
 class TableGroup:
+    """Table generator for the SunSpec TableGroup class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     parameter_uuid_finder = attr.ib()
     sunspec_id = attr.ib()
+    curve_index = attr.ib()
 
-    def gen(self):
+    def gen(self) -> typing.List[typing.List[str]]:
+        """
+        C table generator for the SunSpec TableGroup class.
+
+        Returns:
+            list of lists of strings: C output for table generation
+        """
         both_lines = [[], []]
         for point in self.wrapped.children:
+            # A bit hacky. Assumption is being made that TableGroup's will only be two deep maximum.
             if isinstance(point, epcpm.sunspecmodel.TableGroup):
                 builder = builders.wrap(
                     wrapped=point,
                     model_id=self.model_id,
                     sunspec_id=self.sunspec_id,
                     parameter_uuid_finder=self.parameter_uuid_finder,
+                    curve_index=self.curve_index,
                 )
 
                 for lines, more_lines in zip(both_lines, builder.gen()):
                     lines.extend(more_lines)
                     lines.append("")
             else:
-                parameter = self.parameter_uuid_finder(point.parameter_uuid)
-
                 if point.common_table_parameter_uuid:
-                    curve_index = find_curve_for_point(point)
-                    curve_type = ""
-
                     builder = builders.wrap(
                         wrapped=point,
                         model_id=self.model_id,
                         sunspec_id=self.sunspec_id,
-                        curve_index=curve_index,
-                        curve_type=curve_type,
+                        curve_index=self.curve_index,
+                        curve_type="",
                         parameter_uuid_finder=self.parameter_uuid_finder,
                     )
 
@@ -479,23 +494,5 @@ class TableGroup:
                     ):
                         lines.extend(more_lines)
                         lines.append("")
-                else:
-                    # TODO: Only printing out for now until other logic is figured out.
-                    print(
-                        f"TableBlock::gen() -- common_parameter was null for {parameter.uuid}"
-                    )
 
         return both_lines
-
-
-def find_curve_for_point(point) -> int:
-    tree_path = list()
-    current_tree_node = point.tree_parent
-    while not isinstance(current_tree_node, epcpm.sunspecmodel.TableBlock):
-        tree_path.append(current_tree_node)
-        current_tree_node = current_tree_node.tree_parent
-
-    for curve_index, child in enumerate(current_tree_node.children):
-        if child == tree_path[-1]:
-            return curve_index
-    return -1
