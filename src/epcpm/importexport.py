@@ -255,24 +255,17 @@ def full_export(
         skip_output=skip_output,
     )
 
-    # TODO: put this into importexportdialog.py
-    tmp_path = pathlib.Path(r"C:\Projects\grid-tied_SC-835")
-    tmp_embedded = tmp_path / "embedded-library"
-    tmp_sunspec_path = tmp_embedded / "system" / "sunspec"
-    tmp_sunspec1_interface_c = tmp_sunspec_path / "sunspec1InterfaceGen.c"
     epcpm.sunspectointerface.export(
-        c_path=tmp_sunspec1_interface_c,
-        h_path=tmp_sunspec1_interface_c.with_suffix(".h"),
+        c_path=paths.sunspec1_interface_gen_c,
+        h_path=paths.sunspec1_interface_gen_c.with_suffix(".h"),
         sunspec_model=project.models.sunspec1,
         sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
         skip_sunspec=skip_output,
     )
 
-    # TODO: put this into importexportdialog.py
-    tmp_sunspec2_interface_c = tmp_sunspec_path / "sunspec2InterfaceGen.c"
     epcpm.sunspectointerface.export(
-        c_path=tmp_sunspec2_interface_c,
-        h_path=tmp_sunspec2_interface_c.with_suffix(".h"),
+        c_path=paths.sunspec2_interface_gen_c,
+        h_path=paths.sunspec2_interface_gen_c.with_suffix(".h"),
         sunspec_model=project.models.sunspec2,
         sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO,
         skip_sunspec=skip_output,

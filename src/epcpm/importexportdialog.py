@@ -45,6 +45,14 @@ def import_dialog():
     dialog.ui.bitfields_c.hide()
     dialog.ui.pick_bitfields_c.hide()
 
+    dialog.ui.sunspec1_interface_gen_c_label.hide()
+    dialog.ui.sunspec1_interface_gen_c.hide()
+    dialog.ui.pick_sunspec1_interface_gen_c.hide()
+
+    dialog.ui.sunspec2_interface_gen_c_label.hide()
+    dialog.ui.sunspec2_interface_gen_c.hide()
+    dialog.ui.pick_sunspec2_interface_gen_c.hide()
+
     dialog.ui.sunspec1_tables_c_label.hide()
     dialog.ui.sunspec1_tables_c.hide()
     dialog.ui.pick_sunspec1_tables_c.hide()
@@ -87,6 +95,8 @@ class ImportPaths:
     tables_c = attr.ib(converter=path_or_none)
     bitfields_c = attr.ib(converter=path_or_none)
     staticmodbus_c = attr.ib(converter=path_or_none)
+    sunspec1_interface_gen_c = attr.ib(converter=path_or_none)
+    sunspec2_interface_gen_c = attr.ib(converter=path_or_none)
     sunspec1_tables_c = attr.ib(converter=path_or_none)
     sunspec2_tables_c = attr.ib(converter=path_or_none)
     sunspec1_spreadsheet = attr.ib(converter=path_or_none)
@@ -115,6 +125,8 @@ def paths_from_directory(directory):
         tables_c=interface / "canInterfaceGenTables.c",
         bitfields_c=interface / "interfaceBitfieldsGen.c",
         staticmodbus_c=interface / "staticmodbusInterfaceGen.c",
+        sunspec1_interface_gen_c=sunspec / "sunspec1InterfaceGen.c",
+        sunspec2_interface_gen_c=sunspec / "sunspec2InterfaceGen.c",
         sunspec1_tables_c=sunspec / "sunspec1InterfaceGenTables.c",
         sunspec2_tables_c=sunspec / "sunspec2InterfaceGenTables.c",
         sunspec1_spreadsheet=embedded / "MODBUS_SunSpec1-EPC.xlsx",
@@ -152,6 +164,12 @@ class Dialog(QtWidgets.QDialog):
         self.ui.pick_tables_c.clicked.connect(self.pick_tables_c)
         self.ui.pick_bitfields_c.clicked.connect(self.pick_bitfields_c)
         self.ui.pick_staticmodbus_c.clicked.connect(self.pick_staticmodbus_c)
+        self.ui.pick_sunspec1_interface_gen_c.clicked.connect(
+            partial(self.pick_sunspec_tables_c, self.ui.sunspec1_interface_gen_c)
+        )
+        self.ui.pick_sunspec2_interface_gen_c.clicked.connect(
+            partial(self.pick_sunspec_tables_c, self.ui.sunspec2_interface_gen_c)
+        )
         self.ui.pick_sunspec1_tables_c.clicked.connect(
             partial(self.pick_sunspec_tables_c, self.ui.sunspec1_tables_c)
         )
@@ -196,6 +214,8 @@ class Dialog(QtWidgets.QDialog):
             hierarchy=self.ui.hierarchy.text(),
             tables_c=self.ui.tables_c.text(),
             bitfields_c=self.ui.bitfields_c.text(),
+            sunspec1_interface_gen_c=self.ui.sunspec1_interface_gen_c.text(),
+            sunspec2_interface_gen_c=self.ui.sunspec2_interface_gen_c.text(),
             sunspec1_tables_c=self.ui.sunspec1_tables_c.text(),
             sunspec2_tables_c=self.ui.sunspec2_tables_c.text(),
             sunspec1_spreadsheet=self.ui.sunspec1_spreadsheet.text(),
@@ -227,6 +247,12 @@ class Dialog(QtWidgets.QDialog):
         self.ui.tables_c.setText(os.fspath(paths.tables_c))
         self.ui.bitfields_c.setText(os.fspath(paths.bitfields_c))
         self.ui.staticmodbus_c.setText(os.fspath(paths.staticmodbus_c))
+        self.ui.sunspec1_interface_gen_c.setText(
+            os.fspath(paths.sunspec1_interface_gen_c)
+        )
+        self.ui.sunspec2_interface_gen_c.setText(
+            os.fspath(paths.sunspec2_interface_gen_c)
+        )
         self.ui.sunspec1_tables_c.setText(os.fspath(paths.sunspec1_tables_c))
         self.ui.sunspec2_tables_c.setText(os.fspath(paths.sunspec2_tables_c))
         self.ui.sunspec1_spreadsheet.setText(os.fspath(paths.sunspec1_spreadsheet))
