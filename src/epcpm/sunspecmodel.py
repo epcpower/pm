@@ -704,7 +704,6 @@ class TableRepeatingBlockReferenceDataPointReference(epyqlib.treenode.TreeNode):
 
     def can_drop_on(self, node):
         return isinstance(node, epyqlib.pm.parametermodel.Parameter)
-        # return False
 
     def child_from(self, node):
         self.parameter_uuid = node.uuid
@@ -1157,6 +1156,8 @@ class Table(epyqlib.treenode.TreeNode):
 )
 @attr.s(hash=False)
 class TableGroup(epyqlib.treenode.TreeNode):
+    """Tree node for the SunSpec TableGroup class."""
+
     name = attr.ib(
         default="Table Group",
         metadata=graham.create_metadata(
@@ -1184,29 +1185,35 @@ class TableGroup(epyqlib.treenode.TreeNode):
 
     uuid = epyqlib.attrsmodel.attr_uuid()
 
-    def __attrs_post_init__(self):
+    def __attrs_post_init__(self) -> None:
         super().__init__()
 
-    # @classmethod
-    # def all_addable_types(cls):
-    #     return epyqlib.attrsmodel.create_addable_types(())
-    #
-    # @staticmethod
-    # def addable_types():
-    #     return {}
+    def can_drop_on(self, node: epyqlib.treenode.TreeNode) -> bool:
+        """
+        For TableGroup, do not allow drag & drop on.
 
-    def can_drop_on(self, node):
+        Args:
+            node: tree node to drop on this tree node
+
+        Returns:
+            Can the node be drag & dropped on.
+        """
         return False
 
-    def can_delete(self, node=None):
+    def can_delete(self, node: epyqlib.treenode.TreeNode = None) -> bool:
+        """
+        Return whether the given tree node can be deleted from this parent.
+
+        Args:
+            node: tree node child to delete
+
+        Returns:
+            can the node be deleted
+        """
         if node is None:
             return self.tree_parent.can_delete(node=self)
 
         return isinstance(node, (DataPoint, DataPointBitfield))
-        # return False
-
-    def get_num_repeats(self):
-        return 1
 
     check_offsets_and_length = check_block_offsets_and_length
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
@@ -1224,6 +1231,8 @@ class TableGroup(epyqlib.treenode.TreeNode):
 )
 @attr.s(hash=False)
 class TableBlock(epyqlib.treenode.TreeNode):
+    """Tree node for the SunSpec TableBlock class."""
+
     name = attr.ib(
         default="Table Block",
         metadata=graham.create_metadata(
@@ -1247,32 +1256,43 @@ class TableBlock(epyqlib.treenode.TreeNode):
 
     uuid = epyqlib.attrsmodel.attr_uuid()
 
-    def __attrs_post_init__(self):
+    def __attrs_post_init__(self) -> None:
         super().__init__()
 
-    # @classmethod
-    # def all_addable_types(cls):
-    #     return epyqlib.attrsmodel.create_addable_types(())
-    #
-    # @staticmethod
-    # def addable_types():
-    #     return {}
+    def can_drop_on(self, node: epyqlib.treenode.TreeNode) -> bool:
+        """
+        For TableBlock, do not allow drag & drop on.
 
-    def can_drop_on(self, node):
+        Args:
+            node: tree node to drop on this tree node
+
+        Returns:
+            Can the node be drag & dropped on.
+        """
         return False
 
-    def can_delete(self, node=None):
+    def can_delete(self, node: epyqlib.treenode.TreeNode = None) -> bool:
+        """
+        Return whether the given tree node can be deleted from this parent.
+
+        Args:
+            node: tree node child to delete
+
+        Returns:
+            can the node be deleted
+        """
         if node is None:
             return self.tree_parent.can_delete(node=self)
 
         return isinstance(node, (TableGroup))
-        # return isinstance(node, (DataPoint, DataPointBitfield))
-        # return False
 
-    # def check_offsets_and_length(self):
-    #     return self.original.check_block_offsets_and_length()
+    def check_offsets_and_length(self) -> int:
+        """
+        Perhaps misnamed, but returns the length of all children recursively in the block.
 
-    def check_offsets_and_length(self):
+        Returns:
+            Length of the block
+        """
         length = 0
 
         for block in self.children:
@@ -1280,8 +1300,15 @@ class TableBlock(epyqlib.treenode.TreeNode):
 
         return length
 
-    def get_num_repeats(self):
-        # TODO: actually return a value??????
+    def get_num_repeats(self) -> int:
+        """
+        Yes, this returns 1 even though there could be more than one repeats for this TableBlock.
+        This method is called from only one place and this is the appropriate return value for that scenario.
+        Will likely need to remediate in the future if this method needs to return the actual number of repeats.
+
+        Returns:
+            Number of repeating blocks
+        """
         return 1
 
     remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
@@ -1321,7 +1348,7 @@ class Model(epyqlib.treenode.TreeNode):
 
     # self.point_data = []
     children = attr.ib(
-        factory=lambda: [HeaderBlock(), FixedBlock()],
+        factory=lambda: [HeaderBlock(), FixedBlock(), TableBlock()],
         metadata=graham.create_metadata(
             field=graham.fields.MixedList(
                 fields=(
