@@ -668,7 +668,6 @@ class TableBlock:
     model_offset = attr.ib(type=int)
     address_offset = attr.ib(type=int)
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
-    # TODO: what are repeating_block_reference and is_table doing?????????????????
     repeating_block_reference = attr.ib(
         default=None, type=epcpm.sunspecmodel.TableRepeatingBlockReference
     )
@@ -676,6 +675,12 @@ class TableBlock:
     fixed_block_reference = attr.ib(default=None, type=epcpm.sunspecmodel.FixedBlock)
 
     def gen(self) -> typing.Tuple[typing.List[Fields], int]:
+        """
+        CSV generator for the SunSpec TableBlock class.
+
+        Returns:
+            list, int: list of point data, total register size of block
+        """
         groups = list(self.wrapped.children)
 
         rows = []
@@ -723,7 +728,6 @@ class TableGroup:
     model_offset = attr.ib(type=int)
     address_offset = attr.ib(type=int)
     parameter_uuid_finder = attr.ib(default=None, type=typing.Callable)
-    # TODO: what are repeating_block_reference and is_table doing?????????????????
     repeating_block_reference = attr.ib(
         default=None, type=epcpm.sunspecmodel.TableRepeatingBlockReference
     )
@@ -736,31 +740,9 @@ class TableGroup:
         Returns:
             list, int: list of point data, total register size of block
         """
-        # TODO: Check if this code is necessary or not.
-        # scale_factor_from_uuid = build_uuid_scale_factor_dict(
-        #     points=self.wrapped.children,
-        #     parameter_uuid_finder=self.parameter_uuid_finder,
-        # )
-
         rows = []
 
         points = list(self.wrapped.children)
-
-        # TODO: Padding most likely not necessary for TableGroup. Run tests and remove if necessary.
-        if self.add_padding:
-            point = epcpm.sunspecmodel.DataPoint(
-                type_uuid=self.padding_type.uuid,
-                block_offset=(
-                    self.wrapped.children[-1].block_offset
-                    + self.wrapped.children[-1].size
-                ),
-                size=self.padding_type.value,
-            )
-            # TODO: ack!  just to get the address offset calculated but
-            #       not calling append_child() because i don't want to shove
-            #       this into the model.  :[
-            point.tree_parent = self.wrapped
-            points.append(point)
 
         summed_increments = 0
 
