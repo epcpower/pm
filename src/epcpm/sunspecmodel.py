@@ -321,7 +321,13 @@ class DataPoint(epyqlib.treenode.TreeNode):
         super().__init__()
 
     def can_drop_on(self, node):
-        return isinstance(node, epyqlib.pm.parametermodel.Parameter)
+        return isinstance(
+            node,
+            (
+                epyqlib.pm.parametermodel.Parameter,
+                epyqlib.pm.parametermodel.TableArrayElement,
+            ),
+        )
 
     def child_from(self, node):
         self.parameter_uuid = node.uuid
