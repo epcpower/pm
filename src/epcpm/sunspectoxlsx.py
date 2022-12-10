@@ -452,6 +452,8 @@ class Block:
 @builders(epcpm.sunspecmodel.TableBlock)
 @attr.s
 class TableBlock:
+    """Excel spreadsheet generator for the SunSpec TableBlock class."""
+
     wrapped = attr.ib()
     add_padding = attr.ib()
     padding_type = attr.ib()
@@ -465,7 +467,13 @@ class TableBlock:
     is_table = attr.ib(default=False)
     fixed_block_reference = attr.ib(default=None, type=epcpm.sunspecmodel.FixedBlock)
 
-    def gen(self):
+    def gen(self) -> typing.List[typing.List[Fields], int]:
+        """
+        Excel spreadsheet generator for the SunSpec TableBlock class.
+
+        Returns:
+            list of Fields: int: output list of Fields, address length of block
+        """
         rows = []
 
         groups = list(self.wrapped.children)
@@ -502,6 +510,8 @@ class TableBlock:
 @builders(epcpm.sunspecmodel.TableGroup)
 @attr.s
 class TableGroup:
+    """Excel spreadsheet generator for the SunSpec TableGroup class."""
+
     wrapped = attr.ib()
     add_padding = attr.ib()
     padding_type = attr.ib()
@@ -517,7 +527,13 @@ class TableGroup:
     sunspec_id = attr.ib(default=None)
     is_table = attr.ib(default=False)
 
-    def gen(self):
+    def gen(self) -> typing.List[typing.List[Fields], int]:
+        """
+        Excel spreadsheet generator for the SunSpec TableGroup class.
+
+        Returns:
+            list of Fields: int: output list of Fields, address length of block
+        """
         rows = []
 
         points = list(self.wrapped.children)
@@ -749,7 +765,6 @@ class DataPointBitfieldMember:
 @enumeration_builders(epcpm.sunspecmodel.HeaderBlock)
 @enumeration_builders(epcpm.sunspecmodel.FixedBlock)
 @enumeration_builders(epcpm.sunspecmodel.TableRepeatingBlockReference)
-# @enumeration_builders(epcpm.sunspecmodel.TableGroup)
 @attr.s
 class GenericEnumeratorBuilder:
     wrapped = attr.ib()
@@ -777,10 +792,18 @@ class GenericEnumeratorBuilder:
 @enumeration_builders(epcpm.sunspecmodel.TableBlock)
 @attr.s
 class TableBlockEnumeratorBuilder:
+    """Excel spreadsheet generator for the SunSpec TableBlock class enumerators."""
+
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
-    def gen(self):
+    def gen(self) -> typing.List[Fields]:
+        """
+        Excel spreadsheet generator for the SunSpec TableBlock class enumerators.
+
+        Returns:
+            list of Fields: output enumerators
+        """
         rows = []
 
         for child in self.wrapped.children:
@@ -801,10 +824,18 @@ class TableBlockEnumeratorBuilder:
 @enumeration_builders(epcpm.sunspecmodel.TableGroup)
 @attr.s
 class TableGroupEnumeratorBuilder:
+    """Excel spreadsheet generator for the SunSpec TableGroup class enumerators."""
+
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
-    def gen(self):
+    def gen(self) -> typing.List[Fields]:
+        """
+        Excel spreadsheet generator for the SunSpec TableGroup class enumerators.
+
+        Returns:
+            list of Fields: output enumerators
+        """
         rows = []
 
         for child in self.wrapped.children:
