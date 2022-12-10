@@ -1,6 +1,8 @@
 import attr
 import copy
+import pathlib
 import re
+import typing
 from collections.abc import Iterable
 
 import epcpm.pm_helper
@@ -25,15 +27,24 @@ class OutputPoint:
     read_write = attr.ib()
 
 
-def flatten_list(xs):
-    for x in xs:
-        if isinstance(x, Iterable) and not isinstance(x, (str, bytes)):
-            yield from flatten_list(x)
+def flatten_list(list_of_lists: typing.List) -> typing.List:
+    """
+    Given a list of lists, flatten into a single list.
+
+    Args:
+        list_of_lists: list of lists to flatten
+
+    Returns:
+        list: individual list from the given list of lists
+    """
+    for sublist in list_of_lists:
+        if isinstance(sublist, Iterable) and not isinstance(sublist, (str, bytes)):
+            yield from flatten_list(sublist)
         else:
-            yield x
+            yield sublist
 
 
-# TODO: move this somewhere common in python code...
+# Conversion of SunSpec types to C types.
 sunspec_types = {
     "uint16": "uint16_t",
     "enum16": "uint16_t",
@@ -42,11 +53,11 @@ sunspec_types = {
     "int32": "sunsS32",
     "uint64": "sunsU64",
     "string": "PackedString",
-    "bitfield16": "sunsU16",  # TODO: this is something special...
-    "bitfield32": "sunsU32",  # TODO: this is something special...
-    "sunssf": "sunssf",  # TODO: check if this one is needed for this situation or if it is correct???
-    "acc32": "acc32",  # TODO: check if this one is needed for this situation or if it is correct???
-    "acc64": "acc64",  # TODO: check if this one is needed for this situation or if it is correct???
+    "bitfield16": "sunsU16",
+    "bitfield32": "sunsU32",
+    "sunssf": "sunssf",
+    "acc32": "acc32",
+    "acc64": "acc64",
     "pad16": "pad16",
 }
 
@@ -70,7 +81,26 @@ def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
     return scale_factor_from_uuid
 
 
-def export(c_path, h_path, sunspec_model, sunspec_id, skip_sunspec=False):
+def export(
+    c_path: pathlib.Path,
+    h_path: pathlib.Path,
+    sunspec_model: epyqlib.attrsmodel.Model,
+    sunspec_id: epcpm.pm_helper.SunSpecSection,
+    skip_sunspec: bool = False,
+) -> None:
+    """
+    Generate the SunSpec model data interface .c and .h files.
+
+    Args:
+        c_path: path and filename for .c file
+        h_path: path and filename for .h file
+        sunspec_model: SunSpec model
+        sunspec_id: SunSpec section internal identifier
+        skip_sunspec: skip output of the generated files
+
+    Returns:
+
+    """
     builder = builders.wrap(
         wrapped=sunspec_model.root,
         parameter_uuid_finder=sunspec_model.node_from_uuid,
@@ -81,7 +111,6 @@ def export(c_path, h_path, sunspec_model, sunspec_id, skip_sunspec=False):
     )
     c_path.parent.mkdir(parents=True, exist_ok=True)
     builder.gen()
-    # c_content, h_content = builder.gen()
 
     builder = specific_builders.wrap(
         wrapped=sunspec_model.root,
@@ -93,15 +122,13 @@ def export(c_path, h_path, sunspec_model, sunspec_id, skip_sunspec=False):
     )
     c_path.parent.mkdir(parents=True, exist_ok=True)
     builder.gen()
-    # c_content, h_content = builder.gen()
-
-    # if sunspec_id.value == 2:
-    #     raise ValueError("FAKE ERROR sunspectointerface.py !!!!!!")
 
 
 @builders(epcpm.sunspecmodel.Root)
 @attr.s
 class Root:
+    """Interface generator for the SunSpec Root class."""
+
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
     skip_sunspec = attr.ib()
@@ -109,8 +136,13 @@ class Root:
     c_path = attr.ib(default=None)
     h_path = attr.ib(default=None)
 
-    def gen(self):
-        c_content = []
+    def gen(self) -> None:
+        """
+        Interface generator for the SunSpec Root class.
+
+        Returns:
+
+        """
         h_content = []
         model_list = []
         model_points = []
@@ -127,13 +159,14 @@ class Root:
                 skip_sunspec=self.skip_sunspec,
             )
 
-            c_built, h_built, model_id, model_points_built = builder.gen()
-            c_content.extend(c_built)
+            h_built, model_id, model_points_built = builder.gen()
             h_content.extend(h_built)
             model_list.append(model_id)
-            # print(f"model_points_built={model_points_built}")
             model_points.append(model_points_built)
 
+        #
+        # Generate the overall .h file
+        #
         include_guard = f"__SUNSPEC{self.sunspec_id.value}_INTERFACE_GEN_H__"
         h_lines = [f"#ifndef {include_guard}\n#define {include_guard}\n\n\n"]
         h_lines.extend([AUTO_GEN_LINE])
@@ -158,7 +191,6 @@ class Root:
             sunspec_hi = "0xffff"
             sunspec_lo = "0xffff"
 
-        # TODO: This is the write_C99_struct format.
         h_lines.extend(
             [
                 "typedef struct\n{\n",
@@ -198,7 +230,6 @@ class Root:
                 "}\n\n",
             ]
         )
-        # TODO: This is the write_C99_struct format. (above)
 
         h_lines.extend(["//Read/write register index enumerations:\n"])
         h_lines.extend(["enum{\n"])
@@ -257,6 +288,9 @@ class Root:
 
         h_lines.extend([f"\n#endif //{include_guard}\n"])
 
+        #
+        # Generate the overall .c file
+        #
         c_lines = [f'#include "sunspec{self.sunspec_id.value}InterfaceGen.h"\n\n']
 
         for model_id in model_list:
@@ -428,10 +462,12 @@ class Root:
             ]
         )
 
+        # Output the overall .c file.
         with self.c_path.open("w", newline="\n") as f:
             for c_line in c_lines:
                 f.write(c_line)
 
+        # Output the overall .h file.
         with self.h_path.open("w", newline="\n") as f:
             for h_line in h_lines:
                 f.write(h_line)
@@ -440,6 +476,8 @@ class Root:
 @builders(epcpm.sunspecmodel.Model)
 @attr.s
 class Model:
+    """Interface generator for the SunSpec Model class."""
+
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
     sunspec_id = attr.ib()
@@ -447,7 +485,13 @@ class Model:
     c_path = attr.ib(default=None)
     h_path = attr.ib(default=None)
 
-    def gen(self):
+    def gen(self) -> typing.Tuple[typing.List[str], int, typing.List[OutputPoint]]:
+        """
+        Interface generator for the SunSpec Model class.
+
+        Returns:
+            list of strings, int, list of OutputPoint: output .h lines, model ID, list of model OutputPoint's
+        """
         points = []
         h_enum_lines = []
         h_enum_default_enumerator_dict = dict()
@@ -461,7 +505,6 @@ class Model:
                 sunspec_id=self.sunspec_id,
             )
             built_points = builder.gen()
-            # print(f"{i}; model_type:{model_type}; model:{self.wrapped.id}; point:{built_points}")
             points.extend(built_points)
 
             add_padding = epcpm.pm_helper.add_padding_to_block(
@@ -496,7 +539,6 @@ class Model:
 
         h_lines.extend(h_enum_lines)
 
-        # TODO: This is the write_C99_struct format.
         struct_name = f"Sunspec{self.sunspec_id.value}Model{self.wrapped.id}"
         h_lines.extend(
             [
@@ -506,7 +548,6 @@ class Model:
 
         model_size = 0
         for point in points:
-            # print(f"point={point}")
             if point.type == "PackedString":
                 h_lines.extend([f"    {point.type} {point.name}[{point.size}];\n"])
             else:
@@ -553,15 +594,15 @@ class Model:
                 "    __VA_ARGS__ \\\n" "}\n\n",
             ]
         )
-        # TODO: This is the write_C99_struct format. (above)
 
-        # TODO: check these return values...
-        return [[], h_lines, self.wrapped.id, points]
+        return h_lines, self.wrapped.id, points
 
 
 @builders(epcpm.sunspecmodel.HeaderBlock)
 @attr.s
 class HeaderBlock:
+    """Interface generator for the SunSpec HeaderBlock class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     repeating_block_reference = attr.ib(default=None)
@@ -570,7 +611,13 @@ class HeaderBlock:
     is_table = attr.ib(default=False)
     fixed_block_reference = attr.ib(default=None, type=epcpm.sunspecmodel.FixedBlock)
 
-    def gen(self):
+    def gen(self) -> typing.List[OutputPoint]:
+        """
+        Interface generator for the SunSpec HeaderBlock class.
+
+        Returns:
+            list of OutputPoint: list containing single header OutputPoint
+        """
         header_point = OutputPoint(
             type="SunspecModelHeader",
             name="hdr",
@@ -586,6 +633,8 @@ class HeaderBlock:
 @builders(epcpm.sunspecmodel.TableRepeatingBlockReference)
 @attr.s
 class TableRepeatingBlockReference:
+    """Interface generator for the SunSpec TableRepeatingBlockReference class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     repeating_block_reference = attr.ib(default=None)
@@ -594,7 +643,13 @@ class TableRepeatingBlockReference:
     is_table = attr.ib(default=False)
     fixed_block_reference = attr.ib(default=None, type=epcpm.sunspecmodel.FixedBlock)
 
-    def gen(self):
+    def gen(self) -> typing.List[OutputPoint]:
+        """
+        Interface generator for the SunSpec TableRepeatingBlockReference class.
+
+        Returns:
+            list of OutputPoint: list of child OutputPoint's
+        """
         builder = builders.wrap(
             wrapped=self.wrapped.original,
             parameter_uuid_finder=self.parameter_uuid_finder,
@@ -610,6 +665,8 @@ class TableRepeatingBlockReference:
 @builders(epcpm.sunspecmodel.FixedBlock)
 @attr.s
 class FixedBlock:
+    """Interface generator for the SunSpec FixedBlock class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     repeating_block_reference = attr.ib(default=None)
@@ -618,7 +675,13 @@ class FixedBlock:
     is_table = attr.ib(default=False)
     fixed_block_reference = attr.ib(default=None, type=epcpm.sunspecmodel.FixedBlock)
 
-    def gen(self):
+    def gen(self) -> typing.List[OutputPoint]:
+        """
+        Interface generator for the SunSpec FixedBlock class.
+
+        Returns:
+            list of OutputPoint: list of child OutputPoint's
+        """
         point_vals_out = []
         for child in self.wrapped.children:
             builder = builders.wrap(
@@ -637,6 +700,8 @@ class FixedBlock:
 @builders(epcpm.sunspecmodel.TableRepeatingBlock)
 @attr.s
 class TableRepeatingBlock:
+    """Interface generator for the SunSpec TableRepeatingBlock class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     repeating_block_reference = attr.ib(default=None)
@@ -645,7 +710,13 @@ class TableRepeatingBlock:
     is_table = attr.ib(default=False)
     fixed_block_reference = attr.ib(default=None, type=epcpm.sunspecmodel.FixedBlock)
 
-    def gen(self):
+    def gen(self) -> typing.List[OutputPoint]:
+        """
+        Interface generator for the SunSpec TableRepeatingBlock class.
+
+        Returns:
+            list of OutputPoint: list of child OutputPoint's
+        """
         point_vals_original = []
         point_vals_out = []
         for child in self.wrapped.children:
@@ -671,6 +742,8 @@ class TableRepeatingBlock:
 @builders(epcpm.sunspecmodel.TableBlock)
 @attr.s
 class TableBlock:
+    """Interface generator for the SunSpec TableBlock class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     repeating_block_reference = attr.ib(default=None)
@@ -679,7 +752,13 @@ class TableBlock:
     is_table = attr.ib(default=False)
     fixed_block_reference = attr.ib(default=None, type=epcpm.sunspecmodel.FixedBlock)
 
-    def gen(self):
+    def gen(self) -> typing.List[OutputPoint]:
+        """
+        Interface generator for the SunSpec TableBlock class.
+
+        Returns:
+            list of OutputPoint: list of child OutputPoint's
+        """
         point_vals_out = []
         for child_index, child in enumerate(self.wrapped.children):
             builder = builders.wrap(
@@ -702,6 +781,8 @@ class TableBlock:
 @builders(epcpm.sunspecmodel.TableGroup)
 @attr.s
 class TableGroup:
+    """Interface generator for the SunSpec TableGroup class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     repeating_block_reference = attr.ib(default=None)
@@ -709,7 +790,13 @@ class TableGroup:
     sunspec_id = attr.ib(default=None)
     is_table = attr.ib(default=False)
 
-    def gen(self):
+    def gen(self) -> typing.List[OutputPoint]:
+        """
+        Interface generator for the SunSpec TableGroup class.
+
+        Returns:
+            list of OutputPoint: list of child OutputPoint's
+        """
         point_vals_out = []
         for child in self.wrapped.children:
             builder = builders.wrap(
@@ -728,13 +815,21 @@ class TableGroup:
 @builders(epcpm.sunspecmodel.DataPoint)
 @attr.s
 class DataPoint:
+    """Interface generator for the SunSpec DataPoint class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     is_table = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
     sunspec_id = attr.ib(default=None)
 
-    def gen(self):
+    def gen(self) -> OutputPoint:
+        """
+        Interface generator for the SunSpec DataPoint class.
+
+        Returns:
+            OutputPoint: OutputPoint for the DataPoint
+        """
         size = self.wrapped.size
         default = 0
 
@@ -782,13 +877,21 @@ class DataPoint:
 @builders(epcpm.sunspecmodel.DataPointBitfield)
 @attr.s
 class DataPointBitfield:
+    """Interface generator for the SunSpec DataPointBitfield class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     is_table = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
     sunspec_id = attr.ib(default=None)
 
-    def gen(self):
+    def gen(self) -> OutputPoint:
+        """
+        Interface generator for the SunSpec DataPointBitfield class.
+
+        Returns:
+            OutputPoint: OutputPoint for the DataPointBitfield
+        """
         size = self.wrapped.size
         default = 0
 
@@ -823,6 +926,8 @@ class DataPointBitfield:
 @specific_builders(epcpm.sunspecmodel.Root)
 @attr.s
 class SpecificRoot:
+    """Specific model interface generator for the SunSpec Root class."""
+
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
     skip_sunspec = attr.ib()
@@ -830,7 +935,13 @@ class SpecificRoot:
     c_path = attr.ib(default=None)
     h_path = attr.ib(default=None)
 
-    def gen(self):
+    def gen(self) -> None:
+        """
+        Specific model interface generator for the SunSpec Root class.
+
+        Returns:
+
+        """
         for child in self.wrapped.children:
             if not isinstance(child, epcpm.sunspecmodel.Model):
                 continue
@@ -849,6 +960,8 @@ class SpecificRoot:
 @specific_builders(epcpm.sunspecmodel.Model)
 @attr.s
 class SpecificModel:
+    """Specific model interface generator for the SunSpec Model class."""
+
     wrapped = attr.ib()
     parameter_uuid_finder = attr.ib()
     sunspec_id = attr.ib()
@@ -856,7 +969,13 @@ class SpecificModel:
     c_path = attr.ib(default=None)
     h_path = attr.ib(default=None)
 
-    def gen(self):
+    def gen(self) -> None:
+        """
+        Specific model interface generator for the SunSpec Model class.
+
+        Returns:
+
+        """
         h_file_name = f"{self.h_path.stem}{self.wrapped.id}{self.h_path.suffix}"
         h_file_path = self.h_path.with_name(h_file_name)
         c_file_name = f"{self.c_path.stem}{self.wrapped.id}{self.c_path.suffix}"
@@ -976,6 +1095,8 @@ class SpecificModel:
 @specific_builders(epcpm.sunspecmodel.TableRepeatingBlock)
 @attr.s
 class SpecificTableRepeatingBlock:
+    """Specific model interface generator for the SunSpec TableRepeatingBlock class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     repeating_block_reference = attr.ib(default=None)
@@ -985,7 +1106,13 @@ class SpecificTableRepeatingBlock:
     is_table = attr.ib(default=False)
     fixed_block_reference = attr.ib(default=None, type=epcpm.sunspecmodel.FixedBlock)
 
-    def gen(self):
+    def gen(self) -> typing.Tuple[typing.List[str], typing.List[str], typing.List[str]]:
+        """
+        Specific model interface generator for the SunSpec TableRepeatingBlock class.
+
+        Returns:
+            [list[str], list[str], list[str]]: list of getters, list of setters, list of base declaration strings
+        """
         get_out = []
         set_out = []
         base_decl = []
@@ -1031,6 +1158,8 @@ class SpecificTableRepeatingBlock:
 @specific_builders(epcpm.sunspecmodel.FixedBlock)
 @attr.s
 class SpecificFixedBlock:
+    """Specific model interface generator for the SunSpec FixedBlock class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     repeating_block_reference = attr.ib(default=None)
@@ -1040,7 +1169,13 @@ class SpecificFixedBlock:
     is_table = attr.ib(default=False)
     fixed_block_reference = attr.ib(default=None, type=epcpm.sunspecmodel.FixedBlock)
 
-    def gen(self):
+    def gen(self) -> typing.Tuple[typing.List[str], typing.List[str], typing.List[str]]:
+        """
+        Specific model interface generator for the SunSpec FixedBlock class.
+
+        Returns:
+            [list[str], list[str], list[str]]: list of getters, list of setters, list of base declaration strings
+        """
         get_out = []
         set_out = []
         base_decl = []
@@ -1072,6 +1207,8 @@ class SpecificFixedBlock:
 @specific_builders(epcpm.sunspecmodel.TableBlock)
 @attr.s
 class SpecificTableBlock:
+    """Specific model interface generator for the SunSpec TableBlock class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     repeating_block_reference = attr.ib(default=None)
@@ -1081,7 +1218,13 @@ class SpecificTableBlock:
     is_table = attr.ib(default=False)
     fixed_block_reference = attr.ib(default=None, type=epcpm.sunspecmodel.FixedBlock)
 
-    def gen(self):
+    def gen(self) -> typing.Tuple[typing.List[str], typing.List[str], typing.List[str]]:
+        """
+        Specific model interface generator for the SunSpec TableBlock class.
+
+        Returns:
+            [list[str], list[str], list[str]]: list of getters, list of setters, list of base declaration strings
+        """
         get_out = []
         set_out = []
         base_decl = []
@@ -1103,7 +1246,6 @@ class SpecificTableBlock:
 
             for get_child_item in get_child_flat:
                 if get_child_item is not None:
-                    print(f"model={self.model_id}; get_child_item={get_child_item}")
                     modified_get_child_item = self._allow_format_for_table_option(
                         get_child_item
                     )
@@ -1141,9 +1283,17 @@ class SpecificTableBlock:
         return {}
 
     @staticmethod
-    def _allow_format_for_table_option(str_with_table_option) -> str:
-        # When there are multiple lines of code, handle the table_option with these regex's
-        # so that the curly braces don't set off the python string format.
+    def _allow_format_for_table_option(str_with_table_option: str) -> str:
+        """
+        When there are multiple lines of code, handle the table_option with these regex's
+        so that the curly braces don't set off the python string format.
+
+        Args:
+            str_with_table_option: string that contains one or more 'table_option' substrings
+
+        Returns:
+            str: modified string with added curly braces except for around table_option substring(s)
+        """
         modified_str = re.sub("(?!{table_option){", "{{", str_with_table_option)
         modified_str = re.sub("(?<!table_option)}", "}}", modified_str)
         return modified_str
@@ -1152,6 +1302,8 @@ class SpecificTableBlock:
 @specific_builders(epcpm.sunspecmodel.TableGroup)
 @attr.s
 class SpecificTableGroup:
+    """Specific model interface generator for the SunSpec TableGroup class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     repeating_block_reference = attr.ib(default=None)
@@ -1161,7 +1313,13 @@ class SpecificTableGroup:
     is_table = attr.ib(default=False)
     fixed_block_reference = attr.ib(default=None, type=epcpm.sunspecmodel.FixedBlock)
 
-    def gen(self):
+    def gen(self) -> typing.Tuple[typing.List[str], typing.List[str], typing.List[str]]:
+        """
+        Specific model interface generator for the SunSpec TableGroup class.
+
+        Returns:
+            [list[str], list[str], list[str]]: list of getters, list of setters, list of base declaration strings
+        """
         get_out = []
         set_out = []
         base_decl = []
@@ -1182,14 +1340,12 @@ class SpecificTableGroup:
 
         return [get_out, set_out, base_decl]
 
-    def gen_scale_factor(self):
-        # TODO: I don't think this method is used???
-        return {}
-
 
 @specific_builders(epcpm.sunspecmodel.HeaderBlock)
 @attr.s
 class SpecificHeaderBlock:
+    """Specific model interface generator for the SunSpec HeaderBlock class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     repeating_block_reference = attr.ib(default=None)
@@ -1198,7 +1354,13 @@ class SpecificHeaderBlock:
     sunspec_id = attr.ib(default=None)
     fixed_block_reference = attr.ib(default=None, type=epcpm.sunspecmodel.FixedBlock)
 
-    def gen(self):
+    def gen(self) -> typing.Tuple[typing.List[str], typing.List[str], typing.List[str]]:
+        """
+        Specific model interface generator for the SunSpec HeaderBlock class.
+
+        Returns:
+            [list[str], list[str], list[str]]: list of getters, list of setters, list of base declaration strings
+        """
         return [[], [], []]
 
     def gen_scale_factor(self):
@@ -1208,6 +1370,8 @@ class SpecificHeaderBlock:
 @specific_builders(epcpm.sunspecmodel.TableRepeatingBlockReference)
 @attr.s
 class SpecificTableRepeatingBlockReference:
+    """Specific model interface generator for the SunSpec TableRepeatingBlockReference class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     scale_factor_from_uuid = attr.ib(default=None)
@@ -1216,7 +1380,13 @@ class SpecificTableRepeatingBlockReference:
     is_table = attr.ib(default=False)
     fixed_block_reference = attr.ib(default=None, type=epcpm.sunspecmodel.FixedBlock)
 
-    def gen(self):
+    def gen(self) -> typing.Tuple[typing.List[str], typing.List[str], typing.List[str]]:
+        """
+        Specific model interface generator for the SunSpec TableRepeatingBlockReference class.
+
+        Returns:
+            [list[str], list[str], list[str]]: list of getters, list of setters, list of base declaration strings
+        """
         builder = specific_builders.wrap(
             wrapped=self.wrapped.original,
             parameter_uuid_finder=self.parameter_uuid_finder,
@@ -1235,6 +1405,8 @@ class SpecificTableRepeatingBlockReference:
 @specific_builders(epcpm.sunspecmodel.DataPoint)
 @attr.s
 class SpecificDataPoint:
+    """Specific model interface generator for the SunSpec DataPoint class."""
+
     wrapped = attr.ib()
     scale_factor_from_uuid = attr.ib()
     model_id = attr.ib()
@@ -1242,7 +1414,13 @@ class SpecificDataPoint:
     parameter_uuid_finder = attr.ib(default=None)
     sunspec_id = attr.ib(default=None)
 
-    def gen(self):
+    def gen(self) -> typing.Tuple[typing.List[str], typing.List[str], str]:
+        """
+        Specific model interface generator for the SunSpec DataPoint class.
+
+        Returns:
+            [list[str], list[str], str]: list of getters, list of setters, base declaration string
+        """
         get_out = None
         set_out = None
         base_decl = None
@@ -1277,7 +1455,6 @@ class SpecificDataPoint:
             # TODO: explanation for this!
             tmp_scale_factor = "TMP_SF"
 
-            # TODO: possibly move this code a little lower??????
             if self.wrapped.factor_uuid is not None:
                 scale_factor = self.parameter_uuid_finder(
                     self.scale_factor_from_uuid[self.wrapped.factor_uuid].parameter_uuid
@@ -1499,6 +1676,8 @@ class SpecificDataPoint:
 @specific_builders(epcpm.sunspecmodel.DataPointBitfield)
 @attr.s
 class SpecificDataPointBitfield:
+    """Specific model interface generator for the SunSpec DataPointBitfield class."""
+
     wrapped = attr.ib()
     scale_factor_from_uuid = attr.ib()
     model_id = attr.ib()
@@ -1506,7 +1685,13 @@ class SpecificDataPointBitfield:
     parameter_uuid_finder = attr.ib(default=None)
     sunspec_id = attr.ib(default=None)
 
-    def gen(self):
+    def gen(self) -> typing.Tuple[typing.List[str], typing.List[str], str]:
+        """
+        Specific model interface generator for the SunSpec DataPointBitfield class.
+
+        Returns:
+            [list[str], list[str], str]: list of getters, list of setters, base declaration string
+        """
         getter = []
         setter = []
 
@@ -1564,12 +1749,24 @@ class SpecificDataPointBitfield:
 @enumeration_builders(epcpm.sunspecmodel.HeaderBlock)
 @attr.s
 class EnumerationHeaderBlock:
+    """Enumeration interface generator for the SunSpec HeaderBlock class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
     sunspec_id = attr.ib(default=None)
 
-    def gen(self):
+    def gen(
+        self,
+    ) -> typing.Tuple[
+        typing.List[str], typing.Dict[str, epyqlib.pm.parametermodel.SunSpecEnumerator]
+    ]:
+        """
+        Enumeration interface generator for the SunSpec HeaderBlock class.
+
+        Returns:
+            [list[str], dict[str, SunSpecEnumerator]: list of output, dict of SunSpecEnumerator's
+        """
         return [], {}
 
 
@@ -1578,13 +1775,26 @@ class EnumerationHeaderBlock:
 @enumeration_builders(epcpm.sunspecmodel.TableBlock)
 @enumeration_builders(epcpm.sunspecmodel.TableGroup)
 @attr.s
-class EnumerationFixedBlock:
+class EnumerationBlock:
+    """Enumeration interface generator for the SunSpec FixedBlock, TableRepeatingBlockReference, TableBlock, TableGroup classes."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
     sunspec_id = attr.ib(default=None)
 
-    def gen(self):
+    def gen(
+        self,
+    ) -> typing.Tuple[
+        typing.List[str], typing.Dict[str, epyqlib.pm.parametermodel.SunSpecEnumerator]
+    ]:
+        """
+        Enumeration interface generator for the SunSpec FixedBlock, TableRepeatingBlockReference, TableBlock,
+        TableGroup classes.
+
+        Returns:
+            [list[str], dict[str, SunSpecEnumerator]: list of output, dict of SunSpecEnumerator's
+        """
         rows_out = []
         default_enumerator_dict = dict()
         for child in self.wrapped.children:
@@ -1606,31 +1816,54 @@ class EnumerationFixedBlock:
 )
 @attr.s
 class EnumerationTableRepeatingBlockReferenceDataPointReference:
+    """Enumeration interface generator for the SunSpec TableRepeatingBlockReferenceDataPointReference class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
     sunspec_id = attr.ib(default=None)
 
-    def gen(self):
+    def gen(
+        self,
+    ) -> typing.Tuple[
+        typing.List[str], typing.Dict[str, epyqlib.pm.parametermodel.SunSpecEnumerator]
+    ]:
+        """
+        Enumeration interface generator for the SunSpec TableRepeatingBlockReferenceDataPointReference class.
+
+        Returns:
+            [list[str], dict[str, SunSpecEnumerator]: list of output, dict of SunSpecEnumerator's
+        """
         enumeration_builder = enumeration_builders.wrap(
             wrapped=self.wrapped.original,
             model_id=self.model_id,
             parameter_uuid_finder=self.parameter_uuid_finder,
             sunspec_id=self.sunspec_id,
         )
-        vals = enumeration_builder.gen()
-        return vals
+        return enumeration_builder.gen()
 
 
 @enumeration_builders(epcpm.sunspecmodel.DataPoint)
 @attr.s
 class EnumerationDataPoint:
+    """Enumeration interface generator for the SunSpec DataPoint class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
     sunspec_id = attr.ib(default=None)
 
-    def gen(self):
+    def gen(
+        self,
+    ) -> typing.Tuple[
+        typing.List[str], typing.Dict[str, epyqlib.pm.parametermodel.SunSpecEnumerator]
+    ]:
+        """
+        Enumeration interface generator for the SunSpec DataPoint class.
+
+        Returns:
+            [list[str], dict[str, SunSpecEnumerator]: list of output, dict of SunSpecEnumerator's
+        """
         rows_out = []
         default_enumerator = dict()
 
@@ -1706,12 +1939,24 @@ class EnumerationDataPoint:
 @enumeration_builders(epcpm.sunspecmodel.DataPointBitfield)
 @attr.s
 class EnumerationDataPointBitfield:
+    """Enumeration interface generator for the SunSpec DataPointBitfield class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
     sunspec_id = attr.ib(default=None)
 
-    def gen(self):
+    def gen(
+        self,
+    ) -> typing.Tuple[
+        typing.List[str], typing.Dict[str, epyqlib.pm.parametermodel.SunSpecEnumerator]
+    ]:
+        """
+        Enumeration interface generator for the SunSpec DataPointBitfield class.
+
+        Returns:
+            [list[str], dict[str, SunSpecEnumerator]: list of output, dict of SunSpecEnumerator's
+        """
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
         sunspec_type = self.parameter_uuid_finder(self.wrapped.type_uuid).name
@@ -1753,8 +1998,29 @@ class EnumerationDataPointBitfield:
 
 
 def _output_enum_or_bitfield(
-    size, sunspec_id, model_id, sunspec_type, enumerators_by_bit, parameter
-):
+    size: int,
+    sunspec_id: epcpm.pm_helper.SunSpecSection,
+    model_id: int,
+    sunspec_type: str,
+    enumerators_by_bit: typing.Dict[int, epyqlib.pm.parametermodel.SunSpecEnumerator],
+    parameter: epyqlib.pm.parametermodel.Parameter,
+) -> typing.Tuple[
+    typing.List[str], typing.Dict[str, epyqlib.pm.parametermodel.SunSpecEnumerator]
+]:
+    """
+    Common code for enumeration interface generator.
+
+    Args:
+        size: size of the bitfield (1 or 2)
+        sunspec_id: SunSpec section internal identifier
+        model_id: model ID
+        sunspec_type: SunSpec type to be converted to C type
+        enumerators_by_bit: dict of bit to enumerator object
+        parameter: parameter for the enumeration
+
+    Returns:
+        [list[str], dict[str, SunSpecEnumerator]: list of output, dict of SunSpecEnumerator's
+    """
     rows_out = []
     default_enumerator = {}
 
@@ -1876,7 +2142,25 @@ def _output_enum_or_bitfield(
     return rows_out, default_enumerator
 
 
-def _output_typedef_union(sunspec_id, model_id, sunspec_type, parameter_abbreviation):
+def _output_typedef_union(
+    sunspec_id: epcpm.pm_helper.SunSpecSection,
+    model_id: int,
+    sunspec_type: str,
+    parameter_abbreviation: str,
+) -> typing.List[str]:
+    """
+    Common code for enumeration interface generator.
+    Specifically generation of typedef union code section.
+
+    Args:
+        sunspec_id: SunSpec section internal identifier
+        model_id: model ID
+        sunspec_type: SunSpec type to be converted to C type
+        parameter_abbreviation: parameter abbreviation string
+
+    Returns:
+        list[str]: output C typedef union
+    """
     rows_out = []
     raw_type = sunspec_types[sunspec_type]
     rows_out.append("typedef union\n{\n")
