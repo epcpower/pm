@@ -209,9 +209,7 @@ class Root:
         h_lines.extend(["//Read/write register index enumerations:\n"])
         h_lines.extend(["enum{\n"])
 
-        # TODO: this magic number needs to be calculated...
-        MAGIC_SPACE_BUFFER_SIZE = 19
-        longest_point_name = 0
+        longest_point_name_len = 0
         total_rw_registers = 0
         # Account for 'SunS' length.
         total_addresses = epcpm.pm_helper.SUNS_LENGTH
@@ -220,8 +218,6 @@ class Root:
                 total_addresses += point.size
                 if point.read_write == "RW":
                     total_rw_registers += point.size
-                    if len(point.name) > longest_point_name:
-                        longest_point_name = len(point.name)
                 if point.type == "SunspecModelHeader":
                     # Skip header block
                     continue
@@ -232,12 +228,31 @@ class Root:
                                 f"    SUNSPEC{self.sunspec_id.value}_MODEL{point.model_id}_{point.name}{point_size_index},\n"
                             ]
                         )
+                        # Used to calculate the longest point name length.
+                        point_name_length = (
+                            len(
+                                f"SUNSPEC{self.sunspec_id.value}_MODEL{point.model_id}_"
+                            )
+                            + len(point.name)
+                            + len(str(point_size_index))
+                        )
                 else:
                     h_lines.extend(
                         [
                             f"    SUNSPEC{self.sunspec_id.value}_MODEL{point.model_id}_{point.name},\n"
                         ]
                     )
+                    # Used to calculate the longest point name length.
+                    point_name_length = len(
+                        f"SUNSPEC{self.sunspec_id.value}_MODEL{point.model_id}_"
+                    ) + len(point.name)
+
+                # Calculate the longest point name length for later use.
+                if (
+                    point.read_write == "RW"
+                    and point_name_length > longest_point_name_len
+                ):
+                    longest_point_name_len = point_name_length
 
         h_lines.extend([f"    SUNSPEC{self.sunspec_id.value}_REG_LEN\n}};\n\n"])
 
@@ -306,14 +321,14 @@ class Root:
                                 set_name = "NULL"
                             c_lines.extend(
                                 [
-                                    f"    [{point_index}] = MODBUS_REGISTER_RW_DEFAULTS(/* {point_full_name: <{longest_point_name+MAGIC_SPACE_BUFFER_SIZE}} */ .sign = {sign}, .set = {set_name}),\n"
+                                    f"    [{point_index}] = MODBUS_REGISTER_RW_DEFAULTS(/* {point_full_name: <{longest_point_name_len}} */ .sign = {sign}, .set = {set_name}),\n"
                                 ]
                             )
                             point_index += 1
                     else:
                         c_lines.extend(
                             [
-                                f"    [{point_index}] = MODBUS_REGISTER_RW_DEFAULTS(/* {point_name: <{longest_point_name+MAGIC_SPACE_BUFFER_SIZE}} */ .sign = {sign}, .set = {set_name}),\n"
+                                f"    [{point_index}] = MODBUS_REGISTER_RW_DEFAULTS(/* {point_name: <{longest_point_name_len}} */ .sign = {sign}, .set = {set_name}),\n"
                             ]
                         )
                         point_index += 1
@@ -348,8 +363,6 @@ class Root:
 
                 if point.read_write == "RW":
                     total_rw_registers += point.size
-                    if len(point.name) > longest_point_name:
-                        longest_point_name = len(point.name)
                 if point.type == "SunspecModelHeader":
                     addr_index += point.size
                     continue
@@ -365,7 +378,7 @@ class Root:
                             getter = "NULL"
                         c_lines.extend(
                             [
-                                f"    [{register_index}] = MODBUS_REGISTER_DEFAULTS(/* {point_full_name: <{longest_point_name+MAGIC_SPACE_BUFFER_SIZE}} */ .addr = {addr_index}, .firstReg = {first_reg}, .size = {point.size}, .get = {getter}{setter}),\n"
+                                f"    [{register_index}] = MODBUS_REGISTER_DEFAULTS(/* {point_full_name: <{longest_point_name_len}} */ .addr = {addr_index}, .firstReg = {first_reg}, .size = {point.size}, .get = {getter}{setter}),\n"
                             ]
                         )
                         register_index += 1
@@ -381,7 +394,7 @@ class Root:
                         setter = ""
                     c_lines.extend(
                         [
-                            f"    [{register_index}] = MODBUS_REGISTER_DEFAULTS(/* {point_name: <{longest_point_name+MAGIC_SPACE_BUFFER_SIZE}} */ .addr = {addr_index}, .firstReg = {first_reg}, .size = {point.size}, .get = {getter}{setter}),\n"
+                            f"    [{register_index}] = MODBUS_REGISTER_DEFAULTS(/* {point_name: <{longest_point_name_len}} */ .addr = {addr_index}, .firstReg = {first_reg}, .size = {point.size}, .get = {getter}{setter}),\n"
                         ]
                     )
                     register_index += 1
