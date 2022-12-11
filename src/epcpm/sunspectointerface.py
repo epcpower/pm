@@ -219,7 +219,8 @@ class Root:
         MAGIC_SPACE_BUFFER_SIZE = 19
         longest_point_name = 0
         total_rw_registers = 0
-        total_addresses = 2  # account for starting 'SunS'
+        # Account for 'SunS' length.
+        total_addresses = epcpm.pm_helper.SUNS_LENGTH
         for block_points in model_points:
             for point in block_points:
                 total_addresses += point.size
@@ -337,8 +338,8 @@ class Root:
         )
         register_index = 0
         rw_index = 0
-        # TODO: magic number -- it's SunS size
-        addr_index = 2
+        # Account for 'SunS' length.
+        addr_index = epcpm.pm_helper.SUNS_LENGTH
         for block_points in model_points:
             for point in block_points:
                 point_name = (
@@ -403,8 +404,8 @@ class Root:
                 "{\n",
             ]
         )
-        # TODO: magic number -- it's SunS size
-        register_index = 2
+        # Account for 'SunS' length.
+        register_index = epcpm.pm_helper.SUNS_LENGTH
         point_index = 0
         for block_points in model_points:
             for point in block_points:

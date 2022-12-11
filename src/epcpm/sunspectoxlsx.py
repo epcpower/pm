@@ -158,7 +158,8 @@ class Root:
             else:
                 children = list(self.wrapped.children)
 
-            model_offset = 2  # account for starting 'SunS'
+            # Account for 'SunS' length.
+            model_offset = epcpm.pm_helper.SUNS_LENGTH
             for model in children:
                 if isinstance(model, epcpm.sunspecmodel.Table):
                     # TODO: for now, implement it soon...

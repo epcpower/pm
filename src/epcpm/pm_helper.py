@@ -16,6 +16,10 @@ class SunSpecSection(Enum):
     SUNSPEC_TWO = 2
 
 
+# Define the size for 'SunS', which is the starting characters of a SunSpec address space.
+SUNS_LENGTH = 2
+
+
 def convert_uuid_to_variable_name(input_uuid: uuid.UUID) -> str:
     """
     Replace the dashes in a given UUID with underscores. Return a string value.
@@ -131,4 +135,3 @@ def build_uuid_scale_factor_dict(
             scale_factor_from_uuid[point.uuid] = point
 
     return scale_factor_from_uuid
-
