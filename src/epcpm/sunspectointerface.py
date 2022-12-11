@@ -1434,9 +1434,6 @@ class SpecificDataPoint:
                 is_table=self.is_table,
             )
 
-            # TODO: explanation for this!
-            tmp_scale_factor = "TMP_SF"
-
             if self.wrapped.factor_uuid is not None:
                 scale_factor = self.parameter_uuid_finder(
                     self.scale_factor_from_uuid[self.wrapped.factor_uuid].parameter_uuid
@@ -1446,15 +1443,9 @@ class SpecificDataPoint:
 
             if not uses_interface_item and not self.wrapped.not_implemented:
                 if scale_factor is not None:
-                    scale_factor_updater_name = f"getSUNSPEC{self.sunspec_id.value}_MODEL{self.model_id}_{scale_factor}"
-
-                    f = f"{scale_factor_updater_name}();"
-                    get_scale_factor = f.format(
-                        model_id=self.model_id,
-                        abbreviation=tmp_scale_factor,
-                    )
-                    getter.append(get_scale_factor)
-                    setter.append(get_scale_factor)
+                    scale_factor_updater_name = f"getSUNSPEC{self.sunspec_id.value}_MODEL{self.model_id}_{scale_factor}();"
+                    getter.append(scale_factor_updater_name)
+                    setter.append(scale_factor_updater_name)
 
                 getter.append(f"{hand_coded_getter_function_name}();")
 
