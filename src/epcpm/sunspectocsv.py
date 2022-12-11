@@ -262,39 +262,6 @@ class Table:
         return []
 
 
-def build_uuid_scale_factor_dict(
-    points: typing.List[
-        typing.Union[epcpm.sunspecmodel.DataPoint, epcpm.sunspecmodel.DataPointBitfield]
-    ],
-    parameter_uuid_finder: typing.Callable,
-) -> typing.Dict[uuid.UUID, epcpm.sunspecmodel.DataPoint]:
-    """
-    Generates a dictionary of scale factor data.
-
-    Args:
-        points: list of DataPoint / DataPointBitfield objects from which to generate scale factor data
-        parameter_uuid_finder: parameter UUID finder method
-
-    Returns:
-        dict: dictionary of scale factor data (UUID -> DataPoint)
-    """
-    # TODO: CAMPid 45002738594281495565841631423784
-    scale_factor_from_uuid = {}
-    for point in points:
-        if point.type_uuid is None:
-            continue
-
-        type_node = parameter_uuid_finder(point.type_uuid)
-
-        if type_node is None:
-            continue
-
-        if type_node.name == "sunssf":
-            scale_factor_from_uuid[point.uuid] = point
-
-    return scale_factor_from_uuid
-
-
 @builders(epcpm.sunspecmodel.HeaderBlock)
 @builders(epcpm.sunspecmodel.FixedBlock)
 @attr.s
@@ -326,7 +293,7 @@ class Block:
         """
         # TODO: CAMPid 07548795421667967542697543743987
 
-        scale_factor_from_uuid = build_uuid_scale_factor_dict(
+        scale_factor_from_uuid = epcpm.pm_helper.build_uuid_scale_factor_dict(
             points=self.wrapped.children,
             parameter_uuid_finder=self.parameter_uuid_finder,
         )
@@ -686,7 +653,7 @@ class TableBlock:
         rows = []
         summed_increments = 0
 
-        scale_factor_from_uuid = build_uuid_scale_factor_dict(
+        scale_factor_from_uuid = epcpm.pm_helper.build_uuid_scale_factor_dict(
             points=self.fixed_block_reference.children,
             parameter_uuid_finder=self.parameter_uuid_finder,
         )

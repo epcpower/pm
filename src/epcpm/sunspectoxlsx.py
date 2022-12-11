@@ -362,24 +362,6 @@ class Enumerator:
         return row
 
 
-def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
-    # TODO: CAMPid 45002738594281495565841631423784
-    scale_factor_from_uuid = {}
-    for point in points:
-        if point.type_uuid is None:
-            continue
-
-        type_node = parameter_uuid_finder(point.type_uuid)
-
-        if type_node is None:
-            continue
-
-        if type_node.name == "sunssf":
-            scale_factor_from_uuid[point.uuid] = point
-
-    return scale_factor_from_uuid
-
-
 @builders(epcpm.sunspecmodel.TableRepeatingBlock)
 @builders(epcpm.sunspecmodel.HeaderBlock)
 @builders(epcpm.sunspecmodel.FixedBlock)
@@ -401,7 +383,7 @@ class Block:
     def gen(self):
         # TODO: CAMPid 07548795421667967542697543743987
 
-        scale_factor_from_uuid = build_uuid_scale_factor_dict(
+        scale_factor_from_uuid = epcpm.pm_helper.build_uuid_scale_factor_dict(
             points=self.wrapped.children,
             parameter_uuid_finder=self.parameter_uuid_finder,
         )
@@ -480,7 +462,7 @@ class TableBlock:
 
         summed_increments = 0
 
-        scale_factor_from_uuid = build_uuid_scale_factor_dict(
+        scale_factor_from_uuid = epcpm.pm_helper.build_uuid_scale_factor_dict(
             points=self.fixed_block_reference.children,
             parameter_uuid_finder=self.parameter_uuid_finder,
         )

@@ -7,6 +7,8 @@ import typing
 import uuid
 from abc import ABC
 from enum import Enum
+import epcpm.sunspecmodel
+import epyqlib.treenode
 
 
 class SunSpecSection(Enum):
@@ -96,3 +98,37 @@ def add_padding_to_block(
         add_padding = False
 
     return add_padding
+
+
+def build_uuid_scale_factor_dict(
+    points: typing.List[
+        typing.Union[epcpm.sunspecmodel.DataPoint, epcpm.sunspecmodel.DataPointBitfield]
+    ],
+    parameter_uuid_finder: typing.Callable,
+) -> typing.Dict[uuid.UUID, epcpm.sunspecmodel.DataPoint]:
+    """
+    Generates a dictionary of scale factor data.
+    Replacement for CAMPid 45002738594281495565841631423784
+
+    Args:
+        points: list of DataPoint / DataPointBitfield objects from which to generate scale factor data
+        parameter_uuid_finder: parameter UUID finder method
+
+    Returns:
+        dict: dictionary of scale factor data (UUID -> DataPoint)
+    """
+    scale_factor_from_uuid = {}
+    for point in points:
+        if point.type_uuid is None:
+            continue
+
+        type_node = parameter_uuid_finder(point.type_uuid)
+
+        if type_node is None:
+            continue
+
+        if type_node.name == "sunssf":
+            scale_factor_from_uuid[point.uuid] = point
+
+    return scale_factor_from_uuid
+

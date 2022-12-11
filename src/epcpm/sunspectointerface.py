@@ -62,25 +62,6 @@ sunspec_types = {
 }
 
 
-# TODO: This is a copy of the one in sunspectoxlsx.py (and possibly elsewhere............)
-def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
-    # TODO: CAMPid 45002738594281495565841631423784
-    scale_factor_from_uuid = {}
-    for point in points:
-        if point.type_uuid is None:
-            continue
-
-        type_node = parameter_uuid_finder(point.type_uuid)
-
-        if type_node is None:
-            continue
-
-        if type_node.name == "sunssf":
-            scale_factor_from_uuid[point.uuid] = point
-
-    return scale_factor_from_uuid
-
-
 def export(
     c_path: pathlib.Path,
     h_path: pathlib.Path,
@@ -1197,7 +1178,7 @@ class SpecificFixedBlock:
         return [get_out, set_out, base_decl]
 
     def gen_scale_factor(self):
-        scale_factor_from_uuid = build_uuid_scale_factor_dict(
+        scale_factor_from_uuid = epcpm.pm_helper.build_uuid_scale_factor_dict(
             points=self.wrapped.children,
             parameter_uuid_finder=self.parameter_uuid_finder,
         )
