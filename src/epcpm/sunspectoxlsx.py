@@ -15,6 +15,7 @@ import epyqlib.utils.general
 import epcpm.c
 import epcpm.pm_helper
 import epcpm.sunspecmodel
+import epcpm.sunspectointerface
 
 
 builders = epyqlib.utils.general.TypeMap()
@@ -1001,14 +1002,14 @@ class Point:
                 and parameter.uses_interface_item()
             )
 
-            hand_coded_getter_function_name = getter_name(
+            hand_coded_getter_function_name = epcpm.sunspectointerface.getter_name(
                 parameter=parameter,
                 sunspec_id=self.sunspec_id,
                 model_id=self.model_id,
                 is_table=self.is_table,
             )
 
-            hand_coded_setter_function_name = setter_name(
+            hand_coded_setter_function_name = epcpm.sunspectointerface.setter_name(
                 parameter=parameter,
                 sunspec_id=self.sunspec_id,
                 model_id=self.model_id,
@@ -1141,7 +1142,7 @@ class Point:
                     )
                 else:
                     getter.append(
-                        adjust_assignment(
+                        epcpm.sunspectointerface.adjust_assignment(
                             left_hand_side=sunspec_variable,
                             right_hand_side=internal_variable,
                             sunspec_model_variable=sunspec_model_variable,
@@ -1153,7 +1154,7 @@ class Point:
                     )
 
                     setter.append(
-                        adjust_assignment(
+                        epcpm.sunspectointerface.adjust_assignment(
                             left_hand_side=internal_variable,
                             right_hand_side=sunspec_variable,
                             sunspec_model_variable=sunspec_model_variable,
@@ -1227,73 +1228,3 @@ class Point:
             row.mandatory = "O"
 
         return row, row.size
-
-
-def adjust_assignment(
-    left_hand_side,
-    right_hand_side,
-    sunspec_model_variable,
-    scale_factor,
-    internal_scale,
-    parameter,
-    factor_operator,
-):
-    if scale_factor is not None:
-        scale_factor_variable = f"{sunspec_model_variable}.{scale_factor}"
-        # TODO: what about positive scalings?
-        # factor = f'(P99_IPOW(-{scale_factor_variable}, 10))'
-        # TODO: we really don't want doubles here, do we?
-        # factor = f'(pow(10, -{scale_factor_variable}))'
-
-        opposite = "" if factor_operator == "*" else "-"
-
-        right_hand_side = (
-            f"(sunspecScale({right_hand_side},"
-            f" {opposite}({scale_factor_variable} + {internal_scale})))"
-        )
-
-    if parameter.nv_cast:
-        right_hand_side = f"((__typeof__({left_hand_side})) {right_hand_side})"
-
-    result = f"{left_hand_side} = {right_hand_side};"
-
-    return result
-
-
-def getter_setter_name(get_set, parameter, sunspec_id, model_id, is_table):
-    if is_table:
-        table_option = "_{table_option}"
-    else:
-        table_option = ""
-
-    format_string = (
-        "{get_set}Sunspec{sunspec_id}Model{model_id}{table_option}_{abbreviation}"
-    )
-
-    return format_string.format(
-        get_set=get_set,
-        sunspec_id=sunspec_id.value,
-        model_id=model_id,
-        abbreviation=parameter.abbreviation,
-        table_option=table_option,
-    )
-
-
-def getter_name(parameter, sunspec_id, model_id, is_table):
-    return getter_setter_name(
-        get_set="get",
-        parameter=parameter,
-        sunspec_id=sunspec_id,
-        model_id=model_id,
-        is_table=is_table,
-    )
-
-
-def setter_name(parameter, sunspec_id, model_id, is_table):
-    return getter_setter_name(
-        get_set="set",
-        parameter=parameter,
-        sunspec_id=sunspec_id,
-        model_id=model_id,
-        is_table=is_table,
-    )

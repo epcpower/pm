@@ -2147,7 +2147,6 @@ def _output_typedef_union(
     return rows_out
 
 
-# TODO: these are copied from sunspectoxlsx.py
 def adjust_assignment(
     left_hand_side,
     right_hand_side,
@@ -2179,7 +2178,6 @@ def adjust_assignment(
     return result
 
 
-# TODO: these are copied from sunspectoxlsx.py
 def getter_setter_name(get_set, parameter, sunspec_id, model_id, is_table):
     if is_table:
         table_option = "_{table_option}"
@@ -2199,7 +2197,6 @@ def getter_setter_name(get_set, parameter, sunspec_id, model_id, is_table):
     )
 
 
-# TODO: these are copied from sunspectoxlsx.py
 def getter_name(parameter, sunspec_id, model_id, is_table):
     return getter_setter_name(
         get_set="get",
@@ -2210,7 +2207,6 @@ def getter_name(parameter, sunspec_id, model_id, is_table):
     )
 
 
-# TODO: these are copied from sunspectoxlsx.py
 def setter_name(parameter, sunspec_id, model_id, is_table):
     return getter_setter_name(
         get_set="set",

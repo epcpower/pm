@@ -16,7 +16,6 @@ import epyqlib.utils.general
 import epcpm.cantosym
 import epcpm.pm_helper
 import epcpm.sunspecmodel
-import epcpm.sunspectoxlsx
 import epcpm.staticmodbusmodel
 
 builders = epyqlib.utils.general.TypeMap()
@@ -694,14 +693,14 @@ class Parameter:
 
             # TODO: handle tables with repeating blocks and references
 
-            hand_coded_getter_function_name = epcpm.sunspectoxlsx.getter_name(
+            hand_coded_getter_function_name = epcpm.sunspectointerface.getter_name(
                 parameter=parameter,
                 sunspec_id=sunspec_id,
                 model_id=model.id,
                 is_table=False,
             )
 
-            hand_coded_setter_function_name = epcpm.sunspectoxlsx.setter_name(
+            hand_coded_setter_function_name = epcpm.sunspectointerface.setter_name(
                 parameter=parameter,
                 sunspec_id=sunspec_id,
                 model_id=model.id,
