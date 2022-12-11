@@ -163,15 +163,6 @@ class Root:
 
         h_lines.extend(["/*\n Top-level interface structure\n*/\n"])
 
-        # TODO: these constants need to be put in a common location.
-        # For SunSpec discovery, start with SunSpec ID for SunSpec2 section only.
-        if self.sunspec_id == epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO:
-            sunspec_hi = "0x5375"
-            sunspec_lo = "0x6e53"
-        else:
-            sunspec_hi = "0xffff"
-            sunspec_lo = "0xffff"
-
         h_lines.extend(
             [
                 "typedef struct\n{\n",
@@ -185,6 +176,9 @@ class Root:
                 [f"    Sunspec{self.sunspec_id.value}Model{model} model{model};\n"]
             )
 
+        sunspec_hi, sunspec_lo = epcpm.pm_helper.get_sunspec_starting_register_values(
+            self.sunspec_id
+        )
         h_lines.extend(
             [
                 "    uint16_t ModelEndID;\n",

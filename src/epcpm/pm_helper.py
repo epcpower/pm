@@ -135,3 +135,23 @@ def build_uuid_scale_factor_dict(
             scale_factor_from_uuid[point.uuid] = point
 
     return scale_factor_from_uuid
+
+
+def get_sunspec_starting_register_values(
+    sunspec_id: SunSpecSection,
+) -> typing.Tuple[str, str]:
+    """
+    For SunSpec discovery, start with SunSpec ID for SunSpec2 section only.
+    SunSpec1 section starts with undefined so that it won't be discovered.
+
+    Args:
+        sunspec_id: SunSpec section internal identifier
+
+    Returns:
+        string, string: SunSpec starting register values in order high low
+    """
+    if sunspec_id == SunSpecSection.SUNSPEC_TWO:
+        # High = 0x5375 ("Su"), Low = 0x6e53 ("nS") for combined "SunS"
+        return "0x5375", "0x6e53"
+    else:
+        return "0xffff", "0xffff"
