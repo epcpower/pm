@@ -56,6 +56,29 @@ def node_path_string(node):
     return " > ".join(names)
 
 
+def find_model_from_point(
+    point: typing.Union[
+        epcpm.sunspecmodel.DataPoint, epcpm.sunspecmodel.DataPointBitfield
+    ]
+) -> epcpm.sunspecmodel.Model:
+    """
+    Find the parent model given the child point.
+    A parent Model is expected when this method is called.
+
+    Args:
+        point: DataPoint or DataPointBitfield child node to search from
+
+    Returns:
+        model: parent model of the given child point
+    """
+    found_model = None
+    for ancestor in point.ancestors():
+        if isinstance(ancestor, epcpm.sunspecmodel.Model):
+            found_model = ancestor
+            break
+    return found_model
+
+
 class InvalidAccessLevelError(Exception):
     @classmethod
     def build(cls, value, parameter):
@@ -429,12 +452,7 @@ class DataPoint:
     def interface_variable_name(self):
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
-        maybe_model = self.wrapped.tree_parent
-
-        while not isinstance(maybe_model, epcpm.sunspecmodel.Model):
-            maybe_model = maybe_model.tree_parent
-
-        model = maybe_model
+        model = find_model_from_point(self.wrapped)
         model_variable = f"sunspec{self.sunspec_id.value}Interface.model{model.id}"
 
         return f"&{model_variable}.{parameter.abbreviation}"
@@ -677,12 +695,7 @@ class Parameter:
             hand_coded_sunspec_getter_function = "NULL"
             hand_coded_sunspec_setter_function = "NULL"
         else:
-            maybe_model = sunspec_point.tree_parent
-
-            while not isinstance(maybe_model, epcpm.sunspecmodel.Model):
-                maybe_model = maybe_model.tree_parent
-
-            model = maybe_model
+            model = find_model_from_point(sunspec_point)
 
             sunspec_models.add(model.id)
 
@@ -1313,10 +1326,7 @@ class TableBaseStructures:
                 sunspec_type,
             ]
 
-            maybe_model = sunspec2_point.tree_parent
-            while not isinstance(maybe_model, epcpm.sunspecmodel.Model):
-                maybe_model = maybe_model.tree_parent
-            model = maybe_model
+            model = find_model_from_point(sunspec2_point)
             model_id = model.id
             sunspec_model_variable = f"sunspec2Interface.model{model_id}"
             abbreviation = table_element.abbreviation
