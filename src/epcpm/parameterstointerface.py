@@ -1286,22 +1286,7 @@ class TableBaseStructures:
                     str(x) for x in getter_setter_list + ["setter"]
                 )
 
-            # TODO: CAMPid 67549654267913467967436
-            sunspec_scale_factor = None
-            factor_uuid = None
-            if node_in_model is not None:
-                if node_in_model.factor_uuid is not None:
-                    factor_uuid = node_in_model.factor_uuid
-
-            if factor_uuid is not None:
-                root = node_in_model.find_root()
-                factor_point = root.model.node_from_uuid(
-                    node_in_model.factor_uuid,
-                )
-                sunspec_scale_factor_node = self.parameter_uuid_finder(
-                    factor_point.parameter_uuid,
-                )
-                sunspec_scale_factor = sunspec_scale_factor_node.abbreviation
+            sunspec_scale_factor = self._find_scale_factor(node_in_model)
 
             if sunspec_scale_factor is not None:
                 scale_factor1_variable = (
@@ -1337,21 +1322,7 @@ class TableBaseStructures:
             sunspec2_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
             sunspec2_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
 
-            sunspec_scale_factor = None
-            factor_uuid = None
-            if node_in_model is not None:
-                if node_in_model.factor_uuid is not None:
-                    factor_uuid = node_in_model.factor_uuid
-
-            if factor_uuid is not None:
-                root = node_in_model.find_root()
-                factor_point = root.model.node_from_uuid(
-                    node_in_model.factor_uuid,
-                )
-                sunspec_scale_factor_node = self.parameter_uuid_finder(
-                    factor_point.parameter_uuid,
-                )
-                sunspec_scale_factor = sunspec_scale_factor_node.abbreviation
+            sunspec_scale_factor = self._find_scale_factor(sunspec2_point)
 
             if sunspec_scale_factor is not None:
                 scale_factor2_variable = (
@@ -1487,6 +1458,31 @@ class TableBaseStructures:
             c,
             [f"extern {interface_item_type} const {item_name};"],
         ]
+
+    def _find_scale_factor(
+        self,
+        node_in_model: typing.Union[
+            epcpm.sunspecmodel.TableRepeatingBlockReferenceDataPointReference,
+            epcpm.sunspecmodel.DataPoint,
+        ],
+    ) -> typing.Union[str, None]:
+        sunspec_scale_factor = None
+        factor_uuid = None
+        if node_in_model is not None:
+            if node_in_model.factor_uuid is not None:
+                factor_uuid = node_in_model.factor_uuid
+
+        if factor_uuid is not None:
+            root = node_in_model.find_root()
+            factor_point = root.model.node_from_uuid(
+                node_in_model.factor_uuid,
+            )
+            sunspec_scale_factor_node = self.parameter_uuid_finder(
+                factor_point.parameter_uuid,
+            )
+            sunspec_scale_factor = sunspec_scale_factor_node.abbreviation
+
+        return sunspec_scale_factor
 
 
 # TODO: CAMPid 3078980986754174316996743174316967431
