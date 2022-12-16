@@ -124,6 +124,9 @@ def export(
 
     built_c, built_h, model1_ids, model2_ids, rejected_callback_dict = builder.gen()
 
+    model1_ids = sorted(model1_ids)
+    model2_ids = sorted(model2_ids)
+
     template_context = {
         "sunspec1_interface_gen_headers": (
             f"sunspec1InterfaceGen{id}.h" for id in model1_ids
@@ -1194,6 +1197,9 @@ class TableBaseStructures:
     def create_item(
         self, table_element, layers, sunspec1_point, sunspec2_point, staticmodbus_point
     ):
+        sunspec1_models = set()
+        sunspec2_models = set()
+
         # TODO: CAMPid 9655426754319431461354643167
         array_element = table_element.original
 
@@ -1208,7 +1214,7 @@ class TableBaseStructures:
         )
 
         if not uses_interface_item:
-            return [[], []]
+            return [[], [], sunspec1_models, sunspec2_models]
 
         curve_type = get_curve_type("".join(layers[:2]))
 
@@ -1273,6 +1279,7 @@ class TableBaseStructures:
             if node_in_model is not None:
                 model_id = node_in_model.tree_parent.tree_parent.id
                 sunspec_model_variable = f"sunspec1Interface.model{model_id}"
+                sunspec1_models.add(model_id)
                 abbreviation = table_element.abbreviation
                 sunspec1_variable = (
                     f"{sunspec_model_variable}"
@@ -1314,6 +1321,7 @@ class TableBaseStructures:
             model = find_model_from_point(sunspec2_point)
             model_id = model.id
             sunspec_model_variable = f"sunspec2Interface.model{model_id}"
+            sunspec2_models.add(model_id)
             abbreviation = table_element.abbreviation
             sunspec2_variable = (
                 f"{sunspec_model_variable}" f".Curve_{curve_index:>02}_{abbreviation}"
@@ -1457,6 +1465,8 @@ class TableBaseStructures:
         return [
             c,
             [f"extern {interface_item_type} const {item_name};"],
+            sunspec1_models,
+            sunspec2_models,
         ]
 
     def _find_scale_factor(
@@ -1624,7 +1634,12 @@ class Table:
             include_uuid_in_item=self.include_uuid_in_item,
         )
 
-        item_code = builders.wrap(
+        (
+            item_code_c,
+            item_code_h,
+            sunspec1_models_built,
+            sunspec2_models_built,
+        ) = builders.wrap(
             wrapped=group,
             can_root=self.can_root,
             sunspec1_root=self.sunspec1_root,
@@ -1645,15 +1660,15 @@ class Table:
             [
                 *table_base_structures.c_code,
                 "",
-                *item_code[0],
+                *item_code_c,
             ],
             [
                 *table_base_structures.h_code,
                 "",
-                *item_code[1],
+                *item_code_h,
             ],
-            set(),
-            set(),
+            sunspec1_models_built,
+            sunspec2_models_built,
             {},
         ]
 
@@ -1678,6 +1693,8 @@ class TableGroupElement:
     def gen(self):
         c = []
         h = []
+        sunspec1_models = set()
+        sunspec2_models = set()
 
         table_tree_root = not isinstance(
             self.wrapped.tree_parent,
@@ -1707,11 +1724,14 @@ class TableGroupElement:
                 include_uuid_in_item=self.include_uuid_in_item,
             ).gen()
 
-            c_built, h_built = result
+            c_built, h_built, sunspec1_models_built, sunspec2_models_built = result
             c.extend(c_built)
             h.extend(h_built)
 
-        return c, h
+            sunspec1_models |= sunspec1_models_built
+            sunspec2_models |= sunspec2_models_built
+
+        return c, h, sunspec1_models, sunspec2_models
 
 
 # TODO: CAMPid 079549750417808543178043180
