@@ -485,8 +485,8 @@ class Model:
         h_enum_lines = []
         h_enum_default_enumerator_dict = dict()
         model_types = ["Header", "Fixed Block", "Repeating Block"]
-        zipped = zip(enumerate(self.wrapped.children), model_types)
-        for (i, child), model_type in zipped:
+        child_model_types = zip(enumerate(self.wrapped.children), model_types)
+        for (i, child), model_type in child_model_types:
             builder = builders.wrap(
                 wrapped=child,
                 model_id=self.wrapped.id,
@@ -1686,7 +1686,6 @@ class SpecificDataPointBitfield:
             and parameter.uses_interface_item()
         )
 
-        # TODO: should we just require that it does and assume etc?
         if uses_interface_item:
             parameter_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
                 parameter.uuid
@@ -1716,7 +1715,6 @@ class SpecificDataPointBitfield:
             )
 
         if len(getter) > 0:
-            # TODO: what if write-only?
             get_out = epcpm.c.format_nested_lists(getter)
 
         if not parameter.read_only:

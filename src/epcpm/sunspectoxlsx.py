@@ -214,8 +214,8 @@ class Model:
             fixed_block_reference = None
 
         model_types = ["Header", "Fixed Block", "Repeating Block"]
-        zipped = zip(enumerate(self.wrapped.children), model_types)
-        for (i, child), model_type in zipped:
+        child_model_types = zip(enumerate(self.wrapped.children), model_types)
+        for (i, child), model_type in child_model_types:
             add_padding = epcpm.pm_helper.add_padding_to_block(
                 child, self.sunspec_id, self.wrapped.id, model_type
             )
