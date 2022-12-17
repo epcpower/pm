@@ -522,22 +522,6 @@ class TableGroup:
 
         points = list(self.wrapped.children)
 
-        # TODO: Padding most likely not necessary for TableGroup. Run tests and remove if necessary.
-        if self.add_padding:
-            point = epcpm.sunspecmodel.DataPoint(
-                type_uuid=self.padding_type.uuid,
-                block_offset=(
-                    self.wrapped.children[-1].block_offset
-                    + self.wrapped.children[-1].size
-                ),
-                size=self.padding_type.value,
-            )
-            # TODO: ack!  just to get the address offset calculated but
-            #       not calling append_child() because i don't want to shove
-            #       this into the model.  :[
-            point.tree_parent = self.wrapped
-            points.append(point)
-
         summed_increments = 0
 
         for child in points:
