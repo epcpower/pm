@@ -44,6 +44,40 @@ def flatten_list(list_of_lists: typing.List) -> typing.List:
             yield sublist
 
 
+def get_point_name_prefix(
+    sunspec_id: epcpm.pm_helper.SunSpecSection, model_id: int
+) -> str:
+    """
+    Return partial point name for use in C code.
+
+    Args:
+        sunspec_id: SunSpec section internal identifier
+        model_id: model ID
+
+    Returns:
+        point name prefix
+    """
+    return f"SUNSPEC{sunspec_id.value}_MODEL{model_id}_"
+
+
+def get_full_point_name(
+    sunspec_id: epcpm.pm_helper.SunSpecSection, model_id: int, point_name: str
+) -> str:
+    """
+    Return the full point name for use in C code.
+
+    Args:
+        sunspec_id: SunSpec section internal identifier
+        model_id: model ID
+        point_name: point name to be used as part of a full point name
+
+    Returns:
+        full point name
+    """
+    point_name_prefix = get_point_name_prefix(sunspec_id, model_id)
+    return f"{point_name_prefix}{point_name}"
+
+
 # Conversion of SunSpec types to C types.
 sunspec_types = {
     "uint16": "uint16_t",
@@ -145,9 +179,101 @@ class Root:
             model_list.append(model_id)
             model_points.append(model_points_built)
 
-        #
-        # Generate the overall .h file
-        #
+        (
+            longest_point_name_len,
+            total_rw_registers,
+            total_addresses,
+        ) = self._pre_calculate_model_values(model_points)
+        h_lines = self._generate_h_lines(
+            h_content, model_list, model_points, total_rw_registers, total_addresses
+        )
+        c_lines = self._generate_c_lines(
+            model_list,
+            model_points,
+            longest_point_name_len,
+            total_rw_registers,
+            total_addresses,
+        )
+
+        # Output the overall .c file.
+        with self.c_path.open("w", newline="\n") as f:
+            for c_line in c_lines:
+                f.write(c_line)
+
+        # Output the overall .h file.
+        with self.h_path.open("w", newline="\n") as f:
+            for h_line in h_lines:
+                f.write(h_line)
+
+    def _pre_calculate_model_values(
+        self, model_points: typing.List[typing.List[OutputPoint]]
+    ) -> typing.Tuple[int, int, int]:
+        """
+        Calculate values from model points used by interface generation.
+            longest point name length
+            total RW registers
+            total addresses
+
+        Args:
+            model_points: list of a list of output points
+
+        Returns:
+            longest_point_name_len, total_rw_registers, total_addresses
+        """
+        longest_point_name_len = 0
+        total_rw_registers = 0
+        # Initialize total addresses by accounting for the 'SunS' characters length.
+        total_addresses = epcpm.pm_helper.SUNS_LENGTH
+        for block_points in model_points:
+            for point in block_points:
+                total_addresses += point.size
+                if point.read_write == "RW":
+                    total_rw_registers += point.size
+                if point.type == "SunspecModelHeader":
+                    # Skip header block
+                    continue
+                if point.size > 1:
+                    for point_size_index in range(point.size):
+                        point_name_length = len(
+                            get_full_point_name(
+                                self.sunspec_id, point.model_id, point.name
+                            )
+                        ) + len(str(point_size_index))
+                else:
+                    point_name_length = len(
+                        get_full_point_name(self.sunspec_id, point.model_id, point.name)
+                    )
+
+                # Calculate the longest point name length.
+                if (
+                    point.read_write == "RW"
+                    and point_name_length > longest_point_name_len
+                ):
+                    longest_point_name_len = point_name_length
+
+        return longest_point_name_len, total_rw_registers, total_addresses
+
+    def _generate_h_lines(
+        self,
+        h_content: typing.List[str],
+        model_list: typing.List[int],
+        model_points: typing.List[typing.List[OutputPoint]],
+        total_rw_registers: int,
+        total_addresses: int,
+    ) -> typing.List[str]:
+        """
+        Generate the overall .h file.
+
+        Args:
+            h_content: generated content to be included with the overall output
+            model_list: list of model ID's
+            model_points: list of a list of output points
+            total_rw_registers: total RW registers
+            total_addresses: total addresses
+
+        Returns:
+            list of strings for output in .h file
+        """
         include_guard = f"__SUNSPEC{self.sunspec_id.value}_INTERFACE_GEN_H__"
         h_lines = [f"#ifndef {include_guard}\n#define {include_guard}\n\n\n"]
         h_lines.extend([AUTO_GEN_LINE])
@@ -209,50 +335,19 @@ class Root:
         h_lines.extend(["//Read/write register index enumerations:\n"])
         h_lines.extend(["enum{\n"])
 
-        longest_point_name_len = 0
-        total_rw_registers = 0
-        # Account for 'SunS' length.
-        total_addresses = epcpm.pm_helper.SUNS_LENGTH
         for block_points in model_points:
             for point in block_points:
-                total_addresses += point.size
-                if point.read_write == "RW":
-                    total_rw_registers += point.size
                 if point.type == "SunspecModelHeader":
                     # Skip header block
                     continue
+                point_name = get_full_point_name(
+                    self.sunspec_id, point.model_id, point.name
+                )
                 if point.size > 1:
                     for point_size_index in range(point.size):
-                        h_lines.extend(
-                            [
-                                f"    SUNSPEC{self.sunspec_id.value}_MODEL{point.model_id}_{point.name}{point_size_index},\n"
-                            ]
-                        )
-                        # Used to calculate the longest point name length.
-                        point_name_length = (
-                            len(
-                                f"SUNSPEC{self.sunspec_id.value}_MODEL{point.model_id}_"
-                            )
-                            + len(point.name)
-                            + len(str(point_size_index))
-                        )
+                        h_lines.extend([f"    {point_name}{point_size_index},\n"])
                 else:
-                    h_lines.extend(
-                        [
-                            f"    SUNSPEC{self.sunspec_id.value}_MODEL{point.model_id}_{point.name},\n"
-                        ]
-                    )
-                    # Used to calculate the longest point name length.
-                    point_name_length = len(
-                        f"SUNSPEC{self.sunspec_id.value}_MODEL{point.model_id}_"
-                    ) + len(point.name)
-
-                # Calculate the longest point name length for later use.
-                if (
-                    point.read_write == "RW"
-                    and point_name_length > longest_point_name_len
-                ):
-                    longest_point_name_len = point_name_length
+                    h_lines.extend([f"    {point_name},\n"])
 
         h_lines.extend([f"    SUNSPEC{self.sunspec_id.value}_REG_LEN\n}};\n\n"])
 
@@ -279,9 +374,29 @@ class Root:
 
         h_lines.extend([f"\n#endif //{include_guard}\n"])
 
-        #
-        # Generate the overall .c file
-        #
+        return h_lines
+
+    def _generate_c_lines(
+        self,
+        model_list: typing.List[int],
+        model_points: typing.List[typing.List[OutputPoint]],
+        longest_point_name_len: int,
+        total_rw_registers: int,
+        total_addresses: int,
+    ) -> typing.List[str]:
+        """
+        Generate the overall .c file.
+
+        Args:
+            model_list: list of model ID's
+            model_points: list of a list of output points
+            longest_point_name_len: longest point name length
+            total_rw_registers: total RW registers
+            total_addresses: total addresses
+
+        Returns:
+            list of strings for output in .c file
+        """
         c_lines = [f'#include "sunspec{self.sunspec_id.value}InterfaceGen.h"\n\n']
 
         for model_id in model_list:
@@ -311,17 +426,19 @@ class Root:
             for point in block_points:
                 if point.read_write == "RW":
                     sign = "true" if point.type == "int16_t" else "false"
-                    point_name = f"SUNSPEC{self.sunspec_id.value}_MODEL{point.model_id}_{point.name}"
-                    set_name = f"&setSUNSPEC{self.sunspec_id.value}_MODEL{point.model_id}_{point.name}"
+                    point_name = get_full_point_name(
+                        self.sunspec_id, point.model_id, point.name
+                    )
+                    set_name = f"&set{point_name}"
                     if point.size > 1:
                         for point_size_index in range(point.size):
-                            point_full_name = f"{point_name}{point_size_index}"
+                            point_name_with_index = f"{point_name}{point_size_index}"
 
                             if point_size_index > 0:
                                 set_name = "NULL"
                             c_lines.extend(
                                 [
-                                    f"    [{point_index}] = MODBUS_REGISTER_RW_DEFAULTS(/* {point_full_name: <{longest_point_name_len}} */ .sign = {sign}, .set = {set_name}),\n"
+                                    f"    [{point_index}] = MODBUS_REGISTER_RW_DEFAULTS(/* {point_name_with_index: <{longest_point_name_len}} */ .sign = {sign}, .set = {set_name}),\n"
                                 ]
                             )
                             point_index += 1
@@ -347,12 +464,12 @@ class Root:
         )
         register_index = 0
         rw_index = 0
-        # Account for 'SunS' length.
+        # Initialize address index by accounting for the 'SunS' characters length.
         addr_index = epcpm.pm_helper.SUNS_LENGTH
         for block_points in model_points:
             for point in block_points:
-                point_name = (
-                    f"SUNSPEC{self.sunspec_id.value}_MODEL{point.model_id}_{point.name}"
+                point_name = get_full_point_name(
+                    self.sunspec_id, point.model_id, point.name
                 )
                 first_reg = f"&sunspec{self.sunspec_id.value}Regs[{register_index}]"
 
@@ -361,14 +478,12 @@ class Root:
                 else:
                     getter = f"&get{point_name}"
 
-                if point.read_write == "RW":
-                    total_rw_registers += point.size
                 if point.type == "SunspecModelHeader":
                     addr_index += point.size
                     continue
                 if point.size > 1:
                     for point_size_index in range(point.size):
-                        point_full_name = f"{point_name}{point_size_index}"
+                        point_name_with_index = f"{point_name}{point_size_index}"
                         if point.read_write == "RW":
                             setter = f", .w = &sunspec{self.sunspec_id.value}RegsRw[{rw_index}]"
                             rw_index += 1
@@ -378,7 +493,7 @@ class Root:
                             getter = "NULL"
                         c_lines.extend(
                             [
-                                f"    [{register_index}] = MODBUS_REGISTER_DEFAULTS(/* {point_full_name: <{longest_point_name_len}} */ .addr = {addr_index}, .firstReg = {first_reg}, .size = {point.size}, .get = {getter}{setter}),\n"
+                                f"    [{register_index}] = MODBUS_REGISTER_DEFAULTS(/* {point_name_with_index: <{longest_point_name_len}} */ .addr = {addr_index}, .firstReg = {first_reg}, .size = {point.size}, .get = {getter}{setter}),\n"
                             ]
                         )
                         register_index += 1
@@ -411,7 +526,7 @@ class Root:
                 "{\n",
             ]
         )
-        # Account for 'SunS' length.
+        # Initialize register index by accounting for the 'SunS' characters length.
         register_index = epcpm.pm_helper.SUNS_LENGTH
         point_index = 0
         for block_points in model_points:
@@ -451,15 +566,7 @@ class Root:
             ]
         )
 
-        # Output the overall .c file.
-        with self.c_path.open("w", newline="\n") as f:
-            for c_line in c_lines:
-                f.write(c_line)
-
-        # Output the overall .h file.
-        with self.h_path.open("w", newline="\n") as f:
-            for h_line in h_lines:
-                f.write(h_line)
+        return c_lines
 
 
 @builders(epcpm.sunspecmodel.Model)
@@ -1453,7 +1560,12 @@ class SpecificDataPoint:
 
             if not uses_interface_item and not self.wrapped.not_implemented:
                 if scale_factor is not None:
-                    scale_factor_updater_name = f"getSUNSPEC{self.sunspec_id.value}_MODEL{self.model_id}_{scale_factor}();"
+                    scale_factor_updater_prefix = get_point_name_prefix(
+                        self.sunspec_id, self.model_id
+                    )
+                    scale_factor_updater_name = (
+                        f"get{scale_factor_updater_prefix}{scale_factor}();"
+                    )
                     getter.append(scale_factor_updater_name)
                     setter.append(scale_factor_updater_name)
 
@@ -1651,7 +1763,8 @@ class SpecificDataPoint:
             else:
                 set_out = None
 
-            base_decl = f"SUNSPEC{self.sunspec_id.value}_MODEL{self.model_id}_{table_option}{parameter.abbreviation}"
+            base_decl_prefix = get_point_name_prefix(self.sunspec_id, self.model_id)
+            base_decl = f"{base_decl_prefix}{table_option}{parameter.abbreviation}"
 
         return [get_out, set_out, base_decl]
 
@@ -1722,7 +1835,8 @@ class SpecificDataPointBitfield:
         else:
             set_out = None
 
-        base_decl = f"SUNSPEC{self.sunspec_id.value}_MODEL{self.model_id}_{parameter.abbreviation}"
+        base_decl_prefix = get_point_name_prefix(self.sunspec_id, self.model_id)
+        base_decl = f"{base_decl_prefix}{parameter.abbreviation}"
 
         return [get_out, set_out, base_decl]
 
