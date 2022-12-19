@@ -1210,7 +1210,7 @@ class SpecificTableRepeatingBlock:
         Specific model interface generator for the SunSpec TableRepeatingBlock class.
 
         Returns:
-            [list[str], list[str], list[str]]: list of getters, list of setters, list of base declaration strings
+            list[str], list[str], list[str]: list of getters, list of setters, list of base declaration strings
         """
         get_out = []
         set_out = []
@@ -1251,7 +1251,7 @@ class SpecificTableRepeatingBlock:
                     )
                 )
 
-        return [get_out, set_out, base_decl]
+        return get_out, set_out, base_decl
 
 
 @specific_builders(epcpm.sunspecmodel.FixedBlock)
@@ -1273,7 +1273,7 @@ class SpecificFixedBlock:
         Specific model interface generator for the SunSpec FixedBlock class.
 
         Returns:
-            [list[str], list[str], list[str]]: list of getters, list of setters, list of base declaration strings
+            list[str], list[str], list[str]: list of getters, list of setters, list of base declaration strings
         """
         get_out = []
         set_out = []
@@ -1293,7 +1293,7 @@ class SpecificFixedBlock:
             set_out.append(set_child)
             base_decl.append(base_decl_child)
 
-        return [get_out, set_out, base_decl]
+        return get_out, set_out, base_decl
 
     def gen_scale_factor(self):
         scale_factor_from_uuid = epcpm.pm_helper.build_uuid_scale_factor_dict(
@@ -1322,7 +1322,7 @@ class SpecificTableBlock:
         Specific model interface generator for the SunSpec TableBlock class.
 
         Returns:
-            [list[str], list[str], list[str]]: list of getters, list of setters, list of base declaration strings
+            list[str], list[str], list[str]: list of getters, list of setters, list of base declaration strings
         """
         get_out = []
         set_out = []
@@ -1376,7 +1376,7 @@ class SpecificTableBlock:
                     )
                 )
 
-        return [get_out, set_out, base_decl]
+        return get_out, set_out, base_decl
 
     def gen_scale_factor(self):
         return {}
@@ -1417,7 +1417,7 @@ class SpecificTableGroup:
         Specific model interface generator for the SunSpec TableGroup class.
 
         Returns:
-            [list[str], list[str], list[str]]: list of getters, list of setters, list of base declaration strings
+            list[str], list[str], list[str]: list of getters, list of setters, list of base declaration strings
         """
         get_out = []
         set_out = []
@@ -1437,7 +1437,7 @@ class SpecificTableGroup:
             set_out.append(set_child)
             base_decl.append(base_decl_child)
 
-        return [get_out, set_out, base_decl]
+        return get_out, set_out, base_decl
 
 
 @specific_builders(epcpm.sunspecmodel.HeaderBlock)
@@ -1458,9 +1458,9 @@ class SpecificHeaderBlock:
         Specific model interface generator for the SunSpec HeaderBlock class.
 
         Returns:
-            [list[str], list[str], list[str]]: list of getters, list of setters, list of base declaration strings
+            list[str], list[str], list[str]: list of getters, list of setters, list of base declaration strings
         """
-        return [[], [], []]
+        return [], [], []
 
     def gen_scale_factor(self):
         return {}
@@ -1484,7 +1484,7 @@ class SpecificTableRepeatingBlockReference:
         Specific model interface generator for the SunSpec TableRepeatingBlockReference class.
 
         Returns:
-            [list[str], list[str], list[str]]: list of getters, list of setters, list of base declaration strings
+            list[str], list[str], list[str]: list of getters, list of setters, list of base declaration strings
         """
         builder = specific_builders.wrap(
             wrapped=self.wrapped.original,
@@ -1518,7 +1518,7 @@ class SpecificDataPoint:
         Specific model interface generator for the SunSpec DataPoint class.
 
         Returns:
-            [list[str], list[str], str]: list of getters, list of setters, base declaration string
+            list[str], list[str], str: list of getters, list of setters, base declaration string
         """
         get_out = None
         set_out = None
@@ -1766,7 +1766,7 @@ class SpecificDataPoint:
             base_decl_prefix = get_point_name_prefix(self.sunspec_id, self.model_id)
             base_decl = f"{base_decl_prefix}{table_option}{parameter.abbreviation}"
 
-        return [get_out, set_out, base_decl]
+        return get_out, set_out, base_decl
 
 
 @specific_builders(epcpm.sunspecmodel.DataPointBitfield)
@@ -1786,7 +1786,7 @@ class SpecificDataPointBitfield:
         Specific model interface generator for the SunSpec DataPointBitfield class.
 
         Returns:
-            [list[str], list[str], str]: list of getters, list of setters, base declaration string
+            list[str], list[str], str: list of getters, list of setters, base declaration string
         """
         getter = []
         setter = []
@@ -1838,7 +1838,7 @@ class SpecificDataPointBitfield:
         base_decl_prefix = get_point_name_prefix(self.sunspec_id, self.model_id)
         base_decl = f"{base_decl_prefix}{parameter.abbreviation}"
 
-        return [get_out, set_out, base_decl]
+        return get_out, set_out, base_decl
 
 
 @enumeration_builders(epcpm.sunspecmodel.HeaderBlock)
@@ -2114,7 +2114,7 @@ def _output_enum_or_bitfield(
         parameter: parameter for the enumeration
 
     Returns:
-        [list[str], dict[str, SunSpecEnumerator]: list of output, dict of SunSpecEnumerator's
+        list[str], dict[str, SunSpecEnumerator: list of output, dict of SunSpecEnumerator's
     """
     rows_out = []
     default_enumerator = {}
