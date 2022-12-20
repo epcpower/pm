@@ -96,6 +96,29 @@ sunspec_types = {
 }
 
 
+sunspec_type_to_c_function = {
+    "int16": "INT16_C(0x8000)",
+    "uint16": "UINT16_C(0xffff)",
+    "acc16": "UINT16_C(0x0000)",
+    "enum16": "UINT16_C(0xffff)",
+    "bitfield16": "UINT16_C(0xffff)",
+    "int32": "sunspecInt32ToSS32_returns(INT32_C(0x80000000))",
+    "uint32": "sunspecUint32ToSSU32_returns(UINT32_C(0xffffffff))",
+    "acc32": "sunspecUint32ToSSU32_returns(UINT32_C(0x00000000))",
+    "enum32": "sunspecUint32ToSSU32_returns(UINT32_C(0xffffffff))",
+    "bitfield32": "sunspecUint32ToSSU32_returns(UINT32_C(0xffffffff))",
+    "ipaddr": "sunspecUint32ToSSU32_returns(UINT32_C(0x00000000))",
+    "int64": "sunspecInt64ToSS64_returns(INT64_C(0x8000000000000000))",
+    "uint64": "sunspecUint64ToSSU64_returns(UINT64_C(0xffffffffffffffff))",
+    # yes, acc64 seems to be an int64, not a uint64
+    "acc64": "sunspecInt64ToSS64_returns(INT64_C(0x0000000000000000))",
+    # 'ipv6addr': 'INT128_C(0x00000000000000000000000000000000)',
+    # 'float32': 'NAN',
+    "sunssf": "INT16_C(0x8000)",
+    "string": "UINT16_C(0x0000)",
+}
+
+
 def export(
     c_path: pathlib.Path,
     h_path: pathlib.Path,
@@ -1527,30 +1550,6 @@ class SpecificDataPoint:
         if self.wrapped.parameter_uuid is not None:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
-            meta = "[Meta_Value]"
-
-            getter = []
-            setter = []
-
-            uses_interface_item = (
-                isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
-                and parameter.uses_interface_item()
-            )
-
-            hand_coded_getter_function_name = getter_name(
-                parameter=parameter,
-                sunspec_id=self.sunspec_id,
-                model_id=self.model_id,
-                is_table=self.is_table,
-            )
-
-            hand_coded_setter_function_name = setter_name(
-                parameter=parameter,
-                sunspec_id=self.sunspec_id,
-                model_id=self.model_id,
-                is_table=self.is_table,
-            )
-
             if self.wrapped.factor_uuid is not None:
                 scale_factor = self.parameter_uuid_finder(
                     self.scale_factor_from_uuid[self.wrapped.factor_uuid].parameter_uuid
@@ -1558,215 +1557,244 @@ class SpecificDataPoint:
             else:
                 scale_factor = None
 
-            if not uses_interface_item and not self.wrapped.not_implemented:
-                if scale_factor is not None:
-                    scale_factor_updater_prefix = get_point_name_prefix(
-                        self.sunspec_id, self.model_id
-                    )
-                    scale_factor_updater_name = (
-                        f"get{scale_factor_updater_prefix}{scale_factor}();"
-                    )
-                    getter.append(scale_factor_updater_name)
-                    setter.append(scale_factor_updater_name)
-
-                getter.append(f"{hand_coded_getter_function_name}();")
-
-            sunspec_model_variable = (
-                f"sunspec{self.sunspec_id.value}Interface.model{self.model_id}"
-            )
-
-            if self.is_table:
-                table_option = "{table_option}_"
-            else:
-                table_option = ""
-
-            sunspec_variable = (
-                f"{sunspec_model_variable}.{table_option}{parameter.abbreviation}"
-            )
-
             if self.wrapped.type_uuid is not None:
                 point_type = self.parameter_uuid_finder(self.wrapped.type_uuid).name
             else:
                 point_type = "NOT_ASSIGNED"
 
-            if point_type == "pad":
-                getter.append(f"{sunspec_variable} = 0x8000;")
-            elif self.wrapped.not_implemented:
-                value = {
-                    "int16": "INT16_C(0x8000)",
-                    "uint16": "UINT16_C(0xffff)",
-                    "acc16": "UINT16_C(0x0000)",
-                    "enum16": "UINT16_C(0xffff)",
-                    "bitfield16": "UINT16_C(0xffff)",
-                    "int32": "sunspecInt32ToSS32_returns(INT32_C(0x80000000))",
-                    "uint32": "sunspecUint32ToSSU32_returns(UINT32_C(0xffffffff))",
-                    "acc32": "sunspecUint32ToSSU32_returns(UINT32_C(0x00000000))",
-                    "enum32": "sunspecUint32ToSSU32_returns(UINT32_C(0xffffffff))",
-                    "bitfield32": "sunspecUint32ToSSU32_returns(UINT32_C(0xffffffff))",
-                    "ipaddr": "sunspecUint32ToSSU32_returns(UINT32_C(0x00000000))",
-                    "int64": "sunspecInt64ToSS64_returns(INT64_C(0x8000000000000000))",
-                    "uint64": "sunspecUint64ToSSU64_returns(UINT64_C(0xffffffffffffffff))",
-                    # yes, acc64 seems to be an int64, not a uint64
-                    "acc64": "sunspecInt64ToSS64_returns(INT64_C(0x0000000000000000))",
-                    # 'ipv6addr': 'INT128_C(0x00000000000000000000000000000000)',
-                    # 'float32': 'NAN',
-                    "sunssf": "INT16_C(0x8000)",
-                    "string": "UINT16_C(0x0000)",
-                }[point_type]
-                if point_type == "string":
-                    getter.extend(
-                        [
-                            f"for (size_t i = 0; i < LENGTHOF({sunspec_variable}); i++) {{",
-                            [f"{sunspec_variable}[i] = {value};"],
-                            "}",
-                        ]
-                    )
-                elif point_type.startswith("bitfield"):
-                    getter.append(f"{sunspec_variable}.raw = {value};")
-                    # # below because parsesunspec only detects bitfields
-                    # # if they have values
-                    # if self.wrapped.enumeration_uuid is not None:
-                    #     getter.append(
-                    #         f'{sunspec_variable}.raw = {value};'
-                    #     )
-                    # else:
-                    #     getter.append(
-                    #         f'*((uint{row.type[-2:]}_t*) &{sunspec_variable})'
-                    #         f' = {value};'
-                    #     )
-                else:
-                    getter.append(f"{sunspec_variable} = {value};")
-
-                setter.append("// point not implemented, do nothing")
-            elif parameter.nv_format is not None:
-                internal_variable = parameter.nv_format.format(meta)
-
-                # TODO: CAMPid 075780541068182645821856068542023499
-                converter = {
-                    "uint32": {
-                        "get": "sunspecUint32ToSSU32",
-                        "set": "sunspecSSU32ToUint32",
-                    },
-                    "int32": {
-                        # TODO: add this to embedded?
-                        # 'get': 'sunspecInt32ToSSS32',
-                        "set": "sunspecSSS32ToInt32",
-                    },
-                }.get(point_type)
-
-                if converter is not None:
-                    get_converter = converter["get"]
-                    set_converter = converter["set"]
-
-                    get_cast = ""
-                    set_cast = ""
-                    if parameter.nv_cast:
-                        set_cast = f"(__typeof__({internal_variable})) "
-                        get_type = {
-                            "uint32": "uint32_t",
-                        }[point_type]
-                        get_cast = f"({get_type})"
-
-                    getter.extend(
-                        [
-                            f"{get_converter}(",
-                            [
-                                f"&{sunspec_variable},",
-                                f"{get_cast}{internal_variable}",
-                            ],
-                            ");",
-                        ]
-                    )
-                    setter.extend(
-                        [
-                            f"{internal_variable} = {set_cast}{set_converter}(",
-                            [
-                                f"&{sunspec_variable}",
-                            ],
-                            ");",
-                        ]
-                    )
-                else:
-                    getter.append(
-                        adjust_assignment(
-                            left_hand_side=sunspec_variable,
-                            right_hand_side=internal_variable,
-                            sunspec_model_variable=sunspec_model_variable,
-                            scale_factor=self.wrapped.scale_factor,
-                            internal_scale=parameter.internal_scale_factor,
-                            parameter=parameter,
-                            factor_operator="*",
-                        )
-                    )
-
-                    setter.append(
-                        adjust_assignment(
-                            left_hand_side=internal_variable,
-                            right_hand_side=sunspec_variable,
-                            sunspec_model_variable=sunspec_model_variable,
-                            scale_factor=self.wrapped.scale_factor,
-                            internal_scale=parameter.internal_scale_factor,
-                            parameter=parameter,
-                            factor_operator="/",
-                        )
-                    )
-
-            elif uses_interface_item:
-                parameter_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
-                    parameter.uuid
-                )
-                item_name = f"interfaceItem_{parameter_uuid}"
-
-                getter.extend(
-                    [
-                        f"{item_name}.common.sunspec{self.sunspec_id.value}.getter(",
-                        [
-                            f"(InterfaceItem_void *) &{item_name},",
-                            f"Meta_Value",
-                        ],
-                        f");",
-                    ]
-                )
-                setter.extend(
-                    [
-                        f"{item_name}.common.sunspec{self.sunspec_id.value}.setter(",
-                        [
-                            f"(InterfaceItem_void *) &{item_name},",
-                            f"true,",
-                            f"Meta_Value",
-                        ],
-                        f");",
-                    ]
-                )
-            else:
-                if getattr(parameter, "sunspec_getter", None) is not None:
-                    getter.append(
-                        parameter.sunspec_getter.format(
-                            interface=sunspec_variable,
-                        )
-                    )
-
-                if getattr(parameter, "sunspec_setter", None) is not None:
-                    setter.append(
-                        parameter.sunspec_setter.format(
-                            interface=sunspec_variable,
-                        )
-                    )
-
-            get_out = epcpm.c.format_nested_lists(getter)
-
-            if not uses_interface_item and not self.wrapped.not_implemented:
-                setter.append(f"{hand_coded_setter_function_name}();")
-
-            if not parameter.read_only:
-                set_out = epcpm.c.format_nested_lists(setter)
-            else:
-                set_out = None
-
+            (
+                get_out,
+                set_out,
+                table_option,
+            ) = sunspec_interface_generation_for_data_point(
+                parameter,
+                self.sunspec_id,
+                self.model_id,
+                self.is_table,
+                self.wrapped.not_implemented,
+                scale_factor,
+                point_type,
+            )
             base_decl_prefix = get_point_name_prefix(self.sunspec_id, self.model_id)
             base_decl = f"{base_decl_prefix}{table_option}{parameter.abbreviation}"
 
         return get_out, set_out, base_decl
+
+
+def sunspec_interface_generation_for_data_point(
+    parameter: epyqlib.pm.parametermodel.Parameter,
+    sunspec_id: epcpm.pm_helper.SunSpecSection,
+    model_id: int,
+    is_table: bool,
+    not_implemented: bool,
+    scale_factor: str,
+    point_type: str,
+) -> typing.Tuple[typing.List[str], typing.List[str], str]:
+    """
+    Generate interface code for data point parameter.
+
+    Args:
+        parameter: parameter for getter/setter interface generation
+        sunspec_id: SunSpec section internal identifier
+        model_id: model ID
+        is_table: is the parameter in a table
+        not_implemented: is the parameter not implemented
+        scale_factor: scale factor name/abbreviation
+        point_type: data point type name
+
+    Returns:
+        list[str], list[str], str: list of getters, list of setters, table option string
+    """
+    getter = []
+    setter = []
+
+    uses_interface_item = (
+        isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
+        and parameter.uses_interface_item()
+    )
+
+    hand_coded_getter_function_name = getter_name(
+        parameter=parameter,
+        sunspec_id=sunspec_id,
+        model_id=model_id,
+        is_table=is_table,
+    )
+
+    hand_coded_setter_function_name = setter_name(
+        parameter=parameter,
+        sunspec_id=sunspec_id,
+        model_id=model_id,
+        is_table=is_table,
+    )
+
+    if not uses_interface_item and not not_implemented:
+        if scale_factor is not None:
+            scale_factor_updater_prefix = get_point_name_prefix(sunspec_id, model_id)
+            scale_factor_updater_name = (
+                f"get{scale_factor_updater_prefix}{scale_factor}();"
+            )
+            getter.append(scale_factor_updater_name)
+            setter.append(scale_factor_updater_name)
+
+        getter.append(f"{hand_coded_getter_function_name}();")
+
+    sunspec_model_variable = f"sunspec{sunspec_id.value}Interface.model{model_id}"
+
+    if is_table:
+        table_option = "{table_option}_"
+    else:
+        table_option = ""
+
+    sunspec_variable = (
+        f"{sunspec_model_variable}.{table_option}{parameter.abbreviation}"
+    )
+
+    if point_type == "pad":
+        getter.append(f"{sunspec_variable} = 0x8000;")
+
+    elif not_implemented:
+        c_function = sunspec_type_to_c_function[point_type]
+
+        if point_type == "string":
+            getter.extend(
+                [
+                    f"for (size_t i = 0; i < LENGTHOF({sunspec_variable}); i++) {{",
+                    [f"{sunspec_variable}[i] = {c_function};"],
+                    "}",
+                ]
+            )
+        elif point_type.startswith("bitfield"):
+            getter.append(f"{sunspec_variable}.raw = {c_function};")
+        else:
+            getter.append(f"{sunspec_variable} = {c_function};")
+
+        setter.append("// point not implemented, do nothing")
+
+    elif parameter.nv_format is not None:
+        meta = "[Meta_Value]"
+        internal_variable = parameter.nv_format.format(meta)
+
+        # TODO: CAMPid 075780541068182645821856068542023499
+        converter = {
+            "uint32": {
+                "get": "sunspecUint32ToSSU32",
+                "set": "sunspecSSU32ToUint32",
+            },
+            "int32": {
+                # TODO: add this to embedded?
+                # 'get': 'sunspecInt32ToSSS32',
+                "set": "sunspecSSS32ToInt32",
+            },
+        }.get(point_type)
+
+        if converter is not None:
+            get_converter = converter["get"]
+            set_converter = converter["set"]
+
+            get_cast = ""
+            set_cast = ""
+            if parameter.nv_cast:
+                set_cast = f"(__typeof__({internal_variable})) "
+                get_type = {
+                    "uint32": "uint32_t",
+                }[point_type]
+                get_cast = f"({get_type})"
+
+            getter.extend(
+                [
+                    f"{get_converter}(",
+                    [
+                        f"&{sunspec_variable},",
+                        f"{get_cast}{internal_variable}",
+                    ],
+                    ");",
+                ]
+            )
+            setter.extend(
+                [
+                    f"{internal_variable} = {set_cast}{set_converter}(",
+                    [
+                        f"&{sunspec_variable}",
+                    ],
+                    ");",
+                ]
+            )
+        else:
+            getter.append(
+                adjust_assignment(
+                    left_hand_side=sunspec_variable,
+                    right_hand_side=internal_variable,
+                    sunspec_model_variable=sunspec_model_variable,
+                    scale_factor=scale_factor,
+                    internal_scale=parameter.internal_scale_factor,
+                    parameter=parameter,
+                    factor_operator="*",
+                )
+            )
+
+            setter.append(
+                adjust_assignment(
+                    left_hand_side=internal_variable,
+                    right_hand_side=sunspec_variable,
+                    sunspec_model_variable=sunspec_model_variable,
+                    scale_factor=scale_factor,
+                    internal_scale=parameter.internal_scale_factor,
+                    parameter=parameter,
+                    factor_operator="/",
+                )
+            )
+
+    elif uses_interface_item:
+        parameter_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(parameter.uuid)
+        item_name = f"interfaceItem_{parameter_uuid}"
+
+        getter.extend(
+            [
+                f"{item_name}.common.sunspec{sunspec_id.value}.getter(",
+                [
+                    f"(InterfaceItem_void *) &{item_name},",
+                    f"Meta_Value",
+                ],
+                f");",
+            ]
+        )
+        setter.extend(
+            [
+                f"{item_name}.common.sunspec{sunspec_id.value}.setter(",
+                [
+                    f"(InterfaceItem_void *) &{item_name},",
+                    f"true,",
+                    f"Meta_Value",
+                ],
+                f");",
+            ]
+        )
+    else:
+        if getattr(parameter, "sunspec_getter", None) is not None:
+            getter.append(
+                parameter.sunspec_getter.format(
+                    interface=sunspec_variable,
+                )
+            )
+
+        if getattr(parameter, "sunspec_setter", None) is not None:
+            setter.append(
+                parameter.sunspec_setter.format(
+                    interface=sunspec_variable,
+                )
+            )
+
+    get_out = epcpm.c.format_nested_lists(getter)
+
+    if not uses_interface_item and not not_implemented:
+        setter.append(f"{hand_coded_setter_function_name}();")
+
+    if not parameter.read_only:
+        set_out = epcpm.c.format_nested_lists(setter)
+    else:
+        set_out = None
+
+    return get_out, set_out, table_option
 
 
 @specific_builders(epcpm.sunspecmodel.DataPointBitfield)
@@ -1788,57 +1816,76 @@ class SpecificDataPointBitfield:
         Returns:
             list[str], list[str], str: list of getters, list of setters, base declaration string
         """
-        getter = []
-        setter = []
-
         if self.wrapped.parameter_uuid is not None:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
-        uses_interface_item = (
-            isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
-            and parameter.uses_interface_item()
+        get_out, set_out = sunspec_interface_generation_for_data_point_bitfield(
+            parameter, self.sunspec_id
         )
-
-        if uses_interface_item:
-            parameter_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
-                parameter.uuid
-            )
-            item_name = f"interfaceItem_{parameter_uuid}"
-
-            getter.extend(
-                [
-                    f"{item_name}.common.sunspec{self.sunspec_id.value}.getter(",
-                    [
-                        f"(InterfaceItem_void *) &{item_name},",
-                        f"Meta_Value",
-                    ],
-                    f");",
-                ]
-            )
-            setter.extend(
-                [
-                    f"{item_name}.common.sunspec{self.sunspec_id.value}.setter(",
-                    [
-                        f"(InterfaceItem_void *) &{item_name},",
-                        f"true,",
-                        f"Meta_Value",
-                    ],
-                    f");",
-                ]
-            )
-
-        if len(getter) > 0:
-            get_out = epcpm.c.format_nested_lists(getter)
-
-        if not parameter.read_only:
-            set_out = epcpm.c.format_nested_lists(setter)
-        else:
-            set_out = None
 
         base_decl_prefix = get_point_name_prefix(self.sunspec_id, self.model_id)
         base_decl = f"{base_decl_prefix}{parameter.abbreviation}"
 
         return get_out, set_out, base_decl
+
+
+def sunspec_interface_generation_for_data_point_bitfield(
+    parameter: epyqlib.pm.parametermodel.Parameter,
+    sunspec_id: epcpm.pm_helper.SunSpecSection,
+) -> typing.Tuple[typing.List[str], typing.List[str]]:
+    """
+    Generate interface code for data point bitfield parameter.
+
+    Args:
+        parameter: parameter for getter/setter interface generation
+        sunspec_id: SunSpec section internal identifier
+
+    Returns:
+        get_out, set_out: list of strings of code for getter and setter
+    """
+    getter = []
+    setter = []
+
+    uses_interface_item = (
+        isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
+        and parameter.uses_interface_item()
+    )
+
+    if uses_interface_item:
+        parameter_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(parameter.uuid)
+        item_name = f"interfaceItem_{parameter_uuid}"
+
+        getter.extend(
+            [
+                f"{item_name}.common.sunspec{sunspec_id.value}.getter(",
+                [
+                    f"(InterfaceItem_void *) &{item_name},",
+                    f"Meta_Value",
+                ],
+                f");",
+            ]
+        )
+        setter.extend(
+            [
+                f"{item_name}.common.sunspec{sunspec_id.value}.setter(",
+                [
+                    f"(InterfaceItem_void *) &{item_name},",
+                    f"true,",
+                    f"Meta_Value",
+                ],
+                f");",
+            ]
+        )
+
+    if len(getter) > 0:
+        get_out = epcpm.c.format_nested_lists(getter)
+
+    if not parameter.read_only:
+        set_out = epcpm.c.format_nested_lists(setter)
+    else:
+        set_out = None
+
+    return get_out, set_out
 
 
 @enumeration_builders(epcpm.sunspecmodel.HeaderBlock)
