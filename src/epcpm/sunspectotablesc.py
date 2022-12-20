@@ -1,4 +1,5 @@
 import attr
+import typing
 import epyqlib.utils.general
 import epyqlib.pm.parametermodel
 
@@ -123,7 +124,10 @@ class Model:
         for child in self.wrapped.children:
             found = isinstance(
                 child,
-                epcpm.sunspecmodel.TableRepeatingBlockReference,
+                (
+                    epcpm.sunspecmodel.TableRepeatingBlockReference,
+                    epcpm.sunspecmodel.TableBlock,
+                ),
             )
             if found:
                 break
@@ -196,6 +200,8 @@ class TableRepeatingBlock:
 @builders(epcpm.sunspecmodel.DataPoint)
 @attr.s
 class DataPoint:
+    """Table generator for the SunSpec DataPoint class."""
+
     wrapped = attr.ib()
     model_id = attr.ib()
     sunspec_id = attr.ib()
@@ -203,7 +209,13 @@ class DataPoint:
     curve_type = attr.ib()
     parameter_uuid_finder = attr.ib()
 
-    def gen(self):
+    def gen(self) -> typing.List[typing.List[str]]:
+        """
+        C table generator for the SunSpec DataPoint class.
+
+        Returns:
+            list of lists of strings: C output for table generation
+        """
         table_element = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
         curve_parent = table_element.tree_parent.tree_parent.tree_parent
         table_element = curve_parent.descendent(
@@ -253,6 +265,44 @@ class DataPoint:
         if getter_setter["set"] is None:
             getter_setter["set"] = ""
 
+        return self._gen_common(table_element, parameter, getter_setter)
+
+    def gen_for_table_block(self) -> typing.List[typing.List[str]]:
+        """
+        TableBlock specific generator for DataPoint table code generation.
+
+        Returns:
+            list of lists of strings: C output for table generation
+        """
+        table_element = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
+        common_parameter = self.parameter_uuid_finder(
+            self.wrapped.common_table_parameter_uuid
+        )
+
+        getter_setter = {
+            "get": common_parameter.can_getter,
+            "set": common_parameter.can_setter,
+        }
+
+        return self._gen_common(table_element, table_element, getter_setter)
+
+    def _gen_common(
+        self,
+        table_element: epyqlib.pm.parametermodel.TableArrayElement,
+        parameter: epyqlib.pm.parametermodel.Parameter,
+        getter_setter: typing.Dict,
+    ) -> typing.List[typing.List[str]]:
+        """
+        Common generator for DataPoint table code generation.
+
+        Args:
+            table_element: table array element node to be output
+            parameter: parameter node to be output
+            getter_setter: dict of getter/setter output
+
+        Returns:
+            list of lists of strings: C output for table generation
+        """
         axis = table_element.tree_parent.axis
         if axis is None:
             axis = "<no axis>"
@@ -383,5 +433,93 @@ class DataPoint:
             both_lines[1].append(
                 f"{function_signature};",
             )
+
+        return both_lines
+
+
+@builders(epcpm.sunspecmodel.TableBlock)
+@attr.s
+class TableBlock:
+    """Table generator for the SunSpec TableBlock class."""
+
+    wrapped = attr.ib()
+    model_id = attr.ib()
+    parameter_uuid_finder = attr.ib()
+    sunspec_id = attr.ib()
+
+    def gen(self) -> typing.List[typing.List[str]]:
+        """
+        C table generator for the SunSpec TableBlock class.
+
+        Returns:
+            list of lists of strings: C output for table generation
+        """
+        both_lines = [[], []]
+        for child_index, point in enumerate(self.wrapped.children):
+            # Should always be a TableGroup.
+            builder = builders.wrap(
+                wrapped=point,
+                model_id=self.model_id,
+                sunspec_id=self.sunspec_id,
+                parameter_uuid_finder=self.parameter_uuid_finder,
+                curve_index=child_index,
+            )
+
+            for lines, more_lines in zip(both_lines, builder.gen()):
+                lines.extend(more_lines)
+                lines.append("")
+
+        return both_lines
+
+
+@builders(epcpm.sunspecmodel.TableGroup)
+@attr.s
+class TableGroup:
+    """Table generator for the SunSpec TableGroup class."""
+
+    wrapped = attr.ib()
+    model_id = attr.ib()
+    parameter_uuid_finder = attr.ib()
+    sunspec_id = attr.ib()
+    curve_index = attr.ib()
+
+    def gen(self) -> typing.List[typing.List[str]]:
+        """
+        C table generator for the SunSpec TableGroup class.
+
+        Returns:
+            list of lists of strings: C output for table generation
+        """
+        both_lines = [[], []]
+        for point in self.wrapped.children:
+            # A bit hacky. Assumption is being made that TableGroup's will only be two deep maximum.
+            if isinstance(point, epcpm.sunspecmodel.TableGroup):
+                builder = builders.wrap(
+                    wrapped=point,
+                    model_id=self.model_id,
+                    sunspec_id=self.sunspec_id,
+                    parameter_uuid_finder=self.parameter_uuid_finder,
+                    curve_index=self.curve_index,
+                )
+
+                for lines, more_lines in zip(both_lines, builder.gen()):
+                    lines.extend(more_lines)
+                    lines.append("")
+            else:
+                if point.common_table_parameter_uuid:
+                    builder = builders.wrap(
+                        wrapped=point,
+                        model_id=self.model_id,
+                        sunspec_id=self.sunspec_id,
+                        curve_index=self.curve_index,
+                        curve_type="",
+                        parameter_uuid_finder=self.parameter_uuid_finder,
+                    )
+
+                    for lines, more_lines in zip(
+                        both_lines, builder.gen_for_table_block()
+                    ):
+                        lines.extend(more_lines)
+                        lines.append("")
 
         return both_lines

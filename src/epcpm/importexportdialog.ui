@@ -121,6 +121,46 @@
     </widget>
    </item>
    <item row="5" column="0">
+    <widget class="QLabel" name="sunspec1_interface_gen_c_label">
+     <property name="text">
+      <string>SunSpec1 Interface Gen C:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QLineEdit" name="sunspec1_interface_gen_c"/>
+   </item>
+   <item row="5" column="2">
+    <widget class="QPushButton" name="pick_sunspec1_interface_gen_c">
+     <property name="text">
+      <string>...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QLabel" name="sunspec2_interface_gen_c_label">
+     <property name="text">
+      <string>SunSpec2 Interface Gen C:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QLineEdit" name="sunspec2_interface_gen_c"/>
+   </item>
+   <item row="6" column="2">
+    <widget class="QPushButton" name="pick_sunspec2_interface_gen_c">
+     <property name="text">
+      <string>...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
     <widget class="QLabel" name="sunspec1_tables_c_label">
      <property name="text">
       <string>SunSpec1 Tables C:</string>
@@ -130,17 +170,17 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="1">
+   <item row="7" column="1">
     <widget class="QLineEdit" name="sunspec1_tables_c"/>
    </item>
-   <item row="5" column="2">
+   <item row="7" column="2">
     <widget class="QPushButton" name="pick_sunspec1_tables_c">
      <property name="text">
       <string>...</string>
      </property>
     </widget>
    </item>
-   <item row="6" column="0">
+   <item row="8" column="0">
     <widget class="QLabel" name="sunspec2_tables_c_label">
      <property name="text">
       <string>SunSpec2 Tables C:</string>
@@ -150,17 +190,17 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="1">
+   <item row="8" column="1">
     <widget class="QLineEdit" name="sunspec2_tables_c"/>
    </item>
-   <item row="6" column="2">
+   <item row="8" column="2">
     <widget class="QPushButton" name="pick_sunspec2_tables_c">
      <property name="text">
       <string>...</string>
      </property>
     </widget>
    </item>
-   <item row="7" column="0">
+   <item row="9" column="0">
     <widget class="QLabel" name="sunspec1_spreadsheet_label">
      <property name="text">
       <string>SunSpec1 Spreadsheet:</string>
@@ -170,17 +210,17 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="1">
+   <item row="9" column="1">
     <widget class="QLineEdit" name="sunspec1_spreadsheet"/>
    </item>
-   <item row="7" column="2">
+   <item row="9" column="2">
     <widget class="QPushButton" name="pick_sunspec1_spreadsheet">
      <property name="text">
       <string>...</string>
      </property>
     </widget>
    </item>
-   <item row="8" column="0">
+   <item row="10" column="0">
     <widget class="QLabel" name="sunspec2_spreadsheet_label">
      <property name="text">
       <string>SunSpec2 Spreadsheet:</string>
@@ -190,17 +230,17 @@
      </property>
     </widget>
    </item>
-   <item row="8" column="1">
+   <item row="10" column="1">
     <widget class="QLineEdit" name="sunspec2_spreadsheet"/>
    </item>
-   <item row="8" column="2">
+   <item row="10" column="2">
     <widget class="QPushButton" name="pick_sunspec2_spreadsheet">
      <property name="text">
       <string>...</string>
      </property>
     </widget>
    </item>
-   <item row="9" column="0">
+   <item row="11" column="0">
     <widget class="QLabel" name="sunspec1_spreadsheet_user_label">
      <property name="text">
       <string>SunSpec1 User Spreadsheet:</string>
@@ -210,21 +250,21 @@
      </property>
     </widget>
    </item>
-   <item row="9" column="1">
+   <item row="11" column="1">
     <widget class="QLineEdit" name="sunspec1_spreadsheet_user">
      <property name="text">
       <string/>
      </property>
     </widget>
    </item>
-   <item row="9" column="2">
+   <item row="11" column="2">
     <widget class="QPushButton" name="pick_sunspec1_spreadsheet_user">
      <property name="text">
       <string>...</string>
      </property>
     </widget>
    </item>
-   <item row="10" column="0">
+   <item row="12" column="0">
     <widget class="QLabel" name="sunspec2_spreadsheet_user_label">
      <property name="text">
       <string>SunSpec2 User Spreadsheet:</string>
@@ -234,21 +274,21 @@
      </property>
     </widget>
    </item>
-   <item row="10" column="1">
+   <item row="12" column="1">
     <widget class="QLineEdit" name="sunspec2_spreadsheet_user">
      <property name="text">
       <string/>
      </property>
     </widget>
    </item>
-   <item row="10" column="2">
+   <item row="12" column="2">
     <widget class="QPushButton" name="pick_sunspec2_spreadsheet_user">
      <property name="text">
       <string>...</string>
      </property>
     </widget>
    </item>
-   <item row="11" column="0">
+   <item row="13" column="0">
     <widget class="QLabel" name="static_modbus_spreadsheet_label">
      <property name="text">
       <string>Static Modbus Spreadsheet:</string>
@@ -258,17 +298,17 @@
      </property>
     </widget>
    </item>
-   <item row="11" column="1">
+   <item row="13" column="1">
     <widget class="QLineEdit" name="staticmodbus_spreadsheet"/>
    </item>
-   <item row="11" column="2">
+   <item row="13" column="2">
     <widget class="QPushButton" name="pick_staticmodbus_spreadsheet">
      <property name="text">
       <string>...</string>
      </property>
     </widget>
    </item>
-   <item row="12" column="0">
+   <item row="14" column="0">
     <widget class="QLabel" name="sunspec_c_label">
      <property name="text">
       <string>SunSpec C:</string>
@@ -278,17 +318,17 @@
      </property>
     </widget>
    </item>
-   <item row="12" column="1">
+   <item row="14" column="1">
     <widget class="QLineEdit" name="sunspec_c"/>
    </item>
-   <item row="12" column="2">
+   <item row="14" column="2">
     <widget class="QPushButton" name="pick_sunspec_c">
      <property name="text">
       <string>...</string>
      </property>
     </widget>
    </item>
-   <item row="13" column="0">
+   <item row="15" column="0">
     <widget class="QLabel" name="sil_c_label">
      <property name="text">
       <string>SIL C:</string>
@@ -298,17 +338,17 @@
      </property>
     </widget>
    </item>
-   <item row="13" column="1">
+   <item row="15" column="1">
     <widget class="QLineEdit" name="sil_c"/>
    </item>
-   <item row="13" column="2">
+   <item row="15" column="2">
     <widget class="QPushButton" name="pick_sil_c">
      <property name="text">
       <string>...</string>
      </property>
     </widget>
    </item>
-   <item row="14" column="0">
+   <item row="16" column="0">
     <widget class="QLabel" name="interface_c_label">
      <property name="text">
       <string>Interface C:</string>
@@ -318,17 +358,17 @@
      </property>
     </widget>
    </item>
-   <item row="14" column="1">
+   <item row="16" column="1">
     <widget class="QLineEdit" name="interface_c"/>
    </item>
-   <item row="14" column="2">
+   <item row="16" column="2">
     <widget class="QPushButton" name="pick_interface_c">
      <property name="text">
       <string>...</string>
      </property>
     </widget>
    </item>
-   <item row="15" column="0">
+   <item row="17" column="0">
     <widget class="QLabel" name="rejected_callback_c_label">
      <property name="text">
       <string>Rejected Callback C:</string>
@@ -338,17 +378,17 @@
      </property>
     </widget>
    </item>
-   <item row="15" column="1">
+   <item row="17" column="1">
     <widget class="QLineEdit" name="rejected_callback_c"/>
    </item>
-   <item row="15" column="2">
+   <item row="17" column="2">
     <widget class="QPushButton" name="pick_rejected_callback_c">
      <property name="text">
       <string>...</string>
      </property>
     </widget>
    </item>
-   <item row="16" column="0">
+   <item row="18" column="0">
     <widget class="QLabel" name="smdx_label">
      <property name="text">
       <string>SunSpec SMDX:</string>
@@ -358,28 +398,28 @@
      </property>
     </widget>
    </item>
-   <item row="16" column="1" rowspan="2">
+   <item row="18" column="1" rowspan="2">
     <widget class="QListWidget" name="smdx_list">
      <property name="selectionMode">
       <enum>QAbstractItemView::ExtendedSelection</enum>
      </property>
     </widget>
    </item>
-   <item row="16" column="2">
+   <item row="18" column="2">
     <widget class="QPushButton" name="pick_smdx">
      <property name="text">
       <string>...</string>
      </property>
     </widget>
    </item>
-   <item row="17" column="2">
+   <item row="19" column="2">
     <widget class="QPushButton" name="remove_smdx">
      <property name="text">
       <string>Remove</string>
      </property>
     </widget>
    </item>
-   <item row="18" column="0" colspan="2">
+   <item row="20" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="from_directory">

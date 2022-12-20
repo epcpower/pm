@@ -21,6 +21,7 @@ import epcpm.staticmodbustoc
 import epcpm.staticmodbustoxls
 import epcpm.sunspecmodel
 import epcpm.sunspectocsv
+import epcpm.sunspectointerface
 import epcpm.sunspectotablesc
 import epcpm.sunspectomanualc
 import epcpm.sunspectomanualh
@@ -252,6 +253,22 @@ def full_export(
         staticmodbus_model=project.models.staticmodbus,
         parameters_model=project.models.parameters,
         skip_output=skip_output,
+    )
+
+    epcpm.sunspectointerface.export(
+        c_path=paths.sunspec1_interface_gen_c,
+        h_path=paths.sunspec1_interface_gen_c.with_suffix(".h"),
+        sunspec_model=project.models.sunspec1,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
+        skip_sunspec=skip_output,
+    )
+
+    epcpm.sunspectointerface.export(
+        c_path=paths.sunspec2_interface_gen_c,
+        h_path=paths.sunspec2_interface_gen_c.with_suffix(".h"),
+        sunspec_model=project.models.sunspec2,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO,
+        skip_sunspec=skip_output,
     )
 
     epcpm.sunspectotablesc.export(

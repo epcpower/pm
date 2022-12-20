@@ -16,7 +16,6 @@ import epyqlib.utils.general
 import epcpm.cantosym
 import epcpm.pm_helper
 import epcpm.sunspecmodel
-import epcpm.sunspectoxlsx
 import epcpm.staticmodbusmodel
 
 builders = epyqlib.utils.general.TypeMap()
@@ -55,6 +54,29 @@ def node_path_string(node):
     names = [node.name for node in reversed(nodes)]
 
     return " > ".join(names)
+
+
+def find_model_from_point(
+    point: typing.Union[
+        epcpm.sunspecmodel.DataPoint, epcpm.sunspecmodel.DataPointBitfield
+    ]
+) -> epcpm.sunspecmodel.Model:
+    """
+    Find the parent model given the child point.
+    A parent Model is expected when this method is called.
+
+    Args:
+        point: DataPoint or DataPointBitfield child node to search from
+
+    Returns:
+        model: parent model of the given child point
+    """
+    found_model = None
+    for ancestor in point.ancestors():
+        if isinstance(ancestor, epcpm.sunspecmodel.Model):
+            found_model = ancestor
+            break
+    return found_model
 
 
 class InvalidAccessLevelError(Exception):
@@ -101,6 +123,9 @@ def export(
     c_path.parent.mkdir(parents=True, exist_ok=True)
 
     built_c, built_h, model1_ids, model2_ids, rejected_callback_dict = builder.gen()
+
+    model1_ids = sorted(model1_ids)
+    model2_ids = sorted(model2_ids)
 
     template_context = {
         "sunspec1_interface_gen_headers": (
@@ -430,12 +455,7 @@ class DataPoint:
     def interface_variable_name(self):
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
-        maybe_model = self.wrapped.tree_parent
-
-        while not isinstance(maybe_model, epcpm.sunspecmodel.Model):
-            maybe_model = maybe_model.tree_parent
-
-        model = maybe_model
+        model = find_model_from_point(self.wrapped)
         model_variable = f"sunspec{self.sunspec_id.value}Interface.model{model.id}"
 
         return f"&{model_variable}.{parameter.abbreviation}"
@@ -678,12 +698,7 @@ class Parameter:
             hand_coded_sunspec_getter_function = "NULL"
             hand_coded_sunspec_setter_function = "NULL"
         else:
-            maybe_model = sunspec_point.tree_parent
-
-            while not isinstance(maybe_model, epcpm.sunspecmodel.Model):
-                maybe_model = maybe_model.tree_parent
-
-            model = maybe_model
+            model = find_model_from_point(sunspec_point)
 
             sunspec_models.add(model.id)
 
@@ -694,14 +709,14 @@ class Parameter:
 
             # TODO: handle tables with repeating blocks and references
 
-            hand_coded_getter_function_name = epcpm.sunspectoxlsx.getter_name(
+            hand_coded_getter_function_name = epcpm.sunspectointerface.getter_name(
                 parameter=parameter,
                 sunspec_id=sunspec_id,
                 model_id=model.id,
                 is_table=False,
             )
 
-            hand_coded_setter_function_name = epcpm.sunspectoxlsx.setter_name(
+            hand_coded_setter_function_name = epcpm.sunspectointerface.setter_name(
                 parameter=parameter,
                 sunspec_id=sunspec_id,
                 model_id=model.id,
@@ -1182,6 +1197,9 @@ class TableBaseStructures:
     def create_item(
         self, table_element, layers, sunspec1_point, sunspec2_point, staticmodbus_point
     ):
+        sunspec1_models = set()
+        sunspec2_models = set()
+
         # TODO: CAMPid 9655426754319431461354643167
         array_element = table_element.original
 
@@ -1196,7 +1214,7 @@ class TableBaseStructures:
         )
 
         if not uses_interface_item:
-            return [[], []]
+            return [[], [], sunspec1_models, sunspec2_models]
 
         curve_type = get_curve_type("".join(layers[:2]))
 
@@ -1261,6 +1279,7 @@ class TableBaseStructures:
             if node_in_model is not None:
                 model_id = node_in_model.tree_parent.tree_parent.id
                 sunspec_model_variable = f"sunspec1Interface.model{model_id}"
+                sunspec1_models.add(model_id)
                 abbreviation = table_element.abbreviation
                 sunspec1_variable = (
                     f"{sunspec_model_variable}"
@@ -1274,22 +1293,7 @@ class TableBaseStructures:
                     str(x) for x in getter_setter_list + ["setter"]
                 )
 
-            # TODO: CAMPid 67549654267913467967436
-            sunspec_scale_factor = None
-            factor_uuid = None
-            if node_in_model is not None:
-                if node_in_model.factor_uuid is not None:
-                    factor_uuid = node_in_model.factor_uuid
-
-            if factor_uuid is not None:
-                root = node_in_model.find_root()
-                factor_point = root.model.node_from_uuid(
-                    node_in_model.factor_uuid,
-                )
-                sunspec_scale_factor_node = self.parameter_uuid_finder(
-                    factor_point.parameter_uuid,
-                )
-                sunspec_scale_factor = sunspec_scale_factor_node.abbreviation
+            sunspec_scale_factor = self._find_scale_factor(node_in_model)
 
             if sunspec_scale_factor is not None:
                 scale_factor1_variable = (
@@ -1300,7 +1304,6 @@ class TableBaseStructures:
                 )
                 scale_factor1_updater = f"&{scale_factor_updater_name}"
 
-        # TODO: possible refactor with above?
         if sunspec2_point is not None:
             sunspec_type = sunspec_types[
                 self.parameter_uuid_finder(sunspec2_point.type_uuid).name
@@ -1315,42 +1318,19 @@ class TableBaseStructures:
                 sunspec_type,
             ]
 
-            node_in_model = get_sunspec_point_from_table_element(
-                sunspec_point=sunspec2_point,
-                table_element=table_element,
+            model = find_model_from_point(sunspec2_point)
+            model_id = model.id
+            sunspec_model_variable = f"sunspec2Interface.model{model_id}"
+            sunspec2_models.add(model_id)
+            abbreviation = table_element.abbreviation
+            sunspec2_variable = (
+                f"{sunspec_model_variable}" f".Curve_{curve_index:>02}_{abbreviation}"
             )
 
-            if node_in_model is not None:
-                model_id = node_in_model.tree_parent.tree_parent.id
-                sunspec_model_variable = f"sunspec2Interface.model{model_id}"
-                abbreviation = table_element.abbreviation
-                sunspec2_variable = (
-                    f"{sunspec_model_variable}"
-                    f".Curve_{curve_index:>02}_{abbreviation}"
-                )
+            sunspec2_getter = "_".join(str(x) for x in getter_setter_list + ["getter"])
+            sunspec2_setter = "_".join(str(x) for x in getter_setter_list + ["setter"])
 
-                sunspec2_getter = "_".join(
-                    str(x) for x in getter_setter_list + ["getter"]
-                )
-                sunspec2_setter = "_".join(
-                    str(x) for x in getter_setter_list + ["setter"]
-                )
-
-            sunspec_scale_factor = None
-            factor_uuid = None
-            if node_in_model is not None:
-                if node_in_model.factor_uuid is not None:
-                    factor_uuid = node_in_model.factor_uuid
-
-            if factor_uuid is not None:
-                root = node_in_model.find_root()
-                factor_point = root.model.node_from_uuid(
-                    node_in_model.factor_uuid,
-                )
-                sunspec_scale_factor_node = self.parameter_uuid_finder(
-                    factor_point.parameter_uuid,
-                )
-                sunspec_scale_factor = sunspec_scale_factor_node.abbreviation
+            sunspec_scale_factor = self._find_scale_factor(sunspec2_point)
 
             if sunspec_scale_factor is not None:
                 scale_factor2_variable = (
@@ -1361,7 +1341,7 @@ class TableBaseStructures:
                 )
                 scale_factor2_updater = f"&{scale_factor_updater_name}"
 
-        if not staticmodbus_point is None:
+        if staticmodbus_point is not None:
             staticmodbus_type = staticmodbus_types[
                 self.parameter_uuid_finder(staticmodbus_point.type_uuid).name
             ]
@@ -1485,7 +1465,34 @@ class TableBaseStructures:
         return [
             c,
             [f"extern {interface_item_type} const {item_name};"],
+            sunspec1_models,
+            sunspec2_models,
         ]
+
+    def _find_scale_factor(
+        self,
+        node_in_model: typing.Union[
+            epcpm.sunspecmodel.TableRepeatingBlockReferenceDataPointReference,
+            epcpm.sunspecmodel.DataPoint,
+        ],
+    ) -> typing.Union[str, None]:
+        sunspec_scale_factor = None
+        factor_uuid = None
+        if node_in_model is not None:
+            if node_in_model.factor_uuid is not None:
+                factor_uuid = node_in_model.factor_uuid
+
+        if factor_uuid is not None:
+            root = node_in_model.find_root()
+            factor_point = root.model.node_from_uuid(
+                node_in_model.factor_uuid,
+            )
+            sunspec_scale_factor_node = self.parameter_uuid_finder(
+                factor_point.parameter_uuid,
+            )
+            sunspec_scale_factor = sunspec_scale_factor_node.abbreviation
+
+        return sunspec_scale_factor
 
 
 # TODO: CAMPid 3078980986754174316996743174316967431
@@ -1627,7 +1634,12 @@ class Table:
             include_uuid_in_item=self.include_uuid_in_item,
         )
 
-        item_code = builders.wrap(
+        (
+            item_code_c,
+            item_code_h,
+            sunspec1_models_built,
+            sunspec2_models_built,
+        ) = builders.wrap(
             wrapped=group,
             can_root=self.can_root,
             sunspec1_root=self.sunspec1_root,
@@ -1648,15 +1660,15 @@ class Table:
             [
                 *table_base_structures.c_code,
                 "",
-                *item_code[0],
+                *item_code_c,
             ],
             [
                 *table_base_structures.h_code,
                 "",
-                *item_code[1],
+                *item_code_h,
             ],
-            set(),
-            set(),
+            sunspec1_models_built,
+            sunspec2_models_built,
             {},
         ]
 
@@ -1681,6 +1693,8 @@ class TableGroupElement:
     def gen(self):
         c = []
         h = []
+        sunspec1_models = set()
+        sunspec2_models = set()
 
         table_tree_root = not isinstance(
             self.wrapped.tree_parent,
@@ -1710,11 +1724,14 @@ class TableGroupElement:
                 include_uuid_in_item=self.include_uuid_in_item,
             ).gen()
 
-            c_built, h_built = result
+            c_built, h_built, sunspec1_models_built, sunspec2_models_built = result
             c.extend(c_built)
             h.extend(h_built)
 
-        return c, h
+            sunspec1_models |= sunspec1_models_built
+            sunspec2_models |= sunspec2_models_built
+
+        return c, h, sunspec1_models, sunspec2_models
 
 
 # TODO: CAMPid 079549750417808543178043180
@@ -1755,7 +1772,7 @@ class TableArrayElement:
         )
 
         sunspec1_point = self.parameter_uuid_to_sunspec1_node.get(parameter.uuid)
-        sunspec2_point = self.parameter_uuid_to_sunspec2_node.get(parameter.uuid)
+        sunspec2_point = self.parameter_uuid_to_sunspec2_node.get(table_element.uuid)
         staticmodbus_point = self.parameter_uuid_to_staticmodbus_node.get(
             parameter.uuid
         )

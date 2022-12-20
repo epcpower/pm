@@ -53,7 +53,7 @@ PARAMETERS_ENUMERATIONS_ROOT_UUID = "f7cb5703-967a-472d-a949-dabf51df7422"
 ACCESS_LEVEL_SERVICE_TECH_UUID = "73ad7ac5-dcb4-4aef-9b44-5b12b10166d2"
 
 MODEL_CURVE_INFO = {
-    "705|NCrv": 1,
+    "705|NCrv": 2,
     "705|NPt": 5,
     "706|NCrv": 1,
     "706|NPt": 5,
@@ -163,7 +163,7 @@ class ParametersChild:
 class ParametersGroup:
     _type: str = field(init=False, default="group")
     name: str = field(init=False)
-    type_name: str = field(init=False, default="null")
+    type_name: str = field(init=False)
     children: list = field(init=False)
     uuid: str = field(init=False, default=Factory(generate_uuid))
 
@@ -241,6 +241,22 @@ class SunSpecFixedBlock:
 
 
 @define
+class SunSpecTableBlock:
+    _type: str = field(init=False, default="sunspec_table_block")
+    name: str = field(init=False, default="Table Block")
+    children: list = field(init=False)
+    uuid: str = field(init=False, default=Factory(generate_uuid))
+
+
+@define
+class SunSpecTableGroup:
+    _type: str = field(init=False, default="sunspec_table_group")
+    name: str = field(init=False, default="Table Group")
+    children: list = field(init=False)
+    uuid: str = field(init=False, default=Factory(generate_uuid))
+
+
+@define
 class SunSpecModel:
     _type: str = field(init=False, default="sunspec_model")
     id: int = field(init=False)
@@ -275,6 +291,7 @@ class ModelConversion:
         sunspec_model = SunSpecModel()
         sunspec_header_block = SunSpecHeaderBlock()
         sunspec_fixed_block = SunSpecFixedBlock()
+        sunspec_table_block = SunSpecTableBlock()
         with open(settings_path, encoding="utf-8") as settings_file:
             model_dict = json.load(settings_file)
 
@@ -332,24 +349,30 @@ class ModelConversion:
                     # Only append if sunspec_enumeration was created.
                     parameters_enumerations_children.append(sunspec_enumeration)
 
-            total_length = self._generate_group_points(
+            (
+                total_table_block_length,
+                sunspec_table_block_children,
+            ) = self._generate_group_points(
                 groups,
                 model_id,
-                total_length,
                 fixed_block_offset,
-                sunspec_fixed_block_children,
                 scale_factor_dict,
                 parameters_children,
                 parameters_enumerations_children,
                 "",
             )
+            sunspec_table_block.children = sunspec_table_block_children
+            total_length += total_table_block_length
 
-            # Iterate back through the sunspec children list and complete the scale factor UUID.
+            # Iterate back through the sunspec children fixed list and complete the scale factor UUID.
             for sunspec_child in sunspec_fixed_block_children:
                 if sunspec_child.factor_uuid is not None:
                     sunspec_child.factor_uuid = scale_factor_dict[
                         sunspec_child.factor_uuid
                     ]
+
+            # Iterate back through the sunspec children table list and complete the scale factor UUID.
+            self._complete_scale_factor_uuid(sunspec_table_block, scale_factor_dict)
 
             parameters_model.children = parameters_children
 
@@ -367,9 +390,24 @@ class ModelConversion:
             sunspec_fixed_block.children = sunspec_fixed_block_children
             sunspec_model_children.append(sunspec_header_block)
             sunspec_model_children.append(sunspec_fixed_block)
+            if len(sunspec_table_block.children) > 0:
+                sunspec_model_children.append(sunspec_table_block)
             sunspec_model.children = sunspec_model_children
 
         return parameters_model, sunspec_model, parameters_enumerations_children
+
+    @staticmethod
+    def _complete_scale_factor_uuid(sunspec_table_group, scale_factor_dict):
+        for sunspec_table_block_child in sunspec_table_group.children:
+            if type(sunspec_table_block_child) == SunSpecDataPoint:
+                if sunspec_table_block_child.factor_uuid is not None:
+                    sunspec_table_block_child.factor_uuid = scale_factor_dict[
+                        sunspec_table_block_child.factor_uuid
+                    ]
+            else:
+                ModelConversion._complete_scale_factor_uuid(
+                    sunspec_table_block_child, scale_factor_dict
+                )
 
     @staticmethod
     def _generate_point(
@@ -476,55 +514,56 @@ class ModelConversion:
         self,
         groups: dict,
         model_id: int,
-        total_length: int,
         fixed_block_offset: int,
-        sunspec_fixed_block_children: list,
         scale_factor_dict: dict,
         parameters_children: list,
         parameters_enumerations_children: list,
         prefix: str,
-    ) -> int:
+    ) -> [int, list]:
         """
         Generate points for a group.
 
         Args:
             groups: list of the groups for a node
             model_id: model ID
-            total_length: current total length, updated value is returned
             fixed_block_offset: current fixed block offset
-            sunspec_fixed_block_children: container for SunSpec fixed block points
             scale_factor_dict: dictionary of scale factor UUID's
             parameters_children: list of parameters for the model
             parameters_enumerations_children: list of SunSpec enumerators
             prefix: prefix of the parameter / SunSpec point name
 
         Returns:
-            total length of the group of points
+            total length of group points, list of table groups
         """
-        for group in groups:
-            points = group["points"]
+        table_group_list = list()
+        total_length = 0
 
+        for group in groups:
             if "count" in group:
                 count_name = group["count"]
                 group_name = group["name"]
-                total_points = MODEL_CURVE_INFO[f"{model_id}|{count_name}"]
+                total_count = MODEL_CURVE_INFO[f"{model_id}|{count_name}"]
                 if prefix:
                     prefix_for_points = f"{prefix}_{group_name}"
                 else:
                     prefix_for_points = group_name
             else:
                 prefix_for_points = f"{prefix}"
-                total_points = 1
+                total_count = 1
 
-            for point_num in range(total_points):
+            for count_num in range(total_count):
+                sunspec_table_group = SunSpecTableGroup()
+                sunspec_table_group.children = list()
+
                 if "count" in group:
-                    prefix_for_group = f"{prefix_for_points}_{point_num:02}"
+                    prefix_for_group = f"{prefix_for_points}_{count_num:02}"
                 else:
                     if prefix_for_points:
                         prefix_for_group = f"{prefix_for_points}_{group['name']}"
                     else:
                         prefix_for_group = f"{group['name']}"
 
+                points = group["points"]
                 for point in points:
                     (
                         point_length,
@@ -540,7 +579,7 @@ class ModelConversion:
                     point_name = point["name"]
 
                     sunspec_child.block_offset = fixed_block_offset
-                    sunspec_fixed_block_children.append(sunspec_child)
+                    sunspec_table_group.children.append(sunspec_child)
                     fixed_block_offset += point["size"]
 
                     if is_scale_factor:
@@ -556,19 +595,28 @@ class ModelConversion:
                         parameters_enumerations_children.append(sunspec_enumeration)
 
                 if "groups" in group:
-                    total_length = self._generate_group_points(
+                    (
+                        table_group_length,
+                        sunspec_table_group_children,
+                    ) = self._generate_group_points(
                         group["groups"],
                         model_id,
-                        total_length,
                         fixed_block_offset,
-                        sunspec_fixed_block_children,
                         scale_factor_dict,
                         parameters_children,
                         parameters_enumerations_children,
                         prefix_for_group,
                     )
 
-        return total_length
+                    child_sunspec_table_group = SunSpecTableGroup()
+                    child_sunspec_table_group.children = sunspec_table_group_children
+                    sunspec_table_group.children.append(child_sunspec_table_group)
+
+                    total_length += table_group_length
+
+                table_group_list.append(sunspec_table_group)
+
+        return total_length, table_group_list
 
     @staticmethod
     def generate_interface_file(model_filepath: str, output_dir: str) -> None:
@@ -613,9 +661,10 @@ class ModelConversion:
                         f"void setSunspec2Model{model_id}_{point_name}(void) {{\n}}\n"
                     )
 
-            ModelConversion._generate_interface_for_point(
-                groups, h_function_list, c_function_list, model_id, ""
-            )
+            # No longer output the curve interface functions.
+            # ModelConversion._generate_interface_for_point(
+            #     groups, h_function_list, c_function_list, model_id, ""
+            # )
 
             c_output = [
                 '#include "sunspec2InterfaceGen.h"',
@@ -670,18 +719,18 @@ class ModelConversion:
             if "count" in group:
                 count_name = group["count"]
                 group_name = group["name"]
-                total_points = MODEL_CURVE_INFO[f"{model_id}|{count_name}"]
+                total_count = MODEL_CURVE_INFO[f"{model_id}|{count_name}"]
                 if prefix:
                     prefix_for_points = f"{prefix}_{group_name}"
                 else:
                     prefix_for_points = group_name
             else:
                 prefix_for_points = f"{prefix}"
-                total_points = 1
+                total_count = 1
 
-            for point_num in range(total_points):
+            for count_num in range(total_count):
                 if "count" in group:
-                    prefix_for_group = f"{prefix_for_points}_{point_num:02}"
+                    prefix_for_group = f"{prefix_for_points}_{count_num:02}"
                 else:
                     if prefix_for_points:
                         prefix_for_group = f"{prefix_for_points}_{group['name']}"
