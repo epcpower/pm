@@ -1092,6 +1092,39 @@ class NestedArrays:
 
 
 @attr.s
+class CommonTableData:
+    internal_type = attr.ib()
+    internal_name = attr.ib()
+    parameter = attr.ib()
+    remainder = attr.ib()
+    meta_initializer = attr.ib()
+    setter = attr.ib()
+    access_level = attr.ib()
+    can_getter = attr.ib()
+    can_setter = attr.ib()
+    can_variable = attr.ib()
+    hand_coded_sunspec1_getter_function = attr.ib()
+    hand_coded_sunspec1_setter_function = attr.ib()
+    internal_scale = attr.ib()
+    scale_factor1_updater = attr.ib()
+    scale_factor2_updater = attr.ib()
+    scale_factor1_variable = attr.ib()
+    scale_factor2_variable = attr.ib()
+    sunspec1_getter = attr.ib()
+    sunspec1_setter = attr.ib()
+    sunspec1_variable = attr.ib()
+    sunspec2_getter = attr.ib()
+    sunspec2_setter = attr.ib()
+    sunspec2_variable = attr.ib()
+    staticmodbus_getter = attr.ib()
+    staticmodbus_setter = attr.ib()
+    can_scale_factor = attr.ib()
+    reject_from_inactive_interfaces = attr.ib()
+    uuid_ = attr.ib()
+    include_uuid_in_item = attr.ib()
+
+
+@attr.s
 class TableBaseStructures:
     array_nests = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
@@ -1101,37 +1134,63 @@ class TableBaseStructures:
     parameter_uuid_finder = attr.ib()
     include_uuid_in_item = attr.ib()
     common_structure_names = attr.ib(factory=dict)
-    c_code = attr.ib(factory=list)
-    h_code = attr.ib(factory=list)
+    common_initializers_dict = attr.ib(factory=dict)
 
-    def ensure_common_structure(
-        self,
-        internal_type,
-        internal_name,
-        parameter,
-        remainder,
-        common_initializers,
-        meta_initializer,
-        setter,
-    ):
-        name = self.common_structure_names.get(parameter.uuid)
+    def ensure_common_structure(self, common_table_data):
+        parameter = common_table_data.parameter
 
-        if name is None:
-            if len(self.h_code) > 0:
-                self.h_code.append("")
-            if len(self.c_code) > 0:
-                self.c_code.append("")
+        if str(parameter.uuid) in self.common_initializers_dict.keys():
+            current_common_init = self.common_initializers_dict[str(parameter.uuid)]
+            if current_common_init != common_table_data:
+                if (
+                    current_common_init.sunspec2_getter == "NULL"
+                    and current_common_init.sunspec2_getter
+                    != common_table_data.sunspec2_getter
+                ):
+                    current_common_init.sunspec2_getter = (
+                        common_table_data.sunspec2_getter
+                    )
+                if (
+                    current_common_init.sunspec2_setter == "NULL"
+                    and current_common_init.sunspec2_setter
+                    != common_table_data.sunspec2_setter
+                ):
+                    current_common_init.sunspec2_setter = (
+                        common_table_data.sunspec2_setter
+                    )
 
-            formatted_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
-                parameter.uuid
+            name = self.common_structure_names.get(parameter.uuid)
+
+        else:
+            self.common_initializers_dict[str(parameter.uuid)] = common_table_data
+            name = self._generate_common_name(
+                common_table_data.parameter.uuid, common_table_data.internal_type
             )
-            name = f"InterfaceItem_table_common_{internal_type}_{formatted_uuid}"
+            self.common_structure_names[parameter.uuid] = name
 
-            if remainder is None:
+        return name
+
+    @staticmethod
+    def _generate_common_name(parameter_uuid, internal_type):
+        formatted_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(parameter_uuid)
+        name = f"InterfaceItem_table_common_{internal_type}_{formatted_uuid}"
+
+        return name
+
+    def generate_interface(self):
+        h_code = list()
+        c_code = list()
+
+        for parameter_uuid, common_vals in self.common_initializers_dict.items():
+            name = self._generate_common_name(
+                common_vals.parameter.uuid, common_vals.internal_type
+            )
+
+            if common_vals.remainder is None:
                 sizes = {}
                 full_base_variable = "NULL"
             else:
-                nested_array = self.array_nests[remainder]
+                nested_array = self.array_nests[common_vals.remainder]
 
                 layers = []
                 for layer in nested_array.array_layers:
@@ -1150,10 +1209,10 @@ class TableBaseStructures:
                     for i, layer in enumerate(layers)
                 }
 
-                full_base_variable_name = f"{variable_base}.{remainder}"
+                full_base_variable_name = f"{variable_base}.{common_vals.remainder}"
                 full_base_variable = f"&{full_base_variable_name}"
 
-            if internal_type == "PackedString":
+            if common_vals.internal_type == "PackedString":
                 meta_entry = []
                 variable_base_length_entry = [
                     f".variable_base_length = sizeof({full_base_variable_name}),",
@@ -1161,38 +1220,72 @@ class TableBaseStructures:
             else:
                 meta_entry = [
                     f".meta_values = {{",
-                    meta_initializer,
+                    common_vals.meta_initializer,
                     f"}},",
                 ]
                 variable_base_length_entry = []
 
-            self.common_structure_names[parameter.uuid] = name
-            self.h_code.append(
-                f"extern InterfaceItem_table_common_{internal_name} {name};",
+            self.common_structure_names[common_vals.parameter.uuid] = name
+            h_code.append(
+                f"extern InterfaceItem_table_common_{common_vals.internal_name} {name};",
             )
-            self.c_code.extend(
+
+            common_initializers = create_common_initializers(
+                access_level=common_vals.access_level,
+                can_getter=common_vals.can_getter,
+                can_setter=common_vals.can_setter,
+                # not to be used so really hardcode NULL
+                can_variable="NULL",
+                hand_coded_sunspec1_getter_function="NULL",
+                hand_coded_sunspec1_setter_function="NULL",
+                internal_scale=common_vals.parameter.internal_scale_factor,
+                scale_factor1_updater=common_vals.scale_factor1_updater,
+                scale_factor2_updater=common_vals.scale_factor2_updater,
+                scale_factor1_variable=common_vals.scale_factor1_variable,
+                scale_factor2_variable=common_vals.scale_factor2_variable,
+                sunspec1_getter=common_vals.sunspec1_getter,
+                sunspec1_setter=common_vals.sunspec1_setter,
+                # not to be used so really hardcode NULL
+                sunspec1_variable="NULL",
+                sunspec2_getter=common_vals.sunspec2_getter,
+                sunspec2_setter=common_vals.sunspec2_setter,
+                # not to be used so really hardcode NULL
+                sunspec2_variable="NULL",
+                staticmodbus_getter=common_vals.staticmodbus_getter,
+                staticmodbus_setter=common_vals.staticmodbus_setter,
+                can_scale_factor=common_vals.can_scale_factor,
+                reject_from_inactive_interfaces=(
+                    common_vals.parameter.reject_from_inactive_interfaces
+                ),
+                uuid_=common_vals.parameter.uuid,
+                include_uuid_in_item=self.include_uuid_in_item,
+            )
+
+            c_code.extend(
                 [
                     f'#pragma DATA_SECTION({name}, "Interface")',
-                    f"// {node_path_string(parameter)}",
-                    f"// {parameter.uuid}",
-                    f"InterfaceItem_table_common_{internal_type} const {name} = {{",
+                    f"// {node_path_string(common_vals.parameter)}",
+                    f"// {parameter_uuid}",
+                    f"InterfaceItem_table_common_{common_vals.internal_type} const {name} = {{",
                     [
-                        f".common = {{",
+                        ".common = {",
+                        # common_vals.common_initializers,
                         common_initializers,
-                        f"}},",
+                        "},",
                         f".variable_base = {full_base_variable},",
                         *variable_base_length_entry,
-                        f'.setter = {"NULL" if setter is None else setter},',
+                        f'.setter = {"NULL" if common_vals.setter is None else common_vals.setter},',
                         f'.zone_size = {sizes.get("curve_type", 0)},',
                         f'.curve_size = {sizes.get("curve_index", 0)},',
                         f'.point_size = {sizes.get("point_index", 0)},',
                         *meta_entry,
                     ],
-                    f"}};",
+                    "};",
+                    "",
                 ]
             )
 
-        return name
+        return h_code, c_code
 
     def create_item(
         self, table_element, layers, sunspec1_point, sunspec2_point, staticmodbus_point
@@ -1362,7 +1455,20 @@ class TableBaseStructures:
                 str(x) for x in getter_setter_list + ["setter"]
             )
 
-        common_initializers = create_common_initializers(
+        meta_initializer = create_meta_initializer_values(parameter)
+
+        if parameter.internal_variable is None:
+            remainder = None
+        else:
+            remainder = NestedArrays.build(parameter.internal_variable).remainder
+
+        common_table_data = CommonTableData(
+            internal_type=parameter.internal_type,
+            internal_name=types[parameter.internal_type].name,
+            parameter=parameter,
+            remainder=remainder,
+            meta_initializer=meta_initializer,
+            setter=parameter.setter_function,  # this is the last original method parameter
             access_level=access_level,
             can_getter=can_getter,
             can_setter=can_setter,
@@ -1387,26 +1493,12 @@ class TableBaseStructures:
             staticmodbus_setter=staticmodbus_setter,
             can_scale_factor=can_factor,
             reject_from_inactive_interfaces=(parameter.reject_from_inactive_interfaces),
-            uuid_=table_element.uuid,
+            # uuid_=table_element.uuid,  # THIS MIGHT BE WRONG!!!!!  shouldn't it be the UUID of the common parameter?
+            uuid_=parameter.uuid,
             include_uuid_in_item=self.include_uuid_in_item,
         )
 
-        meta_initializer = create_meta_initializer_values(parameter)
-
-        if parameter.internal_variable is None:
-            remainder = None
-        else:
-            remainder = NestedArrays.build(parameter.internal_variable).remainder
-
-        common_structure_name = self.ensure_common_structure(
-            internal_type=parameter.internal_type,
-            internal_name=types[parameter.internal_type].name,
-            parameter=parameter,
-            remainder=remainder,
-            common_initializers=common_initializers,
-            meta_initializer=meta_initializer,
-            setter=parameter.setter_function,
-        )
+        common_structure_name = self.ensure_common_structure(common_table_data)
 
         interface_item_type = (
             f"InterfaceItem_table_{types[parameter.internal_type].name}"
@@ -1656,14 +1748,15 @@ class Table:
             include_uuid_in_item=self.include_uuid_in_item,
         ).gen()
 
+        table_code_h, table_code_c = table_base_structures.generate_interface()
+
         return [
             [
-                *table_base_structures.c_code,
-                "",
+                *table_code_c,
                 *item_code_c,
             ],
             [
-                *table_base_structures.h_code,
+                *table_code_h,
                 "",
                 *item_code_h,
             ],
