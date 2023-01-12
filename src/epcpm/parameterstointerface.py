@@ -1158,6 +1158,22 @@ class TableBaseStructures:
                     current_common_init.sunspec2_setter = (
                         common_table_data.sunspec2_setter
                     )
+                if (
+                    current_common_init.scale_factor2_updater == "NULL"
+                    and current_common_init.scale_factor2_updater
+                    != common_table_data.scale_factor2_updater
+                ):
+                    current_common_init.scale_factor2_updater = (
+                        common_table_data.scale_factor2_updater
+                    )
+                if (
+                    current_common_init.scale_factor2_variable == "NULL"
+                    and current_common_init.scale_factor2_variable
+                    != common_table_data.scale_factor2_variable
+                ):
+                    current_common_init.scale_factor2_variable = (
+                        common_table_data.scale_factor2_variable
+                    )
 
             name = self.common_structure_names.get(parameter.uuid)
 
