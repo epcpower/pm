@@ -1093,6 +1093,8 @@ class NestedArrays:
 
 @attr.s
 class CommonTableData:
+    """Data class that contains common table data for interface generation of table parameters."""
+
     internal_type = attr.ib()
     internal_name = attr.ib()
     parameter = attr.ib()
@@ -1126,6 +1128,8 @@ class CommonTableData:
 
 @attr.s
 class TableBaseStructures:
+    """Methods for interface generation of table parameters."""
+
     array_nests = attr.ib()
     parameter_uuid_to_can_node = attr.ib()
     parameter_uuid_to_sunspec1_node = attr.ib()
@@ -1136,11 +1140,23 @@ class TableBaseStructures:
     common_structure_names = attr.ib(factory=dict)
     common_initializers_dict = attr.ib(factory=dict)
 
-    def ensure_common_structure(self, common_table_data):
+    def ensure_common_structure(self, common_table_data: CommonTableData) -> str:
+        """
+        Generates the name for a common table parameter.
+        Updates common table parameter values for SunSpec2.
+
+        Args:
+            common_table_data: common table data
+
+        Returns:
+            name of the common table structure
+        """
         parameter = common_table_data.parameter
 
         if str(parameter.uuid) in self.common_initializers_dict.keys():
             current_common_init = self.common_initializers_dict[str(parameter.uuid)]
+            # Updates/synchronizes the common table data stored within this class object
+            # with the input parameter common table data.
             if current_common_init != common_table_data:
                 if (
                     current_common_init.sunspec2_getter == "NULL"
@@ -1175,9 +1191,11 @@ class TableBaseStructures:
                         common_table_data.scale_factor2_variable
                     )
 
+            # Return the already generated common table name.
             name = self.common_structure_names.get(parameter.uuid)
 
         else:
+            # Initial setting of the common table data stored in this class object.
             self.common_initializers_dict[str(parameter.uuid)] = common_table_data
             name = self._generate_common_name(
                 common_table_data.parameter.uuid, common_table_data.internal_type
@@ -1187,13 +1205,43 @@ class TableBaseStructures:
         return name
 
     @staticmethod
-    def _generate_common_name(parameter_uuid, internal_type):
+    def _generate_common_name(parameter_uuid: uuid.UUID, internal_type: str) -> str:
+        """
+        Generate the common table name.
+
+        Args:
+            parameter_uuid: parameter UUID
+            internal_type: variable type of this common table parameter
+
+        Returns:
+            common table name
+        """
         formatted_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(parameter_uuid)
         name = f"InterfaceItem_table_common_{internal_type}_{formatted_uuid}"
 
         return name
 
-    def generate_interface(self):
+    def generate_interface(
+        self,
+    ) -> typing.Tuple[
+        typing.List,
+        typing.List[
+            typing.Union[
+                str,
+                typing.List[
+                    typing.Union[str, typing.List[typing.Union[str, typing.List[str]]]]
+                ],
+            ]
+        ],
+    ]:
+        """
+        Generate the .c/.h code for parameters interface.
+        The h_code is a list of strings (one level).
+        The c_code is a recursive list of strings (multi level).
+
+        Returns:
+            h_code, c_code, where h_code is a list of strings and c_code is a recursive list of strings
+        """
         h_code = list()
         c_code = list()
 
@@ -1304,8 +1352,28 @@ class TableBaseStructures:
         return h_code, c_code
 
     def create_item(
-        self, table_element, layers, sunspec1_point, sunspec2_point, staticmodbus_point
-    ):
+        self,
+        table_element: epyqlib.pm.parametermodel.TableArrayElement,
+        layers: typing.List[str],
+        sunspec1_point: DataPoint,
+        sunspec2_point: DataPoint,
+        staticmodbus_point: DataPoint,
+    ) -> typing.Tuple[
+        typing.List[str], typing.List[str], typing.Set[int], typing.Set[int]
+    ]:
+        """
+        Generate interface for table element.
+
+        Args:
+            table_element: table element from parameter tree
+            layers: table element tree traversal layers
+            sunspec1_point: SunSpec1 data point
+            sunspec2_point: SunSpec2 data point
+            staticmodbus_point: static modbus data point
+
+        Returns:
+            C code, H code, associated SunSpec1 models, associated SunSpec2 models
+        """
         sunspec1_models = set()
         sunspec2_models = set()
 
@@ -1323,7 +1391,7 @@ class TableBaseStructures:
         )
 
         if not uses_interface_item:
-            return [[], [], sunspec1_models, sunspec2_models]
+            return [], [], sunspec1_models, sunspec2_models
 
         curve_type = get_curve_type("".join(layers[:2]))
 
@@ -1570,12 +1638,12 @@ class TableBaseStructures:
             "",
         ]
 
-        return [
+        return (
             c,
             [f"extern {interface_item_type} const {item_name};"],
             sunspec1_models,
             sunspec2_models,
-        ]
+        )
 
     def _find_scale_factor(
         self,
@@ -1584,6 +1652,14 @@ class TableBaseStructures:
             epcpm.sunspecmodel.DataPoint,
         ],
     ) -> typing.Union[str, None]:
+        """
+        Find the scale factor given the SunSpec data point.
+        Args:
+            node_in_model: SunSpec data point (or other node)
+
+        Returns:
+            name of scale factor
+        """
         sunspec_scale_factor = None
         factor_uuid = None
         if node_in_model is not None:
@@ -1679,6 +1755,8 @@ def get_sunspec_model_from_table_group_element(sunspec_point, table_element):
 @builders(epyqlib.pm.parametermodel.Table)
 @attr.s
 class Table:
+    """Interface generation for parameter tables."""
+
     wrapped = attr.ib()
     can_root = attr.ib()
     sunspec1_root = attr.ib()
@@ -1691,7 +1769,21 @@ class Table:
     parameter_uuid_to_staticmodbus_node = attr.ib()
     parameter_uuid_finder = attr.ib()
 
-    def gen(self):
+    def gen(
+        self,
+    ) -> typing.Tuple[
+        typing.List[str],
+        typing.List[str],
+        typing.Set[int],
+        typing.Set[int],
+        typing.Dict,
+    ]:
+        """
+        Interface generation for parameter tables.
+
+        Returns:
+            C code, H code, associated SunSpec1 models, associated SunSpec2 models, rejected callback (empty)
+        """
         (group,) = (
             child
             for child in self.wrapped.children
@@ -1766,7 +1858,7 @@ class Table:
 
         table_code_h, table_code_c = table_base_structures.generate_interface()
 
-        return [
+        return (
             [
                 *table_code_c,
                 *item_code_c,
@@ -1779,7 +1871,7 @@ class Table:
             sunspec1_models_built,
             sunspec2_models_built,
             {},
-        ]
+        )
 
 
 @builders(epyqlib.pm.parametermodel.TableGroupElement)
