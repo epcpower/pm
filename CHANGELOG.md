@@ -29,6 +29,7 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### Fixed
 
+- SC-910: Fix SunSpec2 table parameter interface generation.
 - SC-654: Fix modbus bitfield interface generation.
 
 ### CI
