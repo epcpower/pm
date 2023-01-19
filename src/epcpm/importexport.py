@@ -232,6 +232,7 @@ def full_export(
             set=False,
             item=False,
         ),
+        output_dummy_models=False,
     )
 
     epcpm.sunspectoxlsx.export(

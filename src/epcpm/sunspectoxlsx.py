@@ -17,6 +17,7 @@ import epcpm.pm_helper
 import epcpm.sunspecmodel
 import epcpm.sunspectointerface
 
+from enum import Enum
 
 builders = epyqlib.utils.general.TypeMap()
 enumeration_builders = epyqlib.utils.general.TypeMap()
@@ -28,6 +29,15 @@ epc_enumerator_fields = attr.fields(
     epyqlib.pm.parametermodel.SunSpecEnumerator,
 )
 bitfield_fields = attr.fields(epcpm.sunspecmodel.DataPointBitfield)
+
+
+class DummyModels(Enum):
+    LOWER_BOUND = 1000
+    UPPER_BOUND = 1999
+
+    @staticmethod
+    def within_bounds(value):
+        return DummyModels.LOWER_BOUND.value <= value <= DummyModels.UPPER_BOUND.value
 
 
 @attr.s
@@ -109,6 +119,7 @@ def export(
     parameters_model,
     column_filter=None,
     skip_sunspec=False,
+    output_dummy_models=True,
 ):
     if column_filter is None:
         column_filter = epcpm.pm_helper.attr_fill(Fields, True)
@@ -120,6 +131,7 @@ def export(
         sunspec_id=sunspec_id,
         skip_sunspec=skip_sunspec,
         column_filter=column_filter,
+        output_dummy_models=output_dummy_models,
     )
 
     workbook = builder.gen()
@@ -138,6 +150,7 @@ class Root:
     parameter_model = attr.ib(default=None)
     sunspec_id = attr.ib(default=None)
     sort_models = attr.ib(default=False)
+    output_dummy_models = attr.ib(default=True)
 
     def gen(self):
         workbook = openpyxl.Workbook()
@@ -179,6 +192,10 @@ class Root:
                     column_filter=self.column_filter,
                     model_offset=model_offset,
                 ).gen()
+
+                if not self.output_dummy_models and DummyModels.within_bounds(model.id):
+                    # Do not put dummy models in the spreadsheet.
+                    workbook.remove(worksheet)
 
         return workbook
 
