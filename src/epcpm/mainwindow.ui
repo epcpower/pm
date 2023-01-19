@@ -59,23 +59,6 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="tab_3">
-        <attribute name="title">
-         <string>SunSpec</string>
-        </attribute>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <layout class="QGridLayout" name="gridLayout_3">
-           <item row="1" column="0">
-            <widget class="QTreeView" name="sunspec_view"/>
-           </item>
-           <item row="0" column="0">
-            <widget class="SearchBox" name="sunspec_search_box" native="true"/>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
        <widget class="QWidget" name="tab_5">
         <attribute name="title">
          <string>Static Modbus</string>
@@ -110,6 +93,40 @@
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="tab_6">
+        <attribute name="title">
+         <string>SunSpec1</string>
+        </attribute>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item>
+          <layout class="QGridLayout" name="gridLayout_6">
+           <item row="1" column="0">
+            <widget class="QTreeView" name="sunspec1_view"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="SearchBox" name="sunspec1_search_box" native="true"/>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab_7">
+        <attribute name="title">
+         <string>SunSpec2</string>
+        </attribute>
+        <layout class="QHBoxLayout" name="horizontalLayout_7">
+         <item>
+          <layout class="QGridLayout" name="gridLayout_7">
+           <item row="1" column="0">
+            <widget class="QTreeView" name="sunspec2_view"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="SearchBox" name="sunspec2_search_box" native="true"/>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
       </widget>
       <widget class="QWidget" name="gridLayoutWidget22">
        <layout class="QGridLayout" name="gridLayout22">
@@ -135,7 +152,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>30</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
