@@ -20,6 +20,13 @@ class SunSpecSection(Enum):
 SUNS_LENGTH = 2
 
 
+# Define the start address for each SunSpec address space.
+SUNSPEC_START_ADDRESS = {
+    SunSpecSection.SUNSPEC_ONE: 0,
+    SunSpecSection.SUNSPEC_TWO: 40000,
+}
+
+
 def convert_uuid_to_variable_name(input_uuid: uuid.UUID) -> str:
     """
     Replace the dashes in a given UUID with underscores. Return a string value.
@@ -155,3 +162,21 @@ def get_sunspec_starting_register_values(
         return "0x5375", "0x6e53"
     else:
         return "0xffff", "0xffff"
+
+
+def calculate_start_address(sunspec_id: SunSpecSection) -> int:
+    """
+    Calculate the start address given the SunSpec section ID.
+
+    Args:
+        sunspec_id: SunSpec section internal identifier
+
+    Returns:
+        start address
+    """
+    # Calculate the start address
+    start_address = SUNSPEC_START_ADDRESS[sunspec_id]
+    # Account for 'SunS' length.
+    start_address += SUNS_LENGTH
+
+    return start_address
