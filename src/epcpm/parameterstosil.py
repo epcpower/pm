@@ -522,15 +522,15 @@ class TableArrayElement:
 
         if parameter.setter_function is None:
             # TODO: should Item do this?
-            table_on_write = "NULL"
+            setter_function = "NULL"
         else:
-            table_on_write = parameter.setter_function.format(upper_axis=axis.upper())
+            setter_function = parameter.setter_function
 
         table_info = TableInfo(
             zone=indexes["curve_type"],
             curve=indexes["curve_index"],
             index=indexes["point_index"],
-            setter=table_on_write,
+            setter=setter_function,
             type=parameter.internal_type,
         )
 
@@ -549,37 +549,45 @@ class TableArrayElement:
 
     def handle_group(self):
         table_element = self.wrapped
-
-        curve_index = int(self.layers[-2]) - 1
-
         parameter = table_element.original
 
         if parameter.internal_type == "PackedString":
             return []
-
-        if parameter.internal_variable is None:
+        elif parameter.internal_variable is None:
+            assert parameter.setter_function is None
             return []
 
         if parameter.setter_function is None:
-            # TODO: i think it's reasonable for Item to handle this?
             setter_function = "NULL"
         else:
             setter_function = "&" + parameter.setter_function
 
         curve_type = get_curve_type("".join(self.layers[:2]))
+        curve_index = int(self.layers[-2]) - 1
+        point_index = 0  # unused
 
         internal_variable = parameter.internal_variable.format(
             curve_type=curve_type,
             curve_index=curve_index,
         )
 
-        item = Item(
-            uuid=table_element.uuid,
-            variable=f"&{internal_variable}",
+        table_info = TableInfo(
+            zone=curve_type,
+            curve=curve_index,
+            index=point_index,
+            setter=setter_function,
             type=parameter.internal_type,
-            on_write=setter_function,
-            internal_scale=parameter.internal_scale_factor,
-            path=self.path,
         )
 
-        return [item]
+        return [
+            Item(
+                uuid=table_element.uuid,
+                variable=f"&{internal_variable}",
+                type=parameter.internal_type,
+                on_write="NULL",
+                internal_scale=parameter.internal_scale_factor,
+                is_table=True,
+                table_info=table_info,
+                path=self.path,
+            )
+        ]

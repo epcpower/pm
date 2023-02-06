@@ -24,6 +24,7 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### Fixed
 
+- SC-922: Fix SIL array table element setter for groups
 - SC-654: Fix modbus bitfield interface generation.
 
 ### CI
