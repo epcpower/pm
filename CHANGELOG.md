@@ -20,6 +20,7 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### Changed
 
+- SC-935: SunSpec2 start address 40k for spreadsheet output
 - SC-805: No longer output dummy SunSpec1 models in user spreadsheet
 - SC-869: Changed interface to support both sunspec1 and sunspec2 scaling factors
 - SC-683: Changed rejected callback handling to use automatically generated interface
