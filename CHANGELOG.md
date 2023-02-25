@@ -29,5 +29,6 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### CI
 
+- SC-995: Update actions versions to alleviate CI build warnings
 - SC-760: Pin poetry to 1.1.15
 - SC-401: Romp Removal / Poetry Implementation
