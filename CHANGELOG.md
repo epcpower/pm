@@ -23,4 +23,4 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### CI
 
-- SC-401: Romp Removal / Poetry Implementation
+- SC-1112: Remove codecov python dependency- SC-401: Romp Removal / Poetry Implementation
