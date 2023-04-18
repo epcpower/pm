@@ -24,13 +24,18 @@ class Fields(epcpm.pm_helper.FieldsInterface):
     name = attr.ib(default=None, type=typing.Union[str, bool])
     label = attr.ib(default=None, type=typing.Union[str, bool])
     size = attr.ib(default=None, type=typing.Union[str, bool, int])
+    offset = attr.ib(default=None, type=typing.Union[str, bool, int])
     type = attr.ib(default=None, type=typing.Union[str, bool])
     units = attr.ib(default=None, type=typing.Union[str, bool])
     read_write = attr.ib(default=None, type=typing.Union[str, bool])
-    description = attr.ib(default=None, type=typing.Union[str, bool])
-    field_type = attr.ib(default=None, type=typing.Union[str, bool])
-    parameter_uses_interface_item = attr.ib(default=False, type=typing.Union[str, bool])
+    # description = attr.ib(default=None, type=typing.Union[str, bool])
+    # field_type = attr.ib(default=None, type=typing.Union[str, bool])
+    # parameter_uses_interface_item = attr.ib(default=False, type=typing.Union[str, bool])
     access_level = attr.ib(default=None, type=typing.Union[str, bool, int])
+    scale_factor = attr.ib(default=None, type=typing.Union[str, bool])
+    min = attr.ib(default=None, type=typing.Union[str, bool, int])
+    max = attr.ib(default=None, type=typing.Union[str, bool, int])
+
 
 
 field_names = Fields(
@@ -38,13 +43,17 @@ field_names = Fields(
     name="Name",
     label="Label",
     size="Size",
+    offset="Offset",
     type="Type",
     units="Units",
     read_write="R/W",
-    description="Description",
-    field_type="Field Type",
-    parameter_uses_interface_item="Implemented",
+    # description="Description",
+    # field_type="Field Type",
+    # parameter_uses_interface_item="Implemented",
     access_level="Access Level",
+    scale_factor="Scale Factor",
+    min="Min",
+    max="Max"
 )
 
 
@@ -84,12 +93,6 @@ def export(
 
     path.parent.mkdir(parents=True, exist_ok=True)
     workbook.save(path)
-
-
-# TODO: Remove this method when static modbus start address is changed to zero.
-def add_temporary_modbus_address_offset(input_modbus_address: int):
-    """TEMPORARY offset addition, to be removed when static modbus start address becomes zero"""
-    return input_modbus_address + 20000
 
 
 @builders(epcpm.staticmodbusmodel.Root)
@@ -144,7 +147,7 @@ class FunctionData:
         type_node = self.parameter_uuid_finder(self.wrapped.type_uuid)
         row = Fields()
         row.field_type = FunctionData.__name__
-        row.modbus_address = add_temporary_modbus_address_offset(self.wrapped.address)
+        row.modbus_address = self.wrapped.address
         row.type = type_node.name
         row.size = self.wrapped.size
         row.units = self.wrapped.units
