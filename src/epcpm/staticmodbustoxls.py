@@ -150,6 +150,8 @@ class FunctionData:
         row.modbus_address = self.wrapped.address
         row.type = type_node.name
         row.size = self.wrapped.size
+        row.offset = self.wrapped.bit_offset
+        row.scale_factor = self.wrapped.factor_uuid
         row.units = self.wrapped.units
         if self.wrapped.parameter_uuid is not None:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
@@ -194,7 +196,7 @@ class FunctionDataBitfield:
         row = Fields()
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
         row.field_type = FunctionDataBitfield.__name__
-        row.modbus_address = add_temporary_modbus_address_offset(self.wrapped.address)
+        row.modbus_address = self.wrapped.address
         row.size = self.wrapped.size
         row.label = parameter.name
         row.name = parameter.abbreviation
@@ -208,9 +210,7 @@ class FunctionDataBitfield:
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
             member_row = builder.gen()
-            member_row.modbus_address = add_temporary_modbus_address_offset(
-                self.wrapped.address
-            )
+            member_row.modbus_address = self.wrapped.address
             rows.append(member_row)
 
         return rows

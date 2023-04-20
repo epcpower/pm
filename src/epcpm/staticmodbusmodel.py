@@ -90,7 +90,6 @@ def create_size_attribute(default=0):
         ),
     )
 
-
 def create_address_attribute(default=0):
     return attr.ib(
         default=default,
