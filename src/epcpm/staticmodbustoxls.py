@@ -28,13 +28,13 @@ class Fields(epcpm.pm_helper.FieldsInterface):
     type = attr.ib(default=None, type=typing.Union[str, bool])
     units = attr.ib(default=None, type=typing.Union[str, bool])
     read_write = attr.ib(default=None, type=typing.Union[str, bool])
-    # description = attr.ib(default=None, type=typing.Union[str, bool])
-    # field_type = attr.ib(default=None, type=typing.Union[str, bool])
-    # parameter_uses_interface_item = attr.ib(default=False, type=typing.Union[str, bool])
+    description = attr.ib(default=None, type=typing.Union[str, bool])
+    parameter_uses_interface_item = attr.ib(default=False, type=typing.Union[str, bool])
     access_level = attr.ib(default=None, type=typing.Union[str, bool, int])
     scale_factor = attr.ib(default=None, type=typing.Union[str, bool])
     min = attr.ib(default=None, type=typing.Union[str, bool, int])
     max = attr.ib(default=None, type=typing.Union[str, bool, int])
+    comment = attr.ib(default=None, type=typing.Union[str, bool])
 
 
 
@@ -47,13 +47,13 @@ field_names = Fields(
     type="Type",
     units="Units",
     read_write="R/W",
-    # description="Description",
-    # field_type="Field Type",
-    # parameter_uses_interface_item="Implemented",
+    description="Description",
+    parameter_uses_interface_item="Implemented",
     access_level="Access Level",
     scale_factor="Scale Factor",
     min="Min",
-    max="Max"
+    max="Max",
+    comment="Comment"
 )
 
 
@@ -158,6 +158,9 @@ class FunctionData:
             row.label = parameter.name
             row.name = parameter.abbreviation
             row.description = parameter.comment
+            row.min = parameter.minimum
+            row.max = parameter.maximum
+            row.comment = parameter.notes
             row.read_write = "R" if parameter.read_only else "RW"
             uses_interface_item = (
                 isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
