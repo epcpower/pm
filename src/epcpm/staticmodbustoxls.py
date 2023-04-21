@@ -24,18 +24,14 @@ class Fields(epcpm.pm_helper.FieldsInterface):
     name = attr.ib(default=None, type=typing.Union[str, bool])
     label = attr.ib(default=None, type=typing.Union[str, bool])
     size = attr.ib(default=None, type=typing.Union[str, bool, int])
-    offset = attr.ib(default=None, type=typing.Union[str, bool, int])
     type = attr.ib(default=None, type=typing.Union[str, bool])
     units = attr.ib(default=None, type=typing.Union[str, bool])
     read_write = attr.ib(default=None, type=typing.Union[str, bool])
     description = attr.ib(default=None, type=typing.Union[str, bool])
     parameter_uses_interface_item = attr.ib(default=False, type=typing.Union[str, bool])
     access_level = attr.ib(default=None, type=typing.Union[str, bool, int])
-    scale_factor = attr.ib(default=None, type=typing.Union[str, bool])
     min = attr.ib(default=None, type=typing.Union[str, bool, int])
     max = attr.ib(default=None, type=typing.Union[str, bool, int])
-    comment = attr.ib(default=None, type=typing.Union[str, bool])
-
 
 
 field_names = Fields(
@@ -43,17 +39,14 @@ field_names = Fields(
     name="Name",
     label="Label",
     size="Size",
-    offset="Offset",
     type="Type",
     units="Units",
     read_write="R/W",
     description="Description",
     parameter_uses_interface_item="Implemented",
     access_level="Access Level",
-    scale_factor="Scale Factor",
     min="Min",
-    max="Max",
-    comment="Comment"
+    max="Max"
 )
 
 
@@ -72,9 +65,7 @@ def export(
         parameters_model: parameters model
         column_filter: columns to be output to .xls file
         skip_output: skip output of the generated files
-
     Returns:
-
     """
     if skip_output:
         return
@@ -108,7 +99,6 @@ class Root:
     def gen(self) -> openpyxl.workbook.workbook.Workbook:
         """
         Excel spreadsheet generator for the static modbus root class.
-
         Returns:
             workbook: generated Excel workbook
         """
@@ -140,7 +130,6 @@ class FunctionData:
     def gen(self) -> typing.List[Fields]:
         """
         Excel spreadsheet generator for the static modbus FunctionData class.
-
         Returns:
             list: single Fields row of FunctionData
         """
@@ -150,17 +139,12 @@ class FunctionData:
         row.modbus_address = self.wrapped.address
         row.type = type_node.name
         row.size = self.wrapped.size
-        row.offset = self.wrapped.bit_offset
-        row.scale_factor = self.wrapped.factor_uuid
         row.units = self.wrapped.units
         if self.wrapped.parameter_uuid is not None:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
             row.label = parameter.name
             row.name = parameter.abbreviation
             row.description = parameter.comment
-            row.min = parameter.minimum
-            row.max = parameter.maximum
-            row.comment = parameter.notes
             row.read_write = "R" if parameter.read_only else "RW"
             uses_interface_item = (
                 isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
@@ -191,7 +175,6 @@ class FunctionDataBitfield:
         """
         Excel spreadsheet generator for the static modbus FunctionDataBitfield class.
         Call to generate the FunctionDataBitfieldMember children.
-
         Returns:
             list: list of Fields rows for FunctionDataBitfield and FunctionDataBitfieldMember
         """
@@ -213,7 +196,9 @@ class FunctionDataBitfield:
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
             member_row = builder.gen()
-            member_row.modbus_address = self.wrapped.address
+            member_row.modbus_address =
+                sel.wrapped.address
+            )
             rows.append(member_row)
 
         return rows
@@ -230,7 +215,6 @@ class FunctionDataBitfieldMember:
     def gen(self) -> Fields:
         """
         Excel spreadsheet generator for the static modbus FunctionDataBitfieldMember class.
-
         Returns:
             row: Fields row for a FunctionDataBitfieldMember
         """
