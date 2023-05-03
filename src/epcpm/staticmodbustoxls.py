@@ -32,6 +32,8 @@ class Fields(epcpm.pm_helper.FieldsInterface):
     access_level = attr.ib(default=None, type=typing.Union[str, bool, int])
     min = attr.ib(default=None, type=typing.Union[str, bool, int])
     max = attr.ib(default=None, type=typing.Union[str, bool, int])
+    bit_offset = attr.ib(default=None, type=typing.Union[str, bool, int])
+    scale_factor = attr.ib(default=None, type=typing.Union[str, bool])
 
 
 field_names = Fields(
@@ -46,8 +48,38 @@ field_names = Fields(
     parameter_uses_interface_item="Implemented",
     access_level="Access Level",
     min="Min",
-    max="Max"
+    max="Max",
+    bit_offset="Bit Offset",
+    scale_factor="SF",
 )
+
+
+def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
+    factor_uuid = []
+    for point in points:
+        if type(point) is not epcpm.staticmodbusmodel.FunctionData:
+            continue
+
+        if point.factor_uuid is None:
+            continue
+
+        factor_uuid.append(point.factor_uuid)
+
+    factor_uuid = list(set(factor_uuid))
+
+    scale_factor_from_uuid = {}
+    for point in points:
+        type_node = None
+        if point.uuid in factor_uuid:
+            type_node = parameter_uuid_finder(point.parameter_uuid)
+
+        if type_node is None:
+            continue
+
+        if type_node.abbreviation is not None:
+            scale_factor_from_uuid[point.uuid] = type_node.abbreviation
+
+    return scale_factor_from_uuid
 
 
 def export(
@@ -106,11 +138,19 @@ class Root:
         workbook.remove(workbook.active)
         worksheet = workbook.create_sheet()
         worksheet.append(field_names.as_filtered_tuple(self.column_filter))
-
+        scale_factor_from_uuid = build_uuid_scale_factor_dict(
+            points=self.wrapped.children,
+            parameter_uuid_finder=self.parameter_uuid_finder,
+        )
         for member in self.wrapped.children:
+            scale_factor = None
+            if member.uuid in scale_factor_from_uuid.keys():
+                scale_factor = scale_factor_from_uuid[member.uuid]
+
             builder = builders.wrap(
                 wrapped=member,
                 parameter_uuid_finder=self.parameter_uuid_finder,
+                factor_uuid=scale_factor,
             )
             rows = builder.gen()
             for row in rows:
@@ -135,7 +175,6 @@ class FunctionData:
         """
         type_node = self.parameter_uuid_finder(self.wrapped.type_uuid)
         row = Fields()
-        row.field_type = FunctionData.__name__
         row.modbus_address = self.wrapped.address
         row.type = type_node.name
         row.size = self.wrapped.size
@@ -146,6 +185,8 @@ class FunctionData:
             row.name = parameter.abbreviation
             row.description = parameter.comment
             row.read_write = "R" if parameter.read_only else "RW"
+            row.min = parameter.minimum
+            row.max = parameter.maximum
             uses_interface_item = (
                 isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
                 and parameter.uses_interface_item()
@@ -181,7 +222,6 @@ class FunctionDataBitfield:
         rows = []
         row = Fields()
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
-        row.field_type = FunctionDataBitfield.__name__
         row.modbus_address = self.wrapped.address
         row.size = self.wrapped.size
         row.label = parameter.name
@@ -196,9 +236,7 @@ class FunctionDataBitfield:
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
             member_row = builder.gen()
-            member_row.modbus_address =
-                sel.wrapped.address
-            )
+            member_row.modbus_address = self.wrapped.address
             rows.append(member_row)
 
         return rows
@@ -219,10 +257,10 @@ class FunctionDataBitfieldMember:
             row: Fields row for a FunctionDataBitfieldMember
         """
         row = Fields()
-        row.field_type = FunctionDataBitfieldMember.__name__
         type_node = self.parameter_uuid_finder(self.wrapped.type_uuid)
         row.type = type_node.name
         row.size = self.wrapped.bit_length
+        row.bit_offset = self.wrapped.bit_offset
         if self.wrapped.parameter_uuid is not None:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
             row.label = parameter.name
