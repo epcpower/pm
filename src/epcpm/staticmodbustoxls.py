@@ -15,7 +15,6 @@ import epyqlib.utils.general
 
 builders = epyqlib.utils.general.TypeMap()
 
-
 @attr.s
 class Fields(epcpm.pm_helper.FieldsInterface):
     """The fields defined for a given row in the output XLS file."""
@@ -53,7 +52,6 @@ field_names = Fields(
     scale_factor="SF",
 )
 
-
 def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
     factor_uuid = []
     for point in points:
@@ -76,11 +74,9 @@ def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
         if type_node is None:
             continue
 
-        if type_node.abbreviation is not None:
-            scale_factor_from_uuid[point.uuid] = type_node.abbreviation
+        scale_factor_from_uuid[point.uuid] = type_node.abbreviation
 
     return scale_factor_from_uuid
-
 
 def export(
     path: pathlib.Path,
@@ -140,17 +136,14 @@ class Root:
         worksheet.append(field_names.as_filtered_tuple(self.column_filter))
         scale_factor_from_uuid = build_uuid_scale_factor_dict(
             points=self.wrapped.children,
-            parameter_uuid_finder=self.parameter_uuid_finder,
+            parameter_uuid_finder=self.parameter_uuid_finder
         )
         for member in self.wrapped.children:
-            scale_factor = None
-            if member.uuid in scale_factor_from_uuid.keys():
-                scale_factor = scale_factor_from_uuid[member.uuid]
-
+            print("member: ", member)
             builder = builders.wrap(
                 wrapped=member,
                 parameter_uuid_finder=self.parameter_uuid_finder,
-                factor_uuid=scale_factor,
+                scale_factor_from_uuid=scale_factor_from_uuid
             )
             rows = builder.gen()
             for row in rows:
@@ -166,6 +159,7 @@ class FunctionData:
 
     wrapped = attr.ib(type=epcpm.staticmodbusmodel.FunctionData)
     parameter_uuid_finder = attr.ib(type=typing.Callable)
+    scale_factor_from_uuid = attr.ib(type=typing.Callable)
 
     def gen(self) -> typing.List[Fields]:
         """
@@ -196,6 +190,9 @@ class FunctionData:
                 access_level = self.parameter_uuid_finder(parameter.access_level_uuid)
                 row.access_level = access_level.value
 
+            if self.wrapped.uuid in self.scale_factor_from_uuid.keys():
+                row.scale_factor = self.scale_factor_from_uuid[self.wrapped.uuid]
+
         if type_node.name == "pad":
             row.name = "Pad"
             row.description = "Force even alignment"
@@ -211,6 +208,7 @@ class FunctionDataBitfield:
 
     wrapped = attr.ib(type=epcpm.staticmodbusmodel.FunctionDataBitfield)
     parameter_uuid_finder = attr.ib(type=typing.Callable)
+    scale_factor_from_uuid = attr.ib(type=typing.Callable)
 
     def gen(self) -> typing.List[Fields]:
         """
