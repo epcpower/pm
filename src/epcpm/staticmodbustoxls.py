@@ -18,7 +18,8 @@ builders = epyqlib.utils.general.TypeMap()
 enumeration_builders = epyqlib.utils.general.TypeMap()
 enumerator_builders = epyqlib.utils.general.TypeMap()
 
-epc_enumerator_fields = attr.fields(epyqlib.pm.parametermodel.Enumerator)
+# epc_enumerator_fields = attr.fields(epyqlib.pm.parametermodel.Enumerator)
+epc_enumerator_fields = attr.fields(epyqlib.pm.parametermodel.SunSpecEnumerator)
 
 @attr.s
 class Fields(epcpm.pm_helper.FieldsInterface):
@@ -164,7 +165,6 @@ class Root:
         for member in self.wrapped.children:
             builder = enumeration_builders.wrap(
                 wrapped=member,
-                point=member,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
             rows = builder.gen()
@@ -304,12 +304,10 @@ class FunctionDataBitfieldMember:
 @attr.s
 class FunctionDataOutput:
     wrapped = attr.ib()
-    point = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
         rows = []
-
         enumeration_uuid = getattr(self.wrapped, "enumeration_uuid", None)
         if enumeration_uuid is None:
             return rows
@@ -322,42 +320,37 @@ class FunctionDataOutput:
         # 16 bits per register
         total_bit_count = self.wrapped.size * 16
         decimal_digits = len(str(total_bit_count - 1))
-
         for bit in range(total_bit_count):
             enumerator = enumerators_by_bit.get(bit)
+
             if enumerator is None:
                 padded_bit_string = f"{bit:0{decimal_digits}}"
-                enumerator = epyqlib.pm.parametermodel.Enumerator(
-                    # label=f"Reserved - {padded_bit_string}",
+                enumerator = epyqlib.pm.parametermodel.SunSpecEnumerator(
+                    label=f"Reserved - {padded_bit_string}",
                     name=f"Rsvd{padded_bit_string}",
-                    # value=bit,
+                    value=bit,
                 )
 
             builder = enumerator_builders.wrap(
                 wrapped=enumerator,
-                point=self.point,
-                parameter_uuid_finder=self.parameter_uuid_finder,
             )
             rows.append(builder.gen())
 
         return rows
 
 
-@enumerator_builders(epyqlib.pm.parametermodel.Enumerator)
+@enumerator_builders(epyqlib.pm.parametermodel.SunSpecEnumerator)
 @attr.s
 class Enumerator:
     wrapped = attr.ib()
-    point = attr.ib()
-    parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
         row = Fields()
-
         for name, field in attr.asdict(enumerator_fields).items():
             if field is None:
                 continue
 
-            setattr(row, name, getattr(self.wrapped, field.name))
+            setattr(row, name, getattr(self.wrapped, field.name) if type(field) is not bool else field)
 
         if row.name is None:
             row.name = self.wrapped.name
@@ -400,8 +393,6 @@ class DataPointBitfield:
             else:
                 builder = enumerator_builders.wrap(
                     wrapped=enumerator,
-                    point=self.point,
-                    parameter_uuid_finder=self.parameter_uuid_finder,
                 )
                 row = builder.gen()
 
@@ -456,7 +447,6 @@ class GenericEnumeratorBuilder:
         for child in self.wrapped.children:
             builder = enumeration_builders.wrap(
                 wrapped=child,
-                point=child,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
 
@@ -475,13 +465,11 @@ class GenericEnumeratorBuilder:
 @attr.s
 class TableRepeatingBlockReferenceDataPointReferenceEnumerationBuilder:
     wrapped = attr.ib()
-    point = attr.ib()
     parameter_uuid_finder = attr.ib(default=None)
 
     def gen(self):
         builder = enumeration_builders.wrap(
             wrapped=self.wrapped.original,
-            point=self.point.original,
             parameter_uuid_finder=self.parameter_uuid_finder,
         )
 
