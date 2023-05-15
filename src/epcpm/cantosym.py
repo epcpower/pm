@@ -164,7 +164,9 @@ class Message:
                 extended=self.wrapped.extended,
             ),
             size=self.wrapped.length,
-            comment=self.wrapped.comment,
+            comment="<subset:{}>".format(
+                        str(self.wrapped.can2subset),
+                    ).strip(),
             cycle_time=(
                 self.wrapped.cycle_time if self.wrapped.cycle_time is not None else 0
             ),
