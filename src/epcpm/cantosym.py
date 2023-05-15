@@ -494,6 +494,11 @@ class MultiplexedMessage:
                         access_level.name.casefold(),
                     ).strip()
 
+            mux_signal.comments[multiplexer.identifier] = "{} <subset:{}>".format(
+                mux_signal.comments.get(multiplexer.identifier, ""),
+                str(multiplexer.can2subset),
+            ).strip()
+
             first_new_signal_index = len(frame.signals)
 
             for signal in multiplexer.children:
