@@ -15,11 +15,6 @@ import epyqlib.utils.general
 
 
 builders = epyqlib.utils.general.TypeMap()
-enumeration_builders = epyqlib.utils.general.TypeMap()
-enumerator_builders = epyqlib.utils.general.TypeMap()
-
-# epc_enumerator_fields = attr.fields(epyqlib.pm.parametermodel.Enumerator)
-epc_enumerator_fields = attr.fields(epyqlib.pm.parametermodel.SunSpecEnumerator)
 
 @attr.s
 class Fields(epcpm.pm_helper.FieldsInterface):
@@ -58,13 +53,17 @@ field_names = Fields(
     scale_factor="SF",
 )
 
-enumerator_fields = Fields(
-    name=epc_enumerator_fields.name,
-    # description=epc_enumerator_fields.description,
-    # value=epc_enumerator_fields.value
-)
+def build_uuid_scale_factor_dict(points, parameter_uuid_finder) -> dict:
+    """
+    Function that creates a dict where keys are UUIDs and values are parameter nodes
 
-def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
+    Args:
+        points (list): list of parameter dicts
+        parameter_uuid_finder (function): function to identify a node given a UUID
+
+    Returns:
+        dict: a dict where the keys are UUIDs and the values are scale factors
+    """
     factor_uuid_list = []
     for point in points:
         if type(point) is not epcpm.staticmodbusmodel.FunctionData:
@@ -90,6 +89,56 @@ def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
         scale_factor_from_uuid[point.uuid] = type_node.abbreviation
 
     return scale_factor_from_uuid
+
+def build_enumerators_list(points, parameter_uuid_finder) -> list:
+    """
+    Function that creates a list of enumerator dicts based on `enumeration_uuid`
+    that are not null
+
+    Args:
+        points (list): list of parameter dicts
+        parameter_uuid_finder (function): function to identify a node given a UUID
+
+    Returns:
+        list: a combined list of all the enumerators found using parameter_uuid_finder
+    """
+    enumeration_uuid_list = []
+    for point in points:
+        if type(point) is epcpm.staticmodbusmodel.FunctionDataBitfield:
+            continue
+
+        if point.enumeration_uuid is None:
+            continue
+
+        enumeration_uuid_list.append(point.enumeration_uuid)
+
+    enumeration_uuid_list = list(set(enumeration_uuid_list))
+
+    enumerators_from_uuid = []
+    for point in enumeration_uuid_list:
+        type_node = parameter_uuid_finder(point)
+        node_name = getattr(type_node, "name", None)
+        if node_name == "AccessLevel":
+            continue
+        enumerators_from_uuid += type_node.children
+
+    return enumerators_from_uuid
+
+def clean_enumerators(enumerators_list) -> list:
+    """
+    Grabs the `name` and `value` from each enumerator dictionary in the list
+
+    Args:
+        enumerators_list (list): list of enumerator dicts
+
+    Returns:
+        list: list of lists where each list contains the enumerator `name` and `value`
+    """
+    cleaned_enumerators_list = []
+    for enumerator in enumerators_list:
+        cleaned_enumerators_list.append([enumerator.name, enumerator.value])
+    return cleaned_enumerators_list
+
 
 def export(
     path: pathlib.Path,
@@ -145,13 +194,20 @@ class Root:
         """
         workbook = openpyxl.Workbook()
         workbook.remove(workbook.active)
-        worksheet = workbook.create_sheet()
-        enumeration_worksheet = workbook.create_sheet()
-        worksheet.append(field_names.as_filtered_tuple(self.column_filter))
+        modbus_worksheet = workbook.create_sheet("Static Modbus Data")
+        enumeration_worksheet = workbook.create_sheet("Enumerators")
+        modbus_worksheet.append(field_names.as_filtered_tuple(self.column_filter))
+        enumeration_worksheet.append(["Name", "Value"])
+
         scale_factor_from_uuid = build_uuid_scale_factor_dict(
             points=self.wrapped.children,
             parameter_uuid_finder=self.parameter_uuid_finder
         )
+        enumerators_from_uuid = build_enumerators_list(
+            points=self.wrapped.children,
+            parameter_uuid_finder=self.parameter_uuid_finder
+        )
+        enumerators_from_uuid = clean_enumerators(enumerators_from_uuid)
         for member in self.wrapped.children:
             builder = builders.wrap(
                 wrapped=member,
@@ -160,16 +216,10 @@ class Root:
             )
             rows = builder.gen()
             for row in rows:
-                worksheet.append(row.as_filtered_tuple(self.column_filter))
+                modbus_worksheet.append(row.as_filtered_tuple(self.column_filter))
 
-        for member in self.wrapped.children:
-            builder = enumeration_builders.wrap(
-                wrapped=member,
-                parameter_uuid_finder=self.parameter_uuid_finder,
-            )
-            rows = builder.gen()
-            for row in rows:
-                enumeration_worksheet.append(row.as_filtered_tuple(self.column_filter))
+        for member in enumerators_from_uuid:
+            enumeration_worksheet.append(member)
 
         return workbook
 
@@ -298,208 +348,3 @@ class FunctionDataBitfieldMember:
                 row.access_level = access_level.value
 
         return row
-
-
-@enumeration_builders(epcpm.staticmodbusmodel.FunctionData)
-@attr.s
-class FunctionDataOutput:
-    wrapped = attr.ib()
-    parameter_uuid_finder = attr.ib(default=None)
-
-    def gen(self):
-        rows = []
-        enumeration_uuid = getattr(self.wrapped, "enumeration_uuid", None)
-        if enumeration_uuid is None:
-            return rows
-
-        enumeration = self.parameter_uuid_finder(enumeration_uuid)
-        enumerators_by_bit = {
-            enumerator.value: enumerator for enumerator in enumeration.children
-        }
-
-        # 16 bits per register
-        total_bit_count = self.wrapped.size * 16
-        decimal_digits = len(str(total_bit_count - 1))
-        for bit in range(total_bit_count):
-            enumerator = enumerators_by_bit.get(bit)
-
-            if enumerator is None:
-                padded_bit_string = f"{bit:0{decimal_digits}}"
-                enumerator = epyqlib.pm.parametermodel.SunSpecEnumerator(
-                    label=f"Reserved - {padded_bit_string}",
-                    name=f"Rsvd{padded_bit_string}",
-                    value=bit,
-                )
-
-            builder = enumerator_builders.wrap(
-                wrapped=enumerator,
-            )
-            rows.append(builder.gen())
-
-        return rows
-
-
-@enumerator_builders(epyqlib.pm.parametermodel.SunSpecEnumerator)
-@attr.s
-class Enumerator:
-    wrapped = attr.ib()
-
-    def gen(self):
-        row = Fields()
-        for name, field in attr.asdict(enumerator_fields).items():
-            if field is None:
-                continue
-
-            setattr(row, name, getattr(self.wrapped, field.name) if type(field) is not bool else field)
-
-        if row.name is None:
-            row.name = self.wrapped.name
-
-        return row
-
-
-@enumeration_builders(epcpm.staticmodbusmodel.FunctionDataBitfield)
-@attr.s
-class DataPointBitfield:
-    wrapped = attr.ib()
-    point = attr.ib()
-    parameter_uuid_finder = attr.ib(default=None)
-
-    def gen(self):
-        rows = []
-
-        # 16 bits per register
-        total_bit_count = self.wrapped.size * 16
-        decimal_digits = len(str(total_bit_count - 1))
-
-        enumerators_by_bit = {
-            enumerator.bit_offset
-            + i: [enumerator, i if enumerator.bit_length > 1 else None]
-            for enumerator in self.wrapped.children
-            for i in range(enumerator.bit_length)
-        }
-
-        for bit in range(total_bit_count):
-            enumerator, index = enumerators_by_bit.get(bit, [None, None])
-
-            if enumerator is None:
-                padded_bit_string = f"{bit:0{decimal_digits}}"
-                row = Fields(
-                    field_type=f"bitfield{total_bit_count}",
-                    value=bit,
-                    name=f"Rsvd{padded_bit_string}",
-                    label=f"Reserved - {padded_bit_string}",
-                )
-            else:
-                builder = enumerator_builders.wrap(
-                    wrapped=enumerator,
-                )
-                row = builder.gen()
-
-                if index is not None:
-                    padded_index_string = f"{index:0{decimal_digits}}"
-
-                    row = attr.evolve(
-                        row,
-                        name=f"{row.name}{padded_index_string}",
-                        label=f"{row.label} - {padded_index_string}",
-                        value=row.value + index,
-                    )
-
-            rows.append(row)
-
-        return rows
-
-
-@enumerator_builders(epcpm.staticmodbusmodel.FunctionDataBitfieldMember)
-@attr.s
-class DataPointBitfieldMember:
-    wrapped = attr.ib()
-    point = attr.ib()
-    parameter_uuid_finder = attr.ib(default=None)
-
-    def gen(self):
-        member_parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
-
-        length = self.point.size * 16
-
-        row = Fields(
-            field_type=f"bitfield{length}",
-            value=self.wrapped.bit_offset,
-            name=member_parameter.abbreviation,
-            label=member_parameter.name,
-            description=member_parameter.comment,
-            notes=member_parameter.notes,
-        )
-
-        return row
-
-
-@enumeration_builders(epcpm.staticmodbusmodel.TableRepeatingBlockReference)
-@attr.s
-class GenericEnumeratorBuilder:
-    wrapped = attr.ib()
-    parameter_uuid_finder = attr.ib(default=None)
-
-    def gen(self):
-        rows = []
-
-        for child in self.wrapped.children:
-            builder = enumeration_builders.wrap(
-                wrapped=child,
-                parameter_uuid_finder=self.parameter_uuid_finder,
-            )
-
-            new_rows = builder.gen()
-
-            if len(new_rows) > 0:
-                rows.extend(new_rows)
-                rows.append(Fields())
-
-        return rows
-
-
-@enumeration_builders(
-    epcpm.staticmodbusmodel.TableRepeatingBlockReferenceFunctionDataReference,
-)
-@attr.s
-class TableRepeatingBlockReferenceDataPointReferenceEnumerationBuilder:
-    wrapped = attr.ib()
-    parameter_uuid_finder = attr.ib(default=None)
-
-    def gen(self):
-        builder = enumeration_builders.wrap(
-            wrapped=self.wrapped.original,
-            parameter_uuid_finder=self.parameter_uuid_finder,
-        )
-
-        return builder.gen()
-
-
-@builders(epcpm.staticmodbusmodel.TableRepeatingBlockReference)
-@attr.s
-class TableRepeatingBlockReference:
-    wrapped = attr.ib()
-    add_padding = attr.ib()
-    padding_type = attr.ib()
-    model_type = attr.ib()
-    model_id = attr.ib()
-    model_offset = attr.ib()
-    address_offset = attr.ib()
-    parameter_uuid_finder = attr.ib(default=None)
-
-    def gen(self):
-        builder = builders.wrap(
-            wrapped=self.wrapped.original,
-            model_type=self.model_type,
-            parameter_uuid_finder=self.parameter_uuid_finder,
-            add_padding=self.add_padding,
-            padding_type=self.padding_type,
-            model_id=self.model_id,
-            model_offset=self.model_offset,
-            is_table=True,
-            repeating_block_reference=self.wrapped,
-            address_offset=self.address_offset,
-        )
-
-        return builder.gen()
