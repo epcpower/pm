@@ -90,7 +90,7 @@ def build_uuid_scale_factor_dict(points, parameter_uuid_finder) -> dict:
 
     return scale_factor_from_uuid
 
-def build_enumerators_list(points, parameter_uuid_finder) -> list:
+def build_enumerators_dict(points, parameter_uuid_finder) -> dict:
     """
     Function that creates a list of enumerator dicts based on `enumeration_uuid`
     that are not null
@@ -100,7 +100,8 @@ def build_enumerators_list(points, parameter_uuid_finder) -> list:
         parameter_uuid_finder (function): function to identify a node given a UUID
 
     Returns:
-        list: a combined list of all the enumerators found using parameter_uuid_finder
+        dict: a dict of enumerators where the key is the enumeration name and the
+        value is the list of enumerator dicts
     """
     enumeration_uuid_list = []
     for point in points:
@@ -114,13 +115,12 @@ def build_enumerators_list(points, parameter_uuid_finder) -> list:
 
     enumeration_uuid_list = list(set(enumeration_uuid_list))
 
-    enumerators_from_uuid = []
+    enumerators_from_uuid = {}
     for point in enumeration_uuid_list:
         type_node = parameter_uuid_finder(point)
-        node_name = getattr(type_node, "name", None)
-        if node_name == "AccessLevel":
-            continue
-        enumerators_from_uuid += type_node.children
+        enumeration_name = getattr(type_node, "name", None)
+        enumerators_list = clean_enumerators(type_node.children)
+        enumerators_from_uuid[enumeration_name] = enumerators_list
 
     return enumerators_from_uuid
 
@@ -195,7 +195,7 @@ class Root:
         workbook = openpyxl.Workbook()
         workbook.remove(workbook.active)
         modbus_worksheet = workbook.create_sheet("Static Modbus Data")
-        enumeration_worksheet = workbook.create_sheet("Enumerators")
+        enumeration_worksheet = workbook.create_sheet("Enumerations")
         modbus_worksheet.append(field_names.as_filtered_tuple(self.column_filter))
         enumeration_worksheet.append(["Name", "Value"])
 
@@ -203,11 +203,11 @@ class Root:
             points=self.wrapped.children,
             parameter_uuid_finder=self.parameter_uuid_finder
         )
-        enumerators_from_uuid = build_enumerators_list(
+        enumerators_from_uuid = build_enumerators_dict(
             points=self.wrapped.children,
             parameter_uuid_finder=self.parameter_uuid_finder
         )
-        enumerators_from_uuid = clean_enumerators(enumerators_from_uuid)
+
         for member in self.wrapped.children:
             builder = builders.wrap(
                 wrapped=member,
@@ -218,8 +218,10 @@ class Root:
             for row in rows:
                 modbus_worksheet.append(row.as_filtered_tuple(self.column_filter))
 
-        for member in enumerators_from_uuid:
-            enumeration_worksheet.append(member)
+        for enumeration_name, enumerators in enumerators_from_uuid.items():
+            enumeration_worksheet.append([enumeration_name])
+            for enumerator in enumerators:
+                enumeration_worksheet.append(enumerator)
 
         return workbook
 
