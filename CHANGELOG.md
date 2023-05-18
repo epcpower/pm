@@ -25,9 +25,13 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### Fixed
 
+- SC-922: Fix SIL array table element setter for groups
 - SC-654: Fix modbus bitfield interface generation.
 
 ### CI
 
+- SC-1157: Pin versions of all python packages for installing poetry
+- SC-1112: Remove codecov python dependency
+- SC-995: Update actions versions to alleviate CI build warnings
 - SC-760: Pin poetry to 1.1.15
 - SC-401: Romp Removal / Poetry Implementation
