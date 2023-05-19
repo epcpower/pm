@@ -53,7 +53,19 @@ field_names = Fields(
     scale_factor="SF",
 )
 
-def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
+def build_uuid_scale_factor_dict(points, parameter_uuid_finder) -> dict:
+    """
+    Function that creates a dict of enumerator dicts found by using
+    parameter_uuid_finder
+
+    Args:
+        points (list): a list of parameter dicts
+        parameter_uuid_finder (function): function to identify a node given a UUID
+
+    Returns:
+        dict: a dict where the key is the parameter UUID and the value is the
+        parameter dict associated with the UUID
+    """
     # TODO: CAMPid 45002738594281495565841631423784
     scale_factor_from_uuid = {}
     for point in points:
