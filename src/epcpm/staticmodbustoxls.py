@@ -53,40 +53,20 @@ field_names = Fields(
     scale_factor="SF",
 )
 
-def build_uuid_scale_factor_dict(points, parameter_uuid_finder) -> dict:
-    """
-    Function that creates a dict where keys are UUIDs and values are parameter nodes
-
-    Args:
-        points (list): list of parameter dicts
-        parameter_uuid_finder (function): function to identify a node given a UUID
-
-    Returns:
-        dict: a dict where the keys are UUIDs and the values are scale factors
-    """
-    factor_uuid_list = []
-    for point in points:
-        if type(point) is not epcpm.staticmodbusmodel.FunctionData:
-            continue
-
-        if point.factor_uuid is None:
-            continue
-
-        factor_uuid_list.append(point.factor_uuid)
-
-    factor_uuid_list = list(set(factor_uuid_list))
-
+def build_uuid_scale_factor_dict(points, parameter_uuid_finder):
+    # TODO: CAMPid 45002738594281495565841631423784
     scale_factor_from_uuid = {}
     for point in points:
-        type_node = None
-        if point.uuid in factor_uuid_list:
-            if point.parameter_uuid is not None:
-                type_node = parameter_uuid_finder(point.parameter_uuid)
+        if point.type_uuid is None:
+            continue
+
+        type_node = parameter_uuid_finder(point.type_uuid)
 
         if type_node is None:
             continue
 
-        scale_factor_from_uuid[point.uuid] = type_node.abbreviation
+        if type_node.name == "staticmodbussf":
+            scale_factor_from_uuid[point.uuid] = point
 
     return scale_factor_from_uuid
 
@@ -263,8 +243,10 @@ class FunctionData:
                 access_level = self.parameter_uuid_finder(parameter.access_level_uuid)
                 row.access_level = access_level.value
 
-            if self.wrapped.uuid in self.scale_factor_from_uuid.keys():
-                row.scale_factor = self.scale_factor_from_uuid[self.wrapped.uuid]
+            if self.wrapped.factor_uuid is not None:
+                row.scale_factor = self.parameter_uuid_finder(
+                    self.scale_factor_from_uuid[self.wrapped.factor_uuid].parameter_uuid
+                ).abbreviation
 
         if type_node.name == "pad":
             row.name = "Pad"
