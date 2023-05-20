@@ -188,7 +188,7 @@ class Root:
         """
         workbook = openpyxl.Workbook()
         workbook.remove(workbook.active)
-        modbus_worksheet = workbook.create_sheet("Static Modbus Map")
+        modbus_worksheet = workbook.create_sheet("Static Modbus Data")
         enumeration_worksheet = workbook.create_sheet("Enumerations")
         modbus_worksheet.append(field_names.as_filtered_tuple(self.column_filter))
         enumeration_worksheet.append(["Name", "Value"])
@@ -202,6 +202,7 @@ class Root:
             parameter_uuid_finder=self.parameter_uuid_finder
         )
         enumerations = self.collect_enumerations()
+
         for member in self.wrapped.children:
             builder = builders.wrap(
                 wrapped=member,
@@ -267,6 +268,7 @@ class FunctionData:
         row.type = type_node.name
         row.size = self.wrapped.size
         row.units = self.wrapped.units
+
         if self.wrapped.parameter_uuid is not None:
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
             row.label = parameter.name
@@ -288,6 +290,9 @@ class FunctionData:
                 row.scale_factor = self.parameter_uuid_finder(
                     self.scale_factor_from_uuid[self.wrapped.factor_uuid].parameter_uuid
                 ).abbreviation
+
+            if self.wrapped.enumeration_uuid is not None:
+                row.enumerator = self.parameter_uuid_finder(self.wrapped.enumeration_uuid).name
 
         if type_node.name == "pad":
             row.name = "Pad"
