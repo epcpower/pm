@@ -188,7 +188,7 @@ class Root:
         """
         workbook = openpyxl.Workbook()
         workbook.remove(workbook.active)
-        modbus_worksheet = workbook.create_sheet("Static Modbus Data")
+        modbus_worksheet = workbook.create_sheet("Static Modbus Map")
         enumeration_worksheet = workbook.create_sheet("Enumerations")
         modbus_worksheet.append(field_names.as_filtered_tuple(self.column_filter))
         enumeration_worksheet.append(["Name", "Value"])
