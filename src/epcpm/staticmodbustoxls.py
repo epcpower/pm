@@ -34,6 +34,7 @@ class Fields(epcpm.pm_helper.FieldsInterface):
     max = attr.ib(default=None, type=typing.Union[str, bool, int])
     bit_offset = attr.ib(default=None, type=typing.Union[str, bool, int])
     scale_factor = attr.ib(default=None, type=typing.Union[str, bool])
+    enumerator = attr.ib(default=None, type=typing.Union[str, bool, int])
 
 
 field_names = Fields(
@@ -51,6 +52,7 @@ field_names = Fields(
     max="Max",
     bit_offset="Bit Offset",
     scale_factor="SF",
+    enumerator="Enumerator"
 )
 
 def build_uuid_scale_factor_dict(points, parameter_uuid_finder) -> dict:
@@ -204,7 +206,8 @@ class Root:
             builder = builders.wrap(
                 wrapped=member,
                 parameter_uuid_finder=self.parameter_uuid_finder,
-                scale_factor_from_uuid=scale_factor_from_uuid
+                scale_factor_from_uuid=scale_factor_from_uuid,
+                enumerators_from_uuid=enumerations
             )
             rows = builder.gen()
             for row in rows:
@@ -250,6 +253,7 @@ class FunctionData:
     wrapped = attr.ib(type=epcpm.staticmodbusmodel.FunctionData)
     parameter_uuid_finder = attr.ib(type=typing.Callable)
     scale_factor_from_uuid = attr.ib(type=typing.Callable)
+    enumerators_from_uuid = attr.ib(type=typing.Callable)
 
     def gen(self) -> typing.List[Fields]:
         """
@@ -301,6 +305,7 @@ class FunctionDataBitfield:
     wrapped = attr.ib(type=epcpm.staticmodbusmodel.FunctionDataBitfield)
     parameter_uuid_finder = attr.ib(type=typing.Callable)
     scale_factor_from_uuid = attr.ib(type=typing.Callable)
+    enumerators_from_uuid = attr.ib(type=typing.Callable)
 
     def gen(self) -> typing.List[Fields]:
         """
