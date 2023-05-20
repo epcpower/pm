@@ -199,7 +199,7 @@ class Root:
             points=self.wrapped.children,
             parameter_uuid_finder=self.parameter_uuid_finder
         )
-
+        enumerations = self.collect_enumerations()
         for member in self.wrapped.children:
             builder = builders.wrap(
                 wrapped=member,
@@ -216,6 +216,31 @@ class Root:
                 enumeration_worksheet.append(enumerator)
 
         return workbook
+
+    def collect_enumerations(self):
+        collected = []
+
+        if self.parameter_model is None:
+            return collected
+
+        def collect(node, collected):
+            is_enumeration = isinstance(
+                node,
+                (
+                    epyqlib.pm.parametermodel.Enumeration,
+                    epyqlib.pm.parametermodel.AccessLevels,
+                ),
+            )
+            if is_enumeration:
+                collected.append(node)
+
+        self.parameter_model.root.traverse(
+            call_this=collect,
+            payload=collected,
+            internal_nodes=True,
+        )
+
+        return collected
 
 @builders(epcpm.staticmodbusmodel.FunctionData)
 @attr.s
