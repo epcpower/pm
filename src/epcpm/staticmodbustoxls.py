@@ -241,9 +241,6 @@ class FunctionData:
                 ).abbreviation
 
             if self.wrapped.enumeration_uuid is not None:
-                row.enumerator = self.parameter_uuid_finder(self.wrapped.enumeration_uuid).name
-
-            if self.wrapped.enumeration_uuid is not None:
                 row.enumerator = self.parameter_uuid_finder(
                     self.enumerators_from_uuid[self.wrapped.enumeration_uuid].uuid
                 ).name
