@@ -84,55 +84,6 @@ def build_uuid_scale_factor_dict(points, parameter_uuid_finder) -> dict:
 
     return scale_factor_from_uuid
 
-def build_enumerators_dict(points, parameter_uuid_finder) -> dict:
-    """
-    Function that creates a list of enumerator dicts based on `enumeration_uuid`
-    that are not null
-
-    Args:
-        points (list): list of parameter dicts
-        parameter_uuid_finder (function): function to identify a node given a UUID
-
-    Returns:
-        dict: a dict of enumerators where the key is the enumeration name and the
-        value is the list of enumerator dicts
-    """
-    enumeration_uuid_list = []
-    for point in points:
-        if type(point) is epcpm.staticmodbusmodel.FunctionDataBitfield:
-            continue
-
-        if point.enumeration_uuid is None:
-            continue
-
-        enumeration_uuid_list.append(point.enumeration_uuid)
-
-    enumeration_uuid_list = list(set(enumeration_uuid_list))
-
-    enumerators_from_uuid = {}
-    for point in enumeration_uuid_list:
-        type_node = parameter_uuid_finder(point)
-        enumeration_name = getattr(type_node, "name", None)
-        enumerators_list = clean_enumerators(type_node.children)
-        enumerators_from_uuid[enumeration_name] = enumerators_list
-
-    return enumerators_from_uuid
-
-def clean_enumerators(enumerators_list) -> list:
-    """
-    Grabs the `name` and `value` from each enumerator dictionary in the list
-
-    Args:
-        enumerators_list (list): list of enumerator dicts
-
-    Returns:
-        list: list of lists where each list contains the enumerator `name` and `value`
-    """
-    cleaned_enumerators_list = []
-    for enumerator in enumerators_list:
-        cleaned_enumerators_list.append([enumerator.name, enumerator.value])
-    return cleaned_enumerators_list
-
 
 def export(
     path: pathlib.Path,
@@ -191,33 +142,31 @@ class Root:
         modbus_worksheet = workbook.create_sheet("Static Modbus Data")
         enumeration_worksheet = workbook.create_sheet("Enumerations")
         modbus_worksheet.append(field_names.as_filtered_tuple(self.column_filter))
-        enumeration_worksheet.append(["Name", "Value"])
+        enumeration_worksheet.append(["Enumerator", "Name", "Value"])
 
         scale_factor_from_uuid = build_uuid_scale_factor_dict(
             points=self.wrapped.children,
             parameter_uuid_finder=self.parameter_uuid_finder
         )
-        enumerators_from_uuid = build_enumerators_dict(
-            points=self.wrapped.children,
-            parameter_uuid_finder=self.parameter_uuid_finder
-        )
         enumerations = self.collect_enumerations()
+        enumerators_from_uuid = {}
+        for enumeration in enumerations:
+            enumerators_from_uuid[enumeration.uuid] = enumeration
 
         for member in self.wrapped.children:
             builder = builders.wrap(
                 wrapped=member,
                 parameter_uuid_finder=self.parameter_uuid_finder,
                 scale_factor_from_uuid=scale_factor_from_uuid,
-                enumerators_from_uuid=enumerations
+                enumerators_from_uuid=enumerators_from_uuid
             )
             rows = builder.gen()
             for row in rows:
                 modbus_worksheet.append(row.as_filtered_tuple(self.column_filter))
 
-        for enumeration_name, enumerators in enumerators_from_uuid.items():
-            enumeration_worksheet.append([enumeration_name])
-            for enumerator in enumerators:
-                enumeration_worksheet.append(enumerator)
+        for enumeration in enumerations:
+            for child in enumeration.children:
+                enumeration_worksheet.append([enumeration.name, child.name, child.value])
 
         return workbook
 
@@ -293,6 +242,11 @@ class FunctionData:
 
             if self.wrapped.enumeration_uuid is not None:
                 row.enumerator = self.parameter_uuid_finder(self.wrapped.enumeration_uuid).name
+
+            if self.wrapped.enumeration_uuid is not None:
+                row.enumerator = self.parameter_uuid_finder(
+                    self.enumerators_from_uuid[self.wrapped.enumeration_uuid].uuid
+                ).name
 
         if type_node.name == "pad":
             row.name = "Pad"
