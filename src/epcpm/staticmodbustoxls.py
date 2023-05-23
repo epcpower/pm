@@ -153,6 +153,15 @@ class Root:
         for enumeration in enumerations:
             enumerators_from_uuid[enumeration.uuid] = enumeration
 
+        enumeration_cell_coordinates = {}
+        for enumeration in enumerations:
+            for child in enumeration.children:
+                enumeration_worksheet.append([enumeration.name, child.name, child.value])
+                if enumeration.name not in enumeration_cell_coordinates.keys():
+                    enumeration_cell_coordinates[enumeration.name] = (
+                        f"#Enumerations!A{enumeration_worksheet.max_row}"
+                    )
+
         for member in self.wrapped.children:
             builder = builders.wrap(
                 wrapped=member,
@@ -163,10 +172,12 @@ class Root:
             rows = builder.gen()
             for row in rows:
                 modbus_worksheet.append(row.as_filtered_tuple(self.column_filter))
-
-        for enumeration in enumerations:
-            for child in enumeration.children:
-                enumeration_worksheet.append([enumeration.name, child.name, child.value])
+                if row.enumerator is not None:
+                    max_row = modbus_worksheet.max_row
+                    if row.enumerator in enumeration_cell_coordinates.keys():
+                        modbus_worksheet[f"O{max_row}"].hyperlink = (
+                            enumeration_cell_coordinates[row.enumerator]
+                        )
 
         return workbook
 
