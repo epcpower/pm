@@ -153,13 +153,15 @@ class Root:
         for enumeration in enumerations:
             enumerators_from_uuid[enumeration.uuid] = enumeration
 
+        # Collects the cell coordinates of each new enumerator as they're appended
         enumeration_cell_coordinates = {}
+        ENUMERATION_ENUMERATOR_COLUMN = "#Enumerations!A"
         for enumeration in enumerations:
             for child in enumeration.children:
                 enumeration_worksheet.append([enumeration.name, child.name, child.value])
                 if enumeration.name not in enumeration_cell_coordinates.keys():
                     enumeration_cell_coordinates[enumeration.name] = (
-                        f"#Enumerations!A{enumeration_worksheet.max_row}"
+                        ENUMERATION_ENUMERATOR_COLUMN + f"{enumeration_worksheet.max_row}"
                     )
 
         for member in self.wrapped.children:
@@ -170,12 +172,17 @@ class Root:
                 enumerators_from_uuid=enumerators_from_uuid
             )
             rows = builder.gen()
+
+            # Appends the rows of static modbus data
+            MODBUS_ENUMERATOR_COLUMN = "O"
             for row in rows:
                 modbus_worksheet.append(row.as_filtered_tuple(self.column_filter))
+                # Checks if there's an enumerator and hyperlinks it to the right row in
+                # the Enumerations worksheet
                 if row.enumerator is not None:
                     max_row = modbus_worksheet.max_row
                     if row.enumerator in enumeration_cell_coordinates.keys():
-                        modbus_worksheet[f"O{max_row}"].hyperlink = (
+                        modbus_worksheet[MODBUS_ENUMERATOR_COLUMN +f"{max_row}"].hyperlink = (
                             enumeration_cell_coordinates[row.enumerator]
                         )
 
