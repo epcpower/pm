@@ -188,7 +188,14 @@ class Root:
 
         return workbook
 
-    def collect_enumerations(self):
+    def collect_enumerations(self) -> list:
+        """
+        A function that traverses the parameter model from the root and creates
+        a list of enumerations
+
+        Returns:
+            list: a list of enumerations
+        """
         collected = []
 
         if self.parameter_model is None:
