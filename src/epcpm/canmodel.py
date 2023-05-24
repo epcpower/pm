@@ -201,13 +201,7 @@ class Message(epyqlib.treenode.TreeNode):
         data_display=hex_upper,
         attribute=identifier,
     )
-    can2subset = attr.ib(
-        default=False,
-        converter=epyqlib.attrsmodel.two_state_checkbox,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.Boolean(),
-        ),
-    )
+
     extended = attr.ib(
         default=True,
         converter=epyqlib.attrsmodel.two_state_checkbox,
@@ -304,13 +298,6 @@ class Multiplexer(epyqlib.treenode.TreeNode):
         converter=epyqlib.attrsmodel.to_int_or_none,
         metadata=graham.create_metadata(
             field=marshmallow.fields.Integer(allow_none=True),
-        ),
-    )
-    can2subset = attr.ib(
-        default=False,
-        converter=epyqlib.attrsmodel.two_state_checkbox,
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.Boolean(),
         ),
     )
     length = epyqlib.attrsmodel.create_integer_attribute(default=0)
@@ -1162,7 +1149,6 @@ columns = epyqlib.attrsmodel.columns(
         MultiplexedMessageClone,
         Multiplexer,
     ),
-    merge("can2subset", Message, Multiplexer),
     merge("multiplexer_range_first", CanTable),
     merge("multiplexer_range_last", CanTable),
     (merge("length", Message, Multiplexer, MultiplexedMessage) + merge("bits", Signal)),
