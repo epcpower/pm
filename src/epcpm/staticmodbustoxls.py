@@ -201,7 +201,7 @@ class Root:
         if self.parameter_model is None:
             return collected
 
-        def collect(node, collected):
+        def collect(node: epyqlib.attrsmodel.Model, collected: list) -> typing.Union[typing.List[epyqlib.attrsmodel.Model], None]:
             is_enumeration = isinstance(
                 node,
                 (
