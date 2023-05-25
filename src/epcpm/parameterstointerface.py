@@ -46,7 +46,6 @@ staticmodbus_types = {
     "string": "PackedString",
     "bitfield16": "sunsU16",
     "bitfield32": "sunsU32",
-    "staticmodbussf": "sunsS16",
 }
 
 
@@ -275,12 +274,13 @@ class Root:
                 for node in staticmodbus_nodes_with_parameter_uuid
             }
 
-        if len(can_nodes_with_parameter_uuid) != len(parameter_uuid_to_can_node):
+        lengths_equal = len(can_nodes_with_parameter_uuid) == len(
+            parameter_uuid_to_can_node
+        )
+        if not lengths_equal:
             uuids = [u.parameter_uuid for u in can_nodes_with_parameter_uuid]
             print("\n".join(set(str(u) for u in uuids if uuids.count(u) > 1)))
-            raise Exception(
-                f"Lengths not equal: {len(can_nodes_with_parameter_uuid)} vs {len(parameter_uuid_to_can_node)}"
-            )
+            raise Exception()
 
         c = []
         h = []
@@ -482,8 +482,8 @@ class FunctionData:
     parameter_uuid_finder = attr.ib()
 
     def interface_variable_name(self):
-        parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
-        return f"&{parameter.internal_variable}"
+        # TODO: Remove when staticmodbus.common.variable is eliminated in the future.
+        return "NULL"
 
 
 @builders(epcpm.staticmodbusmodel.FunctionDataBitfieldMember)
@@ -785,7 +785,6 @@ class Parameter:
         ]
 
 
-
 @attr.s(frozen=True)
 class FixedWidthType:
     name = attr.ib()
@@ -994,7 +993,6 @@ def can_getter_setter_variable(can_signal, parameter, var_or_func_or_table):
         can_signal.tree_parent.tree_parent,
         epcpm.canmodel.CanTable,
     )
-
     if in_table:
         can_variable = (
             f"&{can_signal.tree_parent.tree_parent.tree_parent.name}"
@@ -1002,8 +1000,6 @@ def can_getter_setter_variable(can_signal, parameter, var_or_func_or_table):
             f"{can_signal.tree_parent.name}"
             f".{can_signal.name}"
         )
-    elif can_signal.tree_parent.tree_parent.name == "CAN":
-        can_variable = f"&{can_signal.tree_parent.name}" f".{can_signal.name}"
     else:
         can_variable = (
             f"&{can_signal.tree_parent.tree_parent.name}"
@@ -1297,6 +1293,7 @@ class TableBaseStructures:
             h_code.append(
                 f"extern InterfaceItem_table_common_{common_vals.internal_name} {name};",
             )
+
             common_initializers = create_common_initializers(
                 access_level=common_vals.access_level,
                 can_getter=common_vals.can_getter,

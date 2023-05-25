@@ -114,11 +114,10 @@ class ImportPaths:
 
 
 def paths_from_directory(directory):
-    project_path   = pathlib.Path(directory)
-    interface_path = project_path / "interface"
-    can_path       = interface_path / "can"
-    sunspec_path   = interface_path / "sunspec"
-    devices_path   = interface_path / "devices"
+    path = pathlib.Path(directory)
+    interface = path / "interface"
+    embedded = path / "embedded-library"
+    sunspec = embedded / "system" / "sunspec"
 
     return ImportPaths(
         can=interface / "EPC_DG_ID247_FACTORY.sym",

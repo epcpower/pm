@@ -94,33 +94,35 @@ class Root:
             c_file.write("\n")
 
         h_lines = [
-            "#ifndef STATICMODBUS_INTERFACE_GEN_H",
-            "#define STATICMODBUS_INTERFACE_GEN_H",
+            "#ifndef __STATICMODBUS_INTERFACE_GEN_H__",
+            "#define __STATICMODBUS_INTERFACE_GEN_H__",
             "",
             '#include "interface.h"',
             "",
             "",
             "typedef enum InterfaceType {",
-            "    INTERFACE_TYPE_UNASSIGNED   = 0,",
-            "    INTERFACE_TYPE_NORMAL       = 1,",
-            "    INTERFACE_TYPE_TABLE        = 2,",
-            "    INTERFACE_TYPE_BITFIELD     = 3,",
+            "    INTERFACE_TYPE_UNASSIGNED = 0,",
+            "    INTERFACE_TYPE_NORMAL = 1,",
+            "    INTERFACE_TYPE_TABLE = 2,",
+            "    INTERFACE_TYPE_BITFIELD = 3,",
             "} InterfaceType;",
             "",
-            "typedef struct StaticModbusReg {",
-            "    InterfaceType               interfaceType;",
-            "    InterfaceItem_void         *interface;",
+            "typedef struct StaticModbusReg",
+            "{",
+            "    InterfaceType interfaceType;",
+            "    InterfaceItem_void * interface;",
             "} StaticModbusReg;",
             "",
-            "#define STATIC_MODBUS_REGISTER_DEFAULTS(...) {                  \\",
-            "    .interfaceType              = INTERFACE_TYPE_UNASSIGNED,    \\",
-            "    .interface                  = NULL,                         \\",
-            "    __VA_ARGS__                                                 \\",
+            "#define STATIC_MODBUS_REGISTER_DEFAULTS(...) \\",
+            "{ \\",
+            "    .interfaceType = INTERFACE_TYPE_UNASSIGNED, \\",
+            "    .interface = NULL, \\",
+            "    __VA_ARGS__ \\",                                             \\",
             "}",
             "",
             f"extern StaticModbusReg staticmodbusAddrRegMap[{total_registers}];",
             "",
-            "#endif /* STATICMODBUS_INTERFACE_GEN_H */",
+            "#endif //__STATICMODBUS_INTERFACE_GEN_H__",
         ]
 
         with self.h_path.open("w", newline="\n") as h_file:
@@ -178,6 +180,7 @@ class FunctionData:
             and uses_interface_item
             and not self.wrapped.not_implemented
             and type_node is not None
+            and type_node.name != "staticmodbussf"
         ):
             parameter_uuid = epcpm.pm_helper.convert_uuid_to_variable_name(
                 self.wrapped.parameter_uuid
@@ -189,9 +192,9 @@ class FunctionData:
                 self.wrapped.address, self.wrapped.address + self.wrapped.size
             ):
                 if is_table_item:
-                    c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_TABLE, .interface = (InterfaceItem_void *){uuid_interface_val}),"
+                    c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_TABLE, .interface = {uuid_interface_val}),"
                 else:
-                    c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_NORMAL, .interface = (InterfaceItem_void *){uuid_interface_val}),"
+                    c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_NORMAL, .interface = {uuid_interface_val}),"
                 c_lines.append(c_line)
         else:
             # Generate one or more ("size") lines with default NULL interface.
@@ -229,7 +232,7 @@ class FunctionDataBitfield:
             self.wrapped.address, self.wrapped.address + self.wrapped.size
         ):
             if not self.skip_output:
-                c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_BITFIELD, .interface = (InterfaceItem_void *){uuid_interface_val}),"
+                                c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_BITFIELD, .interface = {uuid_interface_val}),"
             else:
                 c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(),"
             c_lines.append(c_line)

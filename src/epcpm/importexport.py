@@ -326,28 +326,28 @@ def full_export(
 
 
 def run_generation_scripts(base_path):
-    scripts_path   = base_path / ".venv" / "Scripts"
-    interface_path = base_path / "interface"
-    can_path       = interface_path / "can"
-    sunspec_path   = interface_path / "sunspec"
-    devices_path   = interface_path / "devices"
-
-    if os.name == 'nt':
-        subprocessArgs = {"check": True, "shell": True}
-    else:
-        subprocessArgs = {"check": True}
+    scripts = base_path / ".venv" / "Scripts"
+    interface = base_path / "interface"
 
     subprocess.run(
         [
-            os.fspath(scripts_path / "generatestripcollect"),
-            os.fspath(devices_path / "EPC_ID247.sym"),
-            "--device-file", os.fspath(devices_path / "devices.json"),
-            "--devices-directory", os.fspath(devices_path),
-            "--can-directory", os.fspath(can_path)
+            os.fspath(scripts / "generatestripcollect"),
+            os.fspath(interface / "EPC_DG_ID247_FACTORY.sym"),
+            "-o",
+            os.fspath(interface / "EPC_DG_ID247.sym"),
+            "--hierarchy",
+            os.fspath(interface / "EPC_DG_ID247_FACTORY.parameters.json"),
+            "--hierarchy-out",
+            os.fspath(interface / "EPC_DG_ID247.parameters.json"),
+            "--device-file",
+            os.fspath(interface / "devices.json"),
+            "--output-directory",
+            os.fspath(interface / "devices"),
         ],
-        **subprocessArgs
+        check=True,
     )
 
+    emb_lib = base_path / "embedded-library"
     subprocess.run(
         [
             os.fspath(scripts / "sunspecparser"),
@@ -364,9 +364,8 @@ def run_generation_scripts(base_path):
             os.fspath(emb_lib / "MODBUS_SunSpec2-EPC.xlsx"),
             str(epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO.value),
         ],
-        **subprocessArgs
+        check=True,
     )
-
 def modification_time_or(path, alternative):
     try:
         return path.stat().st_mtime
