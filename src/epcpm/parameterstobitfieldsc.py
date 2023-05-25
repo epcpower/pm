@@ -18,7 +18,8 @@ def export(
     c_path: pathlib.Path,
     h_path: pathlib.Path,
     parameters_model: epyqlib.attrsmodel.Model,
-    sunspec_model: epyqlib.attrsmodel.Model,
+    sunspec1_model: epyqlib.attrsmodel.Model,
+    sunspec2_model: epyqlib.attrsmodel.Model,
     staticmodbus_model: epyqlib.attrsmodel.Model,
     skip_output: bool = False,
 ):
@@ -36,15 +37,19 @@ def export(
     Returns:
 
     """
-    sunspec_root = sunspec_model.root
+    sunspec1_root = sunspec1_model.root
+    sunspec2_root = sunspec2_model.root
+
     staticmodbus_root = staticmodbus_model.root
 
     builder = builders.wrap(
         wrapped=parameters_model.root,
         c_path=c_path,
         h_path=h_path,
-        sunspec_root=sunspec_root,
-        sunspec_model=sunspec_model,
+        sunspec1_root=sunspec1_root,
+        sunspec2_root=sunspec2_root,
+        sunspec1_model=sunspec1_model,
+        sunspec2_model=sunspec2_model,
         staticmodbus_root=staticmodbus_root,
         staticmodbus_model=staticmodbus_model,
         skip_output=skip_output,
@@ -59,8 +64,10 @@ class Root:
     wrapped = attr.ib(type=epyqlib.pm.parametermodel.Root)
     c_path = attr.ib(type=pathlib.Path)
     h_path = attr.ib(type=pathlib.Path)
-    sunspec_root = attr.ib(type=epyqlib.attrsmodel.Root)
-    sunspec_model = attr.ib(type=epyqlib.attrsmodel.Model)
+    sunspec1_root = attr.ib(type=epyqlib.attrsmodel.Root)
+    sunspec2_root = attr.ib(type=epyqlib.attrsmodel.Root)
+    sunspec1_model = attr.ib(type=epyqlib.attrsmodel.Model)
+    sunspec2_model = attr.ib(type=epyqlib.attrsmodel.Model)
     staticmodbus_root = attr.ib(type=epyqlib.attrsmodel.Root)
     staticmodbus_model = attr.ib(type=epyqlib.attrsmodel.Model)
     skip_output = attr.ib(type=bool)
@@ -84,14 +91,25 @@ class Root:
 
             return True
 
-        if self.sunspec_root is None:
-            parameter_uuid_to_sunspec_node = {}
+        if self.sunspec1_root is None:
+            parameter_uuid_to_sunspec1_node = {}
         else:
-            sunspec_nodes_with_parameter_uuid = self.sunspec_root.nodes_by_filter(
+            sunspec_nodes_with_parameter_uuid = self.sunspec1_root.nodes_by_filter(
                 filter=sunspec_node_wanted,
             )
 
-            parameter_uuid_to_sunspec_node = {
+            parameter_uuid_to_sunspec1_node = {
+                node.parameter_uuid: node for node in sunspec_nodes_with_parameter_uuid
+            }
+
+        if self.sunspec2_root is None:
+            parameter_uuid_to_sunspec2_node = {}
+        else:
+            sunspec_nodes_with_parameter_uuid = self.sunspec2_root.nodes_by_filter(
+                filter=sunspec_node_wanted,
+            )
+
+            parameter_uuid_to_sunspec2_node = {
                 node.parameter_uuid: node for node in sunspec_nodes_with_parameter_uuid
             }
 
@@ -122,11 +140,17 @@ class Root:
 
         # Combine the SunSpec and static modbus nodes
         parameter_uuid_to_modbus_node = {}
-        for key, value in parameter_uuid_to_sunspec_node.items():
+        for key, value in parameter_uuid_to_sunspec1_node.items():
             if key not in parameter_uuid_to_modbus_node:
-                parameter_uuid_to_modbus_node[key] = {"sunspec": value}
+                parameter_uuid_to_modbus_node[key] = {"sunspec1": value}
             else:
-                parameter_uuid_to_modbus_node[key]["sunspec"] = value
+                parameter_uuid_to_modbus_node[key]["sunspec1"] = value
+        for key, value in parameter_uuid_to_sunspec2_node.items():
+            if key not in parameter_uuid_to_modbus_node:
+                parameter_uuid_to_modbus_node[key] = {"sunspec2": value}
+            else:
+                parameter_uuid_to_modbus_node[key]["sunspec2"] = value
+
         for key, value in parameter_uuid_to_staticmodbus_node.items():
             if key not in parameter_uuid_to_modbus_node:
                 parameter_uuid_to_modbus_node[key] = {"staticmodbus": value}
@@ -140,7 +164,8 @@ class Root:
             '#include "staticmodbusInterfaceGen.h"',
             '#include "staticmodbusInterfaceFunctions_generated.h"',
             '#include "sunspecInterfaceFunctions_generated.h"',
-            '#include "sunspecInterfaceGen.h"',
+            '#include "sunspec1InterfaceGen.h"',
+            '#include "sunspec2InterfaceGen.h"',
             "",
             "",
         ]
@@ -166,10 +191,21 @@ class Root:
                 )
 
                 # Generate the SunSpec related .c/.h rows.
-                if "sunspec" in modbus_nodes:
+                if "sunspec1" in modbus_nodes:
                     builder = builders.wrap(
-                        wrapped=modbus_nodes["sunspec"],
-                        parameter_uuid_finder=self.sunspec_model.node_from_uuid,
+                        wrapped=modbus_nodes["sunspec1"],
+                        parameter_uuid_finder=self.sunspec1_model.node_from_uuid,
+                    )
+                    more_c_lines, more_h_lines = builder.gen()
+
+                    c_lines.extend(more_c_lines)
+                    h_lines.extend(more_h_lines)
+
+                # Generate the SunSpec related .c/.h rows.
+                if "sunspec2" in modbus_nodes:
+                    builder = builders.wrap(
+                        wrapped=modbus_nodes["sunspec2"],
+                        parameter_uuid_finder=self.sunspec2_model.node_from_uuid,
                     )
                     more_c_lines, more_h_lines = builder.gen()
 
@@ -178,19 +214,49 @@ class Root:
 
                 common_c_lines = []
                 # Generate C lines for SunSpec node
-                if "sunspec" in modbus_nodes:
+                if "sunspec1" in modbus_nodes:
                     builder = builders.wrap(
-                        wrapped=modbus_nodes["sunspec"],
-                        parameter_uuid_finder=self.sunspec_model.node_from_uuid,
+                        wrapped=modbus_nodes["sunspec1"],
+                        parameter_uuid_finder=self.sunspec1_model.node_from_uuid,
                     )
-                    common_c_lines.extend(builder.gen_common_interface())
+                    common_c_lines.extend(
+                        builder.gen_common_interface(
+                            epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE
+                        )
+                    )
                     members_interface_c_lines.extend(
                         builder.gen_bitfield_members_interface()
                     )
                     members_info_c_lines.extend(builder.gen_members_interface())
                 else:
                     common_c_lines.extend(
-                        DataPointBitfield.gen_default_common_interface()
+                        DataPointBitfield.gen_default_common_interface(
+                            epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE
+                        )
+                    )
+                    members_info_c_lines.extend(
+                        DataPointBitfield.gen_default_members_interface()
+                    )
+
+                if "sunspec2" in modbus_nodes:
+                    builder = builders.wrap(
+                        wrapped=modbus_nodes["sunspec2"],
+                        parameter_uuid_finder=self.sunspec2_model.node_from_uuid,
+                    )
+                    common_c_lines.extend(
+                        builder.gen_common_interface(
+                            epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO
+                        )
+                    )
+                    members_interface_c_lines.extend(
+                        builder.gen_bitfield_members_interface()
+                    )
+                    members_info_c_lines.extend(builder.gen_members_interface())
+                else:
+                    common_c_lines.extend(
+                        DataPointBitfield.gen_default_common_interface(
+                            epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO
+                        )
                     )
                     members_info_c_lines.extend(
                         DataPointBitfield.gen_default_members_interface()
@@ -436,9 +502,14 @@ class DataPointBitfield:
 
         return c_lines, h_lines
 
-    def gen_common_interface(self) -> typing.List[str]:
+    def gen_common_interface(
+        self, sunspec_id: epcpm.pm_helper.SunSpecSection
+    ) -> typing.List[str]:
         """
         Generate a SunSpec bitfield common definitions for the interface item.
+
+        Args:
+            sunspec_id: SunSpec section internal identifier
 
         Returns:
             list: bitfield common definitions
@@ -449,11 +520,11 @@ class DataPointBitfield:
         parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
 
         c_lines = [
-            f".sunspec = {{",
+            f".sunspec{sunspec_id.value} = {{",
             [
-                f".getter = InterfaceItem_bitfield_{bit_length}_sunspec_getter,",
-                f".setter = InterfaceItem_bitfield_{bit_length}_sunspec_setter,",
-                f".variable = &sunspecInterface.model{model:05}.{parameter.abbreviation},",
+                f".getter = InterfaceItem_bitfield_{bit_length}_sunspec{sunspec_id.value}_getter,",
+                f".setter = InterfaceItem_bitfield_{bit_length}_sunspec{sunspec_id.value}_setter,",
+                f".variable = &sunspec{sunspec_id.value}Interface.model{model:05}.{parameter.abbreviation},",
             ],
             f"}},",
         ]
@@ -461,15 +532,20 @@ class DataPointBitfield:
         return c_lines
 
     @staticmethod
-    def gen_default_common_interface() -> typing.List[str]:
+    def gen_default_common_interface(
+        sunspec_id: epcpm.pm_helper.SunSpecSection,
+    ) -> typing.List[str]:
         """
         Generate a default (empty) SunSpec bitfield common definitions for the interface item.
+
+        Args:
+            sunspec_id: SunSpec section internal identifier
 
         Returns:
             list: default bitfield common definitions
         """
         return [
-            f".sunspec = {{",
+            f".sunspec{sunspec_id.value} = {{",
             [
                 f".getter = NULL,",
                 f".setter = NULL,",
