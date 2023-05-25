@@ -16,6 +16,7 @@ import epyqlib.utils.general
 
 builders = epyqlib.utils.general.TypeMap()
 
+
 @attr.s
 class Fields(epcpm.pm_helper.FieldsInterface):
     """The fields defined for a given row in the output XLS file."""
@@ -52,8 +53,9 @@ field_names = Fields(
     max="Max",
     bit_offset="Bit Offset",
     scale_factor="SF",
-    enumerator="Enumerator"
+    enumerator="Enumerator",
 )
+
 
 def build_uuid_scale_factor_dict(points, parameter_uuid_finder) -> dict:
     """
@@ -146,7 +148,7 @@ class Root:
 
         scale_factor_from_uuid = build_uuid_scale_factor_dict(
             points=self.wrapped.children,
-            parameter_uuid_finder=self.parameter_uuid_finder
+            parameter_uuid_finder=self.parameter_uuid_finder,
         )
         enumerations = self.collect_enumerations()
         enumerators_from_uuid = {}
@@ -158,10 +160,13 @@ class Root:
         ENUMERATION_ENUMERATOR_COLUMN = "#Enumerations!A"
         for enumeration in enumerations:
             for child in enumeration.children:
-                enumeration_worksheet.append([enumeration.name, child.name, child.value])
+                enumeration_worksheet.append(
+                    [enumeration.name, child.name, child.value]
+                )
                 if enumeration.name not in enumeration_cell_coordinates.keys():
                     enumeration_cell_coordinates[enumeration.name] = (
-                        ENUMERATION_ENUMERATOR_COLUMN + f"{enumeration_worksheet.max_row}"
+                        ENUMERATION_ENUMERATOR_COLUMN
+                        + f"{enumeration_worksheet.max_row}"
                     )
 
         for member in self.wrapped.children:
@@ -169,7 +174,7 @@ class Root:
                 wrapped=member,
                 parameter_uuid_finder=self.parameter_uuid_finder,
                 scale_factor_from_uuid=scale_factor_from_uuid,
-                enumerators_from_uuid=enumerators_from_uuid
+                enumerators_from_uuid=enumerators_from_uuid,
             )
             rows = builder.gen()
 
@@ -182,9 +187,9 @@ class Root:
                 if row.enumerator is not None:
                     max_row = modbus_worksheet.max_row
                     if row.enumerator in enumeration_cell_coordinates.keys():
-                        modbus_worksheet[MODBUS_ENUMERATOR_COLUMN +f"{max_row}"].hyperlink = (
-                            enumeration_cell_coordinates[row.enumerator]
-                        )
+                        modbus_worksheet[
+                            MODBUS_ENUMERATOR_COLUMN + f"{max_row}"
+                        ].hyperlink = enumeration_cell_coordinates[row.enumerator]
 
         return workbook
 
@@ -201,7 +206,9 @@ class Root:
         if self.parameter_model is None:
             return collected
 
-        def collect(node: epyqlib.attrsmodel.Model, collected: list) -> typing.Union[typing.List[epyqlib.attrsmodel.Model], None]:
+        def collect(
+            node: epyqlib.attrsmodel.Model, collected: list
+        ) -> typing.Union[typing.List[epyqlib.attrsmodel.Model], None]:
             is_enumeration = isinstance(
                 node,
                 (
@@ -219,6 +226,7 @@ class Root:
         )
 
         return collected
+
 
 @builders(epcpm.staticmodbusmodel.FunctionData)
 @attr.s
@@ -312,9 +320,7 @@ class FunctionDataBitfield:
                 parameter_uuid_finder=self.parameter_uuid_finder,
             )
             member_row = builder.gen()
-            member_row.modbus_address = (
-                self.wrapped.address
-            )
+            member_row.modbus_address = self.wrapped.address
             rows.append(member_row)
 
         return rows
