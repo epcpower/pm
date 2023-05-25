@@ -117,7 +117,7 @@ class Root:
             "{ \\",
             "    .interfaceType = INTERFACE_TYPE_UNASSIGNED, \\",
             "    .interface = NULL, \\",
-            "    __VA_ARGS__ \\",                                             \\",
+            "    __VA_ARGS__ \\",
             "}",
             "",
             f"extern StaticModbusReg staticmodbusAddrRegMap[{total_registers}];",
@@ -232,7 +232,7 @@ class FunctionDataBitfield:
             self.wrapped.address, self.wrapped.address + self.wrapped.size
         ):
             if not self.skip_output:
-                                c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_BITFIELD, .interface = {uuid_interface_val}),"
+                c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(.interfaceType = INTERFACE_TYPE_BITFIELD, .interface = {uuid_interface_val}),"
             else:
                 c_line = f"[{addr_val}] = STATIC_MODBUS_REGISTER_DEFAULTS(),"
             c_lines.append(c_line)

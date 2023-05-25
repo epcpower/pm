@@ -366,6 +366,8 @@ def run_generation_scripts(base_path):
         ],
         check=True,
     )
+
+
 def modification_time_or(path, alternative):
     try:
         return path.stat().st_mtime
