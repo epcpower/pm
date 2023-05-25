@@ -182,9 +182,12 @@ class Group:
 
 @attr.s
 class Item:
+    name = attr.ib()
+    group = attr.ib()
     uuid = attr.ib()
     variable = attr.ib()
     type = attr.ib()
+    on_read = attr.ib()
     on_write = attr.ib()
     internal_scale = attr.ib()
     is_table = attr.ib(default=False)
@@ -224,8 +227,11 @@ class Item:
         is_table = "true" if self.is_table else "false"
 
         initializers = [
+            f'.name = "{self.name}",',
+            f'.group = "{"|".join(self.group)}",',
             f'.uuid = "{self.uuid}",',
-            f".setterType = setter_{self.type},",
+            f".internalType = type_{self.type},",
+            f".getter = {{ .{self.type}_ = {self.on_read} }},",
             f".setter = {{ .{self.type}_ = {self.on_write} }},",
             f".variable = {{ .{self.type}_ = {self.variable} }},",
             f".internalScale = {self.internal_scale},",
@@ -306,15 +312,23 @@ class Parameter:
         else:
             on_write = f"&{parameter.setter_function}"
 
+        if parameter.getter_function is None:
+            on_read = "NULL"
+        else:
+            on_read = f"&{parameter.getter_function}"
+
         if parameter.internal_variable is None:
             variable = "NULL"
         else:
             variable = f"&{parameter.internal_variable}"
 
         item = Item(
+            name=parameter.name,
+            group=self.path,
             uuid=parameter.uuid,
             variable=variable,
             type=parameter.internal_type,
+            on_read=on_read,
             on_write=on_write,
             internal_scale=parameter.internal_scale_factor,
             path=self.path,
@@ -536,9 +550,12 @@ class TableArrayElement:
 
         return [
             Item(
+                name=parameter.name,
+                group=self.path,
                 uuid=table_element.uuid,
                 variable=variable,
                 type=parameter.internal_type,
+                on_read="NULL",
                 on_write="NULL",
                 internal_scale=parameter.internal_scale_factor,
                 is_table=True,
@@ -581,9 +598,12 @@ class TableArrayElement:
 
         return [
             Item(
+                name=parameter.name,
+                group=self.path,
                 uuid=table_element.uuid,
                 variable=f"&{internal_variable}",
                 type=parameter.internal_type,
+                on_read="NULL",
                 on_write="NULL",
                 internal_scale=parameter.internal_scale_factor,
                 is_table=True,
