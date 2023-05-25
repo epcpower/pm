@@ -9,6 +9,7 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### Added
 
+- SC-1110: Added scale factor column and enumerations worksheet to static modbus spreadsheet output
 - SC-661: Add SunSpec uint64 support
 - SC-629: Added CAN parameter excel manual output.
 - SC-590: Added access level column to the SunSpec and static modbus spreadsheet output.
