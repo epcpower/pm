@@ -227,7 +227,11 @@ class Root:
                     members_interface_c_lines.extend(
                         builder.gen_bitfield_members_interface()
                     )
-                    members_info_c_lines.extend(builder.gen_members_interface())
+                    members_info_c_lines.extend(
+                        builder.gen_members_interface(
+                            epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE
+                        )
+                    )
                 else:
                     common_c_lines.extend(
                         DataPointBitfield.gen_default_common_interface(
@@ -235,7 +239,9 @@ class Root:
                         )
                     )
                     members_info_c_lines.extend(
-                        DataPointBitfield.gen_default_members_interface()
+                        DataPointBitfield.gen_default_members_interface(
+                            epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE
+                        )
                     )
 
                 if "sunspec2" in modbus_nodes:
@@ -251,7 +257,11 @@ class Root:
                     members_interface_c_lines.extend(
                         builder.gen_bitfield_members_interface()
                     )
-                    members_info_c_lines.extend(builder.gen_members_interface())
+                    members_info_c_lines.extend(
+                        builder.gen_members_interface(
+                            epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO
+                        )
+                    )
                 else:
                     common_c_lines.extend(
                         DataPointBitfield.gen_default_common_interface(
@@ -259,7 +269,9 @@ class Root:
                         )
                     )
                     members_info_c_lines.extend(
-                        DataPointBitfield.gen_default_members_interface()
+                        DataPointBitfield.gen_default_members_interface(
+                            epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO
+                        )
                     )
 
                 # Generate C lines for static modbus node
@@ -585,9 +597,14 @@ class DataPointBitfield:
             "",
         ]
 
-    def gen_members_interface(self) -> typing.List[str]:
+    def gen_members_interface(
+        self, sunspec_id: epcpm.pm_helper.SunSpecSection
+    ) -> typing.List[str]:
         """
         Generate the SunSpec bitfield member additional definitions.
+
+        Args:
+            sunspec_id: SunSpec section internal identifier
 
         Returns:
             list: bitfield member additional definitions
@@ -599,19 +616,24 @@ class DataPointBitfield:
         array_name = f"sunspecBitfieldItems_{name_uuid}"
 
         return [
-            f".sunspecMembers = {array_name},",
-            f".sunspecMembersCount = {len(members)},",
+            f".sunspec{sunspec_id.value}Members = {array_name},",
+            f".sunspec{sunspec_id.value}MembersCount = {len(members)},",
         ]
 
     @staticmethod
-    def gen_default_members_interface() -> typing.List[str]:
+    def gen_default_members_interface(
+        sunspec_id: epcpm.pm_helper.SunSpecSection,
+    ) -> typing.List[str]:
         """
         Generate a default (empty) SunSpec bitfield members definitions for the interface item.
+
+        Args:
+            sunspec_id: SunSpec section internal identifier
 
         Returns:
             list: default bitfield member definitions
         """
         return [
-            ".sunspecMembers = NULL,",
-            ".sunspecMembersCount = 0,",
+            f".sunspec{sunspec_id.value}Members = NULL,",
+            f".sunspec{sunspec_id.value}MembersCount = 0,",
         ]
