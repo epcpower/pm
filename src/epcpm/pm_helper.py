@@ -54,3 +54,45 @@ def attr_fill(cls: typing.Type[FieldsInterface], value: bool) -> FieldsInterface
         fields: Fields object to be used as a filter
     """
     return cls(**{field.name: value for field in attr.fields(cls) if field.init})
+
+
+def build_uuid_scale_factor_dict(
+    points: typing.List[
+        typing.Union[
+            epcpm.staticmodbusmodel.FunctionData,
+            epcpm.staticmodbusmodel.FunctionDataBitfield,
+        ]
+    ],
+    parameter_uuid_finder: typing.Callable,
+) -> typing.Dict[
+    uuid.UUID,
+    typing.Union[
+        epcpm.staticmodbusmodel.FunctionData,
+        epcpm.staticmodbusmodel.FunctionDataBitfield,
+    ],
+]:
+    """
+    Generates a dictionary of scale factor data.
+    Replacement for CAMPid 45002738594281495565841631423784
+
+    Args:
+        points: list of FunctionData / FunctionDataBitfield objects from which to
+        generate scale factor data parameter_uuid_finder: parameter UUID finder method
+
+    Returns:
+        dict: dictionary of scale factor data (UUID -> Union[FunctionData, FunctionDataBitfield])
+    """
+    scale_factor_from_uuid = {}
+    for point in points:
+        if point.type_uuid is None:
+            continue
+
+        type_node = parameter_uuid_finder(point.type_uuid)
+
+        if type_node is None:
+            continue
+
+        if type_node.name == "staticmodbussf":
+            scale_factor_from_uuid[point.uuid] = point
+
+    return scale_factor_from_uuid
