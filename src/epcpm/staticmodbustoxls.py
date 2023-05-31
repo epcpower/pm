@@ -57,36 +57,6 @@ field_names = Fields(
 )
 
 
-def build_uuid_scale_factor_dict(points, parameter_uuid_finder) -> dict:
-    """
-    Function that creates a dict of enumerator dicts found by using
-    parameter_uuid_finder
-
-    Args:
-        points (list): a list of parameter dicts
-        parameter_uuid_finder (function): function to identify a node given a UUID
-
-    Returns:
-        dict: a dict where the key is the parameter UUID and the value is the
-        parameter dict associated with the UUID
-    """
-    # TODO: CAMPid 45002738594281495565841631423784
-    scale_factor_from_uuid = {}
-    for point in points:
-        if point.type_uuid is None:
-            continue
-
-        type_node = parameter_uuid_finder(point.type_uuid)
-
-        if type_node is None:
-            continue
-
-        if type_node.name == "staticmodbussf":
-            scale_factor_from_uuid[point.uuid] = point
-
-    return scale_factor_from_uuid
-
-
 def export(
     path: pathlib.Path,
     staticmodbus_model: epyqlib.attrsmodel.Model,
@@ -146,7 +116,7 @@ class Root:
         modbus_worksheet.append(field_names.as_filtered_tuple(self.column_filter))
         enumeration_worksheet.append(["Enumerator", "Name", "Value"])
 
-        scale_factor_from_uuid = build_uuid_scale_factor_dict(
+        scale_factor_from_uuid = epcpm.pm_helper.build_uuid_scale_factor_dict(
             points=self.wrapped.children,
             parameter_uuid_finder=self.parameter_uuid_finder,
         )

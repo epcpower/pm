@@ -116,6 +116,8 @@ def build_uuid_scale_factor_dict(
         typing.Union[
             epcpm.staticmodbusmodel.FunctionData,
             epcpm.staticmodbusmodel.FunctionDataBitfield,
+            epcpm.sunspecmodel.DataPoint,
+            epcpm.sunspecmodel.DataPointBitfield,
         ]
     ],
     parameter_uuid_finder: typing.Callable,
@@ -124,6 +126,8 @@ def build_uuid_scale_factor_dict(
     typing.Union[
         epcpm.staticmodbusmodel.FunctionData,
         epcpm.staticmodbusmodel.FunctionDataBitfield,
+        epcpm.sunspecmodel.DataPoint,
+        epcpm.sunspecmodel.DataPointBitfield,
     ],
 ]:
     """
@@ -147,7 +151,7 @@ def build_uuid_scale_factor_dict(
         if type_node is None:
             continue
 
-        if type_node.name == "staticmodbussf":
+        if type_node.name == "sunssf" or type_node.name == "staticmodbussf":
             scale_factor_from_uuid[point.uuid] = point
 
     return scale_factor_from_uuid
