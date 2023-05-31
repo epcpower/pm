@@ -135,11 +135,13 @@ def build_uuid_scale_factor_dict(
     Replacement for CAMPid 45002738594281495565841631423784
 
     Args:
-        points: list of FunctionData / FunctionDataBitfield objects from which to
-        generate scale factor data parameter_uuid_finder: parameter UUID finder method
+        points: list of FunctionData / FunctionDataBitfield / DataPoint /
+        DataPointBitField objects from which togenerate scale factor data
+        parameter_uuid_finder: parameter UUID finder method
 
     Returns:
-        dict: dictionary of scale factor data (UUID -> Union[FunctionData, FunctionDataBitfield])
+        dict: dictionary of scale factor data (UUID -> Union[FunctionData,
+        FunctionDataBitfield, DataPoint, DataPointBitField])
     """
     scale_factor_from_uuid = {}
     for point in points:
