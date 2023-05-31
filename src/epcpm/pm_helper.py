@@ -6,6 +6,25 @@ import attr
 import typing
 import uuid
 from abc import ABC
+from enum import Enum
+import epcpm.sunspecmodel
+import epyqlib.treenode
+
+
+class SunSpecSection(Enum):
+    SUNSPEC_ONE = 1
+    SUNSPEC_TWO = 2
+
+
+# Define the size for 'SunS', which is the starting characters of a SunSpec address space.
+SUNS_LENGTH = 2
+
+
+# Define the start address for each SunSpec address space.
+SUNSPEC_START_ADDRESS = {
+    SunSpecSection.SUNSPEC_ONE: 0,
+    SunSpecSection.SUNSPEC_TWO: 40000,
+}
 
 
 def convert_uuid_to_variable_name(input_uuid: uuid.UUID) -> str:
@@ -56,6 +75,42 @@ def attr_fill(cls: typing.Type[FieldsInterface], value: bool) -> FieldsInterface
     return cls(**{field.name: value for field in attr.fields(cls) if field.init})
 
 
+def add_padding_to_block(
+    block: epyqlib.treenode.TreeNode,
+    sunspec_id: SunSpecSection,
+    model_id: int,
+    block_type: str,
+) -> bool:
+    """
+    Returns whether padding should be added to a given block.
+    Contains specific rules for SunSpec1 vs. SunSpec2.
+
+    Args:
+        block: tree node block
+        sunspec_id: SunSpec section internal identifier
+        model_id: SunSpec model ID
+        block_type: type of block
+
+    Returns:
+        add_padding: True/False if padding should be added to the given block
+    """
+    pre_pad_block_length = block.check_offsets_and_length()
+    # Per SunSpec model specification, pad with a 16-bit pad to force even alignment to 32-bit boundaries.
+    add_padding = (pre_pad_block_length % 2) == 1
+
+    # Specifically for SunSpec1 and repeating blocks, do not add padding. This is actually a bug
+    # in the original code for SunSpec1 that must continue being in place so that the registers
+    # aren't shifted for customers using SunSpec statically by directly calling modbus registers
+    # instead of using SunSpec properly.
+    # Specifically for SunSpec2, only add padding for model 1. The 700 series models don't require padding.
+    if (
+        sunspec_id == SunSpecSection.SUNSPEC_ONE and block_type == "Repeating Block"
+    ) or (sunspec_id == SunSpecSection.SUNSPEC_TWO and model_id != 1):
+        add_padding = False
+
+    return add_padding
+
+
 def build_uuid_scale_factor_dict(
     points: typing.List[
         typing.Union[
@@ -96,3 +151,41 @@ def build_uuid_scale_factor_dict(
             scale_factor_from_uuid[point.uuid] = point
 
     return scale_factor_from_uuid
+
+
+def get_sunspec_starting_register_values(
+    sunspec_id: SunSpecSection,
+) -> typing.Tuple[str, str]:
+    """
+    For SunSpec discovery, start with SunSpec ID for SunSpec2 section only.
+    SunSpec1 section starts with undefined so that it won't be discovered.
+
+    Args:
+        sunspec_id: SunSpec section internal identifier
+
+    Returns:
+        string, string: SunSpec starting register values in order high low
+    """
+    if sunspec_id == SunSpecSection.SUNSPEC_TWO:
+        # High = 0x5375 ("Su"), Low = 0x6e53 ("nS") for combined "SunS"
+        return "0x5375", "0x6e53"
+    else:
+        return "0xffff", "0xffff"
+
+
+def calculate_start_address(sunspec_id: SunSpecSection) -> int:
+    """
+    Calculate the start address given the SunSpec section ID.
+
+    Args:
+        sunspec_id: SunSpec section internal identifier
+
+    Returns:
+        start address
+    """
+    # Calculate the start address
+    start_address = SUNSPEC_START_ADDRESS[sunspec_id]
+    # Account for 'SunS' length.
+    start_address += SUNS_LENGTH
+
+    return start_address
