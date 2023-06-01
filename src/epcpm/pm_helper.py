@@ -136,7 +136,7 @@ def build_uuid_scale_factor_dict(
 
     Args:
         points: list of FunctionData / FunctionDataBitfield / DataPoint /
-        DataPointBitField objects from which togenerate scale factor data
+        DataPointBitField objects from which to generate scale factor data
         parameter_uuid_finder: parameter UUID finder method
 
     Returns:
