@@ -113,20 +113,35 @@ def add_padding_to_block(
 
 def build_uuid_scale_factor_dict(
     points: typing.List[
-        typing.Union[epcpm.sunspecmodel.DataPoint, epcpm.sunspecmodel.DataPointBitfield]
+        typing.Union[
+            epcpm.staticmodbusmodel.FunctionData,
+            epcpm.staticmodbusmodel.FunctionDataBitfield,
+            epcpm.sunspecmodel.DataPoint,
+            epcpm.sunspecmodel.DataPointBitfield,
+        ]
     ],
     parameter_uuid_finder: typing.Callable,
-) -> typing.Dict[uuid.UUID, epcpm.sunspecmodel.DataPoint]:
+) -> typing.Dict[
+    uuid.UUID,
+    typing.Union[
+        epcpm.staticmodbusmodel.FunctionData,
+        epcpm.staticmodbusmodel.FunctionDataBitfield,
+        epcpm.sunspecmodel.DataPoint,
+        epcpm.sunspecmodel.DataPointBitfield,
+    ],
+]:
     """
     Generates a dictionary of scale factor data.
     Replacement for CAMPid 45002738594281495565841631423784
 
     Args:
-        points: list of DataPoint / DataPointBitfield objects from which to generate scale factor data
+        points: list of FunctionData / FunctionDataBitfield / DataPoint /
+        DataPointBitField objects from which to generate scale factor data
         parameter_uuid_finder: parameter UUID finder method
 
     Returns:
-        dict: dictionary of scale factor data (UUID -> DataPoint)
+        dict: dictionary of scale factor data (UUID -> Union[FunctionData,
+        FunctionDataBitfield, DataPoint, DataPointBitField])
     """
     scale_factor_from_uuid = {}
     for point in points:
@@ -138,7 +153,7 @@ def build_uuid_scale_factor_dict(
         if type_node is None:
             continue
 
-        if type_node.name == "sunssf":
+        if type_node.name == "sunssf" or type_node.name == "staticmodbussf":
             scale_factor_from_uuid[point.uuid] = point
 
     return scale_factor_from_uuid
