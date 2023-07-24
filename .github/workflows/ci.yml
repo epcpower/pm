@@ -22,7 +22,7 @@ env:
 jobs:
   build:
     name: CI
-    runs-on: windows-latest
+    runs-on: windows-11
     steps:
       - uses: actions/checkout@v3
         with:
