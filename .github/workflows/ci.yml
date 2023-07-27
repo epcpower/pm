@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - "**" #double star includes a '/'.  single star doesnt match a '/'
-      - origin/Story/BA-510
+     
 
     tags:
       - "**" #double star includes a '/'.  single star doesnt match a '/'
