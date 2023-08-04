@@ -571,21 +571,6 @@ pgp = ["gpg"]
 watch = ["pyinotify"]
 
 [[package]]
-name = "dunamai"
-version = "1.16.0"
-description = "Dynamic version generation"
-optional = false
-python-versions = ">=3.5,<4.0"
-files = [
-    {file = "dunamai-1.16.0-py3-none-any.whl", hash = "sha256:dc92d817f3bc155e8b129e8c705c36bb15a7e950e2698a93aea142732a888e98"},
-    {file = "dunamai-1.16.0.tar.gz", hash = "sha256:bfe8e23cc5a1ceed1c7f791674ea24cf832a53a5da73f046eeb43367ccfc3f77"},
-]
-
-[package.dependencies]
-importlib-metadata = {version = ">=1.6.0", markers = "python_version < \"3.8\""}
-packaging = ">=20.9"
-
-[[package]]
 name = "epyqlib"
 version = "0.0.0"
 description = ""
@@ -1383,22 +1368,6 @@ importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
 dev = ["pre-commit", "tox"]
 
 [[package]]
-name = "poetry-dynamic-versioning"
-version = "0.13.1"
-description = "Plugin for Poetry to enable dynamic versioning based on VCS tags"
-optional = false
-python-versions = ">=3.5,<4.0"
-files = [
-    {file = "poetry-dynamic-versioning-0.13.1.tar.gz", hash = "sha256:5c0e7b22560db76812057ef95dadad662ecc63eb270145787eabe73da7c222f9"},
-    {file = "poetry_dynamic_versioning-0.13.1-py3-none-any.whl", hash = "sha256:6d79f76436c624653fc06eb9bb54fb4f39b1d54362bc366ad2496855711d3a78"},
-]
-
-[package.dependencies]
-dunamai = ">=1.5,<2.0"
-jinja2 = {version = ">=2.11.1,<4", markers = "python_version >= \"3.6\" and python_version < \"4.0\""}
-tomlkit = ">=0.4"
-
-[[package]]
 name = "py"
 version = "1.11.0"
 description = "library with cross-python path, ini-parsing, io, code, log facilities"
@@ -2103,17 +2072,6 @@ files = [
 ]
 
 [[package]]
-name = "tomlkit"
-version = "0.11.7"
-description = "Style preserving TOML library"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "tomlkit-0.11.7-py3-none-any.whl", hash = "sha256:5325463a7da2ef0c6bbfefb62a3dc883aebe679984709aee32a317907d0a8d3c"},
-    {file = "tomlkit-0.11.7.tar.gz", hash = "sha256:f392ef70ad87a672f02519f99967d28a4d3047133e2d1df936511465fbb3791d"},
-]
-
-[[package]]
 name = "toolz"
 version = "0.9.0"
 description = "List processing tools and functional utilities"
@@ -2546,4 +2504,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.7.9,<3.11"
-content-hash = "cc79e98b62cc75b3df04037e983860f802699117f683f9c1f47d445c656daae9"
+content-hash = "6e06e520858072ea31b9676ed39e4046861c3f2c0965833c4571eaa3528e2411"
