@@ -9,7 +9,7 @@ include = ["src/*"]
 #set to false.  poetry-dynamic-versioning only needed for CI versioning.
 enable = false
 vcs = "git"
-style = "pep440"
+style = "semver"
 
 [tool.poetry-dynamic-versioning.substitution]
 #poetry-dynamic-versioning has auto subsitution for __init__.py files,
@@ -59,7 +59,6 @@ tqdm = "4.32.1"
 epyqlib = {path = "./sub/epyqlib",  develop = true}
 gitignoreio = "0.1.5"
 pyinstaller = "4.4"
-poetry-dynamic-versioning = "^0.13.1"
 black = ">=20.8b1"
 pytest = "6.2.4"
 pytest-qt = "3.3.0"
@@ -98,4 +97,4 @@ requires = [
     "poetry-dynamic-versioning",
 
 ]
-build-backend = "poetry.core.masonry.api"
+build-backend = "poetry_dynamic_versioning.backend"
