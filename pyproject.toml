@@ -36,7 +36,7 @@ sunspecdemo = { git = "https://github.com/epcpower/sunspec-demo.git", rev = "a04
 ###################
 
 attrs = "20.2.0"
-lxml = "4.3.0"
+lxml = "4.5.0"
 PyQt5 = "5.13.2"
 requests = "2.27.1"
 toolz = "0.9.0"
