@@ -9,7 +9,7 @@ include = ["src/*"]
 #set to false.  poetry-dynamic-versioning only needed for CI versioning.
 enable = false
 vcs = "git"
-style = "semver"
+style = "pep440"
 
 [tool.poetry-dynamic-versioning.substitution]
 #poetry-dynamic-versioning has auto subsitution for __init__.py files,
@@ -36,7 +36,7 @@ sunspecdemo = { git = "https://github.com/epcpower/sunspec-demo.git", rev = "a04
 ###################
 
 attrs = "20.2.0"
-lxml = "4.5.0"
+lxml = "4.3.0"
 PyQt5 = "5.13.2"
 requests = "2.27.1"
 toolz = "0.9.0"

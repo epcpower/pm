@@ -5,7 +5,6 @@ on:
     branches:
       - "**" #double star includes a '/'.  single star doesnt match a '/'
      
-
     tags:
       - "**" #double star includes a '/'.  single star doesnt match a '/'
   schedule:
