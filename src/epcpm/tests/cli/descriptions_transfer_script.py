@@ -391,11 +391,9 @@ group_description_df = pd.DataFrame.from_dict(
         "Description": group_description_dict.values(),
     }
 )
-parameter_excel_path = "/home/annie/Documents/Parameter Descriptions.xlsx"
-parameter_descriptions_df.to_excel(
-    parameter_excel_path, sheet_name="Parameter Descriptions", index=False
-)
-groups_excel_path = "/home/annie/Documents/Group Descriptions.xlsx"
-group_description_df.to_excel(
-    groups_excel_path, sheet_name="Parameter Descriptions", index=False
-)
+excel_path = "/home/annie/Documents/Parameter & Group Descriptions.xlsx"
+with pd.ExcelWriter(excel_path) as writer:
+    parameter_descriptions_df.to_excel(
+        writer, sheet_name="Parameter Descriptions", index=False
+    )
+    group_description_df.to_excel(writer, sheet_name="Group Descriptions", index=False)
