@@ -1,8 +1,17 @@
 import pandas as pd
 import re
+import openpyxl
 
-excel_path = "/home/annie/Documents/Appendix A Table.ods"
+excel_path = "/home/annie/Documents/Appendix A Table.xlsx"
 df = pd.read_excel(excel_path)
+
+input_workbook = openpyxl.load_workbook("/home/annie/Documents/Appendix A Table.xlsx")
+input_sheet = input_workbook.worksheets[0]
+parameter_names_list = []
+for row in input_sheet.iter_rows(min_row=2):
+    name = row[0].value
+    parameter_names_list.append(name)
+
 # Selects columns from the original dataframe
 parameter_name_description_df = df[["Parameter Name", "Description", "Unnamed: 3"]]
 
@@ -378,22 +387,28 @@ for name in group_name_list:
     description = name.replace(longest_matching_group_name, "")
     group_description_dict[longest_matching_group_name] = description.strip()
 
-# Creates dataframe using gathered parameter/group names and descriptions
-parameter_descriptions_df = pd.DataFrame.from_dict(
-    {
-        "Parameter": parameter_description_dict.keys(),
-        "Description": parameter_description_dict.values(),
-    }
-)
-group_description_df = pd.DataFrame.from_dict(
-    {
-        "Group": group_description_dict.keys(),
-        "Description": group_description_dict.values(),
-    }
-)
-excel_path = "/home/annie/Documents/Parameter & Group Descriptions.xlsx"
-with pd.ExcelWriter(excel_path) as writer:
-    parameter_descriptions_df.to_excel(
-        writer, sheet_name="Parameter Descriptions", index=False
-    )
-    group_description_df.to_excel(writer, sheet_name="Group Descriptions", index=False)
+output_workbook = openpyxl.Workbook()
+
+output_parameters_worksheet = output_workbook.active
+output_parameters_worksheet.title = "Parameter Descriptions"
+output_group_worksheet = output_workbook.create_sheet("Group Descriptions")
+
+output_parameters_worksheet["A1"] = "Parameter"
+output_parameters_worksheet["B1"] = "Description"
+
+output_group_worksheet["A1"] = "Group"
+output_group_worksheet["B1"] = "Description"
+
+row = 2
+for parameter, description in parameter_description_dict.items():
+    output_parameters_worksheet[f"A{row}"].value = parameter
+    output_parameters_worksheet[f"B{row}"].value = description
+    row = row + 1
+
+row = 2
+for group, description in group_description_dict.items():
+    output_group_worksheet[f"A{row}"].value = group
+    output_group_worksheet[f"B{row}"].value = description
+    row = row + 1
+
+output_workbook.save("/home/annie/Documents/Parameter & Group Descriptions.xlsx")
