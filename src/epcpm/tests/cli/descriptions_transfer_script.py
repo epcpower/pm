@@ -376,20 +376,27 @@ GROUP_NAMES = [
 parameter_group_names = parameter_name_description_df["Parameter"].to_list()
 descriptions = parameter_name_description_df["Description"].to_list()
 
+current_group_name = ""
 parameter_description_dict = {}
 group_name_list = []
 group_name_pattern = r"([A-Z0-9]\.)"
-for parameter_name, description in zip(parameter_group_names, descriptions):
+for parameter_name, description_group_tuple in zip(parameter_group_names, descriptions):
     if not re.search(group_name_pattern, parameter_name):
-        parameter_description_dict[parameter_name] = description
+        parameter_description_dict[parameter_name] = (
+            description_group_tuple,
+            current_group_name,
+        )
     else:
+        current_group_name = get_longest_match(parameter_name)
         group_name_list.append(parameter_name)
 
 group_description_dict = {}
 for name in group_name_list:
     longest_matching_group_name = get_longest_match(name)
-    description = name.replace(longest_matching_group_name, "")
-    group_description_dict[longest_matching_group_name] = description.strip()
+    description_group_tuple = name.replace(longest_matching_group_name, "")
+    group_description_dict[
+        longest_matching_group_name
+    ] = description_group_tuple.strip()
 
 output_workbook = openpyxl.Workbook()
 
@@ -399,20 +406,23 @@ output_group_worksheet = output_workbook.create_sheet("Group Descriptions")
 
 output_parameters_worksheet["A1"] = "Parameter"
 output_parameters_worksheet["B1"] = "Description"
+output_parameters_worksheet["C1"] = "Group"
+
 
 output_group_worksheet["A1"] = "Group"
 output_group_worksheet["B1"] = "Description"
 
 row = 2
-for parameter, description in parameter_description_dict.items():
+for parameter, description_group_tuple in parameter_description_dict.items():
     output_parameters_worksheet[f"A{row}"].value = parameter
-    output_parameters_worksheet[f"B{row}"].value = description
+    output_parameters_worksheet[f"B{row}"].value = description_group_tuple[0]
+    output_parameters_worksheet[f"C{row}"].value = description_group_tuple[1]
     row = row + 1
 
 row = 2
-for group, description in group_description_dict.items():
+for group, description_group_tuple in group_description_dict.items():
     output_group_worksheet[f"A{row}"].value = group
-    output_group_worksheet[f"B{row}"].value = description
+    output_group_worksheet[f"B{row}"].value = description_group_tuple
     row = row + 1
 
 output_workbook.save("/home/annie/Documents/Parameter & Group Descriptions.xlsx")
