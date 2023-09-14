@@ -3,13 +3,21 @@ import re
 import openpyxl
 
 excel_path = "/home/annie/Documents/Appendix A Table.xlsx"
+excel_path_4_5_0 = "/home/annie/Documents/EPC-CAN_for_manual.xlsx"
 df = pd.read_excel(excel_path)
-
-input_workbook = openpyxl.load_workbook("/home/annie/Documents/Appendix A Table.xlsx")
-input_sheet = input_workbook.worksheets[0]
+df_4_5_0 = pd.read_excel(excel_path_4_5_0)
 
 
-def get_longest_match(name):
+def get_longest_match(name: str) -> str:
+    """
+    Gets the longest matching name in `GROUP_NAMES` constant
+
+    Args:
+        name (str): The name to be matched
+
+    Returns:
+        str: The longest matching name in `GROUP_NAMES`
+    """
     longest_matching_group_name = ""
     for group_name in GROUP_NAMES:
         if group_name in name:
@@ -18,7 +26,16 @@ def get_longest_match(name):
     return longest_matching_group_name
 
 
-def create_parameter_name_description_df(df):
+def create_parameter_name_description_df(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Creates a parameter name and description dataframe
+
+    Args:
+        df (pd.DataFrame): A dataframe read from an excel sheet
+
+    Returns:
+        pd.DataFrame: A dataframe filled with the parameter name and the description
+    """
     # Selects columns from the original dataframe
     parameter_df = df[["Parameter Name", "Description", "Unnamed: 3"]]
 
@@ -36,6 +53,9 @@ def create_parameter_name_description_df(df):
 
 
 parameter_name_description_df = create_parameter_name_description_df(df)
+parameter_name_description_4_5_0_df = df_4_5_0[["Parameter", "Description"]].dropna(
+    subset=["Parameter"]
+)
 
 GROUP_NAMES = [
     "1. AC -> B. Line Monitoring -> Enter service condition",
@@ -375,28 +395,46 @@ GROUP_NAMES = [
 
 parameter_group_names = parameter_name_description_df["Parameter"].to_list()
 descriptions = parameter_name_description_df["Description"].to_list()
+parameter_group_names_4_5_0 = parameter_name_description_4_5_0_df["Parameter"].to_list()
+descriptions_4_5_0 = parameter_name_description_4_5_0_df["Description"].to_list()
 
 current_group_name = ""
+GROUP_NAME_PATTERN = r"([A-Z0-9]\.)"
+
 parameter_description_dict = {}
-group_name_list = []
-group_name_pattern = r"([A-Z0-9]\.)"
-for parameter_name, description_group_tuple in zip(parameter_group_names, descriptions):
-    if not re.search(group_name_pattern, parameter_name):
-        parameter_description_dict[parameter_name] = (
-            description_group_tuple,
+group_description_dict = {}
+parameter_description_dict_4_5_0 = {}
+
+for parameter_name, description in zip(parameter_group_names, descriptions):
+    if not re.search(GROUP_NAME_PATTERN, parameter_name):
+        parameter_description_dict[parameter_name] = description
+    else:
+        current_group_name = get_longest_match(parameter_name)
+        description = parameter_name.replace(current_group_name, "")
+        group_description_dict[current_group_name] = description.strip()
+
+
+current_group_name = ""
+for parameter_name, description_4_5_0 in zip(
+    parameter_group_names_4_5_0, descriptions_4_5_0
+):
+    if not re.search(GROUP_NAME_PATTERN, parameter_name):
+        matched_description = ""
+        if parameter_name in parameter_description_dict.keys():
+            matched_description = parameter_description_dict[parameter_name]
+        difference = "Y"
+        if matched_description == description_4_5_0:
+            difference = "N"
+        parameter_description_dict_4_5_0[parameter_name] = (
             current_group_name,
+            matched_description,
+            description_4_5_0,
+            difference,
         )
     else:
         current_group_name = get_longest_match(parameter_name)
-        group_name_list.append(parameter_name)
-
-group_description_dict = {}
-for name in group_name_list:
-    longest_matching_group_name = get_longest_match(name)
-    description_group_tuple = name.replace(longest_matching_group_name, "")
-    group_description_dict[
-        longest_matching_group_name
-    ] = description_group_tuple.strip()
+        if parameter_name not in group_description_dict.keys():
+            group_description_dict[parameter_name] = description_4_5_0
 
 output_workbook = openpyxl.Workbook()
 
@@ -404,19 +442,23 @@ output_parameters_worksheet = output_workbook.active
 output_parameters_worksheet.title = "Parameter Descriptions"
 output_group_worksheet = output_workbook.create_sheet("Group Descriptions")
 
-output_parameters_worksheet["A1"] = "Parameter"
-output_parameters_worksheet["B1"] = "Description"
-output_parameters_worksheet["C1"] = "Group"
+output_parameters_worksheet["A1"] = "Group"
+output_parameters_worksheet["B1"] = "Parameter"
+output_parameters_worksheet["C1"] = "Description"
+output_parameters_worksheet["D1"] = "Description_4.5.0"
+output_parameters_worksheet["E1"] = "Difference (Y/N)"
 
 
 output_group_worksheet["A1"] = "Group"
 output_group_worksheet["B1"] = "Description"
 
 row = 2
-for parameter, description_group_tuple in parameter_description_dict.items():
-    output_parameters_worksheet[f"A{row}"].value = parameter
-    output_parameters_worksheet[f"B{row}"].value = description_group_tuple[0]
+for parameter, description_group_tuple in parameter_description_dict_4_5_0.items():
+    output_parameters_worksheet[f"A{row}"].value = description_group_tuple[0]
+    output_parameters_worksheet[f"B{row}"].value = parameter
     output_parameters_worksheet[f"C{row}"].value = description_group_tuple[1]
+    output_parameters_worksheet[f"D{row}"].value = description_group_tuple[2]
+    output_parameters_worksheet[f"E{row}"].value = description_group_tuple[3]
     row = row + 1
 
 row = 2
