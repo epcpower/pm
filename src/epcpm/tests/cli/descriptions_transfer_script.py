@@ -7,29 +7,37 @@ df = pd.read_excel(excel_path)
 
 input_workbook = openpyxl.load_workbook("/home/annie/Documents/Appendix A Table.xlsx")
 input_sheet = input_workbook.worksheets[0]
-parameter_names_list = []
-for row in input_sheet.iter_rows(min_row=2):
-    name = row[0].value
-    parameter_names_list.append(name)
 
-# Selects columns from the original dataframe
-parameter_name_description_df = df[["Parameter Name", "Description", "Unnamed: 3"]]
 
-# Renames columns pulled from previous step
-parameter_name_description_df.columns = ["Parameter", "Description", "Overflow"]
+def get_longest_match(name):
+    longest_matching_group_name = ""
+    for group_name in GROUP_NAMES:
+        if group_name in name:
+            if len(group_name) > len(longest_matching_group_name):
+                longest_matching_group_name = group_name
+    return longest_matching_group_name
 
-# Fills the NaN cells in `Description` column with values from the `Overflow` column
-parameter_name_description_df.Description.fillna(
-    parameter_name_description_df.Overflow, inplace=True
-)
-del parameter_name_description_df["Overflow"]
 
-# Drops rows with NaN values in `Parameter` column
-parameter_name_description_df = parameter_name_description_df.dropna(
-    subset=["Parameter"]
-)
+def create_parameter_name_description_df(df):
+    # Selects columns from the original dataframe
+    parameter_df = df[["Parameter Name", "Description", "Unnamed: 3"]]
 
-group_names = [
+    # Renames columns pulled from previous step
+    parameter_df.columns = ["Parameter", "Description", "Overflow"]
+
+    # Fills the NaN cells in `Description` column with values from the `Overflow` column
+    parameter_df.Description.fillna(parameter_df.Overflow, inplace=True)
+    del parameter_df["Overflow"]
+
+    # Drops rows with NaN values in `Parameter` column
+    parameter_df = parameter_df.dropna(subset=["Parameter"])
+
+    return parameter_df
+
+
+parameter_name_description_df = create_parameter_name_description_df(df)
+
+GROUP_NAMES = [
     "1. AC -> B. Line Monitoring -> Enter service condition",
     "1. AC -> B. Line Monitoring -> Enter service condition -> Frequency limits",
     "1. AC -> B. Line Monitoring -> Enter service condition -> Voltage limits",
@@ -379,11 +387,7 @@ for parameter_name, description in zip(parameter_group_names, descriptions):
 
 group_description_dict = {}
 for name in group_name_list:
-    longest_matching_group_name = ""
-    for group_name in group_names:
-        if group_name in name:
-            if len(group_name) > len(longest_matching_group_name):
-                longest_matching_group_name = group_name
+    longest_matching_group_name = get_longest_match(name)
     description = name.replace(longest_matching_group_name, "")
     group_description_dict[longest_matching_group_name] = description.strip()
 
