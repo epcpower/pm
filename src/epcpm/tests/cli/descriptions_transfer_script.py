@@ -1,6 +1,8 @@
+import numpy as np
 import pandas as pd
 import re
 import openpyxl
+from openpyxl.styles import Alignment
 
 excel_path = "/home/annie/Documents/Appendix A Table.xlsx"
 excel_path_4_5_0 = "/home/annie/Documents/EPC-CAN_for_manual.xlsx"
@@ -396,7 +398,9 @@ GROUP_NAMES = [
 parameter_group_names = parameter_name_description_df["Parameter"].to_list()
 descriptions = parameter_name_description_df["Description"].to_list()
 parameter_group_names_4_5_0 = parameter_name_description_4_5_0_df["Parameter"].to_list()
-descriptions_4_5_0 = parameter_name_description_4_5_0_df["Description"].to_list()
+descriptions_4_5_0 = (
+    parameter_name_description_4_5_0_df["Description"].fillna("").to_list()
+)
 
 current_group_name = ""
 GROUP_NAME_PATTERN = r"([A-Z0-9]\.)"
@@ -422,9 +426,13 @@ for parameter_name, description_4_5_0 in zip(
         matched_description = ""
         if parameter_name in parameter_description_dict.keys():
             matched_description = parameter_description_dict[parameter_name]
-        difference = "Y"
-        if matched_description == description_4_5_0:
-            difference = "N"
+            if matched_description is np.nan:
+                matched_description = ""
+        difference = "N"
+        matched_description = matched_description.rstrip()
+        description_4_5_0 = description_4_5_0.rstrip()
+        if matched_description != description_4_5_0:
+            difference = "Y"
         parameter_description_dict_4_5_0[parameter_name] = (
             current_group_name,
             matched_description,
@@ -459,6 +467,13 @@ for parameter, description_group_tuple in parameter_description_dict_4_5_0.items
     output_parameters_worksheet[f"C{row}"].value = description_group_tuple[1]
     output_parameters_worksheet[f"D{row}"].value = description_group_tuple[2]
     output_parameters_worksheet[f"E{row}"].value = description_group_tuple[3]
+
+    output_parameters_worksheet[f"A{row}"].alignment = Alignment(wrap_text=True)
+    output_parameters_worksheet[f"B{row}"].alignment = Alignment(wrap_text=True)
+    output_parameters_worksheet[f"C{row}"].alignment = Alignment(wrap_text=True)
+    output_parameters_worksheet[f"D{row}"].alignment = Alignment(wrap_text=True)
+    output_parameters_worksheet[f"E{row}"].alignment = Alignment(wrap_text=True)
+
     row = row + 1
 
 row = 2
