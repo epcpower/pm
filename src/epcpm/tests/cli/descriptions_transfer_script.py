@@ -468,12 +468,6 @@ for parameter, description_group_tuple in parameter_description_dict_4_5_0.items
     output_parameters_worksheet[f"D{row}"].value = description_group_tuple[2]
     output_parameters_worksheet[f"E{row}"].value = description_group_tuple[3]
 
-    output_parameters_worksheet[f"A{row}"].alignment = Alignment(wrap_text=True)
-    output_parameters_worksheet[f"B{row}"].alignment = Alignment(wrap_text=True)
-    output_parameters_worksheet[f"C{row}"].alignment = Alignment(wrap_text=True)
-    output_parameters_worksheet[f"D{row}"].alignment = Alignment(wrap_text=True)
-    output_parameters_worksheet[f"E{row}"].alignment = Alignment(wrap_text=True)
-
     row = row + 1
 
 row = 2
