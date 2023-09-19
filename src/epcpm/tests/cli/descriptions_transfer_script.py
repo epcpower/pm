@@ -394,7 +394,7 @@ GROUP_NAMES = [
     "8. Data Logger -> Trigger",
     "B. Other",
 ]
-
+ACCESS_LEVELS = ["Service_Tech", "Service_Eng", "EPC_Eng", "EPC_Factory", "MAC_Auth"]
 parameter_group_names = parameter_name_description_df["Parameter"].to_list()
 descriptions = parameter_name_description_df["Description"].to_list()
 parameter_group_names_4_5_0 = parameter_name_description_4_5_0_df["Parameter"].to_list()
@@ -428,6 +428,9 @@ for parameter_name, description_4_5_0 in zip(
             matched_description = parameter_description_dict[parameter_name]
             if matched_description is np.nan:
                 matched_description = ""
+        if description_4_5_0 in ACCESS_LEVELS:
+            description_4_5_0 = ""
+
         difference = "N"
         matched_description = matched_description.rstrip()
         description_4_5_0 = description_4_5_0.rstrip()
@@ -452,8 +455,8 @@ output_group_worksheet = output_workbook.create_sheet("Group Descriptions")
 
 output_parameters_worksheet["A1"] = "Group"
 output_parameters_worksheet["B1"] = "Parameter"
-output_parameters_worksheet["C1"] = "Description"
-output_parameters_worksheet["D1"] = "Description_4.5.0"
+output_parameters_worksheet["C1"] = "Manual Description"
+output_parameters_worksheet["D1"] = "Short Description 4.5.0"
 output_parameters_worksheet["E1"] = "Difference (Y/N)"
 
 
