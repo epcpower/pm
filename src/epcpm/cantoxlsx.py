@@ -260,7 +260,9 @@ class Signal:
                     row.maximum = parameter.maximum
 
                 if self.wrapped.enumeration_uuid is not None:
-                    enumeration = self.parameter_uuid_finder(self.wrapped.enumeration_uuid)
+                    enumeration = self.parameter_uuid_finder(
+                        self.wrapped.enumeration_uuid
+                    )
                     child_enum_list = []
                     for child_enum in enumeration.children:
                         child_enum_list.append(
