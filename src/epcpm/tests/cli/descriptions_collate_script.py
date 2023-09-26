@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import re
 import openpyxl
-from openpyxl.styles import Alignment
 
 excel_path = "/home/annie/Documents/Appendix A Table.xlsx"
 excel_path_epc_can_manual = "/home/annie/Documents/EPC-CAN_for_manual.xlsx"
