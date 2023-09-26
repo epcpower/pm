@@ -5,9 +5,16 @@ import openpyxl
 from openpyxl.styles import Alignment
 
 excel_path = "/home/annie/Documents/Appendix A Table.xlsx"
-excel_path_4_5_0 = "/home/annie/Documents/EPC-CAN_for_manual.xlsx"
+excel_path_epc_can_manual = "/home/annie/Documents/EPC-CAN_for_manual.xlsx"
+exel_path_epc_can = "/home/annie/Documents/EPC-CAN.xlsx"
 df = pd.read_excel(excel_path)
-df_4_5_0 = pd.read_excel(excel_path_4_5_0)
+df_epc_can_manual = pd.read_excel(excel_path_epc_can_manual)
+df_epc_can = pd.read_excel(exel_path_epc_can)[
+    ["EPyQ CAN Parameter Name", "Enumerator List"]
+]
+df_epc_can.columns = ["Parameter", "Enumerators"]
+df_epc_can = df_epc_can.set_index("Parameter")
+df_epc_can_joined = df_epc_can_manual.join(df_epc_can, on="Parameter")
 
 
 def get_longest_match(name: str) -> str:
@@ -55,9 +62,9 @@ def create_parameter_name_description_df(df: pd.DataFrame) -> pd.DataFrame:
 
 
 parameter_name_description_df = create_parameter_name_description_df(df)
-parameter_name_description_4_5_0_df = df_4_5_0[["Parameter", "Description"]].dropna(
-    subset=["Parameter"]
-)
+parameter_name_description_4_5_0_df = df_epc_can_joined[
+    ["Parameter", "Description", "Enumerators"]
+].dropna(subset=["Parameter"])
 
 GROUP_NAMES = [
     "1. AC -> B. Line Monitoring -> Enter service condition",
@@ -395,11 +402,15 @@ GROUP_NAMES = [
     "B. Other",
 ]
 ACCESS_LEVELS = ["Service_Tech", "Service_Eng", "EPC_Eng", "EPC_Factory", "MAC_Auth"]
+
 parameter_group_names = parameter_name_description_df["Parameter"].to_list()
 descriptions = parameter_name_description_df["Description"].to_list()
 parameter_group_names_4_5_0 = parameter_name_description_4_5_0_df["Parameter"].to_list()
 descriptions_4_5_0 = (
     parameter_name_description_4_5_0_df["Description"].fillna("").to_list()
+)
+enumerators_4_5_0 = (
+    parameter_name_description_4_5_0_df["Enumerators"].fillna("").to_list()
 )
 
 current_group_name = ""
@@ -419,8 +430,8 @@ for parameter_name, description in zip(parameter_group_names, descriptions):
 
 
 current_group_name = ""
-for parameter_name, description_4_5_0 in zip(
-    parameter_group_names_4_5_0, descriptions_4_5_0
+for parameter_name, description_4_5_0, enumerators in zip(
+    parameter_group_names_4_5_0, descriptions_4_5_0, enumerators_4_5_0
 ):
     if not re.search(GROUP_NAME_PATTERN, parameter_name):
         matched_description = ""
@@ -440,6 +451,7 @@ for parameter_name, description_4_5_0 in zip(
             current_group_name,
             matched_description,
             description_4_5_0,
+            enumerators,
             difference,
         )
     else:
@@ -457,7 +469,8 @@ output_parameters_worksheet["A1"] = "Group"
 output_parameters_worksheet["B1"] = "Parameter"
 output_parameters_worksheet["C1"] = "Manual Description"
 output_parameters_worksheet["D1"] = "Short Description 4.5.0"
-output_parameters_worksheet["E1"] = "Difference (Y/N)"
+output_parameters_worksheet["E1"] = "Enumerator List"
+output_parameters_worksheet["F1"] = "Difference (Y/N)"
 
 
 output_group_worksheet["A1"] = "Group"
@@ -470,6 +483,7 @@ for parameter, description_group_tuple in parameter_description_dict_4_5_0.items
     output_parameters_worksheet[f"C{row}"].value = description_group_tuple[1]
     output_parameters_worksheet[f"D{row}"].value = description_group_tuple[2]
     output_parameters_worksheet[f"E{row}"].value = description_group_tuple[3]
+    output_parameters_worksheet[f"F{row}"].value = description_group_tuple[4]
 
     row = row + 1
 
