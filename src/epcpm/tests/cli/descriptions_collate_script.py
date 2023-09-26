@@ -3,10 +3,10 @@ import pandas as pd
 import re
 import openpyxl
 
-excel_path = "/home/annie/Documents/Appendix A Table.xlsx"
+excel_path_controls_manual = "/home/annie/Documents/Appendix A Table.xlsx"
 excel_path_epc_can_manual = "/home/annie/Documents/EPC-CAN_for_manual.xlsx"
 exel_path_epc_can = "/home/annie/Documents/EPC-CAN.xlsx"
-df = pd.read_excel(excel_path)
+df_controls_manual = pd.read_excel(excel_path_controls_manual)
 df_epc_can_manual = pd.read_excel(excel_path_epc_can_manual)
 df_epc_can = pd.read_excel(exel_path_epc_can)[
     ["EPyQ CAN Parameter Name", "Enumerator List"]
@@ -60,7 +60,9 @@ def create_parameter_name_description_df(df: pd.DataFrame) -> pd.DataFrame:
     return parameter_df
 
 
-parameter_name_description_df = create_parameter_name_description_df(df)
+parameter_name_description_controls_manual_df = create_parameter_name_description_df(
+    df_controls_manual
+)
 parameter_name_description_4_5_0_df = df_epc_can_joined[
     ["Parameter", "Description", "Enumerators"]
 ].dropna(subset=["Parameter"])
@@ -402,8 +404,12 @@ GROUP_NAMES = [
 ]
 ACCESS_LEVELS = ["Service_Tech", "Service_Eng", "EPC_Eng", "EPC_Factory", "MAC_Auth"]
 
-parameter_group_names = parameter_name_description_df["Parameter"].to_list()
-descriptions = parameter_name_description_df["Description"].to_list()
+parameter_group_names_controls_manual = parameter_name_description_controls_manual_df[
+    "Parameter"
+].to_list()
+descriptions_controls_manual = parameter_name_description_controls_manual_df[
+    "Description"
+].to_list()
 parameter_group_names_4_5_0 = parameter_name_description_4_5_0_df["Parameter"].to_list()
 descriptions_4_5_0 = (
     parameter_name_description_4_5_0_df["Description"].fillna("").to_list()
@@ -415,27 +421,38 @@ enumerators_4_5_0 = (
 current_group_name = ""
 GROUP_NAME_PATTERN = r"([A-Z0-9]\.)"
 
-parameter_description_dict = {}
+parameter_description_controls_manual_dict = {}
 group_description_dict = {}
-parameter_description_dict_4_5_0 = {}
+parameter_description_dict_combined = {}
 
-for parameter_name, description in zip(parameter_group_names, descriptions):
+# Separates the parameter and group descriptions from the controls manual. Also
+# creates a group descriptions dictionary
+for parameter_name, description in zip(
+    parameter_group_names_controls_manual, descriptions_controls_manual
+):
     if not re.search(GROUP_NAME_PATTERN, parameter_name):
-        parameter_description_dict[parameter_name] = description
+        parameter_description_controls_manual_dict[parameter_name] = (
+            description,
+            current_group_name,
+        )
     else:
         current_group_name = get_longest_match(parameter_name)
         description = parameter_name.replace(current_group_name, "")
         group_description_dict[current_group_name] = description.strip()
 
-
+# Goes through list of parameters and group descriptions from EPC-CAN.xlsx. Also
+# creates a parameter descriptions dictionary (to be combined with control
+# manual parameters)
 current_group_name = ""
 for parameter_name, description_4_5_0, enumerators in zip(
     parameter_group_names_4_5_0, descriptions_4_5_0, enumerators_4_5_0
 ):
     if not re.search(GROUP_NAME_PATTERN, parameter_name):
         matched_description = ""
-        if parameter_name in parameter_description_dict.keys():
-            matched_description = parameter_description_dict[parameter_name]
+        if parameter_name in parameter_description_controls_manual_dict.keys():
+            matched_description = parameter_description_controls_manual_dict.pop(
+                parameter_name
+            )[0]
             if matched_description is np.nan:
                 matched_description = ""
         if description_4_5_0 in ACCESS_LEVELS:
@@ -446,7 +463,7 @@ for parameter_name, description_4_5_0, enumerators in zip(
         description_4_5_0 = description_4_5_0.rstrip()
         if matched_description != description_4_5_0:
             difference = "Y"
-        parameter_description_dict_4_5_0[parameter_name] = (
+        parameter_description_dict_combined[parameter_name] = (
             current_group_name,
             matched_description,
             description_4_5_0,
@@ -457,6 +474,21 @@ for parameter_name, description_4_5_0, enumerators in zip(
         current_group_name = get_longest_match(parameter_name)
         if parameter_name not in group_description_dict.keys():
             group_description_dict[parameter_name] = description_4_5_0
+
+# Adds in all parameters not included in EPC-CAN.xlsx
+for parameter_name in parameter_description_controls_manual_dict:
+    description = parameter_description_controls_manual_dict[parameter_name][0]
+    group = parameter_description_controls_manual_dict[parameter_name][1]
+    description_4_5_0 = ""
+    enumerators = ""
+    difference = "N" if description == "" else "Y"
+    parameter_description_dict_combined[parameter_name] = (
+        group,
+        description,
+        description_4_5_0,
+        enumerators,
+        difference,
+    )
 
 output_workbook = openpyxl.Workbook()
 
@@ -476,7 +508,7 @@ output_group_worksheet["A1"] = "Group"
 output_group_worksheet["B1"] = "Description"
 
 row = 2
-for parameter, description_group_tuple in parameter_description_dict_4_5_0.items():
+for parameter, description_group_tuple in parameter_description_dict_combined.items():
     output_parameters_worksheet[f"A{row}"].value = description_group_tuple[0]
     output_parameters_worksheet[f"B{row}"].value = parameter
     output_parameters_worksheet[f"C{row}"].value = description_group_tuple[1]
