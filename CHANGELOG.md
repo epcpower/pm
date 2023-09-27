@@ -34,6 +34,7 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### Fixed
 
+- SC-1413: EPC-CAN.xlsx enumerator list output now uses can.json as source
 - SC-1195: Fix SunSpec2 bitfield interface generation
 - SC-910: Fix SunSpec2 table parameter interface generation.
 - SC-922: Fix SIL array table element setter for groups

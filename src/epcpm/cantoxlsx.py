@@ -259,8 +259,10 @@ class Signal:
                 if parameter.maximum is not None:
                     row.maximum = parameter.maximum
 
-                if parameter.enumeration_uuid is not None:
-                    enumeration = self.parameter_uuid_finder(parameter.enumeration_uuid)
+                if self.wrapped.enumeration_uuid is not None:
+                    enumeration = self.parameter_uuid_finder(
+                        self.wrapped.enumeration_uuid
+                    )
                     child_enum_list = []
                     for child_enum in enumeration.children:
                         child_enum_list.append(
@@ -278,7 +280,7 @@ class Signal:
                 # Chop off the parameter query prefix to match what is seen in the EPyQ parameters tab.
                 can_parameter_path = can_parameter_path[len(PARAMETER_QUERY_PREFIX) :]
                 # Replace '->' with nothing to match EPyQ name. This is for table parameters.
-                can_parameter_path = can_parameter_path.replace("->", "")
+                can_parameter_path = can_parameter_path.replace(" -> ", "")
             row.epyq_can_parameter_name = f"{can_parameter_path}:{self.wrapped.name}"
 
             return [row]
