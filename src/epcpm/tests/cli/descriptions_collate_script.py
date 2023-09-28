@@ -413,25 +413,35 @@ PARAMETER_LIST_NUMBERS = [
     "FrequencyLowRideThrough_X_Before:NumActivePoints",
     "FrequencyLowTrip_X_After:ReadOnly",
     "FrequencyLowTrip_X_Before:NumActivePoints",
+    "HzWatts_X_After:RampRateDecrement",
     "VoltageHighRideThrough_X_After:ReadOnly",
     "VoltageHighRideThrough_X_Before:NumActive",
+    "VoltageHighRideThrough_X_Before:NumActivePoints",
     "VoltageHighTrip_X_After:ReadOnly",
     "VoltageHighTrip_X_Before:NumActivePoints",
     "VoltageLowRideThrough_X_After:ReadOnly",
     "VoltageLowRideThrough_X_Before:NumActive",
+    "VoltageLowRideThrough_X_Before:NumActivePoints",
     "VoltageLowTrip_X_After:ReadOnly",
     "VoltageLowTrip_X_Before:NumActivePoints",
     "HzWatts_X_After:RampRateIncrement",
     "HzWatts_X_Before:NumActivePoints",
+    "VoltVar_X_After:RampRateIncrement",
     "VoltVar_X_After:RampRateDecrement",
     "VoltVar_X_Before:NumActivePoints",
+    "VoltVar_X_Before:VarScale",
     "VoltWatts_X_After:RampRateIncrement",
+    "VoltWatts_X_After:RampRateDecrement",
     "VoltWatts_X_Before:NumActivePoints",
+    "VoltWatts_X_Before:WattScale",
+    "WattPf_X_After:RampRateIncrement",
     "WattPf_X_After:RampRateDecrement",
     "WattPf_X_Before:NumActivePoints",
+    "WattVar_X_After:RampRateIncrement",
     "WattVar_X_After:RampRateDecrement",
     "WattVar_X_Before:NumActivePoints",
 ]
+PARAMETER_LIST_NUMBERS_XX = ["LoggerChunkX:Address", "LoggerChunkX:Bytes"]
 PARAMETER_LIST_ALPHABET_NUMBERS = [
     "FrequencyHighRideThrough_X_hertz_Y:_YY",
     "FrequencyHighRideThrough_X_seconds_Y:_YY",
@@ -500,9 +510,9 @@ for parameter_name, description in zip(
     if not re.search(GROUP_NAME_PATTERN, parameter_name):
         if parameter_name in PARAMETER_LIST_NUMBERS:
             for number in range(1, 3):
-                new_parameter_name = parameter_name.replace("X", str(number))
+                new_parameter_name = parameter_name.replace("X", f"{number}")
                 if description is not np.nan:
-                    new_description = str(description).replace("X", str(number))
+                    new_description = str(description).replace("X", f"{number}")
                 else:
                     new_description = description
                 parameter_description_controls_manual_dict[new_parameter_name] = (
@@ -514,8 +524,8 @@ for parameter_name, description in zip(
             new_parameter_name = new_parameter_name.replace("Y", "A")
             new_parameter_name = new_parameter_name.replace("herzt", "hertz")
             for number in range(1, 3):
-                final_parameter_name = new_parameter_name.replace("X", str(number))
-                new_description = description.replace("X", str(number))
+                final_parameter_name = new_parameter_name.replace("X", f"{number}")
+                new_description = description.replace("X", f"{number}")
                 parameter_description_controls_manual_dict[final_parameter_name] = (
                     new_description,
                     current_group_name,
@@ -526,6 +536,17 @@ for parameter_name, description in zip(
                 description,
                 current_group_name,
             )
+        elif parameter_name in PARAMETER_LIST_NUMBERS_XX:
+            for number in range(1, 17):
+                new_parameter_name = parameter_name.replace("X", f"{number:02}")
+                if description is not np.nan:
+                    new_description = str(description).replace("X", f"{number:02}")
+                else:
+                    new_description = description
+                parameter_description_controls_manual_dict[new_parameter_name] = (
+                    new_description,
+                    current_group_name,
+                )
         else:
             parameter_description_controls_manual_dict[parameter_name] = (
                 description,
