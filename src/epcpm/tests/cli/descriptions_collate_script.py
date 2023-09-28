@@ -622,4 +622,7 @@ for group, description_group_tuple in group_description_dict.items():
     output_group_worksheet[f"B{row}"].value = description_group_tuple
     row = row + 1
 
-output_workbook.save("/home/annie/Documents/Parameter & Group Descriptions.xlsx")
+excel_path_output_spreadsheet = (
+    "/home/annie/Documents/Parameter & Group Descriptions.xlsx"
+)
+output_workbook.save(excel_path_output_spreadsheet)
