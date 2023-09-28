@@ -67,6 +67,7 @@ parameter_name_description_4_5_0_df = df_epc_can_joined[
     ["Parameter", "Description", "Enumerators"]
 ].dropna(subset=["Parameter"])
 
+GROUP_NAME_PATTERN = r"([A-Z0-9]\.)"
 GROUP_NAMES = [
     "1. AC -> B. Line Monitoring -> Enter service condition",
     "1. AC -> B. Line Monitoring -> Enter service condition -> Frequency limits",
@@ -403,6 +404,73 @@ GROUP_NAMES = [
     "B. Other",
 ]
 ACCESS_LEVELS = ["Service_Tech", "Service_Eng", "EPC_Eng", "EPC_Factory", "MAC_Auth"]
+PARAMETER_LIST_NUMBERS = [
+    "FrequencyHighRideThrough_X_After:ReadOnly",
+    "FrequencyHighRideThrough_X_Before:NumActivePoints",
+    "FrequencyHighTrip_X_After:ReadOnly",
+    "FrequencyHighTrip_X_Before:NumActivePoints",
+    "FrequencyLowRideThrough_X_After:ReadOnly",
+    "FrequencyLowRideThrough_X_Before:NumActivePoints",
+    "FrequencyLowTrip_X_After:ReadOnly",
+    "FrequencyLowTrip_X_Before:NumActivePoints",
+    "VoltageHighRideThrough_X_After:ReadOnly",
+    "VoltageHighRideThrough_X_Before:NumActive",
+    "VoltageHighTrip_X_After:ReadOnly",
+    "VoltageHighTrip_X_Before:NumActivePoints",
+    "VoltageLowRideThrough_X_After:ReadOnly",
+    "VoltageLowRideThrough_X_Before:NumActive",
+    "VoltageLowTrip_X_After:ReadOnly",
+    "VoltageLowTrip_X_Before:NumActivePoints",
+    "HzWatts_X_After:RampRateIncrement",
+    "HzWatts_X_Before:NumActivePoints",
+    "VoltVar_X_After:RampRateDecrement",
+    "VoltVar_X_Before:NumActivePoints",
+    "VoltWatts_X_After:RampRateIncrement",
+    "VoltWatts_X_Before:NumActivePoints",
+    "WattPf_X_After:RampRateDecrement",
+    "WattPf_X_Before:NumActivePoints",
+    "WattVar_X_After:RampRateDecrement",
+    "WattVar_X_Before:NumActivePoints",
+]
+PARAMETER_LIST_ALPHABET_NUMBERS = [
+    "FrequencyHighRideThrough_X_hertz_Y:_YY",
+    "FrequencyHighRideThrough_X_seconds_Y:_YY",
+    "FrequencyHighTrip_X_hertz_Y:_YY",
+    "FrequencyHighTrip_X_seconds_Y:_YY",
+    "FrequencyLowRideThrough_X_herzt_Y:_YY",
+    "FrequencyLowRideThrough_X_seconds_Y:_YY",
+    "FrequencyLowTrip_X_herzt_Y:_YY",
+    "FrequencyLowTrip_X_seconds_Y:_YY",
+    "VoltageHighRideThrough_X_percent_Y:_YY",
+    "VoltageHighRideThrough_X_seconds_Y:_YY",
+    "VoltageHighTrip_X_percent_Y:_YY",
+    "VoltageHighTrip_X_seconds_Y:_YY",
+    "VoltageLowRideThrough_X_percent_Y:_YY",
+    "VoltageLowRideThrough_X_seconds_Y:_YY",
+    "VoltageLowTrip_X_percent_Y:_YY",
+    "VoltageLowTrip_X_seconds_Y:_YY",
+    "HzWatts_X_hertz_Y:_YY",
+    "HzWatts_X_percent_nominal_pwr_Y:_YY",
+    "VoltVar_X_percent_nominal_var_Y:_YY",
+    "VoltVar_X_percent_nominal_volts_Y:_YY",
+    "VoltWatts_X_percent_nominal_pwr_Y:_YY",
+    "VoltWatts_X_percent_nominal_volts_Y:_YY",
+    "WattPf_X_percent_nominal_pwr_Y:_YY",
+    "WattPf_X_power_factor_Y:_YY",
+    "WattVar_X_percent_nominal_pwr_Y:_YY",
+    "WattVar_X_percent_nominal_var_Y:_YY",
+]
+PARAMETER_MAP = {
+    "EnterServiceEnable:enable": "EnterToServiceCheck:enable",
+    "EnterServiceFrequency:lower": "EnterToServiceFrequency:lower",
+    "EnterServiceFrequency:upper": "EnterToServiceFrequency:upper",
+    "EnterServiceVoltage:lower": "EnterToServiceVoltage:lower",
+    "EnterServiceVoltage:upper": "EnterToServiceVoltage:upper",
+    "VoltWattLimit:lowerKneeVoltage": "VoltWattLimit:kneeVoltage1",
+    "VoltWattLimitEnable:enable": "VoltWattLimitConf:enable",
+    "StatusFaults:InletOvertemperature": "StatusFaults:InverterOvertemp",
+    "StatusFaults2:InletUndertemp": "StatusFaults2:InverterUndertemp",
+}
 
 parameter_group_names_controls_manual = parameter_name_description_controls_manual_df[
     "Parameter"
@@ -418,8 +486,6 @@ enumerators_4_5_0 = (
     parameter_name_description_4_5_0_df["Enumerators"].fillna("").to_list()
 )
 
-current_group_name = ""
-GROUP_NAME_PATTERN = r"([A-Z0-9]\.)"
 
 parameter_description_controls_manual_dict = {}
 group_description_dict = {}
@@ -427,18 +493,49 @@ parameter_description_dict_combined = {}
 
 # Separates the parameter and group descriptions from the controls manual. Also
 # creates a group descriptions dictionary
+current_group_name = ""
 for parameter_name, description in zip(
     parameter_group_names_controls_manual, descriptions_controls_manual
 ):
     if not re.search(GROUP_NAME_PATTERN, parameter_name):
-        parameter_description_controls_manual_dict[parameter_name] = (
-            description,
-            current_group_name,
-        )
+        if parameter_name in PARAMETER_LIST_NUMBERS:
+            for number in range(1, 3):
+                new_parameter_name = parameter_name.replace("X", str(number))
+                if description is not np.nan:
+                    new_description = str(description).replace("X", str(number))
+                else:
+                    new_description = description
+                parameter_description_controls_manual_dict[new_parameter_name] = (
+                    new_description,
+                    current_group_name,
+                )
+        elif parameter_name in PARAMETER_LIST_ALPHABET_NUMBERS:
+            new_parameter_name = parameter_name.replace("YY", "01")
+            new_parameter_name = new_parameter_name.replace("Y", "A")
+            new_parameter_name = new_parameter_name.replace("herzt", "hertz")
+            for number in range(1, 3):
+                final_parameter_name = new_parameter_name.replace("X", str(number))
+                new_description = description.replace("X", str(number))
+                parameter_description_controls_manual_dict[final_parameter_name] = (
+                    new_description,
+                    current_group_name,
+                )
+        elif parameter_name in PARAMETER_MAP.keys():
+            new_parameter_name = PARAMETER_MAP[parameter_name]
+            parameter_description_controls_manual_dict[new_parameter_name] = (
+                description,
+                current_group_name,
+            )
+        else:
+            parameter_description_controls_manual_dict[parameter_name] = (
+                description,
+                current_group_name,
+            )
     else:
         current_group_name = get_longest_match(parameter_name)
         description = parameter_name.replace(current_group_name, "")
         group_description_dict[current_group_name] = description.strip()
+
 
 # Goes through list of parameters and group descriptions from EPC-CAN.xlsx. Also
 # creates a parameter descriptions dictionary (to be combined with control
@@ -448,6 +545,7 @@ for parameter_name, description_4_5_0, enumerators in zip(
     parameter_group_names_4_5_0, descriptions_4_5_0, enumerators_4_5_0
 ):
     if not re.search(GROUP_NAME_PATTERN, parameter_name):
+        parameter_name = parameter_name.replace(" ", "")
         matched_description = ""
         if parameter_name in parameter_description_controls_manual_dict.keys():
             matched_description = parameter_description_controls_manual_dict.pop(
