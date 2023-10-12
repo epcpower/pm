@@ -9,6 +9,7 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### Added
 
+- SC-1429: Add support for dynamic sunspec1/sunspec2 identifier configuration
 - MDL-378: Add parameter name, group and getter function to SIL parameter generation
 - SC-835: SunSpec2 table support
 - SC-795: Add units to SunSpec2/parameters for 700 series models
