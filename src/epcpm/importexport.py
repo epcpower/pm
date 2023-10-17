@@ -133,93 +133,93 @@ def full_export(
         parameters_model=project.models.parameters,
     )
 
-    epcpm.parameterstointerface.export(
-        c_path=paths.interface_c,
-        h_path=paths.interface_c.with_suffix(".h"),
-        c_path_rejected_callback=paths.rejected_callback_c,
-        can_model=project.models.can,
-        sunspec1_model=project.models.sunspec1,
-        sunspec2_model=project.models.sunspec2,
-        staticmodbus_model=project.models.staticmodbus,
+    #epcpm.parameterstointerface.export(
+    #    c_path=paths.interface_c,
+    #    h_path=paths.interface_c.with_suffix(".h"),
+    #    c_path_rejected_callback=paths.rejected_callback_c,
+    #    can_model=project.models.can,
+    #    sunspec1_model=project.models.sunspec1,
+    #    sunspec2_model=project.models.sunspec2,
+    #    staticmodbus_model=project.models.staticmodbus,
+    #    parameters_model=project.models.parameters,
+    #    skip_output=skip_output,
+    #    include_uuid_in_item=include_uuid_in_item,
+    #)
+
+    #epcpm.sunspectocsv.export(
+    #    path=paths.sunspec1_spreadsheet,
+    #    sunspec_model=project.models.sunspec1,
+    #    sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
+    #    parameters_model=project.models.parameters,
+    #    skip_output=skip_output,
+    #    column_filter=attr.evolve(
+    #        epcpm.pm_helper.attr_fill(epcpm.sunspectocsv.Fields, False),
+    #        model_id=True,
+    #        size=True,
+    #        name=True,
+    #        label=True,
+    #        type=True,
+    #        units=True,
+    #        bit_offset=True,
+    #        bit_length=True,
+    #        modbus_address=True,
+    #        parameter_uuid=True,
+    #        parameter_uses_interface_item=True,
+    #        scale_factor_uuid=True,
+    #        enumeration_uuid=True,
+    #        type_uuid=True,
+    #        access_level=True,
+    #        not_implemented=True,
+    #        uuid=True,
+    #        class_name=True,
+    #    ),
+    #)
+    #
+    #epcpm.sunspectocsv.export(
+    #    path=paths.sunspec2_spreadsheet,
+    #    sunspec_model=project.models.sunspec2,
+    #    sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO,
+    #    parameters_model=project.models.parameters,
+    #    skip_output=skip_output,
+    #    column_filter=attr.evolve(
+    #        epcpm.pm_helper.attr_fill(epcpm.sunspectocsv.Fields, False),
+    #        model_id=True,
+    #        size=True,
+    #        name=True,
+    #        label=True,
+    #        type=True,
+    #        units=True,
+    #        bit_offset=True,
+    #        bit_length=True,
+    #        modbus_address=True,
+    #        parameter_uuid=True,
+    #        parameter_uses_interface_item=True,
+    #        scale_factor_uuid=True,
+    #        enumeration_uuid=True,
+    #        type_uuid=True,
+    #        access_level=True,
+    #        not_implemented=True,
+    #        uuid=True,
+    #        class_name=True,
+    #    ),
+    #)
+
+    epcpm.sunspectoxlsx.export(
+        path=paths.sunspec1_spreadsheet,
+        sunspec_model=project.models.sunspec1,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
         parameters_model=project.models.parameters,
-        skip_output=skip_output,
-        include_uuid_in_item=include_uuid_in_item,
+        skip_sunspec=skip_output,
     )
-
-    #epcpm.sunspectocsv.export(
-    #    path=paths.sunspec1_spreadsheet,
-    #    sunspec_model=project.models.sunspec1,
-    #    sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
-    #    parameters_model=project.models.parameters,
-    #    skip_output=skip_output,
-    #    column_filter=attr.evolve(
-    #        epcpm.pm_helper.attr_fill(epcpm.sunspectocsv.Fields, False),
-    #        model_id=True,
-    #        size=True,
-    #        name=True,
-    #        label=True,
-    #        type=True,
-    #        units=True,
-    #        bit_offset=True,
-    #        bit_length=True,
-    #        modbus_address=True,
-    #        parameter_uuid=True,
-    #        parameter_uses_interface_item=True,
-    #        scale_factor_uuid=True,
-    #        enumeration_uuid=True,
-    #        type_uuid=True,
-    #        access_level=True,
-    #        not_implemented=True,
-    #        uuid=True,
-    #        class_name=True,
-    #    ),
-    #)
-    #
-    #epcpm.sunspectocsv.export(
-    #    path=paths.sunspec2_spreadsheet,
-    #    sunspec_model=project.models.sunspec2,
-    #    sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO,
-    #    parameters_model=project.models.parameters,
-    #    skip_output=skip_output,
-    #    column_filter=attr.evolve(
-    #        epcpm.pm_helper.attr_fill(epcpm.sunspectocsv.Fields, False),
-    #        model_id=True,
-    #        size=True,
-    #        name=True,
-    #        label=True,
-    #        type=True,
-    #        units=True,
-    #        bit_offset=True,
-    #        bit_length=True,
-    #        modbus_address=True,
-    #        parameter_uuid=True,
-    #        parameter_uses_interface_item=True,
-    #        scale_factor_uuid=True,
-    #        enumeration_uuid=True,
-    #        type_uuid=True,
-    #        access_level=True,
-    #        not_implemented=True,
-    #        uuid=True,
-    #        class_name=True,
-    #    ),
-    #)
-
-    #epcpm.sunspectoxlsx.export(
-    #    path=paths.sunspec1_spreadsheet,
-    #    sunspec_model=project.models.sunspec1,
-    #    sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
-    #    parameters_model=project.models.parameters,
-    #    skip_sunspec=skip_output,
-    #)
-    #
-    #epcpm.sunspectoxlsx.export(
-    #    path=paths.sunspec2_spreadsheet,
-    #    sunspec_model=project.models.sunspec2,
-    #    sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO,
-    #    parameters_model=project.models.parameters,
-    #    skip_sunspec=skip_output,
-    #)
-    #
+    
+    epcpm.sunspectoxlsx.export(
+        path=paths.sunspec2_spreadsheet,
+        sunspec_model=project.models.sunspec2,
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_TWO,
+        parameters_model=project.models.parameters,
+        skip_sunspec=skip_output,
+    )
+    
     #epcpm.sunspectoxlsx.export(
     #    path=paths.sunspec1_spreadsheet_user,
     #    sunspec_model=project.models.sunspec1,
