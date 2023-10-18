@@ -133,18 +133,18 @@ def full_export(
         parameters_model=project.models.parameters,
     )
 
-    #epcpm.parameterstointerface.export(
-    #    c_path=paths.interface_c,
-    #    h_path=paths.interface_c.with_suffix(".h"),
-    #    c_path_rejected_callback=paths.rejected_callback_c,
-    #    can_model=project.models.can,
-    #    sunspec1_model=project.models.sunspec1,
-    #    sunspec2_model=project.models.sunspec2,
-    #    staticmodbus_model=project.models.staticmodbus,
-    #    parameters_model=project.models.parameters,
-    #    skip_output=skip_output,
-    #    include_uuid_in_item=include_uuid_in_item,
-    #)
+    epcpm.parameterstointerface.export(
+        c_path=paths.interface_c,
+        h_path=paths.interface_c.with_suffix(".h"),
+        c_path_rejected_callback=paths.rejected_callback_c,
+        can_model=project.models.can,
+        sunspec1_model=project.models.sunspec1,
+        sunspec2_model=project.models.sunspec2,
+        staticmodbus_model=project.models.staticmodbus,
+        parameters_model=project.models.parameters,
+        skip_output=skip_output,
+        include_uuid_in_item=include_uuid_in_item,
+    )
 
     #epcpm.sunspectocsv.export(
     #    path=paths.sunspec1_spreadsheet,
@@ -204,6 +204,8 @@ def full_export(
     #    ),
     #)
 
+    # TODO DG 10/18 - needs to figure out a way to remove this files 
+    # if I remove, it breaks the prebuilt process 
     epcpm.sunspectoxlsx.export(
         path=paths.sunspec1_spreadsheet,
         sunspec_model=project.models.sunspec1,
