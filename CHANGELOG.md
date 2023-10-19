@@ -9,6 +9,7 @@ For instructions, see the [changelog confluence page](https://epcpower.atlassian
 
 ### Added
 
+- SC-1429: Add support for dynamic sunspec1/sunspec2 identifier configuration
 - SC-1163: Add parameter min, max and read-only to SIL parameter generation
 - SC-1110: Added scale factor column and enumerations worksheet to static modbus spreadsheet output
 - MDL-378: Add parameter name, group and getter function to SIL parameter generation

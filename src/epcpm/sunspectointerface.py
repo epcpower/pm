@@ -394,6 +394,9 @@ class Root:
         h_lines.extend(
             f"extern ModbusReg * const sunspec{self.sunspec_id.value}AddrRegMap[{total_addresses}];\n"
         )
+        h_lines.extend(
+            f"\nvoid sunspec{self.sunspec_id.value}SetIdentifier(uint16_t id_hi, uint16_t id_lo);\n"
+        )
 
         h_lines.extend([f"\n#endif //{include_guard}\n"])
 
@@ -586,6 +589,16 @@ class Root:
         c_lines.extend(
             [
                 "};\n\n",
+            ]
+        )
+
+        c_lines.extend(
+            [
+                f"void sunspec{self.sunspec_id.value}SetIdentifier(uint16_t id_hi, uint16_t id_lo) ",
+                "{\n",
+                f"    sunspec{self.sunspec_id.value}Interface.SunS_ID_hi = id_hi;\n",
+                f"    sunspec{self.sunspec_id.value}Interface.SunS_ID_lo = id_lo;\n",
+                "}\n",
             ]
         )
 
