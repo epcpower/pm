@@ -1,26 +1,34 @@
 import pandas as pd
 import json
 
+GROUP_SEPARATOR = " -> "
+PARAMETER_SEPARATOR = ":"
+
 input_spreadsheet_path = "/home/annie/Documents/Parameter & Group Descriptions.xlsx"
 parameter_description_df = pd.read_excel(
     input_spreadsheet_path, "Parameter Descriptions"
-)
-group_description_df = pd.read_excel(input_spreadsheet_path, "Group Descriptions")
-group_description_map = dict(
-    zip(group_description_df["Group"], group_description_df["Description"])
-)
+).fillna("None")
+group_description_df = pd.read_excel(
+    input_spreadsheet_path, "Group Descriptions"
+).fillna("None")
+
+# Create group description map
+groups = group_description_df["Group"]
+group_descriptions = group_description_df["Description"]
+group_description_map = {}
+for group, description in zip(groups, group_descriptions):
+    name = group.split(GROUP_SEPARATOR)[-1]
+    group_description_map[name] = description
 
 # Get all the group names (without separator) in a list
 group_names = []
-GROUP_SEPARATOR = " -> "
-PARAMETER_SEPARATOR = ":"
-for group in group_description_map.keys():
+for group in groups:
     group_names = group_names + group.split(GROUP_SEPARATOR)
 group_names = list(set(group_names))
 
 # Create parameter description map
 parameters = parameter_description_df["Parameter"]
-parameter_descriptions = parameter_description_df["Description"]
+parameter_descriptions = parameter_description_df["Short Description 4.5.0"]
 parameter_description_map = {}
 for parameter, description in zip(parameters, parameter_descriptions):
     name = parameter.split(PARAMETER_SEPARATOR)[-1]
@@ -30,9 +38,38 @@ for parameter, description in zip(parameters, parameter_descriptions):
 json_file = open("/home/annie/Repos/grid-tied/interface/pm/parameters.json")
 root_parameters = json.load(json_file)
 
-groups = []
-for child in root_parameters["children"]:
-    if child["_type"] == "group":
-        groups.append(child)
+# groups = []
+# for child in root_parameters["children"]:
+#     if child["_type"] == "group":
+#         groups.append(child)
 
-print(len(groups))
+
+def populate_description(current_json: dict) -> None:
+    """
+    Function that is intended to recursively populate the parameters.json with
+    relevant parameter and group descriptions
+
+    Args:
+        current_json (dict): A dictionary (most likely nested) in parameters.json
+    """
+    if current_json["_type"] == "group":
+        if current_json["name"] in group_description_map.keys():
+            current_json["description"] = group_description_map[current_json["name"]]
+        else:
+            current_json["description"] = None
+    elif current_json["_type"] == "parameter":
+        if current_json["name"] in parameter_description_map.keys():
+            current_json["description"] = parameter_description_map[
+                current_json["name"]
+            ]
+        else:
+            current_json["description"] = None
+
+    if "children" in current_json.keys():
+        for child in current_json["children"]:
+            populate_description(child)
+
+
+populate_description(root_parameters)
+with open("/home/annie/edited_parameters.json", "w", encoding="utf-8") as f:
+    json.dump(root_parameters, f, ensure_ascii=False, indent=4)
