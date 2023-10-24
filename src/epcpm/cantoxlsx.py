@@ -1,6 +1,7 @@
 from __future__ import (
     annotations,
-)  # See PEP 563, check to remove in future Python version higher than 3.7
+)
+import re  # See PEP 563, check to remove in future Python version higher than 3.7
 import attr
 import decimal
 import openpyxl
@@ -33,7 +34,7 @@ CELL_BORDER = openpyxl.styles.Border(
     top=CELL_SIDE, left=CELL_SIDE, right=CELL_SIDE, bottom=CELL_SIDE
 )
 CELL_FONT = openpyxl.styles.Font(size=8)
-
+NUMBERED_VARIANT_PATTERN = r"_(0[2-9]|1[0-9]|20)$"
 
 builders = epyqlib.utils.general.TypeMap()
 
@@ -259,8 +260,10 @@ class Signal:
                 if parameter.maximum is not None:
                     row.maximum = parameter.maximum
 
-                if parameter.enumeration_uuid is not None:
-                    enumeration = self.parameter_uuid_finder(parameter.enumeration_uuid)
+                if self.wrapped.enumeration_uuid is not None:
+                    enumeration = self.parameter_uuid_finder(
+                        self.wrapped.enumeration_uuid
+                    )
                     child_enum_list = []
                     for child_enum in enumeration.children:
                         child_enum_list.append(
@@ -439,6 +442,8 @@ def format_for_manual(
         entered_tables_section = False
 
         for row in filtered_rows:
+            is_numbered_variant = False
+
             parameter_path = row[16].value
             if not parameter_path.startswith(PARAMETERS_PREFIX):
                 # Only output parameters that are in EPyQ.
@@ -456,6 +461,12 @@ def format_for_manual(
             cab1k_2l_3500hz_out = row[8].value
             cab1k_3l1_2700hz_out = row[9].value
             enumerator_list = row[17].value
+
+            is_numbered_variant = (
+                True
+                if re.search(NUMBERED_VARIANT_PATTERN, parameter_name_out)
+                else False
+            )
 
             if units_out:
                 # If there is a units value, append it to the end of the numeric default value.
@@ -514,7 +525,7 @@ def format_for_manual(
             # Track the rows used for each parameter entry.
             rows_used = 0
 
-            if entered_tables_section:
+            if entered_tables_section and is_numbered_variant:
                 if all_defaults_same:
                     # Output single Default cells section for additional table row.
                     output_worksheet.append(
