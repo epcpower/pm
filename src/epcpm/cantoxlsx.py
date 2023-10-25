@@ -462,6 +462,9 @@ def format_for_manual(
             cab1k_3l1_2700hz_out = row[9].value
             enumerator_list = row[17].value
 
+            # is_numbered_variant is necessary to distinguish parameters that are similarly named
+            # (differ by numbers) from those that aren't (differ by word(s)) since both have
+            # entered_table_section and all_defaults_same set to True
             is_numbered_variant = (
                 True
                 if re.search(NUMBERED_VARIANT_PATTERN, parameter_name_out)
