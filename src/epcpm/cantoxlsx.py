@@ -1,7 +1,7 @@
 from __future__ import (
     annotations,
-)
-import re  # See PEP 563, check to remove in future Python version higher than 3.7
+)  # See PEP 563, check to remove in future Python version higher than 3.7
+import re
 import attr
 import decimal
 import openpyxl
