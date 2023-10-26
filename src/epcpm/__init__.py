@@ -15,4 +15,3 @@ __sha__ = get_git_revision_hash()
 
 __version_tag__ = "v{}".format(__version__)
 __build_tag__ = epcpm._build.job_id
-
