@@ -63,7 +63,7 @@ jobs:
           poetry run black --check --diff .
           poetry run builduipm
           poetry run builduiepyqlib
-          poetry version $(git describe --tags --abbrev=0 2>/dev/null)
+          poetry run poetry-dynamic-versioning
 
           poetry run pip freeze --all
           poetry run genbuildinfo "src/epcpm/__build.py"

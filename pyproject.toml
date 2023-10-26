@@ -7,7 +7,7 @@ include = ["src/*"]
 
 [tool.poetry-dynamic-versioning]
 #set to false.  poetry-dynamic-versioning only needed for CI versioning.
-enable = false
+enable = true
 vcs = "git"
 style = "pep440"
 
@@ -65,6 +65,7 @@ pytest-qt = "3.3.0"
 pytest-cov = "2.5.1"
 pytest-twisted = "<=1.13.4"
 twine = "3.1.1"
+poetry-dynamic-versioning = "^0.13.1"
 
 [tool.poetry.scripts]
 epcpmcli = 'epcpm.cli.main:main'
