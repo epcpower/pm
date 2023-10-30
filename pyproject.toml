@@ -14,7 +14,7 @@ style = "pep440"
 [tool.poetry-dynamic-versioning.substitution]
 #poetry-dynamic-versioning has auto subsitution for __init__.py files,
 #but not for more than 1 directory out of root.
-files = ["src/epcpm/__init__.py"]
+#files = ["src/epcpm/__init__.py"]
 
 [[tool.poetry.source]]
 name = "epc-power"
@@ -65,7 +65,6 @@ pytest-qt = "3.3.0"
 pytest-cov = "2.5.1"
 pytest-twisted = "<=1.13.4"
 twine = "3.1.1"
-poetry-dynamic-versioning = "^0.13.1"
 
 [tool.poetry.scripts]
 epcpmcli = 'epcpm.cli.main:main'
@@ -95,7 +94,7 @@ requires = [
     "setuptools",
     "wheel",
     "poetry-core>=1.0.0",
-    "poetry-dynamic-versioning",
+    "poetry-dynamic-versioning>=1.0.0,<2.0.0",
 
 ]
 build-backend = "poetry_dynamic_versioning.backend"
