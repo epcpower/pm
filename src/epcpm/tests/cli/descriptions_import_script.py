@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import json
 
@@ -7,10 +8,10 @@ PARAMETER_SEPARATOR = ":"
 input_spreadsheet_path = "/home/annie/Documents/Parameter & Group Descriptions.xlsx"
 parameter_description_df = pd.read_excel(
     input_spreadsheet_path, "Parameter Descriptions"
-).fillna("None")
-group_description_df = pd.read_excel(
-    input_spreadsheet_path, "Group Descriptions"
-).fillna("None")
+)
+parameter_description_df = parameter_description_df.replace({np.nan: None})
+group_description_df = pd.read_excel(input_spreadsheet_path, "Group Descriptions")
+group_description_df = group_description_df.replace({np.nan: None})
 
 # Create group description map
 groups = group_description_df["Group"]
@@ -54,16 +55,14 @@ def populate_description(current_json: dict) -> None:
     """
     if current_json["_type"] == "group":
         if current_json["name"] in group_description_map.keys():
-            current_json["description"] = group_description_map[current_json["name"]]
+            current_json["comment"] = group_description_map[current_json["name"]]
         else:
-            current_json["description"] = None
+            current_json["comment"] = None
     elif current_json["_type"] == "parameter":
         if current_json["name"] in parameter_description_map.keys():
-            current_json["description"] = parameter_description_map[
-                current_json["name"]
-            ]
+            current_json["comment"] = parameter_description_map[current_json["name"]]
         else:
-            current_json["description"] = None
+            current_json["comment"] = None
 
     if "children" in current_json.keys():
         for child in current_json["children"]:
