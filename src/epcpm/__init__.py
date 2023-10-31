@@ -5,7 +5,6 @@ import subprocess
 def get_git_revision_hash() -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
 
-
 # For development and git commit, the __version__ variable below is set
 # to the build placeholder "0.0.0". (In other words: leave alone!)
 # For release/distribution, the __version__ variable below is modified
