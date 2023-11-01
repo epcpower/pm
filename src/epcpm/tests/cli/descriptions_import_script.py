@@ -54,15 +54,27 @@ def populate_description(current_json: dict) -> None:
         current_json (dict): A dictionary (most likely nested) in parameters.json
     """
     if current_json["_type"] == "group":
-        if current_json["name"] in group_description_map.keys():
+        if (
+            current_json["name"] in group_description_map.keys()
+            and group_description_map[current_json["name"]] is not None
+        ):
             current_json["comment"] = group_description_map[current_json["name"]]
-        else:
-            current_json["comment"] = None
     elif current_json["_type"] == "parameter":
-        if current_json["name"] in parameter_description_map.keys():
+        if "comment" in current_json.keys() and current_json["comment"] is None:
+            if current_json["name"] in parameter_description_map.keys():
+                current_json["comment"] = parameter_description_map[
+                    current_json["name"]
+                ]
+        elif "comment" in current_json.keys():
+            if (
+                current_json["name"] in parameter_description_map.keys()
+                and parameter_description_map[current_json["name"]] is not None
+            ):
+                current_json["comment"] = parameter_description_map[
+                    current_json["name"]
+                ]
+        elif current_json["name"] in parameter_description_map.keys():
             current_json["comment"] = parameter_description_map[current_json["name"]]
-        else:
-            current_json["comment"] = None
 
     if "children" in current_json.keys():
         for child in current_json["children"]:
@@ -70,5 +82,5 @@ def populate_description(current_json: dict) -> None:
 
 
 populate_description(root_parameters)
-with open("/home/annie/edited_parameters.json", "w", encoding="utf-8") as f:
+with open("/home/annie/edited_parameters.json", "w") as f:
     json.dump(root_parameters, f, ensure_ascii=False, indent=4)
