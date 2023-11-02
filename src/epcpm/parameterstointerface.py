@@ -1625,10 +1625,6 @@ class TableBaseStructures:
             [
                 f".table_common = &{common_structure_name},",
                 f".can_variable = {can_variable},",
-                f".sunspec1_variable = {sunspec1_variable_initializer},",
-                *maybe_sunspec1_variable_length,
-                f".sunspec2_variable = {sunspec2_variable_initializer},",
-                *maybe_sunspec2_variable_length,
                 f'.zone = {curve_type if curve_type is not None else "0"},',
                 f".curve = {str(int(curve_index - 1))},",
                 f".point = {0 if point_index is None else point_index},",
