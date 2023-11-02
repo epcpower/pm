@@ -39,11 +39,6 @@ for parameter, description in zip(parameters, parameter_descriptions):
 json_file = open("/home/annie/Repos/grid-tied/interface/pm/parameters.json")
 root_parameters = json.load(json_file)
 
-# groups = []
-# for child in root_parameters["children"]:
-#     if child["_type"] == "group":
-#         groups.append(child)
-
 
 def populate_description(current_json: dict) -> None:
     """
@@ -82,5 +77,5 @@ def populate_description(current_json: dict) -> None:
 
 
 populate_description(root_parameters)
-with open("/home/annie/edited_parameters.json", "w") as f:
+with open("/home/annie/edited_parameters.json", "w", encoding="utf-8") as f:
     json.dump(root_parameters, f, ensure_ascii=False, indent=4)
