@@ -161,11 +161,6 @@ class Root:
             '#include "interface.h"',
             '#include "interfaceGen.h"',
             '#include "interfaceStructures_generated.h"',
-            '#include "staticmodbusInterfaceGen.h"',
-            '#include "staticmodbusInterfaceFunctions_generated.h"',
-            '#include "sunspecInterfaceFunctions_generated.h"',
-            '#include "sunspec1InterfaceGen.h"',
-            '#include "sunspec2InterfaceGen.h"',
             "",
             "",
         ]
