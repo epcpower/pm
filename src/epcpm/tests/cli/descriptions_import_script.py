@@ -78,4 +78,4 @@ def populate_description(current_json: dict) -> None:
 
 populate_description(root_parameters)
 with open("/home/annie/edited_parameters.json", "w", encoding="utf-8") as f:
-    json.dump(root_parameters, f, ensure_ascii=False, indent=4)
+    json.dump(root_parameters, f, ensure_ascii=True, indent=4)
