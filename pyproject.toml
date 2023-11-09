@@ -67,6 +67,19 @@ pytest-cov = "2.5.1"
 pytest-twisted = "<=1.13.4"
 twine = "3.1.1"
 
+[tool.poetry.scripts]
+epcpmcli = 'epcpm.cli.main:main'
+epcparameterstoc = 'epcpm.cli.parameterstoc:cli'
+epcimportsym = 'epcpm.cli.importsym:cli'
+epcexportsym = 'epcpm.cli.exportsym:cli'
+epcexportdocx = 'epcpm.cli.exportdocx:cli'
+epcconvertparameters = 'epcpm.cli.convertepp:cli'
+builduipm = 'epcpm.builduipm:compile_ui'
+builduiepyqlib = 'epyqlib.builduiepyqlib:compile_ui'
+epcpm = 'epcpm.__main__:_entry_point'
+genbuildinfo = 'epyqlib.genbuildinfo:write_build_file'
+generateversion = 'epyqlib.cli.generateversion:cli'
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
