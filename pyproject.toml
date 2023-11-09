@@ -30,6 +30,12 @@ priority = "explicit"
 [tool.poetry.dependencies]
 python = ">=3.7.9,<3.11"
 
+#### EPC Repos ####
+#sunspecdemo = {version = "0.3.0", source = "epc-power"}
+sunspecdemo = { git = "https://github.com/epcpower/sunspec-demo.git", rev = "a04b466da431549946297c66364ee835c3fab3e0" }
+
+###################
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
