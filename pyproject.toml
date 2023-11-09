@@ -5,27 +5,9 @@ description = ""
 authors = ["Alex Anker <alex.anker@epcpower.com>"]
 readme = "README.md"
 
-[tool.poetry-dynamic-versioning.substitution]
-#poetry-dynamic-versioning has auto subsitution for __init__.py files,
-#but not for more than 1 directory out of root.
-files = ["src/epcpm/__init__.py"]
-
 [tool.poetry.dependencies]
 python = ">=3.7.9,<3.11"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-epcpmcli = 'epcpm.cli.main:main'
-epcparameterstoc = 'epcpm.cli.parameterstoc:cli'
-epcimportsym = 'epcpm.cli.importsym:cli'
-epcexportsym = 'epcpm.cli.exportsym:cli'
-epcexportdocx = 'epcpm.cli.exportdocx:cli'
-epcconvertparameters = 'epcpm.cli.convertepp:cli'
-builduipm = 'epcpm.builduipm:compile_ui'
-builduiepyqlib = 'epyqlib.builduiepyqlib:compile_ui'
-epcpm = 'epcpm.__main__:_entry_point'
-genbuildinfo = 'epyqlib.genbuildinfo:write_build_file'
-generateversion = 'epyqlib.cli.generateversion:cli'
