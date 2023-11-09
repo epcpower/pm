@@ -36,6 +36,26 @@ sunspecdemo = { git = "https://github.com/epcpower/sunspec-demo.git", rev = "a04
 
 ###################
 
+attrs = "20.2.0"
+lxml = "4.3.0"
+PyQt5 = "5.13.2"
+requests = "2.27.1"
+toolz = "0.9.0"
+tox = "3.24.5"
+xmldiff = "2.2"
+openpyxl = "2.5.12"
+canmatrix = "0.9.1"
+graham = "0.1.11"
+pyserial = "3.4"
+pysunspec = "2.1.0"
+pycparser = "2.21"
+Twisted = "21.2.0"
+python-can = "4.0.0"
+Jinja2 = "^3.0.3"
+click = "<=7.1.2"
+qt5reactor = "0.5"
+tqdm = "4.32.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
