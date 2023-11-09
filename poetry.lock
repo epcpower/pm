@@ -2,12 +2,12 @@
 
 [[package]]
 name = "alqtendpy"
-version = "0.1.1"
+version = "0.0.4"
 description = "Extras for working with PyQt5."
 optional = false
 python-versions = "*"
 files = [
-    {file = "alqtendpy-0.1.1-py3-none-any.whl", hash = "sha256:b7e5fa62e71f91306238db94acfc0df736062d27bfe5836a6aa7402531731e91"},
+    {file = "alqtendpy-0.0.4-py3-none-any.whl", hash = "sha256:c1e7e5d9465e0b194ec96a7e20936cbf69f81918bbc7b062e4f012997c5f2d2d"},
 ]
 
 [package.dependencies]
@@ -18,7 +18,7 @@ pyqt5 = "*"
 
 [package.extras]
 dev = ["gitignoreio"]
-test = ["codecov", "pytest", "pytest-cov", "pytest-qt", "pytest-twisted", "pytest-xvfb", "qt5reactor", "quamash", "tox", "twisted", "twisted[windows-platform]"]
+test = ["codecov", "pytest", "pytest-cov", "pytest-qt", "pytest-twisted", "pytest-xvfb", "qt5reactor", "quamash", "tox", "twisted"]
 
 [[package]]
 name = "altendpy"
@@ -593,7 +593,7 @@ files = []
 develop = true
 
 [package.dependencies]
-alqtendpy = "0.1.1"
+alqtendpy = "0.0.4"
 appdirs = "1.4.3"
 arrow = "0.12.1"
 attrs = ">=19.3.0"
