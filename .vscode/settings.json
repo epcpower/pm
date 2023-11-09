@@ -1,0 +1,10 @@
+{
+    "workbench.colorCustomizations": {
+        "tab.activeBorder": "#ff0000",
+        "tab.unfocusedActiveBorder": "#000000",
+        "activityBar.background": "#073606",
+        "titleBar.activeBackground": "#0A4B08",
+        "titleBar.activeForeground": "#F1FDF1"
+    },
+    "esbonio.sphinx.confDir": ""
+}
