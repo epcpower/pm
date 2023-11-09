@@ -92,10 +92,10 @@ exclude = './.venv'
 [build-system]
 #requires = ["poetry-core"]
 requires = [
+    "poetry-core",
     "alqtendpy",
     "setuptools",
-    "wheel",
-    "poetry-core",
+    #"wheel",
     #"poetry-dynamic-versioning>=1.0.0,<2.0.0",
 
 ]
