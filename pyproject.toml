@@ -54,6 +54,7 @@ Jinja2 = "^3.0.3"
 click = "<=7.1.2"
 qt5reactor = "0.5"
 tqdm = "4.32.1"
+alqtendpy = "0.0.4"
 
 [tool.poetry.dev-dependencies]
 epyqlib = {path = "./sub/epyqlib",  develop = true}
@@ -90,7 +91,6 @@ exclude = './.venv'
 
 [build-system]
 requires = [
-    "alqtendpy==0.0.4",
     "setuptools",
     "wheel",
     "poetry-core>=1.0.0",
