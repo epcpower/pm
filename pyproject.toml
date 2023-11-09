@@ -94,7 +94,7 @@ exclude = './.venv'
 requires = [
     "poetry-core",
     "alqtendpy",
-    "setuptools",
+    #"setuptools",
     #"wheel",
     #"poetry-dynamic-versioning>=1.0.0,<2.0.0",
 
