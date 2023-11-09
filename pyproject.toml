@@ -95,8 +95,8 @@ requires = [
     "poetry-core",
     #"alqtendpy",
     "setuptools",
-    #"wheel",
-    #"poetry-dynamic-versioning>=1.0.0,<2.0.0",
+    "wheel",
+    "poetry-dynamic-versioning>=1.0.0,<2.0.0",
 
 ]
 build-backend = "poetry.core.masonry.api"
