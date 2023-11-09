@@ -80,6 +80,15 @@ epcpm = 'epcpm.__main__:_entry_point'
 genbuildinfo = 'epyqlib.genbuildinfo:write_build_file'
 generateversion = 'epyqlib.cli.generateversion:cli'
 
+[tool.black]
+target-version =  ['py37']
+include = '''
+^/(
+    | src/epcpm/.*\.pyi?
+)$
+'''
+exclude = './.venv'
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
