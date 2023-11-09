@@ -1,9 +1,8 @@
 [tool.poetry]
 name = "epcpm"
-version = "0.1.0"
-description = ""
+version = "0.0.0"
+description = "EPC Power Parameter Manager"
 authors = ["Alex Anker <alex.anker@epcpower.com>"]
-readme = "README.md"
 include = ["src/*"]
 
 [tool.poetry-dynamic-versioning]
@@ -90,13 +89,12 @@ include = '''
 exclude = './.venv'
 
 [build-system]
-#requires = ["poetry-core"]
 requires = [
-    "poetry-core",
     #"alqtendpy",
     "setuptools",
     "wheel",
+    "poetry-core>=1.0.0",
     "poetry-dynamic-versioning>=1.0.0,<2.0.0",
 
 ]
-build-backend = "poetry.core.masonry.api"
+build-backend = "poetry_dynamic_versioning.backend"
