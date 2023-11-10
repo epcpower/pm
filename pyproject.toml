@@ -34,7 +34,7 @@ python = ">=3.7.9,<3.11"
 sunspecdemo = { git = "https://github.com/epcpower/sunspec-demo.git", rev = "a04b466da431549946297c66364ee835c3fab3e0" }
 
 ###################
-
+alqtendpy = "0.0.4"
 attrs = "20.2.0"
 lxml = "4.3.0"
 PyQt5 = "5.13.2"
@@ -90,8 +90,8 @@ exclude = './.venv'
 
 [build-system]
 requires = [
-    "alqtendpy",
     "pyqt5<5.14.1",
+    "alqtendpy",
     "setuptools",
     "wheel",
     "poetry-core>=1.0.0",
