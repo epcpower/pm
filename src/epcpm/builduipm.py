@@ -66,6 +66,7 @@ def compile_paths(
 
 def compile_ui():
     print("compile_ui building UI in pm")
+    print(pathlib.Path(__file__).parent)
     compile_ui_alqtendpy(
         directory_paths=[pathlib.Path(__file__).parent],
     )
