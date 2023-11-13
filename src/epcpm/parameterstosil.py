@@ -182,11 +182,17 @@ class Group:
 
 @attr.s
 class Item:
+    name = attr.ib()
+    group = attr.ib()
     uuid = attr.ib()
     variable = attr.ib()
     type = attr.ib()
+    on_read = attr.ib()
     on_write = attr.ib()
     internal_scale = attr.ib()
+    min_limit = attr.ib()
+    max_limit = attr.ib()
+    read_only = attr.ib()
     is_table = attr.ib(default=False)
     table_info = attr.ib(default=None)
     path = attr.ib(default=[])
@@ -224,11 +230,17 @@ class Item:
         is_table = "true" if self.is_table else "false"
 
         initializers = [
+            f'.name = "{self.name}",',
+            f'.group = "{"|".join(self.group)}",',
             f'.uuid = "{self.uuid}",',
-            f".setterType = setter_{self.type},",
+            f".internalType = type_{self.type},",
+            f".getter = {{ .{self.type}_ = {self.on_read} }},",
             f".setter = {{ .{self.type}_ = {self.on_write} }},",
             f".variable = {{ .{self.type}_ = {self.variable} }},",
             f".internalScale = {self.internal_scale},",
+            f".minLimit = {self.min_limit},",
+            f".maxLimit = {self.max_limit},",
+            f".readOnly = {str(self.read_only).lower()},",
             f".isTable = {is_table},",
             *table_info_initializer,
         ]
@@ -306,17 +318,38 @@ class Parameter:
         else:
             on_write = f"&{parameter.setter_function}"
 
+        if parameter.getter_function is None:
+            on_read = "NULL"
+        else:
+            on_read = f"&{parameter.getter_function}"
+
         if parameter.internal_variable is None:
             variable = "NULL"
         else:
             variable = f"&{parameter.internal_variable}"
 
+        if parameter.minimum is None:
+            min_limit = "-INFINITY"
+        else:
+            min_limit = str(parameter.minimum)
+
+        if parameter.maximum is None:
+            max_limit = "INFINITY"
+        else:
+            max_limit = str(parameter.maximum)
+
         item = Item(
+            name=parameter.name,
+            group=self.path,
             uuid=parameter.uuid,
             variable=variable,
             type=parameter.internal_type,
+            on_read=on_read,
             on_write=on_write,
             internal_scale=parameter.internal_scale_factor,
+            min_limit=min_limit,
+            max_limit=max_limit,
+            read_only=parameter.read_only,
             path=self.path,
         )
 
@@ -526,6 +559,16 @@ class TableArrayElement:
         else:
             setter_function = parameter.setter_function
 
+        if parameter.minimum is None:
+            min_limit = "-INFINITY"
+        else:
+            min_limit = str(parameter.minimum)
+
+        if parameter.maximum is None:
+            max_limit = "INFINITY"
+        else:
+            max_limit = str(parameter.maximum)
+
         table_info = TableInfo(
             zone=indexes["curve_type"],
             curve=indexes["curve_index"],
@@ -536,11 +579,17 @@ class TableArrayElement:
 
         return [
             Item(
+                name=parameter.name,
+                group=self.path,
                 uuid=table_element.uuid,
                 variable=variable,
                 type=parameter.internal_type,
+                on_read="NULL",
                 on_write="NULL",
                 internal_scale=parameter.internal_scale_factor,
+                min_limit=min_limit,
+                max_limit=max_limit,
+                read_only=parameter.read_only,
                 is_table=True,
                 table_info=table_info,
                 path=self.path,
@@ -562,6 +611,16 @@ class TableArrayElement:
         else:
             setter_function = "&" + parameter.setter_function
 
+        if parameter.minimum is None:
+            min_limit = "-INFINITY"
+        else:
+            min_limit = str(parameter.minimum)
+
+        if parameter.maximum is None:
+            max_limit = "INFINITY"
+        else:
+            max_limit = str(parameter.maximum)
+
         curve_type = get_curve_type("".join(self.layers[:2]))
         curve_index = int(self.layers[-2]) - 1
         point_index = 0  # unused
@@ -581,11 +640,17 @@ class TableArrayElement:
 
         return [
             Item(
+                name=parameter.name,
+                group=self.path,
                 uuid=table_element.uuid,
                 variable=f"&{internal_variable}",
                 type=parameter.internal_type,
+                on_read="NULL",
                 on_write="NULL",
                 internal_scale=parameter.internal_scale_factor,
+                min_limit=min_limit,
+                max_limit=max_limit,
+                read_only=parameter.read_only,
                 is_table=True,
                 table_info=table_info,
                 path=self.path,
