@@ -7,7 +7,7 @@ include = ["src/*"]
 
 [tool.poetry-dynamic-versioning]
 #set to false.  poetry-dynamic-versioning only needed for CI versioning.
-enable = false
+enable = true
 vcs = "git"
 style = "pep440"
 
@@ -91,7 +91,7 @@ exclude = './.venv'
 
 [build-system]
 requires = [
-    "alqtendpy",
+    #"alqtendpy",
     "setuptools",
     "wheel",
     "poetry-core>=1.0.0",

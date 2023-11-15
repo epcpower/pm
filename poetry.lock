@@ -592,7 +592,7 @@ watch = ["pyinotify"]
 
 [[package]]
 name = "epyqlib"
-version = "0.0.0"
+version = "2022.10.post45.dev0+42435bc"
 description = ""
 optional = false
 python-versions = ">=3.7.9,<3.11"
