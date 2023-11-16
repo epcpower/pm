@@ -55,7 +55,7 @@ click = "<=7.1.2"
 qt5reactor = "0.5"
 tqdm = "4.32.1"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 epyqlib = {path = "./sub/epyqlib",  develop = true}
 gitignoreio = "0.1.5"
 pyinstaller = "4.4"
@@ -90,7 +90,6 @@ exclude = './.venv'
 
 [build-system]
 requires = [
-    "alqtendpy",
     "setuptools",
     "wheel",
     "poetry-core>=1.0.0",
