@@ -76,8 +76,6 @@ epcexportdocx = 'epcpm.cli.exportdocx:cli'
 epcconvertparameters = 'epcpm.cli.convertepp:cli'
 builduipm = 'epcpm.builduipm:compile_ui'
 epcpm = 'epcpm.__main__:_entry_point'
-genbuildinfo = 'epyqlib.genbuildinfo:write_build_file'
-generateversion = 'epyqlib.cli.generateversion:cli'
 
 [tool.black]
 target-version =  ['py37']
