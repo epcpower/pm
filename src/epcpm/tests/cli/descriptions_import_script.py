@@ -48,7 +48,8 @@ for parameter, description in zip(parameters, parameter_descriptions):
     parameter_description_map[name] = description
 
 # Read in parameters.json file
-json_file = open("/home/annie/Repos/grid-tied/interface/pm/parameters.json")
+GRID_TIED_PARAMETERS_PATH = "/home/annie/Repos/grid-tied/interface/pm/parameters.json"
+json_file = open(GRID_TIED_PARAMETERS_PATH)
 root_parameters = json.load(json_file)
 
 
@@ -89,5 +90,5 @@ def populate_description(current_json: dict) -> None:
 
 
 populate_description(root_parameters)
-with open("/home/annie/edited_parameters.json", "w", encoding="utf-8") as f:
+with open(GRID_TIED_PARAMETERS_PATH, "w", encoding="utf-8") as f:
     json.dump(root_parameters, f, ensure_ascii=True, indent=4)
