@@ -1,6 +1,7 @@
 from __future__ import (
     annotations,
-)  # See PEP 563, check to remove in future Python version higher than 3.7
+)
+import json  # See PEP 563, check to remove in future Python version higher than 3.7
 import attr
 import decimal
 import openpyxl
@@ -140,6 +141,19 @@ def create_pmvs_uuid_to_value_list(
     return pmvs_uuid_to_value_list
 
 
+def collect_group_comments(root_parameters):
+    group_comment_map = {}
+    if root_parameters["_type"] == "group":
+        if "comment" in root_parameters.keys():
+            group_comment_map[root_parameters["name"]] = root_parameters["comment"]
+
+    if "children" in root_parameters.keys():
+        for child in root_parameters["children"]:
+            group_comment_map.update(collect_group_comments(child))
+
+    return group_comment_map
+
+
 def export(
     path: pathlib.Path,
     can_model: epyqlib.attrsmodel.Model,
@@ -197,11 +211,13 @@ class Root:
         workbook = openpyxl.Workbook()
         workbook.remove(workbook.active)
         parameters_worksheet = workbook.create_sheet("Parameters")
-        parameters_worksheet.append(
-            parameter_field_names.as_filtered_tuple(self.column_filter)
-        )
+        parameters_worksheet.append(field_names.as_filtered_tuple(self.column_filter))
         groups_worksheet = workbook.create_sheet("Groups")
-        groups_worksheet.append(group_field_names.as_filtered_tuple(self.column_filter))
+        groups_worksheet.append(["Parameter Path", "Group"])
+
+        # Read in parameters.json file
+        json_file = open("/home/annie/Repos/grid-tied/interface/pm/parameters.json")
+        root_parameters = json.load(json_file)
 
         unsorted_rows = []
         for child in self.wrapped.children:
@@ -216,12 +232,16 @@ class Root:
 
         sorted_rows = natsorted(unsorted_rows, key=lambda x: x.parameter_path)
 
+        group_description_map = {}
         for row in sorted_rows:
             parameters_worksheet.append(row.as_filtered_tuple(self.column_filter))
-            parameter_path = row.as_filtered_tuple(self.column_filter)[16]
-            parameter_path = parameter_path.replace("Parameters -> ", "")
-            if parameter_path in group_description_map.keys():
-                pass
+            path_name = row.parameter_path.replace(PARAMETERS_PREFIX, "")
+            group_description_map[path_name] = ""
+
+        group_comment_map = collect_group_comments(root_parameters)
+        for group in group_comment_map.keys():
+            if group in group_description_map.keys():
+                group_description_map[group] = group_comment_map[group]
 
         return workbook
 
@@ -405,8 +425,9 @@ def format_for_manual(
 
     """
     input_workbook = openpyxl.load_workbook(filename=input_path)
-    input_worksheet = input_workbook.active
-    input_worksheet_col_count = input_worksheet.max_column
+    input_parameter_worksheet = input_workbook["Parameters"]
+    input_group_worksheet = input_workbook["Groups"]
+    input_worksheet_col_count = input_parameter_worksheet.max_column
 
     output_path = input_path.with_name(
         input_path.stem + "_for_manual" + input_path.suffix
@@ -421,10 +442,12 @@ def format_for_manual(
 
     # Perform all filtering activities.
     filtered_rows = []
-    for row in input_worksheet.iter_rows(min_row=2, max_col=input_worksheet_col_count):
+    for row in input_parameter_worksheet.iter_rows(
+        min_row=2, max_col=input_worksheet_col_count
+    ):
         # Only output parameters that are in EPyQ.
         parameter_path = row[16].value
-        if not parameter_path.startswith(PARAMETERS_PREFIX):
+        if not parameter_path.startswith(PARAMETER_QUERY_PREFIX):
             continue
 
         # Filter out parameter groups in FILTER_GROUPS list.
