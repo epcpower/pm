@@ -4,6 +4,13 @@ import json
 
 GROUP_SEPARATOR = " -> "
 PARAMETER_SEPARATOR = ":"
+GROUP_MAP = {
+    "1. AC -> B. Line Monitoring -> Enter service condition": "1. AC -> B. Line Monitoring -> Enter to service condition",
+    "1. AC -> B. Line Monitoring -> Enter service condition -> Frequency limits": "1. AC -> B. Line Monitoring -> Enter to service condition -> Frequency limits",
+    "1. AC -> B. Line Monitoring -> Enter service condition -> Voltage limits": "1. AC -> B. Line Monitoring -> Enter to service condition -> Voltage limits",
+}
+old_group_names = list(GROUP_MAP.keys())
+new_group_names = list(GROUP_MAP.values())
 
 input_spreadsheet_path = "/home/annie/Documents/Parameter & Group Descriptions.xlsx"
 parameter_description_df = pd.read_excel(
@@ -15,11 +22,16 @@ group_description_df = group_description_df.replace({np.nan: None})
 
 # Create group description map
 groups = group_description_df["Group"]
+groups = groups.replace(old_group_names, new_group_names)
 group_descriptions = group_description_df["Description"]
 group_description_map = {}
 for group, description in zip(groups, group_descriptions):
     name = group.split(GROUP_SEPARATOR)[-1]
-    group_description_map[name] = description
+    if name not in group_description_map.keys():
+        group_description_map[name] = description
+    else:
+        if not group_description_map[name] and description is not None:
+            group_description_map[name] = description
 
 # Get all the group names (without separator) in a list
 group_names = []
