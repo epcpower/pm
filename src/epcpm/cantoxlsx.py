@@ -196,8 +196,12 @@ class Root:
         """
         workbook = openpyxl.Workbook()
         workbook.remove(workbook.active)
-        worksheet = workbook.create_sheet("Parameters")
-        worksheet.append(field_names.as_filtered_tuple(self.column_filter))
+        parameters_worksheet = workbook.create_sheet("Parameters")
+        parameters_worksheet.append(
+            parameter_field_names.as_filtered_tuple(self.column_filter)
+        )
+        groups_worksheet = workbook.create_sheet("Groups")
+        groups_worksheet.append(group_field_names.as_filtered_tuple(self.column_filter))
 
         unsorted_rows = []
         for child in self.wrapped.children:
@@ -213,7 +217,11 @@ class Root:
         sorted_rows = natsorted(unsorted_rows, key=lambda x: x.parameter_path)
 
         for row in sorted_rows:
-            worksheet.append(row.as_filtered_tuple(self.column_filter))
+            parameters_worksheet.append(row.as_filtered_tuple(self.column_filter))
+            parameter_path = row.as_filtered_tuple(self.column_filter)[16]
+            parameter_path = parameter_path.replace("Parameters -> ", "")
+            if parameter_path in group_description_map.keys():
+                pass
 
         return workbook
 
