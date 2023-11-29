@@ -1,7 +1,7 @@
 from __future__ import (
     annotations,
 )
-import json  # See PEP 563, check to remove in future Python version higher than 3.7
+# import json  # See PEP 563, check to remove in future Python version higher than 3.7
 import attr
 import decimal
 import openpyxl
@@ -11,7 +11,7 @@ import uuid
 import epcpm.pm_helper
 import epyqlib.treenode
 import epyqlib.utils.general
-from natsort import natsorted
+# from natsort import natsorted
 from tqdm import tqdm
 
 
@@ -141,17 +141,17 @@ def create_pmvs_uuid_to_value_list(
     return pmvs_uuid_to_value_list
 
 
-def collect_group_comments(root_parameters):
-    group_comment_map = {}
-    if root_parameters["_type"] == "group":
-        if "comment" in root_parameters.keys():
-            group_comment_map[root_parameters["name"]] = root_parameters["comment"]
-
-    if "children" in root_parameters.keys():
-        for child in root_parameters["children"]:
-            group_comment_map.update(collect_group_comments(child))
-
-    return group_comment_map
+# def collect_group_comments(root_parameters):
+#     group_comment_map = {}
+#     if root_parameters["_type"] == "group":
+#         if "comment" in root_parameters.keys():
+#             group_comment_map[root_parameters["name"]] = root_parameters["comment"]
+#
+#     if "children" in root_parameters.keys():
+#         for child in root_parameters["children"]:
+#             group_comment_map.update(collect_group_comments(child))
+#
+#     return group_comment_map
 
 
 def export(
@@ -216,32 +216,33 @@ class Root:
         groups_worksheet.append(["Parameter Path", "Group"])
 
         # Read in parameters.json file
-        json_file = open("/home/annie/Repos/grid-tied/interface/pm/parameters.json")
-        root_parameters = json.load(json_file)
+        # json_file = open("/home/annie/Repos/grid-tied/interface/pm/parameters.json")
+        # json_file = open(r"C:\Projects\grid-tied_SC-686\interface\pm\parameters.json")
+        # root_parameters = json.load(json_file)
+        #
+        # unsorted_rows = []
+        # for child in self.wrapped.children:
+        #     rows = builders.wrap(
+        #         wrapped=child,
+        #         parameter_uuid_finder=self.parameter_uuid_finder,
+        #         pmvs_uuid_to_value_list=self.pmvs_uuid_to_value_list,
+        #     ).gen()
+        #
+        #     for row in rows:
+        #         unsorted_rows.append(row)
+        #
+        # sorted_rows = natsorted(unsorted_rows, key=lambda x: x.parameter_path)
 
-        unsorted_rows = []
-        for child in self.wrapped.children:
-            rows = builders.wrap(
-                wrapped=child,
-                parameter_uuid_finder=self.parameter_uuid_finder,
-                pmvs_uuid_to_value_list=self.pmvs_uuid_to_value_list,
-            ).gen()
-
-            for row in rows:
-                unsorted_rows.append(row)
-
-        sorted_rows = natsorted(unsorted_rows, key=lambda x: x.parameter_path)
-
-        group_description_map = {}
-        for row in sorted_rows:
-            parameters_worksheet.append(row.as_filtered_tuple(self.column_filter))
-            path_name = row.parameter_path.replace(PARAMETERS_PREFIX, "")
-            group_description_map[path_name] = ""
-
-        group_comment_map = collect_group_comments(root_parameters)
-        for group in group_comment_map.keys():
-            if group in group_description_map.keys():
-                group_description_map[group] = group_comment_map[group]
+        # group_description_map = {}
+        # for row in sorted_rows:
+        #     parameters_worksheet.append(row.as_filtered_tuple(self.column_filter))
+        #     path_name = row.parameter_path.replace(PARAMETERS_PREFIX, "")
+        #     group_description_map[path_name] = ""
+        #
+        # group_comment_map = collect_group_comments(root_parameters)
+        # for group in group_comment_map.keys():
+        #     if group in group_description_map.keys():
+        #         group_description_map[group] = group_comment_map[group]
 
         return workbook
 
@@ -413,6 +414,7 @@ class GenericNode:
 
 def format_for_manual(
     input_path: pathlib.Path,
+    parameters_model,  # TODO: type hint
 ) -> None:
     """
     Translate the CAN model parameter data to formatted Excel format (.xlsx)
@@ -424,9 +426,20 @@ def format_for_manual(
     Returns:
 
     """
+
+    print(f"\nparam_model: {parameters_model.root}\n")
+
+    builder = epcpm.cantoxlsx.builders.wrap(
+        wrapped=parameters_model.root,
+        # parameter_uuid_finder=can_model.node_from_uuid,
+        # column_filter=column_filter,
+        # pmvs_uuid_to_value_list=pmvs_uuid_to_value_list,
+    )
+    builder.gen()
+
     input_workbook = openpyxl.load_workbook(filename=input_path)
     input_parameter_worksheet = input_workbook["Parameters"]
-    input_group_worksheet = input_workbook["Groups"]
+    # input_group_worksheet = input_workbook["Groups"]
     input_worksheet_col_count = input_parameter_worksheet.max_column
 
     output_path = input_path.with_name(
@@ -847,3 +860,49 @@ def format_for_manual(
             progress_bar.update(1)
 
     output_workbook.save(output_path)
+
+
+@builders(epyqlib.pm.parametermodel.Root)
+@attr.s
+class ParameterModelRoot:
+    """Excel spreadsheet generator for the ParameterModel Root class."""
+
+    wrapped = attr.ib(type=epcpm.canmodel.Root)
+
+    def gen(self) -> openpyxl.workbook.workbook.Workbook:
+        print("HERE root!")
+        for child in self.wrapped.children:
+            if not isinstance(
+                child,
+                (
+                    epyqlib.pm.parametermodel.Group,
+                ),
+            ):
+                continue
+
+            builders.wrap(
+                wrapped=child,
+            ).gen()
+
+
+@builders(epyqlib.pm.parametermodel.Group)
+@attr.s
+class Group:
+    wrapped = attr.ib()
+
+    def gen(self) -> openpyxl.workbook.workbook.Workbook:
+        if self.wrapped.comment is not None:
+            print(f"GROUP: {self.wrapped.name}: {self.wrapped.comment}")
+
+        for child in self.wrapped.children:
+            if not isinstance(
+                child,
+                (
+                    epyqlib.pm.parametermodel.Group,
+                ),
+            ):
+                continue
+
+            builders.wrap(
+                wrapped=child,
+            ).gen()
