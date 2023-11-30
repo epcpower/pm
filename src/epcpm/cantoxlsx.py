@@ -506,7 +506,13 @@ def format_for_manual(
                 current_parameter_path = parameter_path_to_check
                 if parameter_path_to_check in group_comment_map:
                     # Add the group's comment, if available.
-                    output_worksheet.append([current_parameter_path + "\n\n" + group_comment_map[current_parameter_path]])
+                    output_worksheet.append(
+                        [
+                            current_parameter_path
+                            + "\n\n"
+                            + group_comment_map[current_parameter_path]
+                        ]
+                    )
                 else:
                     output_worksheet.append([current_parameter_path])
 
@@ -836,6 +842,7 @@ def format_for_manual(
 @attr.s
 class ParameterModelRoot:
     """Generate the control manual Root class."""
+
     wrapped = attr.ib(type=epcpm.canmodel.Root)
 
     def gen(self) -> typing.Dict[str, str]:
@@ -843,9 +850,7 @@ class ParameterModelRoot:
         for child in self.wrapped.children:
             if not isinstance(
                 child,
-                (
-                    epyqlib.pm.parametermodel.Group,
-                ),
+                (epyqlib.pm.parametermodel.Group,),
             ):
                 continue
 
@@ -862,6 +867,7 @@ class ParameterModelRoot:
 @attr.s
 class Group:
     """Generate the control manual Group class."""
+
     wrapped = attr.ib()
 
     def gen(self) -> typing.Dict[str, str]:
@@ -870,15 +876,13 @@ class Group:
             # Create the parameter path string and store in the map.
             parameter_path_list = self._generate_group_path_list(self.wrapped)
             parameter_path_str = " -> ".join(parameter_path_list)
-            parameter_path_str_out = parameter_path_str[len(PARAMETERS_PREFIX):]
+            parameter_path_str_out = parameter_path_str[len(PARAMETERS_PREFIX) :]
             group_comment_map[parameter_path_str_out] = self.wrapped.comment
 
         for child in self.wrapped.children:
             if not isinstance(
                 child,
-                (
-                    epyqlib.pm.parametermodel.Group,
-                ),
+                (epyqlib.pm.parametermodel.Group,),
             ):
                 continue
 
