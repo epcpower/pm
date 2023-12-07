@@ -1,7 +1,7 @@
 from __future__ import (
     annotations,
-)
-import json  # See PEP 563, check to remove in future Python version higher than 3.7
+)  # See PEP 563, check to remove in future Python version higher than 3.7
+import re
 import attr
 import decimal
 import openpyxl
@@ -34,7 +34,8 @@ CELL_BORDER = openpyxl.styles.Border(
     top=CELL_SIDE, left=CELL_SIDE, right=CELL_SIDE, bottom=CELL_SIDE
 )
 CELL_FONT = openpyxl.styles.Font(size=8)
-
+CELL_FILL_GROUP = openpyxl.styles.PatternFill("solid", fgColor="DDDDDD")
+NUMBERED_VARIANT_PATTERN = r"_(0[2-9]|1[0-9]|20)$"
 
 builders = epyqlib.utils.general.TypeMap()
 
@@ -141,19 +142,6 @@ def create_pmvs_uuid_to_value_list(
     return pmvs_uuid_to_value_list
 
 
-def collect_group_comments(root_parameters):
-    group_comment_map = {}
-    if root_parameters["_type"] == "group":
-        if "comment" in root_parameters.keys():
-            group_comment_map[root_parameters["name"]] = root_parameters["comment"]
-
-    if "children" in root_parameters.keys():
-        for child in root_parameters["children"]:
-            group_comment_map.update(collect_group_comments(child))
-
-    return group_comment_map
-
-
 def export(
     path: pathlib.Path,
     can_model: epyqlib.attrsmodel.Model,
@@ -166,7 +154,6 @@ def export(
     Args:
         path: path and filename for .xlsx file
         can_model: CAN model
-        parameters_model: parameters model
         pmvs_path: directory path to the pmvs files
         column_filter: columns to be output to .xls file
 
@@ -210,14 +197,8 @@ class Root:
         """
         workbook = openpyxl.Workbook()
         workbook.remove(workbook.active)
-        parameters_worksheet = workbook.create_sheet("Parameters")
-        parameters_worksheet.append(field_names.as_filtered_tuple(self.column_filter))
-        groups_worksheet = workbook.create_sheet("Groups")
-        groups_worksheet.append(["Parameter Path", "Group"])
-
-        # Read in parameters.json file
-        json_file = open("/home/annie/Repos/grid-tied/interface/pm/parameters.json")
-        root_parameters = json.load(json_file)
+        worksheet = workbook.create_sheet("Parameters")
+        worksheet.append(field_names.as_filtered_tuple(self.column_filter))
 
         unsorted_rows = []
         for child in self.wrapped.children:
@@ -226,22 +207,13 @@ class Root:
                 parameter_uuid_finder=self.parameter_uuid_finder,
                 pmvs_uuid_to_value_list=self.pmvs_uuid_to_value_list,
             ).gen()
-
             for row in rows:
                 unsorted_rows.append(row)
 
         sorted_rows = natsorted(unsorted_rows, key=lambda x: x.parameter_path)
 
-        group_description_map = {}
         for row in sorted_rows:
-            parameters_worksheet.append(row.as_filtered_tuple(self.column_filter))
-            path_name = row.parameter_path.replace(PARAMETERS_PREFIX, "")
-            group_description_map[path_name] = ""
-
-        group_comment_map = collect_group_comments(root_parameters)
-        for group in group_comment_map.keys():
-            if group in group_description_map.keys():
-                group_description_map[group] = group_comment_map[group]
+            worksheet.append(row.as_filtered_tuple(self.column_filter))
 
         return workbook
 
@@ -413,6 +385,7 @@ class GenericNode:
 
 def format_for_manual(
     input_path: pathlib.Path,
+    parameters_model: epyqlib.attrsmodel.Model,
 ) -> None:
     """
     Translate the CAN model parameter data to formatted Excel format (.xlsx)
@@ -420,13 +393,19 @@ def format_for_manual(
 
     Args:
         input_path: path and filename for input .xlsx file
+        parameters_model: parameters model
 
     Returns:
 
     """
+
+    builder = epcpm.cantoxlsx.builders.wrap(
+        wrapped=parameters_model.root,
+    )
+    group_comment_map = builder.gen()
+
     input_workbook = openpyxl.load_workbook(filename=input_path)
     input_parameter_worksheet = input_workbook["Parameters"]
-    input_group_worksheet = input_workbook["Groups"]
     input_worksheet_col_count = input_parameter_worksheet.max_column
 
     output_path = input_path.with_name(
@@ -447,7 +426,7 @@ def format_for_manual(
     ):
         # Only output parameters that are in EPyQ.
         parameter_path = row[16].value
-        if not parameter_path.startswith(PARAMETER_QUERY_PREFIX):
+        if not parameter_path.startswith(PARAMETERS_PREFIX):
             continue
 
         # Filter out parameter groups in FILTER_GROUPS list.
@@ -472,6 +451,8 @@ def format_for_manual(
         entered_tables_section = False
 
         for row in filtered_rows:
+            is_numbered_variant = False
+
             parameter_path = row[16].value
             if not parameter_path.startswith(PARAMETERS_PREFIX):
                 # Only output parameters that are in EPyQ.
@@ -489,6 +470,15 @@ def format_for_manual(
             cab1k_2l_3500hz_out = row[8].value
             cab1k_3l1_2700hz_out = row[9].value
             enumerator_list = row[17].value
+
+            # is_numbered_variant is necessary to distinguish parameters that are similarly named
+            # (differ by numbers) from those that aren't (differ by word(s)) since both have
+            # entered_table_section and all_defaults_same set to True
+            is_numbered_variant = (
+                True
+                if re.search(NUMBERED_VARIANT_PATTERN, parameter_name_out)
+                else False
+            )
 
             if units_out:
                 # If there is a units value, append it to the end of the numeric default value.
@@ -524,9 +514,19 @@ def format_for_manual(
             # Chop off the parameters prefix to match the path that is seen in the EPyQ parameters tab.
             parameter_path_to_check = parameter_path[len(PARAMETERS_PREFIX) :]
             if parameter_path_to_check != current_parameter_path:
-                # Add the parameter path for this section of parameters.
+                # Add the parameter path (group) for this section of parameters.
                 current_parameter_path = parameter_path_to_check
-                output_worksheet.append([current_parameter_path])
+                if parameter_path_to_check in group_comment_map:
+                    # Add the group's comment, if available.
+                    output_worksheet.append(
+                        [
+                            current_parameter_path
+                            + "\n\n"
+                            + group_comment_map[current_parameter_path]
+                        ]
+                    )
+                else:
+                    output_worksheet.append([current_parameter_path])
 
                 # Merge cells for header description.
                 output_worksheet.merge_cells(
@@ -536,9 +536,10 @@ def format_for_manual(
                     end_column=7,
                 )
 
-                # Set the font size for header description.
+                # Set the font size and fill color for header description.
                 for col in ["A", "B", "C", "D", "E", "F", "G"]:
                     output_worksheet[col + str(current_row)].font = CELL_FONT
+                    output_worksheet[col + str(current_row)].fill = CELL_FILL_GROUP
 
                 current_row += 1
                 # Reset the tables section logic.
@@ -547,7 +548,7 @@ def format_for_manual(
             # Track the rows used for each parameter entry.
             rows_used = 0
 
-            if entered_tables_section:
+            if entered_tables_section and is_numbered_variant:
                 if all_defaults_same:
                     # Output single Default cells section for additional table row.
                     output_worksheet.append(
@@ -847,3 +848,85 @@ def format_for_manual(
             progress_bar.update(1)
 
     output_workbook.save(output_path)
+
+
+@builders(epyqlib.pm.parametermodel.Root)
+@attr.s
+class ParameterModelRoot:
+    """Generate the control manual Root class."""
+
+    wrapped = attr.ib(type=epcpm.canmodel.Root)
+
+    def gen(self) -> typing.Dict[str, str]:
+        group_comment_map = dict()
+        for child in self.wrapped.children:
+            if not isinstance(
+                child,
+                (epyqlib.pm.parametermodel.Group,),
+            ):
+                continue
+
+            child_group_comment_map = builders.wrap(
+                wrapped=child,
+            ).gen()
+
+            group_comment_map = {**group_comment_map, **child_group_comment_map}
+
+        return group_comment_map
+
+
+@builders(epyqlib.pm.parametermodel.Group)
+@attr.s
+class Group:
+    """Generate the control manual Group class."""
+
+    wrapped = attr.ib()
+
+    def gen(self) -> typing.Dict[str, str]:
+        group_comment_map = dict()
+        if self.wrapped.comment is not None:
+            # Create the parameter path string and store in the map.
+            parameter_path_list = self._generate_group_path_list(self.wrapped)
+            parameter_path_str = " -> ".join(parameter_path_list)
+            parameter_path_str_out = parameter_path_str[len(PARAMETERS_PREFIX) :]
+            group_comment_map[parameter_path_str_out] = self.wrapped.comment
+
+        for child in self.wrapped.children:
+            if not isinstance(
+                child,
+                (epyqlib.pm.parametermodel.Group,),
+            ):
+                continue
+
+            child_group_comment_map = builders.wrap(
+                wrapped=child,
+            ).gen()
+
+            group_comment_map = {**group_comment_map, **child_group_comment_map}
+
+        return group_comment_map
+
+    @staticmethod
+    def _generate_group_path_list(node: epyqlib.treenode.TreeNode) -> typing.List[str]:
+        """
+        Generate the group node's path list.
+
+        Args:
+            node: tree node (from Parameters model)
+
+        Returns:
+            group node's path list
+        """
+        path_list = [node.name]
+        node_parent = node
+        while True:
+            if node_parent.tree_parent is not None:
+                path_list.insert(0, node_parent.tree_parent.name)
+                node_parent = node_parent.tree_parent
+            else:
+                break
+        if len(path_list) > 1:
+            # Remove the unnecessary Parameters root element.
+            path_list.pop(0)
+
+        return path_list
