@@ -10,6 +10,7 @@ import epyqlib.utils.qt
 import epcpm.canmodel
 import epcpm.sunspecmodel
 import epcpm.staticmodbusmodel
+import epcpm.anomalymodel
 
 
 class ProjectSaveCanceled(Exception):
@@ -127,6 +128,22 @@ def _post_load(project):
                 drop_sources=(models.parameters,),
             )
 
+    if models.anomalies is None:
+        if project.paths.anomalies is None or len(project.paths.anomalies) == 0:
+            models.anomalies = epyqlib.attrsmodel.Model(
+                root=epcpm.anomalymodel.Root(),
+                columns=epcpm.anomalymodel.columns,
+                drop_sources=(models.parameters,),
+            )
+        else:
+            models.anomalies = load_model(
+                project=project,
+                path=project.paths.anomalies,
+                root_type=epcpm.anomalymodel.Root,
+                columns=epcpm.anomalymodel.columns,
+                drop_sources=(models.parameters,),
+            )
+
     models.parameters.droppable_from.add(models.parameters)
 
     models.can.droppable_from.add(models.parameters)
@@ -164,6 +181,10 @@ class Models:
         default=None,
         metadata=graham.create_metadata(field=marshmallow.fields.String()),
     )
+    anomalies = attr.ib(
+        default=None,
+        metadata=graham.create_metadata(field=marshmallow.fields.String()),
+    )
 
     @classmethod
     def __iter__(cls):
@@ -175,6 +196,7 @@ class Models:
         self.sunspec1 = value
         self.sunspec2 = value
         self.staticmodbus = value
+        self.anomalies = value
 
     def items(self):
         return attr.asdict(self, recurse=False).items()

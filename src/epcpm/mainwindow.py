@@ -27,6 +27,7 @@ import epcpm.project
 import epcpm.smdxtosunspec
 import epcpm.sunspecmodel
 import epcpm.staticmodbusmodel
+import epcpm.anomalymodel
 import epcpm.sunspectoxlsx
 import epcpm.symtoproject
 
@@ -376,6 +377,11 @@ class Window:
         model_views.sunspec2 = ModelView(
             view=self.ui.sunspec2_view,
             types=epcpm.sunspecmodel.types,
+        )
+
+        model_views.anomalies = ModelView(
+            view=self.ui.anomalies_view,
+            types=epcpm.anomalymodel.types,
         )
 
         for notifier in self.uuid_notifiers.values():
