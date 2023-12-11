@@ -325,7 +325,4 @@ tags
 # Coc configuration directory
 .vim
 
-# generated build file
-__build.py
-
 # End of https://www.gitignore.io/api/eclipse,vim,python,pycharm,git,venv
