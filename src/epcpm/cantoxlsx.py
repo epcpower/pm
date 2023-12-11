@@ -540,6 +540,10 @@ def format_for_manual(
                 for col in ["A", "B", "C", "D", "E", "F", "G"]:
                     output_worksheet[col + str(current_row)].font = CELL_FONT
                     output_worksheet[col + str(current_row)].fill = CELL_FILL_GROUP
+                    output_worksheet[col + str(style_row)].border = CELL_BORDER
+                    output_worksheet[
+                        col + str(current_row)
+                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
 
                 current_row += 1
                 # Reset the tables section logic.
