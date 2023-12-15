@@ -111,6 +111,8 @@ class ImportPaths:
     rejected_callback_c = attr.ib(converter=path_or_none)
     # No UI handling for spreadsheet_can since it is not part of normal import/export
     spreadsheet_can = attr.ib(converter=path_or_none)
+    anomalies_h = attr.ib(converter=path_or_none)
+    anomalies_spreadsheet = attr.ib(converter=path_or_none)
 
 
 def paths_from_directory(directory):
@@ -140,6 +142,8 @@ def paths_from_directory(directory):
         interface_c=interface / "interfaceGen.c",
         rejected_callback_c=interface / "rejectedCallbackHandler.c",
         spreadsheet_can=embedded / "EPC-CAN.xlsx",
+        anomalies_h=embedded / "system" / "anomalies_generated.h",
+        anomalies_spreadsheet = embedded / "anomalies.xlsx"
     )
 
 

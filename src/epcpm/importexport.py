@@ -27,6 +27,8 @@ import epcpm.sunspectomanualc
 import epcpm.sunspectomanualh
 import epcpm.sunspectoxlsx
 import epcpm.symtoproject
+import epcpm.anomaliestoc
+import epcpm.anomaliestoxlsx
 import epyqlib.attrsmodel
 
 
@@ -308,6 +310,19 @@ def full_export(
         staticmodbus_model=project.models.staticmodbus,
         sunspec1_model=project.models.sunspec1,
         sunspec2_model=project.models.sunspec2,
+        skip_output=skip_output,
+    )
+
+    epcpm.anomaliestoc.export(
+        h_path=paths.anomalies_h,
+        anomaly_model=project.models.anomalies,
+        parameters_model=project.models.parameters,
+    )
+
+    epcpm.anomaliestoxlsx.export(
+        path=paths.anomalies_spreadsheet,
+        anomaly_model=project.models.anomalies,
+        parameters_model=project.models.parameters,
         skip_output=skip_output,
     )
 

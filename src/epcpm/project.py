@@ -158,6 +158,45 @@ def _post_load(project):
     models.update_enumeration_roots()
 
 
+'''
+Generates anomaly code enumerators from anomaly data objects.
+Enumerators found in anomaly_enumeration are modified
+to match anomaly data in anomalies object.
+
+Args:
+    anomalies:           Anomalies root object
+    anomaly_enumeration: Enumeration containing anomaly codes.
+
+Returns:
+    None
+'''
+def update_anomaly_enums(anomalies, anomaly_enumeration):
+
+    # First object is always included, containing the mandatory
+    # enumerator with zero value.
+    anoms = [anomaly_enumeration.children[0]]
+
+    for at in anomalies.root.children:
+        for anom in at.children:
+
+            enum = anom.to_enum()
+
+            # Resolve duplicates, i.e. anomalies that exist already in the enumeration.
+            duplicate = False
+            for old_enum in anomaly_enumeration.children:
+                if enum.value == old_enum.value and enum.name == old_enum.name:
+                    duplicate = True
+                    break
+
+            if duplicate:
+                anoms.append(old_enum)
+            else:
+                anoms.append(enum)
+
+    # Replace the old enumerators
+    anomaly_enumeration.children = anoms
+
+
 @graham.schemify(tag="models")
 @attr.s
 class Models:
@@ -239,6 +278,39 @@ class Models:
             )
         self.parameters.list_selection_roots["access level"] = access_level_root
 
+        # Save location of anomaliy code enumeration
+        if enumerations_root is None:
+            anomaly_enumeration_root = None
+        else:
+            (anomaly_enumeration_root,) = (
+                child
+                for child in enumerations_root.children
+                if child.name == "AnomalyCode"
+            )
+        self.parameters.list_selection_roots["anomalies"] = anomaly_enumeration_root
+
+        # Save location of anomaly response level enumeration
+        if enumerations_root is None:
+            anomaly_resp_level_root = None
+        else:
+            (anomaly_resp_level_root,) = (
+                child
+                for child in enumerations_root.children
+                if child.name == "AnomalyResponseLevel"
+            )
+        self.anomalies.list_selection_roots["anomaly_response_levels"] = anomaly_resp_level_root
+
+        # Save location of anomaly trigger type enumeration
+        if enumerations_root is None:
+            anomaly_trig_type_root = None
+        else:
+            (anomaly_trig_type_root,) = (
+                child
+                for child in enumerations_root.children
+                if child.name == "AnomalyTriggerType"
+            )
+        self.anomalies.list_selection_roots["anomaly_trigger_types"] = anomaly_trig_type_root
+
         if enumerations_root is None:
             visibility_root = None
         else:
@@ -285,11 +357,13 @@ class Models:
         self.staticmodbus.list_selection_roots["enumerations"] = enumerations_root
 
         self.can.list_selection_roots["enumerations"] = enumerations_root
+
         self.parameters.update_nodes()
         self.can.update_nodes()
         self.sunspec1.update_nodes()
         self.sunspec2.update_nodes()
         self.staticmodbus.update_nodes()
+        self.anomalies.update_nodes()
 
 
 @graham.schemify(tag="project")
@@ -307,6 +381,10 @@ class Project:
     data_filters = attr.ib(default=(("Dataset", ["json"]), ("All Files", ["*"])))
 
     def save(self, parent=None):
+
+        # Update anomaly code enumrations before saving
+        update_anomaly_enums(self.models.anomalies, self.models.parameters.list_selection_roots["anomalies"])
+
         if self.filename is None:
             project_path = epyqlib.utils.qt.file_dialog(
                 filters=self.filters,

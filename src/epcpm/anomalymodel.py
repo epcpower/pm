@@ -31,15 +31,52 @@ class Anomaly(epyqlib.treenode.TreeNode):
         ),
     )
 
+    abbreviation = epyqlib.attrsmodel.create_code_identifier_string_attribute(
+        default="NEW_ANOMALY",
+    )
+
     uuid = epyqlib.attrsmodel.attr_uuid()
 
     code = epyqlib.attrsmodel.create_integer_attribute(default=0)
 
-    response_level_I = epyqlib.attrsmodel.create_integer_attribute(default=0)
+    response_level_I = epyqlib.attrsmodel.attr_uuid(
+        default=None,
+        allow_none=True,
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=response_level_I,
+        human_name="Response Level I",
+        data_display=epyqlib.attrsmodel.name_from_uuid,
+        delegate=epyqlib.attrsmodel.RootDelegateCache(
+            list_selection_root="anomaly_response_levels",
+        ),
+    )
 
-    response_level_A = epyqlib.attrsmodel.create_integer_attribute(default=0)
+    response_level_A = epyqlib.attrsmodel.attr_uuid(
+        default=None,
+        allow_none=True,
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=response_level_A,
+        human_name="Response Level A",
+        data_display=epyqlib.attrsmodel.name_from_uuid,
+        delegate=epyqlib.attrsmodel.RootDelegateCache(
+            list_selection_root="anomaly_response_levels",
+        ),
+    )
 
-    trigger_type = epyqlib.attrsmodel.create_integer_attribute(default=0)
+    trigger_type = epyqlib.attrsmodel.attr_uuid(
+        default=None,
+        allow_none=True,
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=trigger_type,
+        human_name="Trigger type",
+        data_display=epyqlib.attrsmodel.name_from_uuid,
+        delegate=epyqlib.attrsmodel.RootDelegateCache(
+            list_selection_root="anomaly_trigger_types",
+        ),
+    )
 
     comment = attr.ib(
         default=None,
@@ -54,6 +91,12 @@ class Anomaly(epyqlib.treenode.TreeNode):
 
     can_delete = epyqlib.attrsmodel.childless_can_delete
 
+    # Returns SunSpec enumerator instance for this anomaly.
+    def to_enum(self):
+        return epyqlib.pm.parametermodel.SunSpecEnumerator(
+            name=self.name, value=self.code
+        )
+
 
 @graham.schemify(tag="anomaly_table")
 @epyqlib.attrsmodel.ify()
@@ -65,6 +108,10 @@ class AnomalyTable(epyqlib.treenode.TreeNode):
         metadata=graham.create_metadata(
             field=marshmallow.fields.String(),
         ),
+    )
+
+    abbreviation = epyqlib.attrsmodel.create_code_identifier_string_attribute(
+        default="NEW_ANOMALY_TABLE",
     )
 
     uuid = epyqlib.attrsmodel.attr_uuid()
@@ -99,6 +146,7 @@ types = epyqlib.attrsmodel.Types(
 
 columns = epyqlib.attrsmodel.columns(
     merge("name", Anomaly, AnomalyTable),
+    merge("abbreviation", Anomaly, AnomalyTable),
     merge("code", Anomaly),
     merge("response_level_I", Anomaly),
     merge("response_level_A", Anomaly),
