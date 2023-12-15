@@ -1697,34 +1697,17 @@ def create_common_initializers(
     )
 
     common_initializers = [
-        f".sunspecScaleFactor = {scale_factor_variable},",
         f".canScaleFactor = {float(can_scale_factor)}f,",
-        f".scaleFactorUpdater = {scale_factor_updater},",
         f".internalScaleFactor = {internal_scale},",
-        f".rejectFromInactiveInterface = {reject_from_inactive_interfaces_literal},",
-        f".sunspec = {{",
-        [
-            f".variable = {sunspec_variable},",
-            f".getter = {sunspec_getter},",
-            f".setter = {sunspec_setter},",
-            # f".handGetter = {hand_coded_sunspec_getter_function},",
-            # f".handSetter = {hand_coded_sunspec_setter_function},",
-        ],
-        f"}},",
-        f".staticmodbus = {{",
-        [
-            f".getter = {staticmodbus_getter},",
-            f".setter = {staticmodbus_setter},",
-        ],
-        f"}},",
         f".can = {{",
         [
             f".variable = {can_variable},",
             f".getter = {can_getter},",
-            f".setter = {can_setter},",
+            f".setter = {can_setter}",
         ],
         f"}},",
         f".access_level = {access_level},",
+        f".rejectFromInactiveInterface = {reject_from_inactive_interfaces_literal},",
         *maybe_uuid,
     ]
     return common_initializers
