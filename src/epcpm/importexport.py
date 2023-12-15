@@ -143,100 +143,11 @@ def full_export(
         include_uuid_in_item=include_uuid_in_item,
     )
 
-    epcpm.sunspectocsv.export(
-        path=paths.spreadsheet,
-        sunspec_model=project.models.sunspec,
-        parameters_model=project.models.parameters,
-        skip_output=skip_output,
-        column_filter=attr.evolve(
-            epcpm.pm_helper.attr_fill(epcpm.sunspectocsv.Fields, False),
-            model_id=True,
-            size=True,
-            name=True,
-            label=True,
-            type=True,
-            units=True,
-            bit_offset=True,
-            bit_length=True,
-            modbus_address=True,
-            parameter_uuid=True,
-            parameter_uses_interface_item=True,
-            scale_factor_uuid=True,
-            enumeration_uuid=True,
-            type_uuid=True,
-            access_level=True,
-            not_implemented=True,
-            uuid=True,
-            class_name=True,
-        ),
-    )
-
-    epcpm.sunspectoxlsx.export(
-        path=paths.spreadsheet,
-        sunspec_model=project.models.sunspec,
-        parameters_model=project.models.parameters,
-        skip_sunspec=skip_output,
-    )
-
-    epcpm.sunspectoxlsx.export(
-        path=paths.spreadsheet_user,
-        sunspec_model=project.models.sunspec,
-        parameters_model=project.models.parameters,
-        skip_sunspec=skip_output,
-        column_filter=attr.evolve(
-            epcpm.pm_helper.attr_fill(epcpm.sunspectoxlsx.Fields, True),
-            get=False,
-            set=False,
-            item=False,
-        ),
-    )
-
-    epcpm.staticmodbustoxls.export(
-        path=paths.staticmodbus_spreadsheet,
-        staticmodbus_model=project.models.staticmodbus,
-        parameters_model=project.models.parameters,
-        skip_output=skip_output,
-    )
-
-    epcpm.sunspectotablesc.export(
-        c_path=paths.sunspec_tables_c,
-        h_path=paths.sunspec_tables_c.with_suffix(".h"),
-        sunspec_model=project.models.sunspec,
-        skip_sunspec=skip_output,
-    )
-
     epcpm.parameterstosil.export(
         c_path=paths.sil_c,
         h_path=paths.sil_c.with_suffix(".h"),
         parameters_model=project.models.parameters,
     )
-
-    epcpm.staticmodbustoc.export(
-        c_path=paths.staticmodbus_c,
-        h_path=paths.staticmodbus_c.with_suffix(".h"),
-        staticmodbus_model=project.models.staticmodbus,
-        skip_output=skip_output,
-    )
-
-    epcpm.parameterstobitfieldsc.export(
-        c_path=paths.bitfields_c,
-        h_path=paths.bitfields_c.with_suffix(".h"),
-        parameters_model=project.models.parameters,
-        staticmodbus_model=project.models.staticmodbus,
-        sunspec_model=project.models.sunspec,
-        skip_output=skip_output,
-    )
-
-    if first_time and not skip_output:
-        epcpm.sunspectomanualc.export(
-            path=paths.sunspec_c,
-            sunspec_model=project.models.sunspec,
-        )
-
-        epcpm.sunspectomanualh.export(
-            path=paths.sunspec_c,
-            sunspec_model=project.models.sunspec,
-        )
 
     run_generation_scripts(target_directory)
 
@@ -260,14 +171,6 @@ def run_generation_scripts(base_path):
             "--device-file", os.fspath(devices_path / "devices.json"),
             "--devices-directory", os.fspath(devices_path),
             "--can-directory", os.fspath(can_path)
-        ],
-        **subprocessArgs
-    )
-
-    subprocess.run(
-        [
-            os.fspath(scripts_path / "sunspecparser"),
-            os.fspath(sunspec_path / "MODBUS_SunSpec-EPC.xlsx"),
         ],
         **subprocessArgs
     )
