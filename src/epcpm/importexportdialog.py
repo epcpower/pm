@@ -143,7 +143,7 @@ def paths_from_directory(directory):
         rejected_callback_c=interface / "rejectedCallbackHandler.c",
         spreadsheet_can=embedded / "EPC-CAN.xlsx",
         anomalies_h=embedded / "system" / "anomalies_generated.h",
-        anomalies_spreadsheet = embedded / "anomalies.xlsx"
+        anomalies_spreadsheet=embedded / "anomalies.xlsx",
     )
 
 

@@ -158,7 +158,7 @@ def _post_load(project):
     models.update_enumeration_roots()
 
 
-'''
+"""
 Generates anomaly code enumerators from anomaly data objects.
 Enumerators found in anomaly_enumeration are modified
 to match anomaly data in anomalies object.
@@ -169,7 +169,9 @@ Args:
 
 Returns:
     None
-'''
+"""
+
+
 def update_anomaly_enums(anomalies, anomaly_enumeration):
 
     # First object is always included, containing the mandatory
@@ -298,7 +300,9 @@ class Models:
                 for child in enumerations_root.children
                 if child.name == "AnomalyResponseLevel"
             )
-        self.anomalies.list_selection_roots["anomaly_response_levels"] = anomaly_resp_level_root
+        self.anomalies.list_selection_roots[
+            "anomaly_response_levels"
+        ] = anomaly_resp_level_root
 
         # Save location of anomaly trigger type enumeration
         if enumerations_root is None:
@@ -309,7 +313,9 @@ class Models:
                 for child in enumerations_root.children
                 if child.name == "AnomalyTriggerType"
             )
-        self.anomalies.list_selection_roots["anomaly_trigger_types"] = anomaly_trig_type_root
+        self.anomalies.list_selection_roots[
+            "anomaly_trigger_types"
+        ] = anomaly_trig_type_root
 
         if enumerations_root is None:
             visibility_root = None
@@ -383,7 +389,10 @@ class Project:
     def save(self, parent=None):
 
         # Update anomaly code enumrations before saving
-        update_anomaly_enums(self.models.anomalies, self.models.parameters.list_selection_roots["anomalies"])
+        update_anomaly_enums(
+            self.models.anomalies,
+            self.models.parameters.list_selection_roots["anomalies"],
+        )
 
         if self.filename is None:
             project_path = epyqlib.utils.qt.file_dialog(
