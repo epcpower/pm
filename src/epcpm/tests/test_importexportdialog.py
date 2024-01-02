@@ -31,6 +31,8 @@ def test_blank(qtbot):
         interface_c=None,
         rejected_callback_c=None,
         spreadsheet_can=None,
+        anomalies_h=None,
+        anomalies_spreadsheet=None,
     )
 
 

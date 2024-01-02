@@ -174,6 +174,10 @@ Returns:
 
 def update_anomaly_enums(anomalies, anomaly_enumeration):
 
+    # Don't do anything if anomalies are not passed
+    if (not anomalies) or (not anomaly_enumeration):
+        return
+
     # First object is always included, containing the mandatory
     # enumerator with zero value.
     anoms = [anomaly_enumeration.children[0]]
@@ -284,22 +288,24 @@ class Models:
         if enumerations_root is None:
             anomaly_enumeration_root = None
         else:
-            (anomaly_enumeration_root,) = (
+            enum = [
                 child
                 for child in enumerations_root.children
                 if child.name == "AnomalyCode"
-            )
-        self.parameters.list_selection_roots["anomalies"] = anomaly_enumeration_root
+            ]
+            anomaly_enumeration_root = enum[0] if len(enum) == 1 else None
+        self.anomalies.list_selection_roots["anomaly_codes"] = anomaly_enumeration_root
 
         # Save location of anomaly response level enumeration
         if enumerations_root is None:
             anomaly_resp_level_root = None
         else:
-            (anomaly_resp_level_root,) = (
+            enum = [
                 child
                 for child in enumerations_root.children
                 if child.name == "AnomalyResponseLevel"
-            )
+            ]
+            anomaly_resp_level_root = enum[0] if len(enum) == 1 else None
         self.anomalies.list_selection_roots[
             "anomaly_response_levels"
         ] = anomaly_resp_level_root
@@ -308,11 +314,12 @@ class Models:
         if enumerations_root is None:
             anomaly_trig_type_root = None
         else:
-            (anomaly_trig_type_root,) = (
+            enum = [
                 child
                 for child in enumerations_root.children
                 if child.name == "AnomalyTriggerType"
-            )
+            ]
+            anomaly_trig_type_root = enum[0] if len(enum) == 1 else None
         self.anomalies.list_selection_roots[
             "anomaly_trigger_types"
         ] = anomaly_trig_type_root
@@ -391,7 +398,7 @@ class Project:
         # Update anomaly code enumrations before saving
         update_anomaly_enums(
             self.models.anomalies,
-            self.models.parameters.list_selection_roots["anomalies"],
+            self.models.anomalies.list_selection_roots["anomaly_codes"],
         )
 
         if self.filename is None:

@@ -234,6 +234,8 @@ class Dialog(QtWidgets.QDialog):
             interface_c=self.ui.interface_c.text(),
             rejected_callback_c=self.ui.rejected_callback_c.text(),
             spreadsheet_can=None,
+            anomalies_h=None,
+            anomalies_spreadsheet=None,
         )
         super().accept()
 

@@ -111,6 +111,7 @@ def full_import(paths):
     project.paths["sunspec1"] = "sunspec1.json"
     project.paths["sunspec2"] = "sunspec2.json"
     project.paths["staticmodbus"] = "staticmodbus.json"
+    project.paths["anomalies"] = "anomalies.json"
 
     return project
 
