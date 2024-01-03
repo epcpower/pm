@@ -7,6 +7,7 @@ import decimal
 import openpyxl
 import pathlib
 import typing
+import glob
 import uuid
 import epcpm.pm_helper
 import epyqlib.treenode
@@ -50,24 +51,7 @@ class Fields(epcpm.pm_helper.FieldsInterface):
     units = attr.ib(default=None, type=typing.Union[str, bool])
     minimum = attr.ib(default=None, type=typing.Union[str, bool, decimal.Decimal])
     maximum = attr.ib(default=None, type=typing.Union[str, bool, decimal.Decimal])
-    c1k_2l_2700_default = attr.ib(
-        default=None, type=typing.Union[str, bool, decimal.Decimal]
-    )
-    c1k_2l_3500_default = attr.ib(
-        default=None, type=typing.Union[str, bool, decimal.Decimal]
-    )
-    c1k_3l1_2700_default = attr.ib(
-        default=None, type=typing.Union[str, bool, decimal.Decimal]
-    )
-    c1k_3l1_3500_default = attr.ib(
-        default=None, type=typing.Union[str, bool, decimal.Decimal]
-    )
-    c1k_3l2_default = attr.ib(
-        default=None, type=typing.Union[str, bool, decimal.Decimal]
-    )
-    pd250_default = attr.ib(default=None, type=typing.Union[str, bool, decimal.Decimal])
-    pd500_default = attr.ib(default=None, type=typing.Union[str, bool, decimal.Decimal])
-    hy_default = attr.ib(default=None, type=typing.Union[str, bool, decimal.Decimal])
+    defaults = attr.ib(default=[], type=typing.List[typing.Union[str, bool, decimal.Decimal]])
     can_path = attr.ib(default=None, type=typing.Union[str, bool])
     parameter_path = attr.ib(default=None, type=typing.Union[str, bool])
     enumerator_list = attr.ib(default=None, type=typing.Union[str, bool])
@@ -83,14 +67,7 @@ field_names = Fields(
     access_level="Access Level",
     minimum="Minimum",
     maximum="Maximum",
-    c1k_2l_2700_default="C1k 2L 2700Hz Default",
-    c1k_2l_3500_default="C1k 2L 3500Hz Default",
-    c1k_3l1_2700_default="C1k 3L1 2700Hz Default",
-    c1k_3l1_3500_default="C1k 3L1 3500Hz Default",
-    c1k_3l2_default="C1k 3L2 Default",
-    pd250_default="PD250 Default",
-    pd500_default="PD500 Default",
-    hy_default="Hydra Default",
+    defaults=[],
     can_path="CAN Path",
     parameter_path="Parameter Path",
     enumerator_list="Enumerator List",
@@ -113,23 +90,12 @@ def create_pmvs_uuid_to_value_list(
     Returns:
         list of PMVS UUID to decimal dict's
     """
+    pmvs_files = glob.glob(f"{pmvs_path}/*.pmvs")
     pmvs_list = []
-    pmvs_file_path = pathlib.Path(pmvs_path) / "DG_Defaults-C1k_2L-2700Hz.pmvs"
-    pmvs_list.append(epyqlib.pm.valuesetmodel.loadp(pmvs_file_path))
-    pmvs_file_path = pathlib.Path(pmvs_path) / "DG_Defaults-C1k_2L-3500Hz.pmvs"
-    pmvs_list.append(epyqlib.pm.valuesetmodel.loadp(pmvs_file_path))
-    pmvs_file_path = pathlib.Path(pmvs_path) / "DG_Defaults-C1k_3L1-2700Hz.pmvs"
-    pmvs_list.append(epyqlib.pm.valuesetmodel.loadp(pmvs_file_path))
-    pmvs_file_path = pathlib.Path(pmvs_path) / "DG_Defaults-C1k_3L1-3500Hz.pmvs"
-    pmvs_list.append(epyqlib.pm.valuesetmodel.loadp(pmvs_file_path))
-    pmvs_file_path = pathlib.Path(pmvs_path) / "DG_Defaults-C1k_3L2.pmvs"
-    pmvs_list.append(epyqlib.pm.valuesetmodel.loadp(pmvs_file_path))
-    pmvs_file_path = pathlib.Path(pmvs_path) / "DG_Defaults-PD250.pmvs"
-    pmvs_list.append(epyqlib.pm.valuesetmodel.loadp(pmvs_file_path))
-    pmvs_file_path = pathlib.Path(pmvs_path) / "DG_Defaults-PD500.pmvs"
-    pmvs_list.append(epyqlib.pm.valuesetmodel.loadp(pmvs_file_path))
-    pmvs_file_path = pathlib.Path(pmvs_path) / "HY_Defaults.pmvs"
-    pmvs_list.append(epyqlib.pm.valuesetmodel.loadp(pmvs_file_path))
+    for pmvs_file in pmvs_files:
+        pmvs = epyqlib.pm.valuesetmodel.loadp(pmvs_file)
+        pmvs_list.append(pmvs)
+        field_names.defaults.append(pmvs.path.stem)
 
     pmvs_uuid_to_value_list = []
     for pmvs in pmvs_list:
@@ -198,7 +164,7 @@ class Root:
         workbook = openpyxl.Workbook()
         workbook.remove(workbook.active)
         worksheet = workbook.create_sheet("Parameters")
-        worksheet.append(field_names.as_filtered_tuple(self.column_filter))
+        worksheet.append(field_names.as_expanded_list(self.column_filter))
 
         unsorted_rows = []
         for child in self.wrapped.children:
@@ -214,7 +180,7 @@ class Root:
         sorted_rows = natsorted(unsorted_rows, key=lambda x: x.parameter_path)
 
         for row in sorted_rows:
-            worksheet.append(row.as_filtered_tuple(self.column_filter))
+            worksheet.append(row.as_expanded_list(self.column_filter))
 
         return workbook
 
@@ -236,7 +202,7 @@ class Signal:
             list of a single Fields row for Signal
         """
         if self.wrapped.parameter_uuid:
-            row = Fields()
+            row = Fields(defaults=[])
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
             self._set_pmvs_row_defaults(
                 row, self.pmvs_uuid_to_value_list, self.wrapped.parameter_uuid
@@ -329,19 +295,9 @@ class Signal:
         Returns:
 
         """
-        default_vals = []
         for pmvs in pmvs_uuid_to_value_list:
             value = pmvs.get(parameter_uuid)
-            default_vals.append(value)
-
-        row.c1k_2l_2700_default = default_vals[0]
-        row.c1k_2l_3500_default = default_vals[1]
-        row.c1k_3l1_2700_default = default_vals[2]
-        row.c1k_3l1_3500_default = default_vals[3]
-        row.c1k_3l2_default = default_vals[4]
-        row.pd250_default = default_vals[5]
-        row.pd500_default = default_vals[6]
-        row.hy_default = default_vals[7]
+            row.defaults.append(value)
 
 
 @builders(epcpm.canmodel.CanTable)

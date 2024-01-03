@@ -58,6 +58,24 @@ class FieldsInterface(ABC):
             value for value, f in zip(attr.astuple(self), attr.astuple(filter_)) if f
         )
 
+    def as_expanded_list(self, filter_: typing.Type[FieldsInterface]) -> typing.List:
+        """
+        Returns list with inner lists expanded of field attribute values specified by the filter.
+
+        Args:
+            filter_: a subset of a FieldsInterface object to be used as a filter
+
+        Returns:
+            list: a list of values with inner lists expanded that have been filtered specified by field values in filter_
+        """
+        values = []
+        for v in self.as_filtered_tuple(filter_):
+            if isinstance(v, list):
+                values.extend(v)
+            else:
+                values.append(v)
+        return values
+
 
 def attr_fill(cls: typing.Type[FieldsInterface], value: bool) -> FieldsInterface:
     """
