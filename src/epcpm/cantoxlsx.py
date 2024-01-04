@@ -576,7 +576,7 @@ def format_for_manual(
                 )
 
                 # Set alignment of description to wrap text.
-                for col in EXCEL_COLUMN_LETTERS[:column_count]:
+                for col in EXCEL_COLUMN_LETTERS[1:column_count]:
                     output_worksheet[
                         col + str(current_row)
                     ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
