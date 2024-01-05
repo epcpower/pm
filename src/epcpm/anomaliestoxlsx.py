@@ -38,7 +38,7 @@ field_names = Fields(
 
 @attr.s
 class InfoSheetFields(epcpm.pm_helper.FieldsInterface):
-    """The fields defined for response level information sheet."""
+    """The fields defined for an enumerator information sheet."""
 
     name = attr.ib(default=None, type=typing.Union[str, bool])
     desc = attr.ib(default=None, type=typing.Union[str, bool])
@@ -49,20 +49,6 @@ info_sheet_field_names = InfoSheetFields(
     desc="Description",
 )
 
-"""
-Exports anomaly information to a spreadsheet file.
-
-Args:
-    path:             Path to output XLSX file.
-    anomaly_model:    Anomaly data model.
-    parameters_model: Parameter data model.
-    column_filter:    Optional filter to remove selected output columns.
-    skip_output:      Optional boolean flag to disable output.
-
-Returns:
-    None
-"""
-
 
 def export(
     path,
@@ -71,6 +57,20 @@ def export(
     column_filter=None,
     skip_output=False,
 ):
+    """
+    Exports anomaly information to a spreadsheet file.
+
+    Args:
+        path:             Path to output XLSX file.
+        anomaly_model:    Anomaly data model.
+        parameters_model: Parameter data model.
+        column_filter:    Optional filter to remove selected output columns.
+        skip_output:      Optional boolean flag to disable output.
+
+    Returns:
+        None
+    """
+
     if column_filter is None:
         column_filter = epcpm.pm_helper.attr_fill(Fields, True)
 
@@ -130,17 +130,16 @@ class Root:
 
         return workbook
 
-    """
-    Generates a spreadsheet for anomalies.
-
-    Args:
-        worksheet: Empty openpyxl worksheet object.
-
-    Returns:
-        None
-    """
-
     def generate_anomalies_sheet(self, worksheet):
+        """
+        Generates a spreadsheet for anomalies.
+
+        Args:
+            worksheet: Empty openpyxl worksheet object.
+
+        Returns:
+            None
+        """
 
         # Helper function for converting cell value to string
         def as_text(value):
@@ -172,18 +171,18 @@ class Root:
             length = max(len(as_text(cell.value)) for cell in column_cells)
             worksheet.column_dimensions[column_cells[0].column].width = length + 5
 
-    """
-    Generates an enumeration information spread sheet with two columns.
-
-    Args:
-        worksheet: Empty openpyxl worksheet object.
-        enums:     Enumerators for which the sheet is generated.
-
-    Returns:
-        None
-    """
-
     def generate_enum_info_sheet(self, worksheet, enums):
+        """
+        Generates an enumeration information spread sheet with two columns.
+        The sheet contains enumerator names and their respective comments.
+
+        Args:
+            worksheet: Empty openpyxl worksheet object.
+            enums:     Enumerators for which the sheet is generated.
+
+        Returns:
+            None
+        """
 
         # Add and format header row
         worksheet.append(

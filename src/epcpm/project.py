@@ -158,21 +158,19 @@ def _post_load(project):
     models.update_enumeration_roots()
 
 
-"""
-Generates anomaly code enumerators from anomaly data objects.
-Enumerators found in anomaly_enumeration are modified
-to match anomaly data in anomalies object.
-
-Args:
-    anomalies:           Anomalies root object
-    anomaly_enumeration: Enumeration containing anomaly codes.
-
-Returns:
-    None
-"""
-
-
 def update_anomaly_enums(anomalies, anomaly_enumeration):
+    """
+    Generates anomaly code enumerators from anomaly data objects.
+    Enumerators found in anomaly_enumeration are modified
+    to match anomaly data in anomalies object.
+
+    Args:
+        anomalies:           Anomalies root object
+        anomaly_enumeration: Enumeration containing anomaly codes.
+
+    Returns:
+        None
+    """
 
     # Don't do anything if anomalies are not passed
     if (not anomalies) or (not anomaly_enumeration):
