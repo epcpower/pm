@@ -284,7 +284,7 @@ class Models:
             )
         self.parameters.list_selection_roots["access level"] = access_level_root
 
-        # Save location of anomaliy code enumeration
+        # Save location of anomaly code enumeration
         if enumerations_root is None:
             anomaly_enumeration_root = None
         else:
