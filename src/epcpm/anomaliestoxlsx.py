@@ -167,7 +167,7 @@ class Root:
                     row.as_filtered_tuple(self.column_filter),
                 )
 
-        # Adjust column widths in the worksheet in regards of text lenght
+        # Adjust column widths in the worksheet in regards of text length
         for column_cells in worksheet.columns:
             length = max(len(as_text(cell.value)) for cell in column_cells)
             worksheet.column_dimensions[column_cells[0].column].width = length + 5
