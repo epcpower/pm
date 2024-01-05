@@ -30,8 +30,8 @@ field_names = Fields(
     group="Group",
     code="Code",
     trig_type="Trigger type",
-    resp_level_I="Response level I",
-    resp_level_A="Response level A",
+    resp_level_I="Response level inactive",
+    resp_level_A="Response level active",
     comment="Description",
 )
 

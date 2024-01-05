@@ -45,7 +45,7 @@ class Anomaly(epyqlib.treenode.TreeNode):
     )
     epyqlib.attrsmodel.attrib(
         attribute=response_level_I,
-        human_name="Response Level I",
+        human_name="Response Level Inactive",
         data_display=epyqlib.attrsmodel.name_from_uuid,
         delegate=epyqlib.attrsmodel.RootDelegateCache(
             list_selection_root="anomaly_response_levels",
@@ -58,7 +58,7 @@ class Anomaly(epyqlib.treenode.TreeNode):
     )
     epyqlib.attrsmodel.attrib(
         attribute=response_level_A,
-        human_name="Response Level A",
+        human_name="Response Level Active",
         data_display=epyqlib.attrsmodel.name_from_uuid,
         delegate=epyqlib.attrsmodel.RootDelegateCache(
             list_selection_root="anomaly_response_levels",
