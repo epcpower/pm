@@ -158,7 +158,10 @@ def _post_load(project):
     models.update_enumeration_roots()
 
 
-def update_anomaly_enums(anomalies, anomaly_enumeration):
+def update_anomaly_enums(
+    anomalies: epyqlib.attrsmodel.Model,
+    anomaly_enumeration: epyqlib.pm.parametermodel.Enumeration,
+) -> None:
     """
     Generates anomaly code enumerators from anomaly data objects.
     Enumerators found in anomaly_enumeration are modified

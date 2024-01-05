@@ -1,6 +1,7 @@
 import attr
 import openpyxl
 import typing
+import pathlib
 
 import epyqlib.pm.parametermodel
 import epyqlib.utils.general
@@ -51,12 +52,12 @@ info_sheet_field_names = InfoSheetFields(
 
 
 def export(
-    path,
-    anomaly_model,
-    parameters_model,
-    column_filter=None,
-    skip_output=False,
-):
+    path: pathlib.Path,
+    anomaly_model: epyqlib.attrsmodel.Model,
+    parameters_model: epyqlib.attrsmodel.Model,
+    column_filter: [epcpm.pm_helper.FieldsInterface, None] = None,
+    skip_output: bool = False,
+) -> None:
     """
     Exports anomaly information to a spreadsheet file.
 
@@ -78,12 +79,8 @@ def export(
         wrapped=anomaly_model.root,
         column_filter=column_filter,
         parameter_uuid_finder=parameters_model.node_from_uuid,
-        response_levels=anomaly_model.list_selection_roots[
-            "anomaly_response_levels"
-        ].children,
-        trigger_types=anomaly_model.list_selection_roots[
-            "anomaly_trigger_types"
-        ].children,
+        response_levels=anomaly_model.list_selection_roots["anomaly_response_levels"],
+        trigger_types=anomaly_model.list_selection_roots["anomaly_trigger_types"],
         skip_output=skip_output,
     )
 
@@ -130,7 +127,9 @@ class Root:
 
         return workbook
 
-    def generate_anomalies_sheet(self, worksheet):
+    def generate_anomalies_sheet(
+        self, worksheet: openpyxl.worksheet.worksheet.Worksheet
+    ) -> None:
         """
         Generates a spreadsheet for anomalies.
 
@@ -171,14 +170,18 @@ class Root:
             length = max(len(as_text(cell.value)) for cell in column_cells)
             worksheet.column_dimensions[column_cells[0].column].width = length + 5
 
-    def generate_enum_info_sheet(self, worksheet, enums):
+    def generate_enum_info_sheet(
+        self,
+        worksheet: openpyxl.worksheet.worksheet.Worksheet,
+        enumeration: epyqlib.pm.parametermodel.Enumeration,
+    ) -> None:
         """
         Generates an enumeration information spread sheet with two columns.
         The sheet contains enumerator names and their respective comments.
 
         Args:
-            worksheet: Empty openpyxl worksheet object.
-            enums:     Enumerators for which the sheet is generated.
+            worksheet:   Empty openpyxl worksheet object.
+            enumeration: Enumeration for which the sheet is generated.
 
         Returns:
             None
@@ -194,7 +197,7 @@ class Root:
 
         # Add response level descriptions
         row = InfoSheetFields()
-        for enum in enums:
+        for enum in enumeration.children:
             row.name = enum.name
             row.desc = enum.description
             worksheet.append(

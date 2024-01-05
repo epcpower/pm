@@ -1,4 +1,5 @@
 import attr
+import pathlib
 
 import epyqlib.pm.parametermodel
 import epyqlib.utils.general
@@ -11,7 +12,11 @@ import epcpm.anomalymodel
 builders = epyqlib.utils.general.TypeMap()
 
 
-def export(anomaly_model, parameters_model, h_path):
+def export(
+    anomaly_model: epyqlib.attrsmodel.Model,
+    parameters_model: epyqlib.attrsmodel.Model,
+    h_path: pathlib.Path,
+) -> None:
 
     builder = epcpm.anomaliestoc.builders.wrap(
         wrapped=anomaly_model.root,
