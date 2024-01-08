@@ -39,12 +39,12 @@ class Anomaly(epyqlib.treenode.TreeNode):
 
     code = epyqlib.attrsmodel.create_integer_attribute(default=0)
 
-    response_level_I = epyqlib.attrsmodel.attr_uuid(
+    response_level_inactive = epyqlib.attrsmodel.attr_uuid(
         default=None,
         allow_none=True,
     )
     epyqlib.attrsmodel.attrib(
-        attribute=response_level_I,
+        attribute=response_level_inactive,
         human_name="Response Level Inactive",
         data_display=epyqlib.attrsmodel.name_from_uuid,
         delegate=epyqlib.attrsmodel.RootDelegateCache(
@@ -52,12 +52,12 @@ class Anomaly(epyqlib.treenode.TreeNode):
         ),
     )
 
-    response_level_A = epyqlib.attrsmodel.attr_uuid(
+    response_level_active = epyqlib.attrsmodel.attr_uuid(
         default=None,
         allow_none=True,
     )
     epyqlib.attrsmodel.attrib(
-        attribute=response_level_A,
+        attribute=response_level_active,
         human_name="Response Level Active",
         data_display=epyqlib.attrsmodel.name_from_uuid,
         delegate=epyqlib.attrsmodel.RootDelegateCache(
@@ -148,8 +148,8 @@ columns = epyqlib.attrsmodel.columns(
     merge("name", Anomaly, AnomalyTable),
     merge("abbreviation", Anomaly, AnomalyTable),
     merge("code", Anomaly),
-    merge("response_level_I", Anomaly),
-    merge("response_level_A", Anomaly),
+    merge("response_level_inactive", Anomaly),
+    merge("response_level_active", Anomaly),
     merge("trigger_type", Anomaly),
     merge("comment", Anomaly),
     merge("uuid", Anomaly, AnomalyTable),

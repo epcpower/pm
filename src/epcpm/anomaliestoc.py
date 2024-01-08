@@ -85,11 +85,11 @@ class Anomaly:
         )
 
         # Resolve response level and trigger type names
-        resp_level_A = self.parameter_uuid_finder(
-            self.wrapped.response_level_A
+        response_level_active = self.parameter_uuid_finder(
+            self.wrapped.response_level_active
         ).abbreviation
-        resp_level_I = self.parameter_uuid_finder(
-            self.wrapped.response_level_I
+        response_level_inactive = self.parameter_uuid_finder(
+            self.wrapped.response_level_inactive
         ).abbreviation
         trig_type = self.parameter_uuid_finder(self.wrapped.trigger_type).abbreviation
 
@@ -99,6 +99,6 @@ class Anomaly:
             "name": self.wrapped.name,
             "code": self.wrapped.code,
             "trigger_type": trig_type,
-            "response_level_I": resp_level_I,
-            "response_level_A": resp_level_A,
+            "response_level_inactive": response_level_inactive,
+            "response_level_active": response_level_active,
         }

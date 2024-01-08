@@ -21,8 +21,8 @@ class Fields(epcpm.pm_helper.FieldsInterface):
     group = attr.ib(default=None, type=typing.Union[str, bool])
     code = attr.ib(default=None, type=typing.Union[int, bool])
     trig_type = attr.ib(default=None, type=typing.Union[int, bool])
-    resp_level_I = attr.ib(default=None, type=typing.Union[int, bool])
-    resp_level_A = attr.ib(default=None, type=typing.Union[int, bool])
+    response_level_inactive = attr.ib(default=None, type=typing.Union[int, bool])
+    response_level_active = attr.ib(default=None, type=typing.Union[int, bool])
     comment = attr.ib(default=None, type=typing.Union[str, bool])
 
 
@@ -31,8 +31,8 @@ field_names = Fields(
     group="Group",
     code="Code",
     trig_type="Trigger type",
-    resp_level_I="Response level inactive",
-    resp_level_A="Response level active",
+    response_level_inactive="Response level inactive",
+    response_level_active="Response level active",
     comment="Description",
 )
 
@@ -250,14 +250,14 @@ class Anomaly:
         row = Fields()
 
         # Resolve response level and trigger type names
-        resp_level_A = (
-            self.parameter_uuid_finder(self.wrapped.response_level_A).name
-            if self.wrapped.response_level_A
+        response_level_active = (
+            self.parameter_uuid_finder(self.wrapped.response_level_active).name
+            if self.wrapped.response_level_active
             else None
         )
-        resp_level_I = (
-            self.parameter_uuid_finder(self.wrapped.response_level_I).name
-            if self.wrapped.response_level_I
+        response_level_inactive = (
+            self.parameter_uuid_finder(self.wrapped.response_level_inactive).name
+            if self.wrapped.response_level_inactive
             else None
         )
         trig_type = (
@@ -270,8 +270,8 @@ class Anomaly:
         row.name = self.wrapped.name
         row.code = self.wrapped.code
         row.trig_type = trig_type
-        row.resp_level_A = resp_level_A
-        row.resp_level_I = resp_level_I
+        row.response_level_active = response_level_active
+        row.response_level_inactive = response_level_inactive
         row.comment = self.wrapped.comment
 
         return row
