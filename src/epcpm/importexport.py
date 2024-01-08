@@ -324,7 +324,7 @@ def full_export(
         path=paths.anomalies_spreadsheet,
         anomaly_model=project.models.anomalies,
         parameters_model=project.models.parameters,
-        skip_output=skip_output,
+        skip_output=False,
     )
 
     if first_time and not skip_output:
