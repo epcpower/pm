@@ -24,6 +24,8 @@ class Fields(epcpm.pm_helper.FieldsInterface):
     response_level_inactive = attr.ib(default=None, type=typing.Union[int, bool])
     response_level_active = attr.ib(default=None, type=typing.Union[int, bool])
     comment = attr.ib(default=None, type=typing.Union[str, bool])
+    detail = attr.ib(default=None, type=typing.Union[str, bool])
+    sources = attr.ib(default=None, type=typing.Union[str, bool])
 
 
 field_names = Fields(
@@ -34,6 +36,8 @@ field_names = Fields(
     response_level_inactive="Response level inactive",
     response_level_active="Response level active",
     comment="Description",
+    detail="Meaning of detail",
+    sources="Source",
 )
 
 
@@ -104,6 +108,9 @@ class Root:
     header_fill = openpyxl.styles.PatternFill(
         start_color="FF8DB4E2", end_color="FF8DB4E2", fill_type="solid"
     )
+    table_alignment = openpyxl.styles.Alignment(
+        horizontal="left", vertical="top", wrapText=True
+    )
 
     def gen(self):
 
@@ -164,6 +171,11 @@ class Root:
                 worksheet.append(
                     row.as_filtered_tuple(self.column_filter),
                 )
+
+        # Apply text alignment to table
+        for row in worksheet.iter_rows(min_row=2):
+            for cell in row:
+                cell.alignment = self.table_alignment
 
         # Adjust column widths in the worksheet in regards of text length
         for column_cells in worksheet.columns:
@@ -273,5 +285,19 @@ class Anomaly:
         row.response_level_active = response_level_active
         row.response_level_inactive = response_level_inactive
         row.comment = self.wrapped.comment
+        row.detail = self.wrapped.detail
 
+        srcStrs = []
+        for source in self.wrapped.children:
+            srcStrs.append(builders.wrap(wrapped=source).gen())
+
+        row.sources = "\n".join(srcStrs)
         return row
+
+    @builders(epcpm.anomalymodel.AnomalySource)
+    @attr.s
+    class AnomalySource:
+        wrapped = attr.ib()
+
+        def gen(self):
+            return "Source {:d} = {:s}".format(self.wrapped.code, self.wrapped.comment)

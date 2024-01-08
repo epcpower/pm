@@ -19,6 +19,40 @@ def merge(name, *types):
     return tuple((x, name) for x in types)
 
 
+@graham.schemify(tag="anomaly_source")
+@epyqlib.attrsmodel.ify()
+@epyqlib.utils.qt.pyqtify()
+@attr.s(hash=False)
+class AnomalySource(epyqlib.treenode.TreeNode):
+    name = attr.ib(
+        default="New Anomaly Source",
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+
+    abbreviation = epyqlib.attrsmodel.create_code_identifier_string_attribute(
+        default="NEW_ANOMALY_SOURCE",
+    )
+
+    code = epyqlib.attrsmodel.create_integer_attribute(default=0)
+
+    comment = attr.ib(
+        default=None,
+        converter=epyqlib.attrsmodel.to_str_or_none,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(allow_none=True),
+        ),
+    )
+
+    uuid = epyqlib.attrsmodel.attr_uuid()
+
+    def __attrs_post_init__(self):
+        super().__init__()
+
+    can_delete = epyqlib.attrsmodel.childless_can_delete
+
+
 @graham.schemify(tag="anomaly")
 @epyqlib.attrsmodel.ify()
 @epyqlib.utils.qt.pyqtify()
@@ -86,10 +120,31 @@ class Anomaly(epyqlib.treenode.TreeNode):
         ),
     )
 
+    detail = attr.ib(
+        default=None,
+        converter=epyqlib.attrsmodel.to_str_or_none,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(allow_none=True),
+        ),
+    )
+
+    children = attr.ib(
+        default=attr.Factory(list),
+        metadata=graham.create_metadata(
+            field=graham.fields.MixedList(
+                fields=(marshmallow.fields.Nested(graham.schema(AnomalySource)),)
+            ),
+        ),
+    )
+
     def __attrs_post_init__(self):
         super().__init__()
 
-    can_delete = epyqlib.attrsmodel.childless_can_delete
+    def can_delete(self, node=None):
+        if node is None:
+            return self.tree_parent.can_delete(node=self)
+
+        return True
 
     # Returns SunSpec enumerator instance for this anomaly.
     def to_enum(self):
@@ -141,16 +196,17 @@ Root = epyqlib.attrsmodel.Root(
 )
 
 types = epyqlib.attrsmodel.Types(
-    types=(Root, Anomaly, AnomalyTable),
+    types=(Root, AnomalySource, Anomaly, AnomalyTable),
 )
 
 columns = epyqlib.attrsmodel.columns(
-    merge("name", Anomaly, AnomalyTable),
-    merge("abbreviation", Anomaly, AnomalyTable),
-    merge("code", Anomaly),
+    merge("name", AnomalySource, Anomaly, AnomalyTable),
+    merge("abbreviation", AnomalySource, Anomaly, AnomalyTable),
+    merge("code", AnomalySource, Anomaly),
     merge("response_level_inactive", Anomaly),
     merge("response_level_active", Anomaly),
     merge("trigger_type", Anomaly),
-    merge("comment", Anomaly),
-    merge("uuid", Anomaly, AnomalyTable),
+    merge("comment", AnomalySource, Anomaly),
+    merge("detail", Anomaly),
+    merge("uuid", AnomalySource, Anomaly, AnomalyTable),
 )
