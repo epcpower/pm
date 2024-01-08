@@ -175,6 +175,11 @@ class Window:
                 self.ui.sunspec2_search_box,
                 epcpm.sunspecmodel.columns.index_of("Name"),
             ),
+            (
+                self.ui.anomalies_view,
+                self.ui.anomalies_search_box,
+                epcpm.sunspecmodel.columns.index_of("Name"),
+            ),
         )
 
         for view, search_box, column in search_boxes:
