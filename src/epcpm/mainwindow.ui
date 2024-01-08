@@ -138,7 +138,7 @@
             <widget class="QTreeView" name="anomalies_view"/>
            </item>
            <item row="0" column="0">
-            <widget class="SearchBox" name="anomalies_search_box_2"/>
+            <widget class="SearchBox" name="anomalies_search_box"/>
            </item>
           </layout>
          </item>
