@@ -17,8 +17,8 @@ builders = epyqlib.utils.general.TypeMap()
 class Fields(epcpm.pm_helper.FieldsInterface):
     """The fields defined for a given row in the output XLS file."""
 
-    name = attr.ib(default=None, type=typing.Union[str, bool])
     group = attr.ib(default=None, type=typing.Union[str, bool])
+    name = attr.ib(default=None, type=typing.Union[str, bool])
     code = attr.ib(default=None, type=typing.Union[int, bool])
     trig_type = attr.ib(default=None, type=typing.Union[int, bool])
     response_level_inactive = attr.ib(default=None, type=typing.Union[int, bool])
@@ -27,8 +27,8 @@ class Fields(epcpm.pm_helper.FieldsInterface):
 
 
 field_names = Fields(
-    name="Name",
     group="Group",
+    name="Name",
     code="Code",
     trig_type="Trigger type",
     response_level_inactive="Response level inactive",
