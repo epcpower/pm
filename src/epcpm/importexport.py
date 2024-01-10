@@ -27,6 +27,8 @@ import epcpm.sunspectomanualc
 import epcpm.sunspectomanualh
 import epcpm.sunspectoxlsx
 import epcpm.symtoproject
+import epcpm.anomaliestoc
+import epcpm.anomaliestoxlsx
 import epyqlib.attrsmodel
 
 
@@ -109,6 +111,7 @@ def full_import(paths):
     project.paths["sunspec1"] = "sunspec1.json"
     project.paths["sunspec2"] = "sunspec2.json"
     project.paths["staticmodbus"] = "staticmodbus.json"
+    project.paths["anomalies"] = "anomalies.json"
 
     return project
 
@@ -309,6 +312,19 @@ def full_export(
         sunspec1_model=project.models.sunspec1,
         sunspec2_model=project.models.sunspec2,
         skip_output=skip_output,
+    )
+
+    epcpm.anomaliestoc.export(
+        h_path=paths.anomalies_h,
+        anomaly_model=project.models.anomalies,
+        parameters_model=project.models.parameters,
+    )
+
+    epcpm.anomaliestoxlsx.export(
+        path=paths.anomalies_spreadsheet,
+        anomaly_model=project.models.anomalies,
+        parameters_model=project.models.parameters,
+        skip_output=False,
     )
 
     if first_time and not skip_output:

@@ -27,6 +27,246 @@
                 },
                 {
                     "_type": "enumeration",
+                    "name": "AnomalyCode",
+                    "children": [
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "None",
+                            "abbreviation": null,
+                            "label": null,
+                            "description": "",
+                            "notes": null,
+                            "value": 0,
+                            "type": "",
+                            "uuid": "5edc983f-f599-48fd-a4eb-1b3a677ba4a4"
+                        },
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "Anomaly 1",
+                            "abbreviation": null,
+                            "label": null,
+                            "description": "",
+                            "notes": null,
+                            "value": 10,
+                            "type": "",
+                            "uuid": "6c5bff1a-7cb0-40cf-bed9-98d515ef250b"
+                        },
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "Anomaly 2",
+                            "abbreviation": null,
+                            "label": null,
+                            "description": "",
+                            "notes": null,
+                            "value": 20,
+                            "type": "",
+                            "uuid": "f807eefe-1d8a-4068-98b3-fb04eec119f5"
+                        },
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "Anomaly 3",
+                            "abbreviation": null,
+                            "label": null,
+                            "description": "",
+                            "notes": null,
+                            "value": 30,
+                            "type": "",
+                            "uuid": "372b6bdd-bb52-4d86-aa5d-2c2ae537c7e1"
+                        }
+                    ],
+                    "uuid": "a078d98b-3fdc-451b-8622-f5cf5ef42286"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "AnomalyPriority",
+                    "children": [
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "Normal",
+                            "abbreviation": null,
+                            "label": null,
+                            "description": "",
+                            "notes": null,
+                            "value": 0,
+                            "type": "",
+                            "uuid": "6297ce23-8727-4705-afaa-f2be4ef860f4"
+                        },
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "High",
+                            "abbreviation": null,
+                            "label": null,
+                            "description": "",
+                            "notes": null,
+                            "value": 1,
+                            "type": "",
+                            "uuid": "26a1d8a3-46df-4fcb-b319-f6783a0b3f5a"
+                        },
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "Critical",
+                            "abbreviation": null,
+                            "label": null,
+                            "description": "",
+                            "notes": null,
+                            "value": 2,
+                            "type": "",
+                            "uuid": "559f7c51-91af-4291-8a39-f06b6630eadd"
+                        }
+                    ],
+                    "uuid": "d4b519ba-3609-47f5-b546-bed6d5469088"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "AnomalyQualState",
+                    "children": [
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "Inactive",
+                            "abbreviation": null,
+                            "label": null,
+                            "description": "",
+                            "notes": null,
+                            "value": 0,
+                            "type": "",
+                            "uuid": "b156a1e5-257f-42f6-85a8-9eceff491752"
+                        },
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "Active",
+                            "abbreviation": null,
+                            "label": null,
+                            "description": "",
+                            "notes": null,
+                            "value": 1,
+                            "type": "",
+                            "uuid": "2f8efb81-6b99-4d80-9fd7-80e9f2d0519e"
+                        }
+                    ],
+                    "uuid": "5904767b-17fe-4965-a5e2-a79236c319e9"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "AnomalyResponseLevel",
+                    "children": [
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "Normal",
+                            "abbreviation": "NONE",
+                            "label": null,
+                            "description": "",
+                            "notes": null,
+                            "value": 0,
+                            "type": "",
+                            "uuid": "97fec3d9-d3dd-4b62-872d-5c2b66fc5de6"
+                        },
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "Information",
+                            "abbreviation": "INFO",
+                            "label": null,
+                            "description": "An information-type anomaly response is one which will not cause the converter to stop if it is already running. It will however prevent starting, acting as a non-ready cause. When the global response level (highest response of any asserted anomaly) is information, then information response anomalies will automatically clear when the condition giving rise to them subsides. When the global response level is higher than information however, information type anomalies will be logged.",
+                            "notes": null,
+                            "value": 1,
+                            "type": "",
+                            "uuid": "01e1ef16-e258-47c7-8e36-afd5b7727267"
+                        },
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "Warning",
+                            "abbreviation": "WARN",
+                            "label": null,
+                            "description": "The warning anomaly response will cause a controlled shutdown if the converter is already running. Warning type anomaly responses always result in an entry in the event log. Warning type response anomalies are generally for anomalies where the converter hardware is not (yet) degraded, but continued operation could result in degradation.",
+                            "notes": null,
+                            "value": 2,
+                            "type": "",
+                            "uuid": "17bb7bce-ad12-4366-8676-1656517a12f8"
+                        },
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "Failure",
+                            "abbreviation": "FAIL",
+                            "label": null,
+                            "description": "A failure anomaly response will cause an uncontrolled shutdown if the converter is already running. Failure responses always result in a log entry. A failure response is reserved for conditions where continued operation may contribute to immanent hardware degradation, where degradation may have already occurred, or where the ability for affecting a successful controlled shutdown (as in warning response) is uncertain.",
+                            "notes": null,
+                            "value": 3,
+                            "type": "",
+                            "uuid": "d09d7db6-5aa3-4f2e-93c7-01ee98b72bc6"
+                        }
+                    ],
+                    "uuid": "40e9d05f-2377-449c-8da7-35167c19c404"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "AnomalyStatus",
+                    "children": [
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "Normal",
+                            "abbreviation": null,
+                            "label": null,
+                            "description": "",
+                            "notes": null,
+                            "value": 0,
+                            "type": "",
+                            "uuid": "d486efa2-d6fe-4966-8611-f2d8c544b29d"
+                        },
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "Triggered",
+                            "abbreviation": null,
+                            "label": null,
+                            "description": "",
+                            "notes": null,
+                            "value": 1,
+                            "type": "",
+                            "uuid": "4d6da735-c69b-45ee-ab11-a3b18a071f42"
+                        },
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "Active",
+                            "abbreviation": null,
+                            "label": null,
+                            "description": "",
+                            "notes": null,
+                            "value": 2,
+                            "type": "",
+                            "uuid": "422e0fb1-df8b-474e-b78f-33e1b7fa1146"
+                        }
+                    ],
+                    "uuid": "32365978-c548-40d8-985b-c7a3cb6f953d"
+                },
+                {
+                    "_type": "enumeration",
+                    "name": "AnomalyTriggerType",
+                    "children": [
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "Event",
+                            "abbreviation": "EVENT",
+                            "label": null,
+                            "description": "An anomaly which is asserted as an event, such as from an interrupt or one-time crossing of a threshold. The status of the anomaly will not be automatically reverted when the condition that gave rise to the anomaly has subsided; rather, the anomaly log must be acknowledged.",
+                            "notes": null,
+                            "value": 0,
+                            "type": "",
+                            "uuid": "1dc10a82-86b0-4e01-a805-80899e82e9b3"
+                        },
+                        {
+                            "_type": "sunspec_enumerator",
+                            "name": "Level",
+                            "abbreviation": "LEVEL",
+                            "label": null,
+                            "description": "A monitored anomaly is one for which the status of the condition is constantly observed. The condition may come and go and will be able to automatically clear in the case that the present response level is not more than information. When the response level is above information, both the assertion into the event and de-assertion when the event has cleared will be logged.",
+                            "notes": null,
+                            "value": 1,
+                            "type": "",
+                            "uuid": "d3082cf0-ab41-457d-809b-b9ab68521e4d"
+                        }
+                    ],
+                    "uuid": "c73b7478-597d-41af-ae2e-eacedb473ad8"
+                },
+                {
+                    "_type": "enumeration",
                     "name": "CmmControlsVariant",
                     "children": [
                         {

@@ -30,7 +30,7 @@
          </widget>
         </item>
         <item row="0" column="0">
-         <widget class="SearchBox" name="parameter_search_box" native="true"/>
+         <widget class="SearchBox" name="parameter_search_box"/>
         </item>
        </layout>
       </widget>
@@ -53,7 +53,7 @@
             </widget>
            </item>
            <item row="0" column="0">
-            <widget class="SearchBox" name="can_search_box" native="true"/>
+            <widget class="SearchBox" name="can_search_box"/>
            </item>
           </layout>
          </item>
@@ -70,7 +70,7 @@
             <widget class="QTreeView" name="static_modbus_view"/>
            </item>
            <item row="0" column="0">
-            <widget class="SearchBox" name="static_modbus_search_box" native="true"/>
+            <widget class="SearchBox" name="static_modbus_search_box"/>
            </item>
           </layout>
          </item>
@@ -87,7 +87,7 @@
             <widget class="QTreeView" name="value_set_view"/>
            </item>
            <item row="0" column="0">
-            <widget class="SearchBox" name="value_set_search_box" native="true"/>
+            <widget class="SearchBox" name="value_set_search_box"/>
            </item>
           </layout>
          </item>
@@ -104,7 +104,7 @@
             <widget class="QTreeView" name="sunspec1_view"/>
            </item>
            <item row="0" column="0">
-            <widget class="SearchBox" name="sunspec1_search_box" native="true"/>
+            <widget class="SearchBox" name="sunspec1_search_box"/>
            </item>
           </layout>
          </item>
@@ -121,7 +121,24 @@
             <widget class="QTreeView" name="sunspec2_view"/>
            </item>
            <item row="0" column="0">
-            <widget class="SearchBox" name="sunspec2_search_box" native="true"/>
+            <widget class="SearchBox" name="sunspec2_search_box"/>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab_8">
+        <attribute name="title">
+         <string>Anomalies</string>
+        </attribute>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="1" column="0">
+            <widget class="QTreeView" name="anomalies_view"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="SearchBox" name="anomalies_search_box"/>
            </item>
           </layout>
          </item>
@@ -138,7 +155,7 @@
          </widget>
         </item>
         <item row="0" column="0">
-         <widget class="SearchBox" name="check_result_search_box" native="true"/>
+         <widget class="SearchBox" name="check_result_search_box"/>
         </item>
        </layout>
       </widget>

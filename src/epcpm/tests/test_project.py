@@ -18,7 +18,8 @@ reference_string = textwrap.dedent(
         "can": "can.json",
         "sunspec1": "sunspec1.json",
         "sunspec2": "sunspec2.json",
-        "staticmodbus": "staticmodbus.json"
+        "staticmodbus": "staticmodbus.json",
+        "anomalies": "anomalies.json"
     }
 }"""
 )
@@ -29,6 +30,7 @@ reference_project.paths.can = "can.json"
 reference_project.paths.sunspec1 = "sunspec1.json"
 reference_project.paths.sunspec2 = "sunspec2.json"
 reference_project.paths.staticmodbus = "staticmodbus.json"
+reference_project.paths.anomalies = "anomalies.json"
 
 
 def test_save():
@@ -44,7 +46,14 @@ def test_load():
 def test_model_iterable():
     model = epcpm.project.Models()
 
-    assert tuple(model) == ("parameters", "can", "sunspec1", "sunspec2", "staticmodbus")
+    assert tuple(model) == (
+        "parameters",
+        "can",
+        "sunspec1",
+        "sunspec2",
+        "staticmodbus",
+        "anomalies",
+    )
 
 
 def test_model_set_all():
@@ -66,6 +75,7 @@ def test_model_items():
         ("sunspec1", None),
         ("sunspec2", None),
         ("staticmodbus", None),
+        ("anomalies", None),
     )
 
     assert tuple(model.items()) == expected
@@ -83,6 +93,7 @@ def test_model_values():
         "sunspec1_",
         "sunspec2_",
         "staticmodbus_",
+        "anomalies_",
     )
 
 
@@ -93,7 +104,7 @@ def test_model_getitem():
     for name in model:
         values.append(model[name])
 
-    assert values == [None, None, None, None, None]
+    assert values == [None] * 6
 
 
 def test_model_proper_selection_roots():

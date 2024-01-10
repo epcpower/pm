@@ -6,6 +6,7 @@
         "can": "can.json",
         "sunspec1": "sunspec1.json",
         "sunspec2": "sunspec2.json",
-        "staticmodbus": "staticmodbus.json"
+        "staticmodbus": "staticmodbus.json",
+        "anomalies": "anomalies.json"
     }
 }

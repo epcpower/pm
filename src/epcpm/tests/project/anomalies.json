@@ -1,0 +1,71 @@
+{
+    "_type": "root",
+    "name": "Anomaly Tables",
+    "children": [
+        {
+            "_type": "anomaly_table",
+            "name": "Anomaly Table 1",
+            "abbreviation": "TABLE_1",
+            "uuid": "24293059-f57d-427d-9429-a4b9154eaed6",
+            "children": [
+                {
+                    "_type": "anomaly",
+                    "name": "Anomaly 1",
+                    "abbreviation": "ANOMALY_1",
+                    "uuid": "6e05806c-14ba-4d63-8649-e97f83d7f0d8",
+                    "code": 10,
+                    "response_level_inactive": "01e1ef16-e258-47c7-8e36-afd5b7727267",
+                    "response_level_active": "17bb7bce-ad12-4366-8676-1656517a12f8",
+                    "trigger_type": "1dc10a82-86b0-4e01-a805-80899e82e9b3",
+                    "comment": "First anomaly",
+                    "detail": "Detail has no specific meaning here",
+                    "children": []
+                },
+                {
+                    "_type": "anomaly",
+                    "name": "Anomaly 2",
+                    "abbreviation": "ANOMALY_2",
+                    "uuid": "baae4e5b-bfc2-48fa-ae81-ede35df7b0c8",
+                    "code": 20,
+                    "response_level_inactive": null,
+                    "response_level_active": null,
+                    "trigger_type": "d3082cf0-ab41-457d-809b-b9ab68521e4d",
+                    "comment": "Second anomaly",
+                    "detail": null,
+                    "children": [
+                        {
+                            "_type": "anomaly_source",
+                            "name": "Source 1",
+                            "abbreviation": "SOURCE_1",
+                            "code": 1,
+                            "comment": "This is one of the sources of second anomaly.",
+                            "uuid": "b2138620-2e5f-4d83-a9b4-76073d5b57c3"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "_type": "anomaly_table",
+            "name": "Anomaly Table 2",
+            "abbreviation": "TABLE_2",
+            "uuid": "9f4d2632-23e8-430d-9413-915103500f06",
+            "children": [
+                {
+                    "_type": "anomaly",
+                    "name": "Anomaly 3",
+                    "abbreviation": "ANOMALY_3",
+                    "uuid": "1f432f64-4148-44ff-aac2-591dd8808eed",
+                    "code": 30,
+                    "response_level_inactive": "d09d7db6-5aa3-4f2e-93c7-01ee98b72bc6",
+                    "response_level_active": "d09d7db6-5aa3-4f2e-93c7-01ee98b72bc6",
+                    "trigger_type": "1dc10a82-86b0-4e01-a805-80899e82e9b3",
+                    "comment": "Third anomaly",
+                    "detail": null,
+                    "children": []
+                }
+            ]
+        }
+    ],
+    "uuid": "25a11b1d-0cbe-4f7d-ac50-78f34bd1252b"
+}
