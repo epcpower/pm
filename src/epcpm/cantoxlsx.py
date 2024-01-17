@@ -402,7 +402,7 @@ def format_for_manual(
     builder = epcpm.cantoxlsx.builders.wrap(
         wrapped=parameters_model.root,
     )
-    group_comment_map = builder.gen()
+    group_comment_map, manual_description_map = builder.gen()
 
     input_workbook = openpyxl.load_workbook(filename=input_path)
     input_parameter_worksheet = input_workbook["Parameters"]
@@ -861,22 +861,25 @@ class ParameterModelRoot:
 
     wrapped = attr.ib(type=epcpm.canmodel.Root)
 
-    def gen(self) -> typing.Dict[str, str]:
+    def gen(self) -> typing.Tuple[typing.Dict[str, str], typing.Dict[str, str]]:
         group_comment_map = dict()
+        manual_description_map = dict()
         for child in self.wrapped.children:
-            if not isinstance(
+            if isinstance(
                 child,
                 (epyqlib.pm.parametermodel.Group,),
             ):
-                continue
+                child_group_comment_map, child_manual_description_map = builders.wrap(
+                    wrapped=child,
+                ).gen()
 
-            child_group_comment_map = builders.wrap(
-                wrapped=child,
-            ).gen()
+                group_comment_map = {**group_comment_map, **child_group_comment_map}
+                manual_description_map = {
+                    **manual_description_map,
+                    **child_manual_description_map,
+                }
 
-            group_comment_map = {**group_comment_map, **child_group_comment_map}
-
-        return group_comment_map
+        return (group_comment_map, manual_description_map)
 
 
 @builders(epyqlib.pm.parametermodel.Group)
@@ -886,8 +889,9 @@ class Group:
 
     wrapped = attr.ib()
 
-    def gen(self) -> typing.Dict[str, str]:
+    def gen(self) -> typing.Tuple[typing.Dict[str, str], typing.Dict[str, str]]:
         group_comment_map = dict()
+        manual_description_map = dict()
         if self.wrapped.comment is not None:
             # Create the parameter path string and store in the map.
             parameter_path_list = self._generate_group_path_list(self.wrapped)
@@ -896,19 +900,31 @@ class Group:
             group_comment_map[parameter_path_str_out] = self.wrapped.comment
 
         for child in self.wrapped.children:
-            if not isinstance(
+            if isinstance(
                 child,
                 (epyqlib.pm.parametermodel.Group,),
             ):
-                continue
+                child_group_comment_map, child_manual_description_map = builders.wrap(
+                    wrapped=child,
+                ).gen()
+                group_comment_map = {**group_comment_map, **child_group_comment_map}
+                manual_description_map = {
+                    **manual_description_map,
+                    **child_manual_description_map,
+                }
+            elif isinstance(
+                child,
+                (epyqlib.pm.parametermodel.Parameter,),
+            ):
+                child_manual_description_map = builders.wrap(
+                    wrapped=child,
+                ).gen()
+                manual_description_map = {
+                    **manual_description_map,
+                    **child_manual_description_map,
+                }
 
-            child_group_comment_map = builders.wrap(
-                wrapped=child,
-            ).gen()
-
-            group_comment_map = {**group_comment_map, **child_group_comment_map}
-
-        return group_comment_map
+        return (group_comment_map, manual_description_map)
 
     @staticmethod
     def _generate_group_path_list(node: epyqlib.treenode.TreeNode) -> typing.List[str]:
@@ -920,6 +936,57 @@ class Group:
 
         Returns:
             group node's path list
+        """
+        path_list = [node.name]
+        node_parent = node
+        while True:
+            if node_parent.tree_parent is not None:
+                path_list.insert(0, node_parent.tree_parent.name)
+                node_parent = node_parent.tree_parent
+            else:
+                break
+        if len(path_list) > 1:
+            # Remove the unnecessary Parameters root element.
+            path_list.pop(0)
+
+        return path_list
+
+
+@builders(epyqlib.pm.parametermodel.Parameter)
+@attr.s
+class Parameter:
+    """Generate the control manual Group class."""
+
+    wrapped = attr.ib()
+
+    def gen(self) -> typing.Dict[str, str]:
+        manual_description_map = dict()
+        if self.wrapped.manual_description is not None:
+            parameter_path_list = self._generate_parameter_path_list(self.wrapped)
+            parameter_path_str = " -> ".join(parameter_path_list)
+            parameter_path_str_out = parameter_path_str[len(PARAMETERS_PREFIX) :]
+            manual_description_map[
+                parameter_path_str_out
+            ] = self.wrapped.manual_description
+
+            manual_description_map = {
+                **manual_description_map,
+            }
+
+        return manual_description_map
+
+    @staticmethod
+    def _generate_parameter_path_list(
+        node: epyqlib.treenode.TreeNode,
+    ) -> typing.List[str]:
+        """
+        Generate the parameter node's path list.
+
+        Args:
+            node: tree node (from Parameters model)
+
+        Returns:
+            parameter node's path list
         """
         path_list = [node.name]
         node_parent = node
