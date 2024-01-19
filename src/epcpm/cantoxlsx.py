@@ -21,6 +21,7 @@ PMVS_UUID_TO_DECIMAL_LIST = typing.List[typing.Dict[uuid.UUID, decimal.Decimal]]
 PARAMETER_QUERY_PREFIX = "ParameterQuery -> "
 # The parameters prefix on a large portion of the parameter paths.
 PARAMETERS_PREFIX = "Parameters -> "
+PATH_SEPARATOR = " -> "
 TABLES_TREE_STR = "Tables -> Tree"
 FILTER_GROUPS = [
     "2. DC",
@@ -624,7 +625,20 @@ def format_for_manual(
                 entered_tables_section = TABLES_TREE_STR in parameter_path
 
                 # Add the parameter name and description cells.
-                output_worksheet.append([parameter_name_out, description_out])
+                parameter_name_to_check = (
+                    parameter_path_to_check
+                    + PATH_SEPARATOR
+                    + parameter_name_out.split(":")[-1]
+                )
+                if parameter_name_to_check in manual_description_map.keys():
+                    output_worksheet.append(
+                        [
+                            parameter_name_out,
+                            manual_description_map[parameter_name_to_check],
+                        ]
+                    )
+                else:
+                    output_worksheet.append([parameter_name_out, ""])
                 rows_used += 1
 
                 if enumerator_list:
