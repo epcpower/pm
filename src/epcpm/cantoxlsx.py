@@ -7,6 +7,7 @@ import decimal
 import openpyxl
 import pathlib
 import typing
+import glob
 import uuid
 import epcpm.pm_helper
 import epyqlib.treenode
@@ -14,7 +15,7 @@ import epyqlib.utils.general
 from natsort import natsorted
 from tqdm import tqdm
 
-
+EXCEL_COLUMN_LETTERS = [c for c in "ABCDEFGHIJKLMNOPQRSTU"]
 PMVS_UUID_TO_DECIMAL_LIST = typing.List[typing.Dict[uuid.UUID, decimal.Decimal]]
 
 # The parameter query prefix on a large portion of the CAN parameter paths.
@@ -34,7 +35,10 @@ CELL_BORDER = openpyxl.styles.Border(
     top=CELL_SIDE, left=CELL_SIDE, right=CELL_SIDE, bottom=CELL_SIDE
 )
 CELL_FONT = openpyxl.styles.Font(size=8)
+# All values are stored as text to have consistent left alignment
+NUMBER_FORMAT_TEXT = openpyxl.styles.numbers.FORMAT_TEXT
 NUMBERED_VARIANT_PATTERN = r"_(0[2-9]|1[0-9]|20)$"
+MIN_MANUAL_COLUMN_COUNT = 5  # Name, access level, min, max, default
 
 builders = epyqlib.utils.general.TypeMap()
 
@@ -48,31 +52,16 @@ class Fields(epcpm.pm_helper.FieldsInterface):
     description = attr.ib(default=None, type=typing.Union[str, bool])
     access_level = attr.ib(default=None, type=typing.Union[str, bool, int])
     units = attr.ib(default=None, type=typing.Union[str, bool])
-    minimum = attr.ib(default=None, type=typing.Union[str, bool, decimal.Decimal])
-    maximum = attr.ib(default=None, type=typing.Union[str, bool, decimal.Decimal])
-    c1k_2l_2700_default = attr.ib(
-        default=None, type=typing.Union[str, bool, decimal.Decimal]
-    )
-    c1k_2l_3500_default = attr.ib(
-        default=None, type=typing.Union[str, bool, decimal.Decimal]
-    )
-    c1k_3l1_2700_default = attr.ib(
-        default=None, type=typing.Union[str, bool, decimal.Decimal]
-    )
-    c1k_3l1_3500_default = attr.ib(
-        default=None, type=typing.Union[str, bool, decimal.Decimal]
-    )
-    c1k_3l2_default = attr.ib(
-        default=None, type=typing.Union[str, bool, decimal.Decimal]
-    )
-    pd250_default = attr.ib(default=None, type=typing.Union[str, bool, decimal.Decimal])
-    pd500_default = attr.ib(default=None, type=typing.Union[str, bool, decimal.Decimal])
-    hy_default = attr.ib(default=None, type=typing.Union[str, bool, decimal.Decimal])
     can_path = attr.ib(default=None, type=typing.Union[str, bool])
     parameter_path = attr.ib(default=None, type=typing.Union[str, bool])
     enumerator_list = attr.ib(default=None, type=typing.Union[str, bool])
     parameter_uuid = attr.ib(default=None, type=typing.Union[str, bool])
     epyq_can_parameter_name = attr.ib(default=None, type=typing.Union[str, bool])
+    minimum = attr.ib(default=None, type=typing.Union[str, bool, decimal.Decimal])
+    maximum = attr.ib(default=None, type=typing.Union[str, bool, decimal.Decimal])
+    defaults = attr.ib(
+        default=[], type=typing.List[typing.Union[str, bool, decimal.Decimal]]
+    )
 
 
 field_names = Fields(
@@ -81,21 +70,14 @@ field_names = Fields(
     description="Description",
     units="Units",
     access_level="Access Level",
-    minimum="Minimum",
-    maximum="Maximum",
-    c1k_2l_2700_default="C1k 2L 2700Hz Default",
-    c1k_2l_3500_default="C1k 2L 3500Hz Default",
-    c1k_3l1_2700_default="C1k 3L1 2700Hz Default",
-    c1k_3l1_3500_default="C1k 3L1 3500Hz Default",
-    c1k_3l2_default="C1k 3L2 Default",
-    pd250_default="PD250 Default",
-    pd500_default="PD500 Default",
-    hy_default="Hydra Default",
     can_path="CAN Path",
     parameter_path="Parameter Path",
     enumerator_list="Enumerator List",
     parameter_uuid="Parameter UUID",
     epyq_can_parameter_name="EPyQ CAN Parameter Name",
+    minimum="Minimum",
+    maximum="Maximum",
+    defaults=[],
 )
 
 
@@ -113,23 +95,12 @@ def create_pmvs_uuid_to_value_list(
     Returns:
         list of PMVS UUID to decimal dict's
     """
+    pmvs_files = glob.glob(f"{pmvs_path}/*.pmvs")
     pmvs_list = []
-    pmvs_file_path = pathlib.Path(pmvs_path) / "DG_Defaults-C1k_2L-2700Hz.pmvs"
-    pmvs_list.append(epyqlib.pm.valuesetmodel.loadp(pmvs_file_path))
-    pmvs_file_path = pathlib.Path(pmvs_path) / "DG_Defaults-C1k_2L-3500Hz.pmvs"
-    pmvs_list.append(epyqlib.pm.valuesetmodel.loadp(pmvs_file_path))
-    pmvs_file_path = pathlib.Path(pmvs_path) / "DG_Defaults-C1k_3L1-2700Hz.pmvs"
-    pmvs_list.append(epyqlib.pm.valuesetmodel.loadp(pmvs_file_path))
-    pmvs_file_path = pathlib.Path(pmvs_path) / "DG_Defaults-C1k_3L1-3500Hz.pmvs"
-    pmvs_list.append(epyqlib.pm.valuesetmodel.loadp(pmvs_file_path))
-    pmvs_file_path = pathlib.Path(pmvs_path) / "DG_Defaults-C1k_3L2.pmvs"
-    pmvs_list.append(epyqlib.pm.valuesetmodel.loadp(pmvs_file_path))
-    pmvs_file_path = pathlib.Path(pmvs_path) / "DG_Defaults-PD250.pmvs"
-    pmvs_list.append(epyqlib.pm.valuesetmodel.loadp(pmvs_file_path))
-    pmvs_file_path = pathlib.Path(pmvs_path) / "DG_Defaults-PD500.pmvs"
-    pmvs_list.append(epyqlib.pm.valuesetmodel.loadp(pmvs_file_path))
-    pmvs_file_path = pathlib.Path(pmvs_path) / "HY_Defaults.pmvs"
-    pmvs_list.append(epyqlib.pm.valuesetmodel.loadp(pmvs_file_path))
+    for pmvs_file in pmvs_files:
+        pmvs = epyqlib.pm.valuesetmodel.loadp(pmvs_file)
+        pmvs_list.append(pmvs)
+        field_names.defaults.append(pmvs.path.stem)
 
     pmvs_uuid_to_value_list = []
     for pmvs in pmvs_list:
@@ -198,7 +169,7 @@ class Root:
         workbook = openpyxl.Workbook()
         workbook.remove(workbook.active)
         worksheet = workbook.create_sheet("Parameters")
-        worksheet.append(field_names.as_filtered_tuple(self.column_filter))
+        worksheet.append(field_names.as_expanded_list(self.column_filter))
 
         unsorted_rows = []
         for child in self.wrapped.children:
@@ -214,7 +185,7 @@ class Root:
         sorted_rows = natsorted(unsorted_rows, key=lambda x: x.parameter_path)
 
         for row in sorted_rows:
-            worksheet.append(row.as_filtered_tuple(self.column_filter))
+            worksheet.append(row.as_expanded_list(self.column_filter))
 
         return workbook
 
@@ -236,7 +207,7 @@ class Signal:
             list of a single Fields row for Signal
         """
         if self.wrapped.parameter_uuid:
-            row = Fields()
+            row = Fields(defaults=[])
             parameter = self.parameter_uuid_finder(self.wrapped.parameter_uuid)
             self._set_pmvs_row_defaults(
                 row, self.pmvs_uuid_to_value_list, self.wrapped.parameter_uuid
@@ -329,19 +300,9 @@ class Signal:
         Returns:
 
         """
-        default_vals = []
         for pmvs in pmvs_uuid_to_value_list:
             value = pmvs.get(parameter_uuid)
-            default_vals.append(value)
-
-        row.c1k_2l_2700_default = default_vals[0]
-        row.c1k_2l_3500_default = default_vals[1]
-        row.c1k_3l1_2700_default = default_vals[2]
-        row.c1k_3l1_3500_default = default_vals[3]
-        row.c1k_3l2_default = default_vals[4]
-        row.pd250_default = default_vals[5]
-        row.pd500_default = default_vals[6]
-        row.hy_default = default_vals[7]
+            row.defaults.append(value)
 
 
 @builders(epcpm.canmodel.CanTable)
@@ -416,7 +377,7 @@ def format_for_manual(
     filtered_rows = []
     for row in input_worksheet.iter_rows(min_row=2, max_col=input_worksheet_col_count):
         # Only output parameters that are in EPyQ.
-        parameter_path = row[16].value
+        parameter_path = row[6].value
         if not parameter_path.startswith(PARAMETERS_PREFIX):
             continue
 
@@ -444,23 +405,26 @@ def format_for_manual(
         for row in filtered_rows:
             is_numbered_variant = False
 
-            parameter_path = row[16].value
+            parameter_path = row[6].value
             if not parameter_path.startswith(PARAMETERS_PREFIX):
                 # Only output parameters that are in EPyQ.
                 continue
-            parameter_name_out = row[19].value
             description_out = row[2].value
             access_level_out = row[3].value
             units_out = row[4].value
-            minimum_out = row[5].value
-            maximum_out = row[6].value
-            pd250_out = row[12].value
-            pd500_out = row[13].value
-            hy_out = row[14].value
-            cab1k_2l_2700hz_out = row[7].value
-            cab1k_2l_3500hz_out = row[8].value
-            cab1k_3l1_2700hz_out = row[9].value
-            enumerator_list = row[17].value
+            # can_path = row[5].value
+            # parameter_path = row[6].value
+            enumerator_list = row[7].value
+            # uuid = row[8].value
+            parameter_name_out = row[9].value
+            minimum_out = row[10].value
+            maximum_out = row[11].value
+            defaults_out = []
+            for col in row[12:]:
+                if col.value != None:
+                    defaults_out.append(f"{col.value}")
+                else:
+                    defaults_out.append("")
 
             # is_numbered_variant is necessary to distinguish parameters that are similarly named
             # (differ by numbers) from those that aren't (differ by word(s)) since both have
@@ -477,29 +441,15 @@ def format_for_manual(
                     minimum_out = f"{minimum_out} {units_out}"
                 if maximum_out is not None:
                     maximum_out = f"{maximum_out} {units_out}"
-                if pd250_out is not None:
-                    pd250_out = f"{pd250_out} {units_out}"
-                if pd500_out is not None:
-                    pd500_out = f"{pd500_out} {units_out}"
-                if hy_out is not None:
-                    hy_out = f"{hy_out} {units_out}"
-                if cab1k_2l_2700hz_out is not None:
-                    cab1k_2l_2700hz_out = f"{cab1k_2l_2700hz_out} {units_out}"
-                if cab1k_2l_3500hz_out is not None:
-                    cab1k_2l_3500hz_out = f"{cab1k_2l_3500hz_out} {units_out}"
-                if cab1k_3l1_2700hz_out is not None:
-                    cab1k_3l1_2700hz_out = f"{cab1k_3l1_2700hz_out} {units_out}"
+                for i in range(len(defaults_out)):
+                    if defaults_out[i] != "":
+                        defaults_out[i] = f"{defaults_out[i]} {units_out}"
 
             # Discover if all the product defaults are equal.
-            all_defaults = [
-                pd250_out,
-                pd500_out,
-                hy_out,
-                cab1k_2l_2700hz_out,
-                cab1k_2l_3500hz_out,
-                cab1k_3l1_2700hz_out,
-            ]
-            all_defaults_same = len(set(all_defaults)) == 1
+            all_defaults_same = len(set(defaults_out)) == 1
+
+            # +1 for parameter name
+            column_count = max(MIN_MANUAL_COLUMN_COUNT, len(defaults_out) + 1)
 
             # If applicable, add a header description for a set of parameters.
             # Chop off the parameters prefix to match the path that is seen in the EPyQ parameters tab.
@@ -514,11 +464,11 @@ def format_for_manual(
                     start_row=current_row,
                     start_column=1,
                     end_row=current_row,
-                    end_column=7,
+                    end_column=column_count,
                 )
 
                 # Set the font size for header description.
-                for col in ["A", "B", "C", "D", "E", "F", "G"]:
+                for col in EXCEL_COLUMN_LETTERS[:column_count]:
                     output_worksheet[col + str(current_row)].font = CELL_FONT
 
                 current_row += 1
@@ -529,34 +479,25 @@ def format_for_manual(
             rows_used = 0
 
             if entered_tables_section and is_numbered_variant:
-                if all_defaults_same:
-                    # Output single Default cells section for additional table row.
-                    output_worksheet.append(
-                        [
-                            parameter_name_out,
-                            access_level_out,
-                            "",
-                            "",
-                            minimum_out,
-                            maximum_out,
-                            pd250_out,
-                        ]
-                    )
-                    rows_used += 1
-                else:
-                    # Output multiple Default cells sections for additional table row.
-                    output_worksheet.append(
-                        [
-                            parameter_name_out,
-                            pd250_out,
-                            pd500_out,
-                            hy_out,
-                            cab1k_2l_2700hz_out,
-                            cab1k_2l_3500hz_out,
-                            cab1k_3l1_2700hz_out,
-                        ]
-                    )
-                    rows_used += 1
+                # Different table defaults for different products would need to keep track of all
+                # table parameters and add the header row with product variants if the defaults differ
+                # in any of them. So far the default is the same for all products so this is not
+                # yet implemented.
+                assert (
+                    all_defaults_same
+                ), "Different defaults for table parameters has not been implemented"
+                # Output single Default cells section for additional table row.
+                row = (
+                    [parameter_name_out, access_level_out]
+                    + (column_count - MIN_MANUAL_COLUMN_COUNT) * [""]
+                    + [
+                        minimum_out,
+                        maximum_out,
+                        defaults_out[0],
+                    ]
+                )
+                output_worksheet.append(row)
+                rows_used += 1
 
                 # Set horizontal & vertical alignment for parameter name.
                 output_worksheet[
@@ -565,35 +506,13 @@ def format_for_manual(
                     horizontal="left", vertical="top"
                 )
 
-                if all_defaults_same:
-                    # Merge access level is 3 columns; minimum, maximum, and default stay at 1 column.
-                    output_worksheet.merge_cells(
-                        start_row=current_row,
-                        start_column=2,
-                        end_row=current_row,
-                        end_column=4,
-                    )
-                else:
-                    # Merge each of access level, minimum, maximum, to 2 columns; no default column.
-                    # The product specific defaults each get their own column.
-                    output_worksheet.merge_cells(
-                        start_row=current_row,
-                        start_column=2,
-                        end_row=current_row,
-                        end_column=3,
-                    )
-                    output_worksheet.merge_cells(
-                        start_row=current_row,
-                        start_column=4,
-                        end_row=current_row,
-                        end_column=5,
-                    )
-                    output_worksheet.merge_cells(
-                        start_row=current_row,
-                        start_column=6,
-                        end_row=current_row,
-                        end_column=7,
-                    )
+                # Merge access level; minimum, maximum and default stay as 1 column
+                output_worksheet.merge_cells(
+                    start_row=current_row,
+                    start_column=2,
+                    end_row=current_row,
+                    end_column=column_count - 3,
+                )
 
             else:
                 # Check and set if this parameter is the start of table rows section.
@@ -609,68 +528,36 @@ def format_for_manual(
                     rows_used += 1
 
                 if all_defaults_same:
+                    row1 = (
+                        ["", field_names.access_level]
+                        + (column_count - MIN_MANUAL_COLUMN_COUNT) * [""]
+                        + [field_names.minimum, field_names.maximum, "Default"]
+                    )
+                    row2 = (
+                        ["", access_level_out]
+                        + (column_count - MIN_MANUAL_COLUMN_COUNT) * [""]
+                        + [minimum_out, maximum_out, defaults_out[0]]
+                    )
                     # Output single Default cells section.
-                    output_worksheet.append(
-                        [
-                            "",
-                            field_names.access_level,
-                            "",
-                            "",
-                            field_names.minimum,
-                            field_names.maximum,
-                            "Default",
-                        ]
-                    )
-                    output_worksheet.append(
-                        [
-                            "",
-                            access_level_out,
-                            "",
-                            "",
-                            minimum_out,
-                            maximum_out,
-                            pd250_out,
-                        ]
-                    )
+                    output_worksheet.append(row1)
+                    output_worksheet.append(row2)
                     rows_used += 2
                 else:
-                    # Output multiple Default cells sections.
-                    output_worksheet.append(
-                        [
-                            "",
-                            field_names.access_level,
-                            "",
-                            field_names.minimum,
-                            "",
-                            field_names.maximum,
-                            "",
-                        ]
+                    # Output multiple Default cells sections, +1 for no default column
+                    row1 = (
+                        ["", field_names.access_level]
+                        + (column_count - MIN_MANUAL_COLUMN_COUNT + 1) * [""]
+                        + [field_names.minimum, field_names.maximum]
                     )
-                    output_worksheet.append(
-                        ["", access_level_out, "", minimum_out, "", maximum_out, ""]
+                    row2 = (
+                        ["", access_level_out]
+                        + (column_count - MIN_MANUAL_COLUMN_COUNT + 1) * [""]
+                        + [minimum_out, maximum_out]
                     )
-                    output_worksheet.append(
-                        [
-                            "",
-                            field_names.pd250_default,
-                            field_names.pd500_default,
-                            field_names.hy_default,
-                            field_names.c1k_2l_2700_default,
-                            field_names.c1k_2l_3500_default,
-                            field_names.c1k_3l1_2700_default,
-                        ]
-                    )
-                    output_worksheet.append(
-                        [
-                            "",
-                            pd250_out,
-                            pd500_out,
-                            hy_out,
-                            cab1k_2l_2700hz_out,
-                            cab1k_2l_3500hz_out,
-                            cab1k_3l1_2700hz_out,
-                        ]
-                    )
+                    output_worksheet.append(row1)
+                    output_worksheet.append(row2)
+                    output_worksheet.append([""] + field_names.defaults)
+                    output_worksheet.append([""] + defaults_out)
                     rows_used += 4
 
                 # Merge cells for parameter name.
@@ -689,7 +576,7 @@ def format_for_manual(
                 )
 
                 # Set alignment of description to wrap text.
-                for col in ["B", "C", "D", "E", "F", "G"]:
+                for col in EXCEL_COLUMN_LETTERS[1:column_count]:
                     output_worksheet[
                         col + str(current_row)
                     ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
@@ -699,7 +586,7 @@ def format_for_manual(
                     start_row=current_row,
                     start_column=2,
                     end_row=current_row,
-                    end_column=7,
+                    end_column=column_count,
                 )
 
                 if enumerator_list:
@@ -708,120 +595,75 @@ def format_for_manual(
                         start_row=current_row + 1,
                         start_column=2,
                         end_row=current_row + 1,
-                        end_column=7,
+                        end_column=column_count,
                     )
 
                 if all_defaults_same:
-                    # Merge access level is 3 columns; minimum, maximum, and default stay at 1 column.
+                    # Merge access level; minimum, maximum and default stay as 1 column
                     if enumerator_list:
                         output_worksheet.merge_cells(
                             start_row=current_row + 2,
                             start_column=2,
                             end_row=current_row + 2,
-                            end_column=4,
+                            end_column=column_count - 3,
                         )
                         output_worksheet.merge_cells(
                             start_row=current_row + 3,
                             start_column=2,
                             end_row=current_row + 3,
-                            end_column=4,
+                            end_column=column_count - 3,
                         )
                     else:
                         output_worksheet.merge_cells(
                             start_row=current_row + 1,
                             start_column=2,
                             end_row=current_row + 1,
-                            end_column=4,
+                            end_column=column_count - 3,
                         )
                         output_worksheet.merge_cells(
                             start_row=current_row + 2,
                             start_column=2,
                             end_row=current_row + 2,
-                            end_column=4,
+                            end_column=column_count - 3,
                         )
                 else:
-                    # Merge each of access level, minimum, maximum, to 2 columns; no default column.
+                    # Merge access level; minimum and maximum stay as 1 column; no default column.
                     # The product specific defaults each get their own column.
                     if enumerator_list:
                         output_worksheet.merge_cells(
                             start_row=current_row + 2,
                             start_column=2,
                             end_row=current_row + 2,
-                            end_column=3,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=4,
-                            end_row=current_row + 2,
-                            end_column=5,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=6,
-                            end_row=current_row + 2,
-                            end_column=7,
+                            end_column=column_count - 2,
                         )
                         output_worksheet.merge_cells(
                             start_row=current_row + 3,
                             start_column=2,
                             end_row=current_row + 3,
-                            end_column=3,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 3,
-                            start_column=4,
-                            end_row=current_row + 3,
-                            end_column=5,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 3,
-                            start_column=6,
-                            end_row=current_row + 3,
-                            end_column=7,
+                            end_column=column_count - 2,
                         )
                     else:
                         output_worksheet.merge_cells(
                             start_row=current_row + 1,
                             start_column=2,
                             end_row=current_row + 1,
-                            end_column=3,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 1,
-                            start_column=4,
-                            end_row=current_row + 1,
-                            end_column=5,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 1,
-                            start_column=6,
-                            end_row=current_row + 1,
-                            end_column=7,
+                            end_column=column_count - 2,
                         )
                         output_worksheet.merge_cells(
                             start_row=current_row + 2,
                             start_column=2,
                             end_row=current_row + 2,
-                            end_column=3,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=4,
-                            end_row=current_row + 2,
-                            end_column=5,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=6,
-                            end_row=current_row + 2,
-                            end_column=7,
+                            end_column=column_count - 2,
                         )
 
             # Set the font size and border for non header description rows.
             for style_row in range(current_row, current_row + rows_used):
-                for col in ["A", "B", "C", "D", "E", "F", "G"]:
+                for col in EXCEL_COLUMN_LETTERS[:column_count]:
                     output_worksheet[col + str(style_row)].font = CELL_FONT
                     output_worksheet[col + str(style_row)].border = CELL_BORDER
+                    output_worksheet[
+                        col + str(style_row)
+                    ].number_format = NUMBER_FORMAT_TEXT
 
             # Update the current row with the number of rows used plus one to go to the next row.
             current_row += rows_used
