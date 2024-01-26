@@ -52,6 +52,14 @@ class AnomalySource(epyqlib.treenode.TreeNode):
 
     can_delete = epyqlib.attrsmodel.childless_can_delete
 
+    def can_drop_on(self, node):
+        return False
+
+    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
+    child_from = epyqlib.attrsmodel.default_child_from
+
 
 @graham.schemify(tag="anomaly")
 @epyqlib.attrsmodel.ify()
@@ -146,11 +154,22 @@ class Anomaly(epyqlib.treenode.TreeNode):
 
         return True
 
+    def can_drop_on(self, node):
+        return isinstance(
+            node,
+            (AnomalySource,),
+        )
+
     # Returns SunSpec enumerator instance for this anomaly.
     def to_enum(self):
         return epyqlib.pm.parametermodel.SunSpecEnumerator(
             name=self.name, value=self.code
         )
+
+    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
+    child_from = epyqlib.attrsmodel.default_child_from
 
 
 @graham.schemify(tag="anomaly_table")
@@ -188,6 +207,17 @@ class AnomalyTable(epyqlib.treenode.TreeNode):
             return self.tree_parent.can_delete(node=self)
 
         return True
+
+    def can_drop_on(self, node):
+        return isinstance(
+            node,
+            (Anomaly,),
+        )
+
+    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
+    internal_move = epyqlib.attrsmodel.default_internal_move
+    check = epyqlib.attrsmodel.check_just_children
+    child_from = epyqlib.attrsmodel.default_child_from
 
 
 Root = epyqlib.attrsmodel.Root(
