@@ -470,7 +470,6 @@ def format_for_manual(
             cab1k_2l_2700hz_out = row[7].value
             cab1k_2l_3500hz_out = row[8].value
             cab1k_3l1_2700hz_out = row[9].value
-            enumerator_list = row[17].value
 
             # is_numbered_variant is necessary to distinguish parameters that are similarly named
             # (differ by numbers) from those that aren't (differ by word(s)) since both have
@@ -641,11 +640,6 @@ def format_for_manual(
                     output_worksheet.append([parameter_name_out, ""])
                 rows_used += 1
 
-                if enumerator_list:
-                    # Add the enumerator list cell / row.
-                    output_worksheet.append(["", enumerator_list])
-                    rows_used += 1
-
                 if all_defaults_same:
                     # Output single Default cells section.
                     output_worksheet.append(
@@ -740,120 +734,60 @@ def format_for_manual(
                     end_column=7,
                 )
 
-                if enumerator_list:
-                    # Merge cells for enumerator list cell.
+                if all_defaults_same:
+                    # Merge access level is 3 columns; minimum, maximum, and default stay at 1 column.
                     output_worksheet.merge_cells(
                         start_row=current_row + 1,
                         start_column=2,
                         end_row=current_row + 1,
-                        end_column=7,
+                        end_column=4,
+                    )
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 2,
+                        start_column=2,
+                        end_row=current_row + 2,
+                        end_column=4,
                     )
 
-                if all_defaults_same:
-                    # Merge access level is 3 columns; minimum, maximum, and default stay at 1 column.
-                    if enumerator_list:
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=2,
-                            end_row=current_row + 2,
-                            end_column=4,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 3,
-                            start_column=2,
-                            end_row=current_row + 3,
-                            end_column=4,
-                        )
-                    else:
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 1,
-                            start_column=2,
-                            end_row=current_row + 1,
-                            end_column=4,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=2,
-                            end_row=current_row + 2,
-                            end_column=4,
-                        )
                 else:
                     # Merge each of access level, minimum, maximum, to 2 columns; no default column.
                     # The product specific defaults each get their own column.
-                    if enumerator_list:
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=2,
-                            end_row=current_row + 2,
-                            end_column=3,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=4,
-                            end_row=current_row + 2,
-                            end_column=5,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=6,
-                            end_row=current_row + 2,
-                            end_column=7,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 3,
-                            start_column=2,
-                            end_row=current_row + 3,
-                            end_column=3,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 3,
-                            start_column=4,
-                            end_row=current_row + 3,
-                            end_column=5,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 3,
-                            start_column=6,
-                            end_row=current_row + 3,
-                            end_column=7,
-                        )
-                    else:
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 1,
-                            start_column=2,
-                            end_row=current_row + 1,
-                            end_column=3,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 1,
-                            start_column=4,
-                            end_row=current_row + 1,
-                            end_column=5,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 1,
-                            start_column=6,
-                            end_row=current_row + 1,
-                            end_column=7,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=2,
-                            end_row=current_row + 2,
-                            end_column=3,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=4,
-                            end_row=current_row + 2,
-                            end_column=5,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=6,
-                            end_row=current_row + 2,
-                            end_column=7,
-                        )
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 1,
+                        start_column=2,
+                        end_row=current_row + 1,
+                        end_column=3,
+                    )
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 1,
+                        start_column=4,
+                        end_row=current_row + 1,
+                        end_column=5,
+                    )
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 1,
+                        start_column=6,
+                        end_row=current_row + 1,
+                        end_column=7,
+                    )
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 2,
+                        start_column=2,
+                        end_row=current_row + 2,
+                        end_column=3,
+                    )
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 2,
+                        start_column=4,
+                        end_row=current_row + 2,
+                        end_column=5,
+                    )
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 2,
+                        start_column=6,
+                        end_row=current_row + 2,
+                        end_column=7,
+                    )
 
             # Set the font size and border for non header description rows.
             for style_row in range(current_row, current_row + rows_used):
