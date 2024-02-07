@@ -403,7 +403,8 @@ def format_for_manual(
     builder = epcpm.cantoxlsx.builders.wrap(
         wrapped=parameters_model.root,
     )
-    group_comment_map, manual_description_map = builder.gen()
+    group_comment_map = builder.gen()
+    parameter_uuid_finder = parameters_model.node_from_uuid
 
     input_workbook = openpyxl.load_workbook(filename=input_path)
     input_parameter_worksheet = input_workbook["Parameters"]
@@ -452,14 +453,14 @@ def format_for_manual(
         entered_tables_section = False
 
         for row in filtered_rows:
-            is_numbered_variant = False
-
             parameter_path = row[16].value
             if not parameter_path.startswith(PARAMETERS_PREFIX):
                 # Only output parameters that are in EPyQ.
                 continue
             parameter_name_out = row[19].value
-            description_out = row[2].value
+            parameter_uuid = row[18].value
+            parameter_node = parameter_uuid_finder(uuid.UUID(parameter_uuid))
+            description_out = parameter_node.manual_description
             access_level_out = row[3].value
             units_out = row[4].value
             minimum_out = row[5].value
@@ -624,20 +625,12 @@ def format_for_manual(
                 entered_tables_section = TABLES_TREE_STR in parameter_path
 
                 # Add the parameter name and description cells.
-                parameter_name_to_check = (
-                    parameter_path_to_check
-                    + PATH_SEPARATOR
-                    + parameter_name_out.split(":")[-1]
+                output_worksheet.append(
+                    [
+                        parameter_name_out,
+                        description_out,
+                    ]
                 )
-                if parameter_name_to_check in manual_description_map.keys():
-                    output_worksheet.append(
-                        [
-                            parameter_name_out,
-                            manual_description_map[parameter_name_to_check],
-                        ]
-                    )
-                else:
-                    output_worksheet.append([parameter_name_out, ""])
                 rows_used += 1
 
                 if all_defaults_same:
@@ -809,25 +802,20 @@ class ParameterModelRoot:
 
     wrapped = attr.ib(type=epcpm.canmodel.Root)
 
-    def gen(self) -> typing.Tuple[typing.Dict[str, str], typing.Dict[str, str]]:
+    def gen(self) -> typing.Dict[str, str]:
         group_comment_map = dict()
-        manual_description_map = dict()
         for child in self.wrapped.children:
             if isinstance(
                 child,
                 (epyqlib.pm.parametermodel.Group,),
             ):
-                child_group_comment_map, child_manual_description_map = builders.wrap(
+                child_group_comment_map = builders.wrap(
                     wrapped=child,
                 ).gen()
 
                 group_comment_map = {**group_comment_map, **child_group_comment_map}
-                manual_description_map = {
-                    **manual_description_map,
-                    **child_manual_description_map,
-                }
 
-        return (group_comment_map, manual_description_map)
+        return group_comment_map
 
 
 @builders(epyqlib.pm.parametermodel.Group)
@@ -837,9 +825,8 @@ class Group:
 
     wrapped = attr.ib()
 
-    def gen(self) -> typing.Tuple[typing.Dict[str, str], typing.Dict[str, str]]:
+    def gen(self) -> typing.Dict[str, str]:
         group_comment_map = dict()
-        manual_description_map = dict()
         if self.wrapped.comment is not None:
             # Create the parameter path string and store in the map.
             parameter_path_list = self._generate_group_path_list(self.wrapped)
@@ -852,27 +839,12 @@ class Group:
                 child,
                 (epyqlib.pm.parametermodel.Group,),
             ):
-                child_group_comment_map, child_manual_description_map = builders.wrap(
+                child_group_comment_map = builders.wrap(
                     wrapped=child,
                 ).gen()
                 group_comment_map = {**group_comment_map, **child_group_comment_map}
-                manual_description_map = {
-                    **manual_description_map,
-                    **child_manual_description_map,
-                }
-            elif isinstance(
-                child,
-                (epyqlib.pm.parametermodel.Parameter,),
-            ):
-                child_manual_description_map = builders.wrap(
-                    wrapped=child,
-                ).gen()
-                manual_description_map = {
-                    **manual_description_map,
-                    **child_manual_description_map,
-                }
 
-        return (group_comment_map, manual_description_map)
+        return group_comment_map
 
     @staticmethod
     def _generate_group_path_list(node: epyqlib.treenode.TreeNode) -> typing.List[str]:
@@ -884,57 +856,6 @@ class Group:
 
         Returns:
             group node's path list
-        """
-        path_list = [node.name]
-        node_parent = node
-        while True:
-            if node_parent.tree_parent is not None:
-                path_list.insert(0, node_parent.tree_parent.name)
-                node_parent = node_parent.tree_parent
-            else:
-                break
-        if len(path_list) > 1:
-            # Remove the unnecessary Parameters root element.
-            path_list.pop(0)
-
-        return path_list
-
-
-@builders(epyqlib.pm.parametermodel.Parameter)
-@attr.s
-class Parameter:
-    """Generate the control manual Group class."""
-
-    wrapped = attr.ib()
-
-    def gen(self) -> typing.Dict[str, str]:
-        manual_description_map = dict()
-        if self.wrapped.manual_description is not None:
-            parameter_path_list = self._generate_parameter_path_list(self.wrapped)
-            parameter_path_str = " -> ".join(parameter_path_list)
-            parameter_path_str_out = parameter_path_str[len(PARAMETERS_PREFIX) :]
-            manual_description_map[
-                parameter_path_str_out
-            ] = self.wrapped.manual_description
-
-            manual_description_map = {
-                **manual_description_map,
-            }
-
-        return manual_description_map
-
-    @staticmethod
-    def _generate_parameter_path_list(
-        node: epyqlib.treenode.TreeNode,
-    ) -> typing.List[str]:
-        """
-        Generate the parameter node's path list.
-
-        Args:
-            node: tree node (from Parameters model)
-
-        Returns:
-            parameter node's path list
         """
         path_list = [node.name]
         node_parent = node
