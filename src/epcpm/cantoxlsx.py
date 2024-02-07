@@ -208,6 +208,7 @@ class Root:
                 parameter_uuid_finder=self.parameter_uuid_finder,
                 pmvs_uuid_to_value_list=self.pmvs_uuid_to_value_list,
             ).gen()
+
             for row in rows:
                 unsorted_rows.append(row)
 
@@ -542,9 +543,9 @@ def format_for_manual(
                     output_worksheet[col + str(current_row)].font = CELL_FONT
                     output_worksheet[col + str(current_row)].fill = CELL_FILL_GROUP
                     output_worksheet[col + str(current_row)].border = CELL_BORDER
-                    output_worksheet[
-                        col + str(current_row)
-                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
+                    output_worksheet[col + str(current_row)].alignment = (
+                        openpyxl.styles.alignment.Alignment(wrap_text=True)
+                    )
 
                 current_row += 1
                 # Reset the tables section logic.
@@ -584,10 +585,10 @@ def format_for_manual(
                     rows_used += 1
 
                 # Set horizontal & vertical alignment for parameter name.
-                output_worksheet[
-                    "A" + str(current_row)
-                ].alignment = openpyxl.styles.alignment.Alignment(
-                    horizontal="left", vertical="top"
+                output_worksheet["A" + str(current_row)].alignment = (
+                    openpyxl.styles.alignment.Alignment(
+                        horizontal="left", vertical="top"
+                    )
                 )
 
                 if all_defaults_same:
@@ -707,17 +708,17 @@ def format_for_manual(
                 )
 
                 # Set horizontal & vertical alignment for parameter name.
-                output_worksheet[
-                    "A" + str(current_row)
-                ].alignment = openpyxl.styles.alignment.Alignment(
-                    horizontal="left", vertical="top"
+                output_worksheet["A" + str(current_row)].alignment = (
+                    openpyxl.styles.alignment.Alignment(
+                        horizontal="left", vertical="top"
+                    )
                 )
 
                 # Set alignment of description to wrap text.
                 for col in ["B", "C", "D", "E", "F", "G"]:
-                    output_worksheet[
-                        col + str(current_row)
-                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
+                    output_worksheet[col + str(current_row)].alignment = (
+                        openpyxl.styles.alignment.Alignment(wrap_text=True)
+                    )
 
                 # Merge cells for description.
                 output_worksheet.merge_cells(
