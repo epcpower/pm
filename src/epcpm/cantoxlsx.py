@@ -404,7 +404,7 @@ def format_for_manual(
     builder = epcpm.cantoxlsx.builders.wrap(
         wrapped=parameters_model.root,
     )
-    group_comment_map = builder.gen()
+    group_manual_description_map = builder.gen()
     parameter_uuid_finder = parameters_model.node_from_uuid
 
     input_workbook = openpyxl.load_workbook(filename=input_path)
@@ -518,13 +518,13 @@ def format_for_manual(
             if parameter_path_to_check != current_parameter_path:
                 # Add the parameter path (group) for this section of parameters.
                 current_parameter_path = parameter_path_to_check
-                if parameter_path_to_check in group_comment_map:
+                if parameter_path_to_check in group_manual_description_map:
                     # Add the group's comment, if available.
                     output_worksheet.append(
                         [
                             current_parameter_path
                             + "\n\n"
-                            + group_comment_map[current_parameter_path]
+                            + group_manual_description_map[current_parameter_path]
                         ]
                     )
                 else:
@@ -804,19 +804,22 @@ class ParameterModelRoot:
     wrapped = attr.ib(type=epcpm.canmodel.Root)
 
     def gen(self) -> typing.Dict[str, str]:
-        group_comment_map = dict()
+        group_manual_description_map = dict()
         for child in self.wrapped.children:
             if isinstance(
                 child,
                 (epyqlib.pm.parametermodel.Group,),
             ):
-                child_group_comment_map = builders.wrap(
+                child_group_manual_description_map = builders.wrap(
                     wrapped=child,
                 ).gen()
 
-                group_comment_map = {**group_comment_map, **child_group_comment_map}
+                group_manual_description_map = {
+                    **group_manual_description_map,
+                    **child_group_manual_description_map,
+                }
 
-        return group_comment_map
+        return group_manual_description_map
 
 
 @builders(epyqlib.pm.parametermodel.Group)
@@ -827,25 +830,30 @@ class Group:
     wrapped = attr.ib()
 
     def gen(self) -> typing.Dict[str, str]:
-        group_comment_map = dict()
-        if self.wrapped.comment is not None:
+        group_manual_description_map = dict()
+        if self.wrapped.manual_description is not None:
             # Create the parameter path string and store in the map.
             parameter_path_list = self._generate_group_path_list(self.wrapped)
             parameter_path_str = " -> ".join(parameter_path_list)
             parameter_path_str_out = parameter_path_str[len(PARAMETERS_PREFIX) :]
-            group_comment_map[parameter_path_str_out] = self.wrapped.comment
+            group_manual_description_map[
+                parameter_path_str_out
+            ] = self.wrapped.manual_description
 
         for child in self.wrapped.children:
             if isinstance(
                 child,
                 (epyqlib.pm.parametermodel.Group,),
             ):
-                child_group_comment_map = builders.wrap(
+                child_group_manual_description_map = builders.wrap(
                     wrapped=child,
                 ).gen()
-                group_comment_map = {**group_comment_map, **child_group_comment_map}
+                group_manual_description_map = {
+                    **group_manual_description_map,
+                    **child_group_manual_description_map,
+                }
 
-        return group_comment_map
+        return group_manual_description_map
 
     @staticmethod
     def _generate_group_path_list(node: epyqlib.treenode.TreeNode) -> typing.List[str]:
