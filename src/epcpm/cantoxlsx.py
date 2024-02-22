@@ -21,6 +21,7 @@ PMVS_UUID_TO_DECIMAL_LIST = typing.List[typing.Dict[uuid.UUID, decimal.Decimal]]
 PARAMETER_QUERY_PREFIX = "ParameterQuery -> "
 # The parameters prefix on a large portion of the parameter paths.
 PARAMETERS_PREFIX = "Parameters -> "
+PATH_SEPARATOR = " -> "
 TABLES_TREE_STR = "Tables -> Tree"
 FILTER_GROUPS = [
     "2. DC",
@@ -34,6 +35,7 @@ CELL_BORDER = openpyxl.styles.Border(
     top=CELL_SIDE, left=CELL_SIDE, right=CELL_SIDE, bottom=CELL_SIDE
 )
 CELL_FONT = openpyxl.styles.Font(size=8)
+CELL_FILL_GROUP = openpyxl.styles.PatternFill("solid", fgColor="DDDDDD")
 NUMBERED_VARIANT_PATTERN = r"_(0[2-9]|1[0-9]|20)$"
 
 builders = epyqlib.utils.general.TypeMap()
@@ -153,7 +155,6 @@ def export(
     Args:
         path: path and filename for .xlsx file
         can_model: CAN model
-        parameters_model: parameters model
         pmvs_path: directory path to the pmvs files
         column_filter: columns to be output to .xls file
 
@@ -386,6 +387,7 @@ class GenericNode:
 
 def format_for_manual(
     input_path: pathlib.Path,
+    parameters_model: epyqlib.attrsmodel.Model,
 ) -> None:
     """
     Translate the CAN model parameter data to formatted Excel format (.xlsx)
@@ -393,13 +395,21 @@ def format_for_manual(
 
     Args:
         input_path: path and filename for input .xlsx file
+        parameters_model: parameters model
 
     Returns:
 
     """
+
+    builder = epcpm.cantoxlsx.builders.wrap(
+        wrapped=parameters_model.root,
+    )
+    group_manual_description_map = builder.gen()
+    parameter_uuid_finder = parameters_model.node_from_uuid
+
     input_workbook = openpyxl.load_workbook(filename=input_path)
-    input_worksheet = input_workbook.active
-    input_worksheet_col_count = input_worksheet.max_column
+    input_parameter_worksheet = input_workbook["Parameters"]
+    input_worksheet_col_count = input_parameter_worksheet.max_column
 
     output_path = input_path.with_name(
         input_path.stem + "_for_manual" + input_path.suffix
@@ -414,7 +424,9 @@ def format_for_manual(
 
     # Perform all filtering activities.
     filtered_rows = []
-    for row in input_worksheet.iter_rows(min_row=2, max_col=input_worksheet_col_count):
+    for row in input_parameter_worksheet.iter_rows(
+        min_row=2, max_col=input_worksheet_col_count
+    ):
         # Only output parameters that are in EPyQ.
         parameter_path = row[16].value
         if not parameter_path.startswith(PARAMETERS_PREFIX):
@@ -442,14 +454,14 @@ def format_for_manual(
         entered_tables_section = False
 
         for row in filtered_rows:
-            is_numbered_variant = False
-
             parameter_path = row[16].value
             if not parameter_path.startswith(PARAMETERS_PREFIX):
                 # Only output parameters that are in EPyQ.
                 continue
             parameter_name_out = row[19].value
-            description_out = row[2].value
+            parameter_uuid = row[18].value
+            parameter_node = parameter_uuid_finder(uuid.UUID(parameter_uuid))
+            description_out = parameter_node.manual_description
             access_level_out = row[3].value
             units_out = row[4].value
             minimum_out = row[5].value
@@ -460,7 +472,6 @@ def format_for_manual(
             cab1k_2l_2700hz_out = row[7].value
             cab1k_2l_3500hz_out = row[8].value
             cab1k_3l1_2700hz_out = row[9].value
-            enumerator_list = row[17].value
 
             # is_numbered_variant is necessary to distinguish parameters that are similarly named
             # (differ by numbers) from those that aren't (differ by word(s)) since both have
@@ -505,9 +516,19 @@ def format_for_manual(
             # Chop off the parameters prefix to match the path that is seen in the EPyQ parameters tab.
             parameter_path_to_check = parameter_path[len(PARAMETERS_PREFIX) :]
             if parameter_path_to_check != current_parameter_path:
-                # Add the parameter path for this section of parameters.
+                # Add the parameter path (group) for this section of parameters.
                 current_parameter_path = parameter_path_to_check
-                output_worksheet.append([current_parameter_path])
+                if parameter_path_to_check in group_manual_description_map:
+                    # Add the group's comment, if available.
+                    output_worksheet.append(
+                        [
+                            current_parameter_path
+                            + "\n\n"
+                            + group_manual_description_map[current_parameter_path]
+                        ]
+                    )
+                else:
+                    output_worksheet.append([current_parameter_path])
 
                 # Merge cells for header description.
                 output_worksheet.merge_cells(
@@ -517,9 +538,14 @@ def format_for_manual(
                     end_column=7,
                 )
 
-                # Set the font size for header description.
+                # Set the font size and fill color for header description.
                 for col in ["A", "B", "C", "D", "E", "F", "G"]:
                     output_worksheet[col + str(current_row)].font = CELL_FONT
+                    output_worksheet[col + str(current_row)].fill = CELL_FILL_GROUP
+                    output_worksheet[col + str(current_row)].border = CELL_BORDER
+                    output_worksheet[
+                        col + str(current_row)
+                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
 
                 current_row += 1
                 # Reset the tables section logic.
@@ -600,13 +626,13 @@ def format_for_manual(
                 entered_tables_section = TABLES_TREE_STR in parameter_path
 
                 # Add the parameter name and description cells.
-                output_worksheet.append([parameter_name_out, description_out])
+                output_worksheet.append(
+                    [
+                        parameter_name_out,
+                        description_out,
+                    ]
+                )
                 rows_used += 1
-
-                if enumerator_list:
-                    # Add the enumerator list cell / row.
-                    output_worksheet.append(["", enumerator_list])
-                    rows_used += 1
 
                 if all_defaults_same:
                     # Output single Default cells section.
@@ -702,120 +728,60 @@ def format_for_manual(
                     end_column=7,
                 )
 
-                if enumerator_list:
-                    # Merge cells for enumerator list cell.
+                if all_defaults_same:
+                    # Merge access level is 3 columns; minimum, maximum, and default stay at 1 column.
                     output_worksheet.merge_cells(
                         start_row=current_row + 1,
                         start_column=2,
                         end_row=current_row + 1,
-                        end_column=7,
+                        end_column=4,
+                    )
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 2,
+                        start_column=2,
+                        end_row=current_row + 2,
+                        end_column=4,
                     )
 
-                if all_defaults_same:
-                    # Merge access level is 3 columns; minimum, maximum, and default stay at 1 column.
-                    if enumerator_list:
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=2,
-                            end_row=current_row + 2,
-                            end_column=4,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 3,
-                            start_column=2,
-                            end_row=current_row + 3,
-                            end_column=4,
-                        )
-                    else:
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 1,
-                            start_column=2,
-                            end_row=current_row + 1,
-                            end_column=4,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=2,
-                            end_row=current_row + 2,
-                            end_column=4,
-                        )
                 else:
                     # Merge each of access level, minimum, maximum, to 2 columns; no default column.
                     # The product specific defaults each get their own column.
-                    if enumerator_list:
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=2,
-                            end_row=current_row + 2,
-                            end_column=3,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=4,
-                            end_row=current_row + 2,
-                            end_column=5,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=6,
-                            end_row=current_row + 2,
-                            end_column=7,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 3,
-                            start_column=2,
-                            end_row=current_row + 3,
-                            end_column=3,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 3,
-                            start_column=4,
-                            end_row=current_row + 3,
-                            end_column=5,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 3,
-                            start_column=6,
-                            end_row=current_row + 3,
-                            end_column=7,
-                        )
-                    else:
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 1,
-                            start_column=2,
-                            end_row=current_row + 1,
-                            end_column=3,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 1,
-                            start_column=4,
-                            end_row=current_row + 1,
-                            end_column=5,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 1,
-                            start_column=6,
-                            end_row=current_row + 1,
-                            end_column=7,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=2,
-                            end_row=current_row + 2,
-                            end_column=3,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=4,
-                            end_row=current_row + 2,
-                            end_column=5,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=6,
-                            end_row=current_row + 2,
-                            end_column=7,
-                        )
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 1,
+                        start_column=2,
+                        end_row=current_row + 1,
+                        end_column=3,
+                    )
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 1,
+                        start_column=4,
+                        end_row=current_row + 1,
+                        end_column=5,
+                    )
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 1,
+                        start_column=6,
+                        end_row=current_row + 1,
+                        end_column=7,
+                    )
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 2,
+                        start_column=2,
+                        end_row=current_row + 2,
+                        end_column=3,
+                    )
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 2,
+                        start_column=4,
+                        end_row=current_row + 2,
+                        end_column=5,
+                    )
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 2,
+                        start_column=6,
+                        end_row=current_row + 2,
+                        end_column=7,
+                    )
 
             # Set the font size and border for non header description rows.
             for style_row in range(current_row, current_row + rows_used):
@@ -828,3 +794,88 @@ def format_for_manual(
             progress_bar.update(1)
 
     output_workbook.save(output_path)
+
+
+@builders(epyqlib.pm.parametermodel.Root)
+@attr.s
+class ParameterModelRoot:
+    """Generate the control manual Root class."""
+
+    wrapped = attr.ib(type=epcpm.canmodel.Root)
+
+    def gen(self) -> typing.Dict[str, str]:
+        group_manual_description_map = dict()
+        for child in self.wrapped.children:
+            if isinstance(
+                child,
+                (epyqlib.pm.parametermodel.Group,),
+            ):
+                child_group_manual_description_map = builders.wrap(
+                    wrapped=child,
+                ).gen()
+
+                group_manual_description_map = {
+                    **group_manual_description_map,
+                    **child_group_manual_description_map,
+                }
+
+        return group_manual_description_map
+
+
+@builders(epyqlib.pm.parametermodel.Group)
+@attr.s
+class Group:
+    """Generate the control manual Group class."""
+
+    wrapped = attr.ib()
+
+    def gen(self) -> typing.Dict[str, str]:
+        group_manual_description_map = dict()
+        if self.wrapped.manual_description is not None:
+            # Create the parameter path string and store in the map.
+            parameter_path_list = self._generate_group_path_list(self.wrapped)
+            parameter_path_str = " -> ".join(parameter_path_list)
+            parameter_path_str_out = parameter_path_str[len(PARAMETERS_PREFIX) :]
+            group_manual_description_map[
+                parameter_path_str_out
+            ] = self.wrapped.manual_description
+
+        for child in self.wrapped.children:
+            if isinstance(
+                child,
+                (epyqlib.pm.parametermodel.Group,),
+            ):
+                child_group_manual_description_map = builders.wrap(
+                    wrapped=child,
+                ).gen()
+                group_manual_description_map = {
+                    **group_manual_description_map,
+                    **child_group_manual_description_map,
+                }
+
+        return group_manual_description_map
+
+    @staticmethod
+    def _generate_group_path_list(node: epyqlib.treenode.TreeNode) -> typing.List[str]:
+        """
+        Generate the group node's path list.
+
+        Args:
+            node: tree node (from Parameters model)
+
+        Returns:
+            group node's path list
+        """
+        path_list = [node.name]
+        node_parent = node
+        while True:
+            if node_parent.tree_parent is not None:
+                path_list.insert(0, node_parent.tree_parent.name)
+                node_parent = node_parent.tree_parent
+            else:
+                break
+        if len(path_list) > 1:
+            # Remove the unnecessary Parameters root element.
+            path_list.pop(0)
+
+        return path_list
