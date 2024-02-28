@@ -35,6 +35,9 @@ CELL_BORDER = openpyxl.styles.Border(
     top=CELL_SIDE, left=CELL_SIDE, right=CELL_SIDE, bottom=CELL_SIDE
 )
 CELL_FONT = openpyxl.styles.Font(size=8)
+CELL_FILL_GROUP = openpyxl.styles.PatternFill("solid", fgColor="B0B0B0")
+CELL_FILL_PARAMETER = openpyxl.styles.PatternFill("solid", fgColor="DDDDDD")
+CELL_FILL_DEFAULTS = openpyxl.styles.PatternFill("solid", fgColor="E3E3E3")
 # All values are stored as text to have consistent left alignment
 NUMBER_FORMAT_TEXT = openpyxl.styles.numbers.FORMAT_TEXT
 NUMBERED_VARIANT_PATTERN = r"_(0[2-9]|1[0-9]|20)$"
@@ -467,9 +470,14 @@ def format_for_manual(
                     end_column=column_count,
                 )
 
-                # Set the font size for header description.
+                # Set the font size and fill color for header description.
                 for col in EXCEL_COLUMN_LETTERS[:column_count]:
                     output_worksheet[col + str(current_row)].font = CELL_FONT
+                    output_worksheet[col + str(current_row)].fill = CELL_FILL_GROUP
+                    output_worksheet[col + str(current_row)].border = CELL_BORDER
+                    output_worksheet[col + str(current_row)].alignment = (
+                        openpyxl.styles.alignment.Alignment(wrap_text=True)
+                    )
 
                 current_row += 1
                 # Reset the tables section logic.
