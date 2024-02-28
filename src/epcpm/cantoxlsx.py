@@ -500,10 +500,10 @@ def format_for_manual(
                 rows_used += 1
 
                 # Set horizontal & vertical alignment for parameter name.
-                output_worksheet[
-                    "A" + str(current_row)
-                ].alignment = openpyxl.styles.alignment.Alignment(
-                    horizontal="left", vertical="top"
+                output_worksheet["A" + str(current_row)].alignment = (
+                    openpyxl.styles.alignment.Alignment(
+                        horizontal="left", vertical="top"
+                    )
                 )
 
                 # Merge access level; minimum, maximum and default stay as 1 column
@@ -569,17 +569,17 @@ def format_for_manual(
                 )
 
                 # Set horizontal & vertical alignment for parameter name.
-                output_worksheet[
-                    "A" + str(current_row)
-                ].alignment = openpyxl.styles.alignment.Alignment(
-                    horizontal="left", vertical="top"
+                output_worksheet["A" + str(current_row)].alignment = (
+                    openpyxl.styles.alignment.Alignment(
+                        horizontal="left", vertical="top"
+                    )
                 )
 
                 # Set alignment of description to wrap text.
                 for col in EXCEL_COLUMN_LETTERS[1:column_count]:
-                    output_worksheet[
-                        col + str(current_row)
-                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
+                    output_worksheet[col + str(current_row)].alignment = (
+                        openpyxl.styles.alignment.Alignment(wrap_text=True)
+                    )
 
                 # Merge cells for description.
                 output_worksheet.merge_cells(
@@ -661,9 +661,9 @@ def format_for_manual(
                 for col in EXCEL_COLUMN_LETTERS[:column_count]:
                     output_worksheet[col + str(style_row)].font = CELL_FONT
                     output_worksheet[col + str(style_row)].border = CELL_BORDER
-                    output_worksheet[
-                        col + str(style_row)
-                    ].number_format = NUMBER_FORMAT_TEXT
+                    output_worksheet[col + str(style_row)].number_format = (
+                        NUMBER_FORMAT_TEXT
+                    )
 
             # Update the current row with the number of rows used plus one to go to the next row.
             current_row += rows_used
@@ -712,9 +712,9 @@ class Group:
             parameter_path_list = self._generate_group_path_list(self.wrapped)
             parameter_path_str = " -> ".join(parameter_path_list)
             parameter_path_str_out = parameter_path_str[len(PARAMETERS_PREFIX) :]
-            group_manual_description_map[
-                parameter_path_str_out
-            ] = self.wrapped.manual_description
+            group_manual_description_map[parameter_path_str_out] = (
+                self.wrapped.manual_description
+            )
 
         for child in self.wrapped.children:
             if isinstance(

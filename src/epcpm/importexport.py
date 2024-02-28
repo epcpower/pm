@@ -480,5 +480,4 @@ def generate_docs(
     if generate_formatted_output:
         epcpm.cantoxlsx.format_for_manual(
             input_path=paths.spreadsheet_can,
-            parameters_model=project.models.parameters,
         )
