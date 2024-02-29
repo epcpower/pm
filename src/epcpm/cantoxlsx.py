@@ -415,10 +415,6 @@ def format_for_manual(
             description_out = row[2].value
             access_level_out = row[3].value
             units_out = row[4].value
-            # can_path = row[5].value
-            # parameter_path = row[6].value
-            enumerator_list = row[7].value
-            # uuid = row[8].value
             parameter_name_out = row[9].value
             minimum_out = row[10].value
             maximum_out = row[11].value
@@ -475,9 +471,9 @@ def format_for_manual(
                     output_worksheet[col + str(current_row)].font = CELL_FONT
                     output_worksheet[col + str(current_row)].fill = CELL_FILL_GROUP
                     output_worksheet[col + str(current_row)].border = CELL_BORDER
-                    output_worksheet[
-                        col + str(current_row)
-                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
+                    output_worksheet[col + str(current_row)].alignment = (
+                        openpyxl.styles.alignment.Alignment(wrap_text=True)
+                    )
 
                 current_row += 1
                 # Reset the tables section logic.
@@ -508,10 +504,10 @@ def format_for_manual(
                 rows_used += 1
 
                 # Set horizontal & vertical alignment for parameter name.
-                output_worksheet[
-                    "A" + str(current_row)
-                ].alignment = openpyxl.styles.alignment.Alignment(
-                    horizontal="left", vertical="top"
+                output_worksheet["A" + str(current_row)].alignment = (
+                    openpyxl.styles.alignment.Alignment(
+                        horizontal="left", vertical="top"
+                    )
                 )
 
                 # Merge access level; minimum, maximum and default stay as 1 column
@@ -542,29 +538,17 @@ def format_for_manual(
                     output_worksheet[col + str(current_row)].font = CELL_FONT
                     output_worksheet[col + str(current_row)].fill = CELL_FILL_PARAMETER
                     output_worksheet[col + str(current_row)].border = CELL_BORDER
-                    output_worksheet[
-                        col + str(current_row)
-                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
+                    output_worksheet[col + str(current_row)].alignment = (
+                        openpyxl.styles.alignment.Alignment(wrap_text=True)
+                    )
                 current_row += 1
 
-                if enumerator_list:
-                    # Add the enumerator list cell / row.
-                    output_worksheet.append([description_out, enumerator_list])
-                    rows_used += 1
-
                 if all_defaults_same:
-                    if enumerator_list:
-                        row1 = (
-                            ["", field_names.access_level]
-                            + (column_count - MIN_MANUAL_COLUMN_COUNT) * [""]
-                            + [field_names.minimum, field_names.maximum, "Default"]
-                        )
-                    else:
-                        row1 = (
-                            [description_out, field_names.access_level]
-                            + (column_count - MIN_MANUAL_COLUMN_COUNT) * [""]
-                            + [field_names.minimum, field_names.maximum, "Default"]
-                        )
+                    row1 = (
+                        [description_out, field_names.access_level]
+                        + (column_count - MIN_MANUAL_COLUMN_COUNT) * [""]
+                        + [field_names.minimum, field_names.maximum, "Default"]
+                    )
                     row2 = (
                         ["", access_level_out]
                         + (column_count - MIN_MANUAL_COLUMN_COUNT) * [""]
@@ -601,113 +585,62 @@ def format_for_manual(
                 )
 
                 # Set wrap_text, horizontal & vertical alignment for parameter description.
-                output_worksheet[
-                    "A" + str(current_row)
-                ].alignment = openpyxl.styles.alignment.Alignment(
-                    horizontal="left", vertical="top", wrap_text=True
+                output_worksheet["A" + str(current_row)].alignment = (
+                    openpyxl.styles.alignment.Alignment(
+                        horizontal="left", vertical="top", wrap_text=True
+                    )
                 )
 
-                if enumerator_list:
-                    # Merge cells for enumerator list cell.
+                if all_defaults_same:
                     output_worksheet.merge_cells(
                         start_row=current_row,
                         start_column=2,
                         end_row=current_row,
-                        end_column=column_count,
+                        end_column=column_count - 3,
                     )
-
-                if all_defaults_same:
-                    # Merge access level; minimum, maximum and default stay as 1 column
-                    if enumerator_list:
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 1,
-                            start_column=2,
-                            end_row=current_row + 1,
-                            end_column=column_count - 3,
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 1,
+                        start_column=2,
+                        end_row=current_row + 1,
+                        end_column=column_count - 3,
+                    )
+                    # Style access level; minimum, maximum and default
+                    for col in EXCEL_COLUMN_LETTERS[1:column_count]:
+                        output_worksheet[col + str(current_row)].fill = (
+                            CELL_FILL_DEFAULTS
                         )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=2,
-                            end_row=current_row + 2,
-                            end_column=column_count - 3,
-                        )
-                        # Style access level; minimum, maximum and default
-                        for col in EXCEL_COLUMN_LETTERS[1:column_count]:
-                            output_worksheet[
-                                col + str(current_row + 1)
-                            ].fill = CELL_FILL_DEFAULTS
-                    else:
-                        output_worksheet.merge_cells(
-                            start_row=current_row,
-                            start_column=2,
-                            end_row=current_row,
-                            end_column=column_count - 3,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 1,
-                            start_column=2,
-                            end_row=current_row + 1,
-                            end_column=column_count - 3,
-                        )
-                        # Style access level; minimum, maximum and default
-                        for col in EXCEL_COLUMN_LETTERS[1:column_count]:
-                            output_worksheet[
-                                col + str(current_row)
-                            ].fill = CELL_FILL_DEFAULTS
                 else:
                     # Merge access level; minimum and maximum stay as 1 column; no default column.
                     # The product specific defaults each get their own column.
-                    if enumerator_list:
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 1,
-                            start_column=2,
-                            end_row=current_row + 1,
-                            end_column=column_count - 2,
+                    output_worksheet.merge_cells(
+                        start_row=current_row,
+                        start_column=2,
+                        end_row=current_row,
+                        end_column=column_count - 2,
+                    )
+                    output_worksheet.merge_cells(
+                        start_row=current_row + 1,
+                        start_column=2,
+                        end_row=current_row + 1,
+                        end_column=column_count - 2,
+                    )
+                    # Style access level; minimum and maximum
+                    for col in EXCEL_COLUMN_LETTERS[1:column_count]:
+                        output_worksheet[col + str(current_row)].fill = (
+                            CELL_FILL_DEFAULTS
                         )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=2,
-                            end_row=current_row + 2,
-                            end_column=column_count - 2,
+                        output_worksheet[col + str(current_row + 2)].fill = (
+                            CELL_FILL_DEFAULTS
                         )
-                        # Style access level; minimum and maximum
-                        for col in EXCEL_COLUMN_LETTERS[1:column_count]:
-                            output_worksheet[
-                                col + str(current_row + 1)
-                            ].fill = CELL_FILL_DEFAULTS
-                            output_worksheet[
-                                col + str(current_row + 3)
-                            ].fill = CELL_FILL_DEFAULTS
-                    else:
-                        output_worksheet.merge_cells(
-                            start_row=current_row,
-                            start_column=2,
-                            end_row=current_row,
-                            end_column=column_count - 2,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 1,
-                            start_column=2,
-                            end_row=current_row + 1,
-                            end_column=column_count - 2,
-                        )
-                        # Style access level; minimum and maximum
-                        for col in EXCEL_COLUMN_LETTERS[1:column_count]:
-                            output_worksheet[
-                                col + str(current_row)
-                            ].fill = CELL_FILL_DEFAULTS
-                            output_worksheet[
-                                col + str(current_row + 2)
-                            ].fill = CELL_FILL_DEFAULTS
 
             # Set the font size and border for non header description rows.
             for style_row in range(current_row, current_row + rows_used):
                 for col in EXCEL_COLUMN_LETTERS[:column_count]:
                     output_worksheet[col + str(style_row)].font = CELL_FONT
                     output_worksheet[col + str(style_row)].border = CELL_BORDER
-                    output_worksheet[
-                        col + str(style_row)
-                    ].number_format = NUMBER_FORMAT_TEXT
+                    output_worksheet[col + str(style_row)].number_format = (
+                        NUMBER_FORMAT_TEXT
+                    )
 
             # Update the current row with the number of rows used plus one to go to the next row.
             current_row += rows_used
@@ -756,9 +689,9 @@ class Group:
             parameter_path_list = self._generate_group_path_list(self.wrapped)
             parameter_path_str = " -> ".join(parameter_path_list)
             parameter_path_str_out = parameter_path_str[len(PARAMETERS_PREFIX) :]
-            group_manual_description_map[
-                parameter_path_str_out
-            ] = self.wrapped.manual_description
+            group_manual_description_map[parameter_path_str_out] = (
+                self.wrapped.manual_description
+            )
 
         for child in self.wrapped.children:
             if isinstance(
