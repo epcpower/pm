@@ -41,7 +41,7 @@ CELL_FILL_DEFAULTS = openpyxl.styles.PatternFill("solid", fgColor="EEEEEE")
 # All values are stored as text to have consistent left alignment
 NUMBER_FORMAT_TEXT = openpyxl.styles.numbers.FORMAT_TEXT
 NUMBERED_VARIANT_PATTERN = r"_(0[2-9]|1[0-9]|20)$"
-MIN_MANUAL_COLUMN_COUNT = 5  # Name, access level, min, max, default
+COLUMN_COUNT = 5
 
 builders = epyqlib.utils.general.TypeMap()
 
@@ -447,9 +447,6 @@ def format_for_manual(
             # Discover if all the product defaults are equal.
             all_defaults_same = len(set(defaults_out)) == 1
 
-            # +1 for parameter name
-            column_count = max(MIN_MANUAL_COLUMN_COUNT, len(defaults_out) + 1)
-
             # If applicable, add a header description for a set of parameters.
             # Chop off the parameters prefix to match the path that is seen in the EPyQ parameters tab.
             parameter_path_to_check = parameter_path[len(PARAMETERS_PREFIX) :]
@@ -463,11 +460,11 @@ def format_for_manual(
                     start_row=current_row,
                     start_column=1,
                     end_row=current_row,
-                    end_column=column_count,
+                    end_column=COLUMN_COUNT,
                 )
 
                 # Set the font size and fill color for header description.
-                for col in EXCEL_COLUMN_LETTERS[:column_count]:
+                for col in EXCEL_COLUMN_LETTERS[:COLUMN_COUNT]:
                     output_worksheet[col + str(current_row)].font = CELL_FONT
                     output_worksheet[col + str(current_row)].fill = CELL_FILL_GROUP
                     output_worksheet[col + str(current_row)].border = CELL_BORDER
@@ -491,15 +488,11 @@ def format_for_manual(
                     all_defaults_same
                 ), "Different defaults for table parameters has not been implemented"
                 # Output single Default cells section for additional table row.
-                row = (
-                    [parameter_name_out, access_level_out]
-                    + (column_count - MIN_MANUAL_COLUMN_COUNT) * [""]
-                    + [
-                        minimum_out,
-                        maximum_out,
-                        defaults_out[0],
-                    ]
-                )
+                row = [parameter_name_out, access_level_out] + [
+                    minimum_out,
+                    maximum_out,
+                    defaults_out[0],
+                ]
                 output_worksheet.append(row)
                 rows_used += 1
 
@@ -509,15 +502,6 @@ def format_for_manual(
                         horizontal="left", vertical="top"
                     )
                 )
-
-                # Merge access level; minimum, maximum and default stay as 1 column
-                output_worksheet.merge_cells(
-                    start_row=current_row,
-                    start_column=2,
-                    end_row=current_row,
-                    end_column=column_count - 3,
-                )
-
             else:
                 # Check and set if this parameter is the start of table rows section.
                 entered_tables_section = TABLES_TREE_STR in parameter_path
@@ -530,11 +514,11 @@ def format_for_manual(
                     start_row=current_row,
                     start_column=1,
                     end_row=current_row,
-                    end_column=column_count,
+                    end_column=COLUMN_COUNT,
                 )
 
                 # Set the font size and fill color for parameter name.
-                for col in EXCEL_COLUMN_LETTERS[:column_count]:
+                for col in EXCEL_COLUMN_LETTERS[:COLUMN_COUNT]:
                     output_worksheet[col + str(current_row)].font = CELL_FONT
                     output_worksheet[col + str(current_row)].fill = CELL_FILL_PARAMETER
                     output_worksheet[col + str(current_row)].border = CELL_BORDER
@@ -544,37 +528,34 @@ def format_for_manual(
                 current_row += 1
 
                 if all_defaults_same:
-                    row1 = (
-                        [description_out, field_names.access_level]
-                        + (column_count - MIN_MANUAL_COLUMN_COUNT) * [""]
-                        + [field_names.minimum, field_names.maximum, "Default"]
-                    )
-                    row2 = (
-                        ["", access_level_out]
-                        + (column_count - MIN_MANUAL_COLUMN_COUNT) * [""]
-                        + [minimum_out, maximum_out, defaults_out[0]]
-                    )
+                    row1 = [description_out, field_names.access_level] + [
+                        field_names.minimum,
+                        field_names.maximum,
+                        "Default",
+                    ]
+                    row2 = ["", access_level_out] + [
+                        minimum_out,
+                        maximum_out,
+                        defaults_out[0],
+                    ]
                     # Output single Default cells section.
                     output_worksheet.append(row1)
                     output_worksheet.append(row2)
                     rows_used += 2
                 else:
                     # Output multiple Default cells sections, +1 for no default column
-                    row1 = (
-                        [description_out, field_names.access_level]
-                        + (column_count - MIN_MANUAL_COLUMN_COUNT + 1) * [""]
-                        + [field_names.minimum, field_names.maximum]
-                    )
-                    row2 = (
-                        ["", access_level_out]
-                        + (column_count - MIN_MANUAL_COLUMN_COUNT + 1) * [""]
-                        + [minimum_out, maximum_out]
-                    )
+                    row1 = [description_out, field_names.access_level] + [
+                        field_names.minimum,
+                        field_names.maximum,
+                    ]
+                    row2 = ["", access_level_out] + [minimum_out, maximum_out]
                     output_worksheet.append(row1)
                     output_worksheet.append(row2)
-                    output_worksheet.append([""] + field_names.defaults)
-                    output_worksheet.append([""] + defaults_out)
-                    rows_used += 4
+                    output_worksheet.append([""] + field_names.defaults[:4])
+                    output_worksheet.append([""] + defaults_out[:4])
+                    output_worksheet.append([""] + field_names.defaults[4:])
+                    output_worksheet.append([""] + defaults_out[4:])
+                    rows_used += 6
 
                 # Merge cells for parameter description.
                 output_worksheet.merge_cells(
@@ -592,50 +573,27 @@ def format_for_manual(
                 )
 
                 if all_defaults_same:
-                    output_worksheet.merge_cells(
-                        start_row=current_row,
-                        start_column=2,
-                        end_row=current_row,
-                        end_column=column_count - 3,
-                    )
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 1,
-                        start_column=2,
-                        end_row=current_row + 1,
-                        end_column=column_count - 3,
-                    )
                     # Style access level; minimum, maximum and default
-                    for col in EXCEL_COLUMN_LETTERS[1:column_count]:
+                    for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
                         output_worksheet[col + str(current_row)].fill = (
                             CELL_FILL_DEFAULTS
                         )
                 else:
-                    # Merge access level; minimum and maximum stay as 1 column; no default column.
-                    # The product specific defaults each get their own column.
-                    output_worksheet.merge_cells(
-                        start_row=current_row,
-                        start_column=2,
-                        end_row=current_row,
-                        end_column=column_count - 2,
-                    )
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 1,
-                        start_column=2,
-                        end_row=current_row + 1,
-                        end_column=column_count - 2,
-                    )
                     # Style access level; minimum and maximum
-                    for col in EXCEL_COLUMN_LETTERS[1:column_count]:
+                    for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
                         output_worksheet[col + str(current_row)].fill = (
                             CELL_FILL_DEFAULTS
                         )
                         output_worksheet[col + str(current_row + 2)].fill = (
                             CELL_FILL_DEFAULTS
                         )
+                        output_worksheet[col + str(current_row + 4)].fill = (
+                            CELL_FILL_DEFAULTS
+                        )
 
             # Set the font size and border for non header description rows.
             for style_row in range(current_row, current_row + rows_used):
-                for col in EXCEL_COLUMN_LETTERS[:column_count]:
+                for col in EXCEL_COLUMN_LETTERS[:COLUMN_COUNT]:
                     output_worksheet[col + str(style_row)].font = CELL_FONT
                     output_worksheet[col + str(style_row)].border = CELL_BORDER
                     output_worksheet[col + str(style_row)].number_format = (
