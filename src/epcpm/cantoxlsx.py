@@ -2,6 +2,7 @@ from __future__ import (
     annotations,
 )  # See PEP 563, check to remove in future Python version higher than 3.7
 import re
+import string
 import attr
 import decimal
 import openpyxl
@@ -15,14 +16,15 @@ import epyqlib.utils.general
 from natsort import natsorted
 from tqdm import tqdm
 
-EXCEL_COLUMN_LETTERS = [c for c in "ABCDEFGHIJKLMNOPQRSTU"]
+EXCEL_COLUMN_LETTERS = string.ascii_uppercase
 PMVS_UUID_TO_DECIMAL_LIST = typing.List[typing.Dict[uuid.UUID, decimal.Decimal]]
-DEFAULT_PREFIX = "DG_Defaults-"
+
+PATH_SEPARATOR = " -> "
 # The parameter query prefix on a large portion of the CAN parameter paths.
-PARAMETER_QUERY_PREFIX = "ParameterQuery -> "
+PARAMETER_QUERY_PREFIX = f"ParameterQuery{PATH_SEPARATOR}"
 # The parameters prefix on a large portion of the parameter paths.
-PARAMETERS_PREFIX = "Parameters -> "
-TABLES_TREE_STR = "Tables -> Tree"
+PARAMETERS_PREFIX = f"Parameters{PATH_SEPARATOR}"
+TABLES_TREE_STR = f"Tables{PATH_SEPARATOR}Tree"
 FILTER_GROUPS = [
     "2. DC",
     "9. Simulation Mode",
@@ -103,10 +105,12 @@ def create_pmvs_uuid_to_value_list(
     for pmvs_file in pmvs_files:
         pmvs = epyqlib.pm.valuesetmodel.loadp(pmvs_file)
         pmvs_list.append(pmvs)
-        clean_default_name = pmvs.path.stem.replace(DEFAULT_PREFIX, "").replace(
+        clean_default_name = pmvs.path.stem.replace(PARAMETERS_PREFIX, "").replace(
             "_", " "
         )
-        field_names.defaults.append(clean_default_name)
+        # field_names.defaults.append(clean_default_name)
+        field_names.defaults.append(pmvs.path.stem)
+        print(f"{pmvs.path.stem} OR {clean_default_name}")
 
     pmvs_uuid_to_value_list = []
     for pmvs in pmvs_list:
@@ -130,7 +134,6 @@ def export(
     Args:
         path: path and filename for .xlsx file
         can_model: CAN model
-        parameters_model: parameters model
         pmvs_path: directory path to the pmvs files
         column_filter: columns to be output to .xls file
 
@@ -352,7 +355,8 @@ class GenericNode:
 
 
 def format_for_manual(
-    input_path: pathlib.Path, product_specific_defaults: typing.List[str]
+    input_path: pathlib.Path,
+    parameters_model: epyqlib.attrsmodel.Model,
 ) -> None:
     """
     Translate the CAN model parameter data to formatted Excel format (.xlsx)
@@ -360,14 +364,21 @@ def format_for_manual(
 
     Args:
         input_path: path and filename for input .xlsx file
-        product_specific_defaults: list of defaults that will be included in output
+        parameters_model: parameters model
 
     Returns:
 
     """
+
+    builder = epcpm.cantoxlsx.builders.wrap(
+        wrapped=parameters_model.root,
+    )
+    group_manual_description_map = builder.gen()
+    parameter_uuid_finder = parameters_model.node_from_uuid
+
     input_workbook = openpyxl.load_workbook(filename=input_path)
-    input_worksheet = input_workbook.active
-    input_worksheet_col_count = input_worksheet.max_column
+    input_parameter_worksheet = input_workbook["Parameters"]
+    input_worksheet_col_count = input_parameter_worksheet.max_column
 
     output_path = input_path.with_name(
         input_path.stem + "_for_manual" + input_path.suffix
@@ -382,7 +393,9 @@ def format_for_manual(
 
     # Perform all filtering activities.
     filtered_rows = []
-    for row in input_worksheet.iter_rows(min_row=2, max_col=input_worksheet_col_count):
+    for row in input_parameter_worksheet.iter_rows(
+        min_row=2, max_col=input_worksheet_col_count
+    ):
         # Only output parameters that are in EPyQ.
         parameter_path = row[6].value
         if not parameter_path.startswith(PARAMETERS_PREFIX):
@@ -416,7 +429,10 @@ def format_for_manual(
             if not parameter_path.startswith(PARAMETERS_PREFIX):
                 # Only output parameters that are in EPyQ.
                 continue
-            description_out = row[2].value
+
+            parameter_uuid = row[8].value
+            parameter_node = parameter_uuid_finder(uuid.UUID(parameter_uuid))
+            description_out = parameter_node.manual_description
             access_level_out = row[3].value
             units_out = row[4].value
             parameter_name_out = row[9].value
@@ -455,9 +471,19 @@ def format_for_manual(
             # Chop off the parameters prefix to match the path that is seen in the EPyQ parameters tab.
             parameter_path_to_check = parameter_path[len(PARAMETERS_PREFIX) :]
             if parameter_path_to_check != current_parameter_path:
-                # Add the parameter path for this section of parameters.
+                # Add the parameter path (group) for this section of parameters.
                 current_parameter_path = parameter_path_to_check
-                output_worksheet.append([current_parameter_path])
+                if parameter_path_to_check in group_manual_description_map:
+                    # Add the group's comment, if available.
+                    output_worksheet.append(
+                        [
+                            current_parameter_path
+                            + "\n\n"
+                            + group_manual_description_map[current_parameter_path]
+                        ]
+                    )
+                else:
+                    output_worksheet.append([current_parameter_path])
 
                 # Merge cells for header description.
                 output_worksheet.merge_cells(
