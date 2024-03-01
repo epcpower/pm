@@ -2,6 +2,7 @@ from __future__ import (
     annotations,
 )  # See PEP 563, check to remove in future Python version higher than 3.7
 import re
+import string
 import attr
 import decimal
 import openpyxl
@@ -15,13 +16,15 @@ import epyqlib.utils.general
 from natsort import natsorted
 from tqdm import tqdm
 
-EXCEL_COLUMN_LETTERS = [c for c in "ABCDEFGHIJKLMNOPQRSTU"]
+EXCEL_COLUMN_LETTERS = string.ascii_uppercase
 PMVS_UUID_TO_DECIMAL_LIST = typing.List[typing.Dict[uuid.UUID, decimal.Decimal]]
+
+PATH_SEPARATOR = " -> "
 # The parameter query prefix on a large portion of the CAN parameter paths.
-PARAMETER_QUERY_PREFIX = "ParameterQuery -> "
+PARAMETER_QUERY_PREFIX = f"ParameterQuery{PATH_SEPARATOR}"
 # The parameters prefix on a large portion of the parameter paths.
-PARAMETERS_PREFIX = "Parameters -> "
-TABLES_TREE_STR = "Tables -> Tree"
+PARAMETERS_PREFIX = f"Parameters{PATH_SEPARATOR}"
+TABLES_TREE_STR = f"Tables{PATH_SEPARATOR}Tree"
 FILTER_GROUPS = [
     "2. DC",
     "9. Simulation Mode",
@@ -126,7 +129,6 @@ def export(
     Args:
         path: path and filename for .xlsx file
         can_model: CAN model
-        parameters_model: parameters model
         pmvs_path: directory path to the pmvs files
         column_filter: columns to be output to .xls file
 
@@ -348,7 +350,8 @@ class GenericNode:
 
 
 def format_for_manual(
-    input_path: pathlib.Path, product_specific_defaults: typing.List[str]
+    input_path: pathlib.Path,
+    parameters_model: epyqlib.attrsmodel.Model,
 ) -> None:
     """
     Translate the CAN model parameter data to formatted Excel format (.xlsx)
@@ -356,14 +359,21 @@ def format_for_manual(
 
     Args:
         input_path: path and filename for input .xlsx file
-        product_specific_defaults: list of defaults that will be included in output
+        parameters_model: parameters model
 
     Returns:
 
     """
+
+    builder = epcpm.cantoxlsx.builders.wrap(
+        wrapped=parameters_model.root,
+    )
+    group_manual_description_map = builder.gen()
+    parameter_uuid_finder = parameters_model.node_from_uuid
+
     input_workbook = openpyxl.load_workbook(filename=input_path)
-    input_worksheet = input_workbook.active
-    input_worksheet_col_count = input_worksheet.max_column
+    input_parameter_worksheet = input_workbook["Parameters"]
+    input_worksheet_col_count = input_parameter_worksheet.max_column
 
     output_path = input_path.with_name(
         input_path.stem + "_for_manual" + input_path.suffix
@@ -378,7 +388,9 @@ def format_for_manual(
 
     # Perform all filtering activities.
     filtered_rows = []
-    for row in input_worksheet.iter_rows(min_row=2, max_col=input_worksheet_col_count):
+    for row in input_parameter_worksheet.iter_rows(
+        min_row=2, max_col=input_worksheet_col_count
+    ):
         # Only output parameters that are in EPyQ.
         parameter_path = row[6].value
         if not parameter_path.startswith(PARAMETERS_PREFIX):
@@ -412,7 +424,10 @@ def format_for_manual(
             if not parameter_path.startswith(PARAMETERS_PREFIX):
                 # Only output parameters that are in EPyQ.
                 continue
-            description_out = row[2].value
+
+            parameter_uuid = row[8].value
+            parameter_node = parameter_uuid_finder(uuid.UUID(parameter_uuid))
+            description_out = parameter_node.manual_description
             access_level_out = row[3].value
             units_out = row[4].value
             parameter_name_out = row[9].value
@@ -451,9 +466,19 @@ def format_for_manual(
             # Chop off the parameters prefix to match the path that is seen in the EPyQ parameters tab.
             parameter_path_to_check = parameter_path[len(PARAMETERS_PREFIX) :]
             if parameter_path_to_check != current_parameter_path:
-                # Add the parameter path for this section of parameters.
+                # Add the parameter path (group) for this section of parameters.
                 current_parameter_path = parameter_path_to_check
-                output_worksheet.append([current_parameter_path])
+                if parameter_path_to_check in group_manual_description_map:
+                    # Add the group's comment, if available.
+                    output_worksheet.append(
+                        [
+                            current_parameter_path
+                            + "\n\n"
+                            + group_manual_description_map[current_parameter_path]
+                        ]
+                    )
+                else:
+                    output_worksheet.append([current_parameter_path])
 
                 # Merge cells for header description.
                 output_worksheet.merge_cells(
@@ -468,9 +493,9 @@ def format_for_manual(
                     output_worksheet[col + str(current_row)].font = CELL_FONT
                     output_worksheet[col + str(current_row)].fill = CELL_FILL_GROUP
                     output_worksheet[col + str(current_row)].border = CELL_BORDER
-                    output_worksheet[
-                        col + str(current_row)
-                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
+                    output_worksheet[col + str(current_row)].alignment = (
+                        openpyxl.styles.alignment.Alignment(wrap_text=True)
+                    )
 
                 current_row += 1
                 # Reset the tables section logic.
@@ -497,10 +522,10 @@ def format_for_manual(
                 rows_used += 1
 
                 # Set horizontal & vertical alignment for parameter name.
-                output_worksheet[
-                    "A" + str(current_row)
-                ].alignment = openpyxl.styles.alignment.Alignment(
-                    horizontal="left", vertical="top"
+                output_worksheet["A" + str(current_row)].alignment = (
+                    openpyxl.styles.alignment.Alignment(
+                        horizontal="left", vertical="top"
+                    )
                 )
             else:
                 # Check and set if this parameter is the start of table rows section.
@@ -522,9 +547,9 @@ def format_for_manual(
                     output_worksheet[col + str(current_row)].font = CELL_FONT
                     output_worksheet[col + str(current_row)].fill = CELL_FILL_PARAMETER
                     output_worksheet[col + str(current_row)].border = CELL_BORDER
-                    output_worksheet[
-                        col + str(current_row)
-                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
+                    output_worksheet[col + str(current_row)].alignment = (
+                        openpyxl.styles.alignment.Alignment(wrap_text=True)
+                    )
                 current_row += 1
 
                 if all_defaults_same:
@@ -627,53 +652,53 @@ def format_for_manual(
                 )
 
                 # Set wrap_text, horizontal & vertical alignment for parameter description.
-                output_worksheet[
-                    "A" + str(current_row)
-                ].alignment = openpyxl.styles.alignment.Alignment(
-                    horizontal="left", vertical="top", wrap_text=True
+                output_worksheet["A" + str(current_row)].alignment = (
+                    openpyxl.styles.alignment.Alignment(
+                        horizontal="left", vertical="top", wrap_text=True
+                    )
                 )
 
                 if all_defaults_same:
                     # Style access level; minimum, maximum, and default
                     for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
-                        output_worksheet[
-                            col + str(current_row)
-                        ].fill = CELL_FILL_DEFAULTS
+                        output_worksheet[col + str(current_row)].fill = (
+                            CELL_FILL_DEFAULTS
+                        )
                 else:
                     # Style access level; minimum, maximum, and defaults
                     if rows_used > 4:
                         for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
-                            output_worksheet[
-                                col + str(current_row)
-                            ].fill = CELL_FILL_DEFAULTS
-                            output_worksheet[
-                                col + str(current_row + 2)
-                            ].fill = CELL_FILL_DEFAULTS
-                            output_worksheet[
-                                col + str(current_row + 4)
-                            ].fill = CELL_FILL_DEFAULTS
+                            output_worksheet[col + str(current_row)].fill = (
+                                CELL_FILL_DEFAULTS
+                            )
+                            output_worksheet[col + str(current_row + 2)].fill = (
+                                CELL_FILL_DEFAULTS
+                            )
+                            output_worksheet[col + str(current_row + 4)].fill = (
+                                CELL_FILL_DEFAULTS
+                            )
                     elif rows_used > 2:
                         for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
-                            output_worksheet[
-                                col + str(current_row)
-                            ].fill = CELL_FILL_DEFAULTS
-                            output_worksheet[
-                                col + str(current_row + 2)
-                            ].fill = CELL_FILL_DEFAULTS
+                            output_worksheet[col + str(current_row)].fill = (
+                                CELL_FILL_DEFAULTS
+                            )
+                            output_worksheet[col + str(current_row + 2)].fill = (
+                                CELL_FILL_DEFAULTS
+                            )
                     else:
                         for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
-                            output_worksheet[
-                                col + str(current_row)
-                            ].fill = CELL_FILL_DEFAULTS
+                            output_worksheet[col + str(current_row)].fill = (
+                                CELL_FILL_DEFAULTS
+                            )
 
             # Set the font size and border for non header description rows.
             for style_row in range(current_row, current_row + rows_used):
                 for col in EXCEL_COLUMN_LETTERS[:COLUMN_COUNT]:
                     output_worksheet[col + str(style_row)].font = CELL_FONT
                     output_worksheet[col + str(style_row)].border = CELL_BORDER
-                    output_worksheet[
-                        col + str(style_row)
-                    ].number_format = NUMBER_FORMAT_TEXT
+                    output_worksheet[col + str(style_row)].number_format = (
+                        NUMBER_FORMAT_TEXT
+                    )
 
             # Update the current row with the number of rows used plus one to go to the next row.
             current_row += rows_used
@@ -722,9 +747,9 @@ class Group:
             parameter_path_list = self._generate_group_path_list(self.wrapped)
             parameter_path_str = " -> ".join(parameter_path_list)
             parameter_path_str_out = parameter_path_str[len(PARAMETERS_PREFIX) :]
-            group_manual_description_map[
-                parameter_path_str_out
-            ] = self.wrapped.manual_description
+            group_manual_description_map[parameter_path_str_out] = (
+                self.wrapped.manual_description
+            )
 
         for child in self.wrapped.children:
             if isinstance(
