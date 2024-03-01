@@ -450,6 +450,12 @@ def format_for_manual(
                 else False
             )
 
+            # Remove defaults that aren't
+            for default in product_specific_defaults:
+                if default not in field_names.defaults:
+                    print(f"The default {default} does not exist")
+                    product_specific_defaults.remove(default)
+
             if units_out:
                 # If there is a units value, append it to the end of the numeric default value.
                 if minimum_out is not None:
