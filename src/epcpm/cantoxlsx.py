@@ -352,6 +352,7 @@ class GenericNode:
 def format_for_manual(
     input_path: pathlib.Path,
     parameters_model: epyqlib.attrsmodel.Model,
+    product_specific_defaults: typing.List[str],
 ) -> None:
     """
     Translate the CAN model parameter data to formatted Excel format (.xlsx)
@@ -493,9 +494,9 @@ def format_for_manual(
                     output_worksheet[col + str(current_row)].font = CELL_FONT
                     output_worksheet[col + str(current_row)].fill = CELL_FILL_GROUP
                     output_worksheet[col + str(current_row)].border = CELL_BORDER
-                    output_worksheet[col + str(current_row)].alignment = (
-                        openpyxl.styles.alignment.Alignment(wrap_text=True)
-                    )
+                    output_worksheet[
+                        col + str(current_row)
+                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
 
                 current_row += 1
                 # Reset the tables section logic.
@@ -522,10 +523,10 @@ def format_for_manual(
                 rows_used += 1
 
                 # Set horizontal & vertical alignment for parameter name.
-                output_worksheet["A" + str(current_row)].alignment = (
-                    openpyxl.styles.alignment.Alignment(
-                        horizontal="left", vertical="top"
-                    )
+                output_worksheet[
+                    "A" + str(current_row)
+                ].alignment = openpyxl.styles.alignment.Alignment(
+                    horizontal="left", vertical="top"
                 )
             else:
                 # Check and set if this parameter is the start of table rows section.
@@ -547,9 +548,9 @@ def format_for_manual(
                     output_worksheet[col + str(current_row)].font = CELL_FONT
                     output_worksheet[col + str(current_row)].fill = CELL_FILL_PARAMETER
                     output_worksheet[col + str(current_row)].border = CELL_BORDER
-                    output_worksheet[col + str(current_row)].alignment = (
-                        openpyxl.styles.alignment.Alignment(wrap_text=True)
-                    )
+                    output_worksheet[
+                        col + str(current_row)
+                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
                 current_row += 1
 
                 if all_defaults_same:
@@ -652,53 +653,53 @@ def format_for_manual(
                 )
 
                 # Set wrap_text, horizontal & vertical alignment for parameter description.
-                output_worksheet["A" + str(current_row)].alignment = (
-                    openpyxl.styles.alignment.Alignment(
-                        horizontal="left", vertical="top", wrap_text=True
-                    )
+                output_worksheet[
+                    "A" + str(current_row)
+                ].alignment = openpyxl.styles.alignment.Alignment(
+                    horizontal="left", vertical="top", wrap_text=True
                 )
 
                 if all_defaults_same:
                     # Style access level; minimum, maximum, and default
                     for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
-                        output_worksheet[col + str(current_row)].fill = (
-                            CELL_FILL_DEFAULTS
-                        )
+                        output_worksheet[
+                            col + str(current_row)
+                        ].fill = CELL_FILL_DEFAULTS
                 else:
                     # Style access level; minimum, maximum, and defaults
                     if rows_used > 4:
                         for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
-                            output_worksheet[col + str(current_row)].fill = (
-                                CELL_FILL_DEFAULTS
-                            )
-                            output_worksheet[col + str(current_row + 2)].fill = (
-                                CELL_FILL_DEFAULTS
-                            )
-                            output_worksheet[col + str(current_row + 4)].fill = (
-                                CELL_FILL_DEFAULTS
-                            )
+                            output_worksheet[
+                                col + str(current_row)
+                            ].fill = CELL_FILL_DEFAULTS
+                            output_worksheet[
+                                col + str(current_row + 2)
+                            ].fill = CELL_FILL_DEFAULTS
+                            output_worksheet[
+                                col + str(current_row + 4)
+                            ].fill = CELL_FILL_DEFAULTS
                     elif rows_used > 2:
                         for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
-                            output_worksheet[col + str(current_row)].fill = (
-                                CELL_FILL_DEFAULTS
-                            )
-                            output_worksheet[col + str(current_row + 2)].fill = (
-                                CELL_FILL_DEFAULTS
-                            )
+                            output_worksheet[
+                                col + str(current_row)
+                            ].fill = CELL_FILL_DEFAULTS
+                            output_worksheet[
+                                col + str(current_row + 2)
+                            ].fill = CELL_FILL_DEFAULTS
                     else:
                         for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
-                            output_worksheet[col + str(current_row)].fill = (
-                                CELL_FILL_DEFAULTS
-                            )
+                            output_worksheet[
+                                col + str(current_row)
+                            ].fill = CELL_FILL_DEFAULTS
 
             # Set the font size and border for non header description rows.
             for style_row in range(current_row, current_row + rows_used):
                 for col in EXCEL_COLUMN_LETTERS[:COLUMN_COUNT]:
                     output_worksheet[col + str(style_row)].font = CELL_FONT
                     output_worksheet[col + str(style_row)].border = CELL_BORDER
-                    output_worksheet[col + str(style_row)].number_format = (
-                        NUMBER_FORMAT_TEXT
-                    )
+                    output_worksheet[
+                        col + str(style_row)
+                    ].number_format = NUMBER_FORMAT_TEXT
 
             # Update the current row with the number of rows used plus one to go to the next row.
             current_row += rows_used
@@ -747,9 +748,9 @@ class Group:
             parameter_path_list = self._generate_group_path_list(self.wrapped)
             parameter_path_str = " -> ".join(parameter_path_list)
             parameter_path_str_out = parameter_path_str[len(PARAMETERS_PREFIX) :]
-            group_manual_description_map[parameter_path_str_out] = (
-                self.wrapped.manual_description
-            )
+            group_manual_description_map[
+                parameter_path_str_out
+            ] = self.wrapped.manual_description
 
         for child in self.wrapped.children:
             if isinstance(
