@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 EXCEL_COLUMN_LETTERS = [c for c in "ABCDEFGHIJKLMNOPQRSTU"]
 PMVS_UUID_TO_DECIMAL_LIST = typing.List[typing.Dict[uuid.UUID, decimal.Decimal]]
-
+DEFAULT_PREFIX = "DG_Defaults-"
 # The parameter query prefix on a large portion of the CAN parameter paths.
 PARAMETER_QUERY_PREFIX = "ParameterQuery -> "
 # The parameters prefix on a large portion of the parameter paths.
@@ -103,7 +103,10 @@ def create_pmvs_uuid_to_value_list(
     for pmvs_file in pmvs_files:
         pmvs = epyqlib.pm.valuesetmodel.loadp(pmvs_file)
         pmvs_list.append(pmvs)
-        field_names.defaults.append(pmvs.path.stem)
+        clean_default_name = pmvs.path.stem.replace(DEFAULT_PREFIX, "").replace(
+            "_", " "
+        )
+        field_names.defaults.append(clean_default_name)
 
     pmvs_uuid_to_value_list = []
     for pmvs in pmvs_list:
@@ -349,7 +352,7 @@ class GenericNode:
 
 
 def format_for_manual(
-    input_path: pathlib.Path,
+    input_path: pathlib.Path, product_specific_defaults: typing.List[str]
 ) -> None:
     """
     Translate the CAN model parameter data to formatted Excel format (.xlsx)
@@ -357,6 +360,7 @@ def format_for_manual(
 
     Args:
         input_path: path and filename for input .xlsx file
+        product_specific_defaults: list of defaults that will be included in output
 
     Returns:
 
@@ -543,19 +547,95 @@ def format_for_manual(
                     output_worksheet.append(row2)
                     rows_used += 2
                 else:
-                    # Output multiple Default cells sections, +1 for no default column
-                    row1 = [description_out, field_names.access_level] + [
-                        field_names.minimum,
-                        field_names.maximum,
-                    ]
-                    row2 = ["", access_level_out] + [minimum_out, maximum_out]
-                    output_worksheet.append(row1)
-                    output_worksheet.append(row2)
-                    output_worksheet.append([""] + field_names.defaults[:4])
-                    output_worksheet.append([""] + defaults_out[:4])
-                    output_worksheet.append([""] + field_names.defaults[4:])
-                    output_worksheet.append([""] + defaults_out[4:])
-                    rows_used += 6
+                    # TODO: Implement default selection here
+                    # rows_used will differ depending on the length of product_specific_defaults
+                    if len(product_specific_defaults) > 4:
+                        # Output multiple Default cells sections, +1 for no default column
+                        row1 = [description_out, field_names.access_level] + [
+                            field_names.minimum,
+                            field_names.maximum,
+                        ]
+                        row2 = ["", access_level_out] + [minimum_out, maximum_out]
+                        default_indices = []
+                        for default in product_specific_defaults:
+                            default_indices.append(field_names.defaults.index(default))
+                        output_worksheet.append(row1)
+                        output_worksheet.append(row2)
+                        output_worksheet.append(
+                            [""]
+                            + [
+                                field_names.defaults[index]
+                                for index in default_indices[:4]
+                            ]
+                        )
+                        output_worksheet.append(
+                            [""]
+                            + [defaults_out[index] for index in default_indices[:4]]
+                        )
+                        output_worksheet.append(
+                            [""]
+                            + [
+                                field_names.defaults[index]
+                                for index in default_indices[4:]
+                            ]
+                        )
+                        output_worksheet.append(
+                            [""]
+                            + [defaults_out[index] for index in default_indices[4:]]
+                        )
+                        rows_used += 6
+                    elif len(product_specific_defaults) > 1:
+                        # Output multiple Default cells sections, +1 for no default column
+                        row1 = [description_out, field_names.access_level] + [
+                            field_names.minimum,
+                            field_names.maximum,
+                        ]
+                        row2 = ["", access_level_out] + [minimum_out, maximum_out]
+                        # Need to think about the order here
+                        default_indices = []
+                        for default in product_specific_defaults:
+                            default_indices.append(field_names.defaults.index(default))
+                        output_worksheet.append(row1)
+                        output_worksheet.append(row2)
+                        output_worksheet.append(
+                            [""]
+                            + [field_names.defaults[index] for index in default_indices]
+                        )
+                        output_worksheet.append(
+                            [""] + [defaults_out[index] for index in default_indices]
+                        )
+                        rows_used += 4
+                    elif len(product_specific_defaults) == 1:
+                        row1 = [description_out, field_names.access_level] + [
+                            field_names.minimum,
+                            field_names.maximum,
+                            product_specific_defaults[0],
+                        ]
+                        default_index = field_names.defaults.index(
+                            product_specific_defaults[0]
+                        )
+                        row2 = ["", access_level_out] + [
+                            minimum_out,
+                            maximum_out,
+                            defaults_out[default_index],
+                        ]
+                        output_worksheet.append(row1)
+                        output_worksheet.append(row2)
+                        rows_used += 2
+                    else:
+                        # Output multiple Default cells sections, +1 for no default column
+                        row1 = [description_out, field_names.access_level] + [
+                            field_names.minimum,
+                            field_names.maximum,
+                        ]
+                        row2 = ["", access_level_out] + [minimum_out, maximum_out]
+                        output_worksheet.append(row1)
+                        output_worksheet.append(row2)
+                        output_worksheet.append([""] + field_names.defaults[:4])
+                        output_worksheet.append([""] + defaults_out[:4])
+                        output_worksheet.append([""] + field_names.defaults[4:])
+                        output_worksheet.append([""] + defaults_out[4:])
+                        rows_used += 6
 
                 # Merge cells for parameter description.
                 output_worksheet.merge_cells(
@@ -573,23 +653,37 @@ def format_for_manual(
                 )
 
                 if all_defaults_same:
-                    # Style access level; minimum, maximum and default
+                    # Style access level; minimum, maximum, and default
                     for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
                         output_worksheet[
                             col + str(current_row)
                         ].fill = CELL_FILL_DEFAULTS
                 else:
-                    # Style access level; minimum and maximum
-                    for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
-                        output_worksheet[
-                            col + str(current_row)
-                        ].fill = CELL_FILL_DEFAULTS
-                        output_worksheet[
-                            col + str(current_row + 2)
-                        ].fill = CELL_FILL_DEFAULTS
-                        output_worksheet[
-                            col + str(current_row + 4)
-                        ].fill = CELL_FILL_DEFAULTS
+                    # Style access level; minimum, maximum, and defaults
+                    if rows_used > 4:
+                        for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
+                            output_worksheet[
+                                col + str(current_row)
+                            ].fill = CELL_FILL_DEFAULTS
+                            output_worksheet[
+                                col + str(current_row + 2)
+                            ].fill = CELL_FILL_DEFAULTS
+                            output_worksheet[
+                                col + str(current_row + 4)
+                            ].fill = CELL_FILL_DEFAULTS
+                    elif rows_used > 2:
+                        for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
+                            output_worksheet[
+                                col + str(current_row)
+                            ].fill = CELL_FILL_DEFAULTS
+                            output_worksheet[
+                                col + str(current_row + 2)
+                            ].fill = CELL_FILL_DEFAULTS
+                    else:
+                        for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
+                            output_worksheet[
+                                col + str(current_row)
+                            ].fill = CELL_FILL_DEFAULTS
 
             # Set the font size and border for non header description rows.
             for style_row in range(current_row, current_row + rows_used):

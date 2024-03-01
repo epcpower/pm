@@ -117,11 +117,16 @@ def build(
 @epcpm.cli.utils.target_path_option(required=True)
 @epcpm.cli.utils.pmvs_overlay_recipes_path_option(required=True)
 @click.option("--generate-formatted-output", "generate_formatted_output", is_flag=True)
+@click.option(
+    "--product-specific-defaults",
+    help="Comma separated list of defaults to be included in the output",
+)
 def docs(
     project: str,
     target_path: str,
     pmvs_overlay_recipes_path: str,
     generate_formatted_output: bool,
+    product_specific_defaults: str,
 ) -> None:
     """
     Export PM documentation to embedded project directory
@@ -131,6 +136,7 @@ def docs(
         target_path: path to root target directory
         pmvs_overlay_recipes_path: path to PMVS overlay recipes directory (contains base.json)
         generate_formatted_output: generate formatted output of the documentation (takes a long time)
+        product_specific_defaults: optional argument to specify which defaults are included in the output
     Returns:
 
     """
@@ -144,12 +150,15 @@ def docs(
     paths = epcpm.importexportdialog.paths_from_directory(target_path)
 
     loaded_project = epcpm.project.loadp(project)
-
+    product_specific_defaults_list = []
+    if product_specific_defaults:
+        product_specific_defaults_list = product_specific_defaults.split(",")
     epcpm.importexport.generate_docs(
         project=loaded_project,
         pmvs_path=pmvs_output_path,
         paths=paths,
         generate_formatted_output=generate_formatted_output,
+        product_specific_defaults=product_specific_defaults_list,
     )
 
     click.echo()
