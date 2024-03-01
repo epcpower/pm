@@ -17,7 +17,6 @@ from tqdm import tqdm
 
 EXCEL_COLUMN_LETTERS = [c for c in "ABCDEFGHIJKLMNOPQRSTU"]
 PMVS_UUID_TO_DECIMAL_LIST = typing.List[typing.Dict[uuid.UUID, decimal.Decimal]]
-DEFAULT_PREFIX = "DG_Defaults-"
 # The parameter query prefix on a large portion of the CAN parameter paths.
 PARAMETER_QUERY_PREFIX = "ParameterQuery -> "
 # The parameters prefix on a large portion of the parameter paths.
@@ -103,10 +102,7 @@ def create_pmvs_uuid_to_value_list(
     for pmvs_file in pmvs_files:
         pmvs = epyqlib.pm.valuesetmodel.loadp(pmvs_file)
         pmvs_list.append(pmvs)
-        clean_default_name = pmvs.path.stem.replace(DEFAULT_PREFIX, "").replace(
-            "_", " "
-        )
-        field_names.defaults.append(clean_default_name)
+        field_names.defaults.append(pmvs.path.stem)
 
     pmvs_uuid_to_value_list = []
     for pmvs in pmvs_list:
