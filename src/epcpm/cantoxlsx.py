@@ -423,6 +423,9 @@ def format_for_manual(
             if default not in product_specific_defaults:
                 unincluded_default_indices.append(field_names.defaults.index(default))
     unincluded_default_indices.sort(reverse=True)
+    # Remove defaults not included in the controls manual output
+    for index in unincluded_default_indices:
+        field_names.defaults.pop(index)
 
     # Track the current row in the output worksheet.
     current_row = 1
@@ -455,10 +458,9 @@ def format_for_manual(
                 else:
                     defaults_out.append("")
 
-            # Remove field_names.defaults and values for defaults not specified in controls manual
+            # Remove field_names.defaults values for defaults not specified in controls manual
             for index in unincluded_default_indices:
                 defaults_out.pop(index)
-                field_names.defaults.pop(index)
 
             # Gets the indices of the default and its respective value
             default_indices = []
