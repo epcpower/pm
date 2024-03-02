@@ -410,6 +410,20 @@ def format_for_manual(
         if access_level_out in ["Service_Tech", "Service_Eng"]:
             filtered_rows.append(row)
 
+    # Validate/remove defaults that don't have a match and output a warning
+    for default in product_specific_defaults:
+        if default not in field_names.defaults:
+            print(f"The default {default} does not exist")
+            product_specific_defaults.remove(default)
+
+    # Figure out which defaults are not specified for controls manual output
+    unincluded_default_indices = []
+    if product_specific_defaults:
+        for default in field_names.defaults:
+            if default not in product_specific_defaults:
+                unincluded_default_indices.append(field_names.defaults.index(default))
+    unincluded_default_indices.sort(reverse=True)
+
     # Track the current row in the output worksheet.
     current_row = 1
 
@@ -441,6 +455,16 @@ def format_for_manual(
                 else:
                     defaults_out.append("")
 
+            # Remove field_names.defaults and values for defaults not specified in controls manual
+            for index in unincluded_default_indices:
+                defaults_out.pop(index)
+                field_names.defaults.pop(index)
+
+            # Gets the indices of the default and its respective value
+            default_indices = []
+            for default in product_specific_defaults:
+                default_indices.append(field_names.defaults.index(default))
+
             # is_numbered_variant is necessary to distinguish parameters that are similarly named
             # (differ by numbers) from those that aren't (differ by word(s)) since both have
             # entered_table_section and all_defaults_same set to True
@@ -449,12 +473,6 @@ def format_for_manual(
                 if re.search(NUMBERED_VARIANT_PATTERN, parameter_name_out)
                 else False
             )
-
-            # Remove defaults that aren't
-            for default in product_specific_defaults:
-                if default not in field_names.defaults:
-                    print(f"The default {default} does not exist")
-                    product_specific_defaults.remove(default)
 
             if units_out:
                 # If there is a units value, append it to the end of the numeric default value.
@@ -575,8 +593,6 @@ def format_for_manual(
                     output_worksheet.append(row2)
                     rows_used += 2
                 else:
-                    # TODO: Implement default selection here
-                    # rows_used will differ depending on the length of product_specific_defaults
                     if len(product_specific_defaults) > 4:
                         # Output multiple Default cells sections, +1 for no default column
                         row1 = [description_out, field_names.access_level] + [
@@ -584,9 +600,6 @@ def format_for_manual(
                             field_names.maximum,
                         ]
                         row2 = ["", access_level_out] + [minimum_out, maximum_out]
-                        default_indices = []
-                        for default in product_specific_defaults:
-                            default_indices.append(field_names.defaults.index(default))
                         output_worksheet.append(row1)
                         output_worksheet.append(row2)
                         output_worksheet.append([""] + product_specific_defaults[:4])
@@ -608,9 +621,6 @@ def format_for_manual(
                         ]
                         row2 = ["", access_level_out] + [minimum_out, maximum_out]
                         # Need to think about the order here
-                        default_indices = []
-                        for default in product_specific_defaults:
-                            default_indices.append(field_names.defaults.index(default))
                         output_worksheet.append(row1)
                         output_worksheet.append(row2)
                         output_worksheet.append([""] + product_specific_defaults)
@@ -622,7 +632,7 @@ def format_for_manual(
                         row1 = [description_out, field_names.access_level] + [
                             field_names.minimum,
                             field_names.maximum,
-                            product_specific_defaults[0],
+                            "Default",
                         ]
                         default_index = field_names.defaults.index(
                             product_specific_defaults[0]
