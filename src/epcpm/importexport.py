@@ -468,6 +468,7 @@ def generate_docs(
         paths: import/export dialog paths
         pmvs_path: PMVS output path
         generate_formatted_output: generate formatted output (takes a long time)
+        product_specific_defaults: List of defaults to be included in the controls manual
 
     Returns:
 

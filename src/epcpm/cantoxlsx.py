@@ -361,6 +361,7 @@ def format_for_manual(
     Args:
         input_path: path and filename for input .xlsx file
         parameters_model: parameters model
+        product_specific_defaults: List of defaults to be included in the controls manual
 
     Returns:
 
