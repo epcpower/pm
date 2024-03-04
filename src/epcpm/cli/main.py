@@ -153,6 +153,9 @@ def docs(
     product_specific_defaults_list = []
     if product_specific_defaults:
         product_specific_defaults_list = product_specific_defaults.split(",")
+        product_specific_defaults_list = [
+            x.strip() for x in product_specific_defaults_list
+        ]
     epcpm.importexport.generate_docs(
         project=loaded_project,
         pmvs_path=pmvs_output_path,
