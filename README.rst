@@ -41,11 +41,11 @@ Windows
 - ``git clone https://github.com/epcpower/pm``
 - ``cd pm``
 - ``git submodule update --init``
-- ``poetry install``
-- ``poetry run builduipm``
-- ``poetry run builduiepyqlib``
+- ``poetry@1.5.1 install``
+- ``poetry@1.5.1 run builduipm``
+- ``poetry@1.5.1 run builduiepyqlib``
 
-To launch PM run ``poetry run epcpm``.
+To launch PM run ``poetry@1.5.1 run epcpm``.
 
 .. _`Python 3.7`: https://www.python.org/downloads/
 .. _`Poetry`: https://python-poetry.org/docs/
@@ -62,11 +62,11 @@ Linux
 - ``git clone https://github.com/epcpower/pm``
 - ``cd pm``
 - ``git submodule update --init``
-- ``poetry install``
-- ``poetry run builduipm``
-- ``poetry run builduiepyqlib``
+- ``poetry@1.5.1 install``
+- ``poetry@1.5.1 run builduipm``
+- ``poetry@1.5.1 run builduiepyqlib``
 
-To launch PM run ``poetry run epcpm``
+To launch PM run ``poetry@1.5.1 run epcpm``
 
 A minimal sample project is available at ``src/epcpm/tests/project/project.pmp``.
 
