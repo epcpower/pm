@@ -3,7 +3,7 @@ import math
 import os
 import pathlib
 import subprocess
-
+import typing
 import attr
 import graham
 
@@ -458,6 +458,7 @@ def generate_docs(
     paths: epcpm.importexportdialog.ImportPaths,
     pmvs_path: pathlib.Path,
     generate_formatted_output: bool,
+    product_specific_defaults: typing.List[str],
 ) -> None:
     """
     Generate the CAN model parameter data documentation.
@@ -467,6 +468,7 @@ def generate_docs(
         paths: import/export dialog paths
         pmvs_path: PMVS output path
         generate_formatted_output: generate formatted output (takes a long time)
+        product_specific_defaults: List of defaults to be included in the controls manual
 
     Returns:
 
@@ -480,4 +482,6 @@ def generate_docs(
     if generate_formatted_output:
         epcpm.cantoxlsx.format_for_manual(
             input_path=paths.spreadsheet_can,
+            parameters_model=project.models.parameters,
+            product_specific_defaults=product_specific_defaults,
         )
