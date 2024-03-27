@@ -370,7 +370,7 @@ paho-mqtt = "1.4.0"
 Pint = "0.11"
 pyelftools = {git = "https://github.com/eliben/pyelftools", rev = "27941c50fef8cff8ef991419511664154c8cdf52"}
 PyQt5 = ">=5.13.0"
-pysunspec = "2.1.0"
+pysunspec = "2.1.1"
 python-can = "4.0.0"
 python-dateutil = "^2.8.2"
 python-docx = "0.8.7"
@@ -380,9 +380,10 @@ QtAwesome = "0.6.0"
 requests = "2.27.1"
 selenium = "3.141.0"
 siphash-cffi = "0.1.4"
-sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo.git", rev = "a04b466da431549946297c66364ee835c3fab3e0"}
+sunspecdemo = {git = "https://github.com/epcpower/sunspec-demo.git", rev = "57b7699ffc000ad5d2018748c7fdbe3273b7e908"}
 treq = "21.1.0"
 Twisted = "21.2.0"
+uptime = "^3.0.1"
 
 [package.source]
 type = "directory"
@@ -884,22 +885,22 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "pyasn1"
-version = "0.5.1"
+version = "0.6.0"
 description = "Pure-Python implementation of ASN.1 types and DER/BER/CER codecs (X.208)"
 category = "dev"
 optional = false
-python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
+python-versions = ">=3.8"
 
 [[package]]
 name = "pyasn1-modules"
-version = "0.3.0"
+version = "0.4.0"
 description = "A collection of ASN.1-based protocols modules"
 category = "dev"
 optional = false
-python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
+python-versions = ">=3.8"
 
 [package.dependencies]
-pyasn1 = ">=0.4.6,<0.6.0"
+pyasn1 = ">=0.4.6,<0.7.0"
 
 [[package]]
 name = "pycparser"
@@ -907,7 +908,7 @@ version = "2.21"
 description = "C parser in Python"
 category = "main"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+python-versions = "*"
 
 [[package]]
 name = "pyelftools"
@@ -1011,7 +1012,7 @@ python-versions = "*"
 
 [[package]]
 name = "pysunspec"
-version = "2.1.0"
+version = "2.1.1"
 description = "Python SunSpec Tools"
 category = "main"
 optional = false
@@ -1347,14 +1348,14 @@ version = "0.0.0"
 description = "EPC SunSpec demonstration tool"
 category = "main"
 optional = false
-python-versions = ">=3.7.9,<3.11"
+python-versions = ">=3.8,<3.11"
 develop = false
 
 [package.dependencies]
 attrs = ">=19.3.0"
 click = "^7.0"
 pyserial = "3.4"
-pysunspec = "2.1.0"
+pysunspec = "2.1.1"
 toml = "^0.10.2"
 toolz = "0.9.0"
 tqdm = "4.32.1"
@@ -1363,8 +1364,8 @@ typing-extensions = "^4.0.1"
 [package.source]
 type = "git"
 url = "https://github.com/epcpower/sunspec-demo.git"
-reference = "a04b466da431549946297c66364ee835c3fab3e0"
-resolved_reference = "a04b466da431549946297c66364ee835c3fab3e0"
+reference = "57b7699ffc000ad5d2018748c7fdbe3273b7e908"
+resolved_reference = "57b7699ffc000ad5d2018748c7fdbe3273b7e908"
 
 [[package]]
 name = "toml"
@@ -1517,6 +1518,14 @@ optional = false
 python-versions = ">=3.8"
 
 [[package]]
+name = "uptime"
+version = "3.0.1"
+description = "Cross-platform uptime library"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "urllib3"
 version = "1.25.11"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
@@ -1602,7 +1611,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "46a90834131d334e2fcdf3d7c4307e7576ed6aa57579cda80c44b94f9ec679a6"
+content-hash = "6ff7908dbb70ac18b56635719fea060371ce669266b8375a9e738c3f9c1f5500"
 
 [metadata.files]
 alqtendpy = [
@@ -2164,7 +2173,6 @@ msgpack = [
     {file = "msgpack-1.0.8-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:5fbb160554e319f7b22ecf530a80a3ff496d38e8e07ae763b9e82fadfe96f273"},
     {file = "msgpack-1.0.8-cp39-cp39-win32.whl", hash = "sha256:f9af38a89b6a5c04b7d18c492c8ccf2aee7048aff1ce8437c4683bb5a1df893d"},
     {file = "msgpack-1.0.8-cp39-cp39-win_amd64.whl", hash = "sha256:ed59dd52075f8fc91da6053b12e8c89e37aa043f8986efd89e61fae69dc1b011"},
-    {file = "msgpack-1.0.8-py3-none-any.whl", hash = "sha256:24f727df1e20b9876fa6e95f840a2a2651e34c0ad147676356f4bf5fbb0206ca"},
     {file = "msgpack-1.0.8.tar.gz", hash = "sha256:95c02b0e27e706e48d0e5426d1710ca78e0f0628d6e89d5b5a5b91a5f12274f3"},
 ]
 mypy-extensions = [
@@ -2240,12 +2248,12 @@ py = [
     {file = "py-1.11.0.tar.gz", hash = "sha256:51c75c4126074b472f746a24399ad32f6053d1b34b68d2fa41e558e6f4a98719"},
 ]
 pyasn1 = [
-    {file = "pyasn1-0.5.1-py2.py3-none-any.whl", hash = "sha256:4439847c58d40b1d0a573d07e3856e95333f1976294494c325775aeca506eb58"},
-    {file = "pyasn1-0.5.1.tar.gz", hash = "sha256:6d391a96e59b23130a5cfa74d6fd7f388dbbe26cc8f1edf39fdddf08d9d6676c"},
+    {file = "pyasn1-0.6.0-py2.py3-none-any.whl", hash = "sha256:cca4bb0f2df5504f02f6f8a775b6e416ff9b0b3b16f7ee80b5a3153d9b804473"},
+    {file = "pyasn1-0.6.0.tar.gz", hash = "sha256:3a35ab2c4b5ef98e17dfdec8ab074046fbda76e281c5a706ccd82328cfc8f64c"},
 ]
 pyasn1-modules = [
-    {file = "pyasn1_modules-0.3.0-py2.py3-none-any.whl", hash = "sha256:d3ccd6ed470d9ffbc716be08bd90efbd44d0734bc9303818f7336070984a162d"},
-    {file = "pyasn1_modules-0.3.0.tar.gz", hash = "sha256:5bd01446b736eb9d31512a30d46c1ac3395d676c6f3cafa4c03eb54b9925631c"},
+    {file = "pyasn1_modules-0.4.0-py3-none-any.whl", hash = "sha256:be04f15b66c206eed667e0bb5ab27e2b1855ea54a842e5037738099e8ca4ae0b"},
+    {file = "pyasn1_modules-0.4.0.tar.gz", hash = "sha256:831dbcea1b177b28c9baddf4c6d1013c24c3accd14a1873fffaa6a2e905f17b6"},
 ]
 pycparser = [
     {file = "pycparser-2.21-py2.py3-none-any.whl", hash = "sha256:8ee45429555515e1f6b185e78100aea234072576aa43ab53aefcae078162fca9"},
@@ -2307,8 +2315,8 @@ pyserial = [
     {file = "pyserial-3.4.tar.gz", hash = "sha256:6e2d401fdee0eab996cf734e67773a0143b932772ca8b42451440cfed942c627"},
 ]
 pysunspec = [
-    {file = "pysunspec-2.1.0-py2.py3-none-any.whl", hash = "sha256:97dbd776796df2acf8b4610f546fc251af99aa6474181d91008cd2a1fdfb03fe"},
-    {file = "pysunspec-2.1.0.tar.gz", hash = "sha256:c4587736b107e72b411f1bb9a4cd9d4e7791217cb90533ca2ab87210151ae08c"},
+    {file = "pysunspec-2.1.1-py3-none-any.whl", hash = "sha256:af05b0a0449d75aaebb1a1134e740d4c81081291d5fd1f17bb882134a6021b20"},
+    {file = "pysunspec-2.1.1.tar.gz", hash = "sha256:9824c815a98935399029276837feb1f3d5749646415910317026d3b7f8d9a142"},
 ]
 pytest = [
     {file = "pytest-6.2.4-py3-none-any.whl", hash = "sha256:91ef2131a9bd6be8f76f1f08eac5c5317221d6ad1e143ae03894b862e8976890"},
@@ -2510,6 +2518,9 @@ twisted-iocpsupport = [
 typing-extensions = [
     {file = "typing_extensions-4.10.0-py3-none-any.whl", hash = "sha256:69b1a937c3a517342112fb4c6df7e72fc39a38e7891a5730ed4985b5214b5475"},
     {file = "typing_extensions-4.10.0.tar.gz", hash = "sha256:b0abd7c89e8fb96f98db18d86106ff1d90ab692004eb746cf6eda2682f91b3cb"},
+]
+uptime = [
+    {file = "uptime-3.0.1.tar.gz", hash = "sha256:7c300254775b807ce46e3dcbcda30aa3b9a204b9c57a7ac1e79ee6dbe3942973"},
 ]
 urllib3 = [
     {file = "urllib3-1.25.11-py2.py3-none-any.whl", hash = "sha256:f5321fbe4bf3fefa0efd0bfe7fb14e90909eb62a48ccda331726b4319897dd5e"},
