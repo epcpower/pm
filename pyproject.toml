@@ -28,13 +28,6 @@ secondary = true
 
 [tool.poetry.dependencies]
 python = ">=3.7.9,<3.11"
-
-#### EPC Repos ####
-#sunspecdemo = {version = "0.3.0", source = "epc-power"}
-sunspecdemo = { git = "https://github.com/epcpower/sunspec-demo.git", rev = "a04b466da431549946297c66364ee835c3fab3e0" }
-
-###################
-
 attrs = "20.2.0"
 lxml = "4.3.0"
 PyQt5 = "5.13.2"
