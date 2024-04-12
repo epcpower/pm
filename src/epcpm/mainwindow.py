@@ -124,16 +124,18 @@ class Window:
 
         self.uuid_notifiers = {
             "can": epcpm.canmodel.ReferencedUuidNotifier(),
-            "sunspec": epcpm.sunspecmodel.ReferencedUuidNotifier(),
             "staticmodbus": epcpm.staticmodbusmodel.ReferencedUuidNotifier(),
             "check_result": epyqlib.checkresultmodel.ReferencedUuidNotifier(),
+            "sunspec1": epcpm.sunspecmodel.ReferencedUuidNotifier(),
+            "sunspec2": epcpm.sunspecmodel.ReferencedUuidNotifier(),
         }
         self.uuid_notifiers["can"].changed.connect(self.can_uuid_changed)
-        self.uuid_notifiers["sunspec"].changed.connect(self.can_uuid_changed)
         self.uuid_notifiers["staticmodbus"].changed.connect(self.can_uuid_changed)
         self.uuid_notifiers["check_result"].changed.connect(
             self.check_result_uuid_changed,
         )
+        self.uuid_notifiers["sunspec1"].changed.connect(self.can_uuid_changed)
+        self.uuid_notifiers["sunspec2"].changed.connect(self.can_uuid_changed)
 
         self.project = None
         self.value_set = None
@@ -153,11 +155,6 @@ class Window:
                 epcpm.canmodel.columns.index_of("Name"),
             ),
             (
-                self.ui.sunspec_view,
-                self.ui.sunspec_search_box,
-                epcpm.sunspecmodel.columns.index_of("Name"),
-            ),
-            (
                 self.ui.static_modbus_view,
                 self.ui.static_modbus_search_box,
                 epcpm.staticmodbusmodel.columns.index_of("Name"),
@@ -166,6 +163,16 @@ class Window:
                 self.ui.value_set_view,
                 self.ui.value_set_search_box,
                 epyqlib.pm.valuesetmodel.columns.index_of("Name"),
+            ),
+            (
+                self.ui.sunspec1_view,
+                self.ui.sunspec1_search_box,
+                epcpm.sunspecmodel.columns.index_of("Name"),
+            ),
+            (
+                self.ui.sunspec2_view,
+                self.ui.sunspec2_search_box,
+                epcpm.sunspecmodel.columns.index_of("Name"),
             ),
         )
 
@@ -259,10 +266,6 @@ class Window:
         project.models.sunspec = epyqlib.attrsmodel.Model(
             root=sunspec_root,
             columns=epcpm.sunspecmodel.columns,
-        )
-        project.models.static_modbus = epyqlib.attrsmodel.Model(
-            root=static_modbus_root,
-            columns=epcpm.staticmodbusmodel.columns,
         )
 
         epcpm.project._post_load(project)
@@ -360,14 +363,19 @@ class Window:
             types=epcpm.canmodel.types,
         )
 
-        model_views.sunspec = ModelView(
-            view=self.ui.sunspec_view,
-            types=epcpm.sunspecmodel.types,
-        )
-
         model_views.staticmodbus = ModelView(
             view=self.ui.static_modbus_view,
             types=epcpm.staticmodbusmodel.types,
+        )
+
+        model_views.sunspec1 = ModelView(
+            view=self.ui.sunspec1_view,
+            types=epcpm.sunspecmodel.types,
+        )
+
+        model_views.sunspec2 = ModelView(
+            view=self.ui.sunspec2_view,
+            types=epcpm.sunspecmodel.types,
         )
 
         for notifier in self.uuid_notifiers.values():
@@ -414,8 +422,10 @@ class Window:
             view.customContextMenuRequested.connect(m)
 
         self.uuid_notifiers["can"].set_view(self.ui.can_view)
-        self.uuid_notifiers["sunspec"].set_view(self.ui.sunspec_view)
+        self.uuid_notifiers["staticmodbus"].set_view(self.ui.static_modbus_view)
         self.uuid_notifiers["check_result"].set_view(self.ui.check_result_view)
+        self.uuid_notifiers["sunspec1"].set_view(self.ui.sunspec1_view)
+        self.uuid_notifiers["sunspec2"].set_view(self.ui.sunspec2_view)
 
         return
 

@@ -75,7 +75,7 @@ def test_table_update_unlinked():
     }
 
     project = epcpm.project.loadp(here / "project" / "project.pmp")
-    (sunspec_table,) = project.models.sunspec.root.nodes_by_attribute(
+    (sunspec_table,) = project.models.sunspec1.root.nodes_by_attribute(
         attribute_value="First Table",
         attribute_name="name",
     )
@@ -90,7 +90,7 @@ def test_table_update_unlinked():
     assert count_types(sunspec_table.children) == expected_counts
 
     print()
-    print(epyqlib.utils.qt.indented_text_from_model(project.models.sunspec.model))
+    print(epyqlib.utils.qt.indented_text_from_model(project.models.sunspec1.model))
 
     sunspec_table.parameter_table_uuid = None
     sunspec_table.update()

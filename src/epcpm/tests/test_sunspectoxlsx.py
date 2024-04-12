@@ -17,7 +17,7 @@ smdx_path = here / "sunspec"
 def test_x():
     project = epcpm.project.loadp(here / "project" / "project.pmp")
 
-    attrs_model = project.models.sunspec
+    attrs_model = project.models.sunspec1
     parameter_model = project.models.parameters
 
     enumerations = parameter_model.list_selection_roots["enumerations"]
@@ -60,7 +60,8 @@ def test_x():
                 setattr(point, direction, accessor)
 
     project.filename = here / "project_with_sunspec" / "project.pmp"
-    project.paths["sunspec"] = "sunspec.json"
+    project.paths["sunspec1"] = "sunspec1.json"
+    project.paths["sunspec2"] = "sunspec2.json"
     project.filename.parent.mkdir(parents=True, exist_ok=True)
     project.save()
 
@@ -69,6 +70,7 @@ def test_x():
         parameter_uuid_finder=attrs_model.node_from_uuid,
         parameter_model=project.models.parameters,
         column_filter=epcpm.pm_helper.attr_fill(epcpm.sunspectoxlsx.Fields, True),
+        sunspec_id=epcpm.pm_helper.SunSpecSection.SUNSPEC_ONE,
     )
 
     workbook = builder.gen()
