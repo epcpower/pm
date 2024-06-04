@@ -7,6 +7,10 @@
 *.log
 *_ui.py
 
+#Visual Studio and Visual Studio Code
+#The templates are not currently adequate.
+.vs/
+.vscode/
 
 # Created by https://www.gitignore.io/api/eclipse,vim,python,pycharm,git,venv
 # Edit at https://www.gitignore.io/?templates=eclipse,vim,python,pycharm,git,venv
