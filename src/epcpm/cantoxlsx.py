@@ -86,6 +86,17 @@ field_names = Fields(
 )
 
 
+default_alias = {
+    "DG_Defaults-C1k_2L-2700Hz": "CAB1000 2L 2700 Hz",
+    "DG_Defaults-C1k_2L-3500Hz": "CAB1000 2L 3500 Hz",
+    "DG_Defaults-C1k_3L1-2700Hz": "CAB1000 3L1",
+    "DG_Defaults-C1k_3L2": "CAB1000 3L2",
+    "DG_Defaults-PD250": "PD250",
+    "DG_Defaults-PD500": "PD500",
+    "HY_Defaults": "HYDRA"
+}
+
+
 def create_pmvs_uuid_to_value_list(
     pmvs_path: pathlib.Path,
 ) -> PMVS_UUID_TO_DECIMAL_LIST:
@@ -603,12 +614,23 @@ def format_for_manual(
                         row2 = ["", access_level_out] + [minimum_out, maximum_out]
                         output_worksheet.append(row1)
                         output_worksheet.append(row2)
-                        output_worksheet.append([""] + product_specific_defaults[:4])
+
+                        defaultAliasList = []
+
+                        # Creates a new default alias list from grid-tied default names
+                        for default in product_specific_defaults:
+                            if default in product_specific_defaults:
+                                defaultAliasList.append(default_alias[default])
+                            else:
+                                defaultAliasList.append("no_default")
+
+
+                        output_worksheet.append([""] + defaultAliasList[:4])
                         output_worksheet.append(
                             [""]
                             + [defaults_out[index] for index in default_indices[:4]]
                         )
-                        output_worksheet.append([""] + product_specific_defaults[4:])
+                        output_worksheet.append([""] + defaultAliasList[4:])
                         output_worksheet.append(
                             [""]
                             + [defaults_out[index] for index in default_indices[4:]]
