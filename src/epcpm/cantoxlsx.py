@@ -453,6 +453,10 @@ def format_for_manual(
                 # Only output parameters that are in EPyQ.
                 continue
 
+            # If row contains text containing "Tree -> " needs to remove
+            if "Tree" in parameter_path:
+                parameter_path = parameter_path.replace("Tree -> ", "")
+
             parameter_uuid = row[8].value
             parameter_node = parameter_uuid_finder(uuid.UUID(parameter_uuid))
             description_out = parameter_node.manual_description
