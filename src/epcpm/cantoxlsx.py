@@ -453,7 +453,7 @@ def format_for_manual(
                 # Only output parameters that are in EPyQ.
                 continue
 
-            # If row contains text containing "Tree -> " needs to remove
+            # If row text contains "Tree -> " needs to remove
             if "Tree" in parameter_path:
                 parameter_path = parameter_path.replace("Tree -> ", "")
 
