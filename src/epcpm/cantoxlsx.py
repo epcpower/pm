@@ -32,11 +32,31 @@ FILTER_GROUPS = [
     "B. Other -> Authorization",
     "B. Other -> Debug",
 ]
+
+
+FILTER_NO_DESCRIPTION = [
+    "AC -> B. Line Monitoring -> Frequency Monitoring -> Tables -> After",
+    "AC -> B. Line Monitoring -> Frequency Monitoring -> Tables -> Before",
+    "AC -> B. Line Monitoring -> Voltage Monitoring -> Tables -> After",
+    "AC -> B. Line Monitoring -> Voltage Monitoring -> Tables -> Before",
+    "AC -> C. Grid Support -> Hz-Watt -> Tables -> After",
+    "AC -> C. Grid Support -> Hz-Watt -> Tables -> Before",
+    "AC -> C. Grid Support -> Volt-Var -> Tables -> After",
+    "AC -> C. Grid Support -> Volt-Var -> Tables -> Before",
+    "AC -> C. Grid Support -> Volt-Watt -> Tables -> After",
+    "AC -> C. Grid Support -> Volt-Watt -> Tables -> Before",
+    "AC -> C. Grid Support -> Watt-Power Factor -> Tables -> After",
+    "AC -> C. Grid Support -> Watt-Power Factor -> Tables -> Before",
+    "AC -> C. Grid Support -> Watt-Var -> Tables -> After",
+    "AC -> C. Grid Support -> Watt-Var -> Tables -> Before",
+]
+
+
 CELL_SIDE = openpyxl.styles.Side(border_style="thin", color="000000")
 CELL_BORDER = openpyxl.styles.Border(
     top=CELL_SIDE, left=CELL_SIDE, right=CELL_SIDE, bottom=CELL_SIDE
 )
-CELL_FONT = openpyxl.styles.Font(size=8)
+CELL_FONT = openpyxl.styles.Font(name="Montserrat", size=8)
 CELL_FILL_GROUP = openpyxl.styles.PatternFill("solid", fgColor="AAAAAA")
 CELL_FILL_PARAMETER = openpyxl.styles.PatternFill("solid", fgColor="CCCCCC")
 CELL_FILL_DEFAULTS = openpyxl.styles.PatternFill("solid", fgColor="EEEEEE")
@@ -413,6 +433,16 @@ def format_for_manual(
         filter_out = False
         for group_parameter_filter in FILTER_GROUPS:
             if parameter_path.startswith(PARAMETERS_PREFIX + group_parameter_filter):
+                filter_out = True
+        if filter_out:
+            continue
+
+        # Filter out parameter groups in FILTER_NO_DESCRIPTION list
+        # This list contains grouping of parameters with no descriptions
+        # therefore there was no value on adding this into excel costumer manual
+        filter_out = False
+        for group_parameter_filter in FILTER_NO_DESCRIPTION:
+            if group_parameter_filter in parameter_path:
                 filter_out = True
         if filter_out:
             continue
