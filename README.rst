@@ -35,7 +35,7 @@ Running From Source
 Windows
 =======
 
-- Install `Python 3.7`_
+- Install `Python 3.8`_
 - Install `Poetry`_
 - Install `Git`_
 - ``git clone https://github.com/epcpower/pm``
@@ -47,14 +47,14 @@ Windows
 
 To launch PM run ``poetry run epcpm``.
 
-.. _`Python 3.7`: https://www.python.org/downloads/
+.. _`Python 3.8`: https://www.python.org/downloads/
 .. _`Poetry`: https://python-poetry.org/docs/
 .. _`Git`: https://git-scm.com/download
 
 Linux
 =====
 
-- Install Python 3.7
+- Install Python 3.8
 
   - pyenv_ to get Python versions
 
