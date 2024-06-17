@@ -439,7 +439,7 @@ def format_for_manual(
 
         # Filter out parameter groups in FILTER_NO_DESCRIPTION list
         # This list contains grouping of parameters with no descriptions
-        # therefore there was no value on adding this into excel costumer manual
+        # therefore there was no value on adding this into excel customer manual
         filter_out = False
         for group_parameter_filter in FILTER_NO_DESCRIPTION:
             if group_parameter_filter in parameter_path:
