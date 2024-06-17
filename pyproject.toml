@@ -27,9 +27,9 @@ url = "https://epc-power-us-890711758583.d.codeartifact.us-east-2.amazonaws.com/
 secondary = true
 
 [tool.poetry.dependencies]
-python = ">=3.7.9,<3.11"
+python = ">=3.8,<3.11"
 attrs = "20.2.0"
-lxml = "4.3.0"
+lxml = "5.2.1"
 PyQt5 = "5.13.2"
 requests = "2.27.1"
 toolz = "0.9.0"
@@ -39,7 +39,7 @@ openpyxl = "2.5.12"
 canmatrix = "0.9.1"
 graham = "0.1.11"
 pyserial = "3.4"
-pysunspec = "2.1.0"
+pysunspec = "2.1.1"
 pycparser = "2.21"
 Twisted = "21.2.0"
 python-can = "4.0.0"
