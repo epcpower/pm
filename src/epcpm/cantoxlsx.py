@@ -113,7 +113,7 @@ default_alias = {
     "DG_Defaults-C1k_3L2": "CAB1000 3L2",
     "DG_Defaults-PD250": "PD250",
     "DG_Defaults-PD500": "PD500",
-    "HY_Defaults": "HYDRA"
+    "HY_Defaults": "HYDRA",
 }
 
 
@@ -657,7 +657,6 @@ def format_for_manual(
                                 defaultAliasList.append(default_alias[default])
                             else:
                                 defaultAliasList.append("no_default")
-
 
                         output_worksheet.append([""] + defaultAliasList[:4])
                         output_worksheet.append(
