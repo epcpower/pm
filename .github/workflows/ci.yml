@@ -48,6 +48,10 @@ jobs:
           poetry config virtualenvs.in-project true
           poetry config virtualenvs.path .
 
+          # Workaround for: ChefBuildError: Backend 'setuptools.build_meta:__legacy__' is not available.
+          # Fix is in Poetry 1.7.0. See https://github.com/python-poetry/poetry/issues/7611
+          poetry config installer.max-workers 1
+
           #Setup AWS Connection
           export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain epc-power-us --domain-owner ${{ secrets.AWS_ACCOUNT_ID }} --query authorizationToken --output text`
           poetry config repositories.epc-power https://epc-power-us-${{ secrets.AWS_ACCOUNT_ID }}.d.codeartifact.us-east-2.amazonaws.com/pypi/epc-power/
