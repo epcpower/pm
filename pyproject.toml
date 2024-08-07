@@ -57,7 +57,7 @@ pyinstaller = "4.4"
 pyinstaller-hooks-contrib = "2022.10" # Locks the version to avoid updating during `poetry update`
 black = ">=20.8b1"
 pytest = "6.2.5"
-pytest-qt = "3.3.0"
+pytest-qt = "4.0.2"
 pytest-cov = "2.5.1"
 pytest-twisted = "<=1.13.4"
 twine = "3.1.1"
