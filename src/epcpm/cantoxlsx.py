@@ -33,7 +33,7 @@ FILTER_GROUPS = [
     "B. Other -> Authorization",
     "B. Other -> Debug",
 ]
-FILTER_NODES = ["Before", "After"]
+FILTER_NODES = [f"Tables{PATH_SEPARATOR}Before", f"Tables{PATH_SEPARATOR}After"]
 CELL_SIDE = openpyxl.styles.Side(border_style="thin", color="000000")
 CELL_BORDER = openpyxl.styles.Border(
     top=CELL_SIDE, left=CELL_SIDE, right=CELL_SIDE, bottom=CELL_SIDE
