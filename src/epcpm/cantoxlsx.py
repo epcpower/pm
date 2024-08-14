@@ -24,8 +24,8 @@ PATH_SEPARATOR = " -> "
 PARAMETER_QUERY_PREFIX = f"ParameterQuery{PATH_SEPARATOR}"
 # The parameters prefix on a large portion of the parameter paths.
 PARAMETERS_PREFIX = f"Parameters{PATH_SEPARATOR}"
-TABLES_TREE_STR = f"Tables{PATH_SEPARATOR}Tree"
 TABLES_STR = "Tables"
+TABLES_TREE_STR = f"{TABLES_STR}{PATH_SEPARATOR}Tree"
 FILTER_GROUPS = [
     "2. DC",
     "9. Simulation Mode",
@@ -33,7 +33,7 @@ FILTER_GROUPS = [
     "B. Other -> Authorization",
     "B. Other -> Debug",
 ]
-FILTER_NODES = [f"Tables{PATH_SEPARATOR}Before", f"Tables{PATH_SEPARATOR}After"]
+FILTER_NODES = [f"{TABLES_STR}{PATH_SEPARATOR}Before", f"{TABLES_STR}{PATH_SEPARATOR}After"]
 CELL_SIDE = openpyxl.styles.Side(border_style="thin", color="000000")
 CELL_BORDER = openpyxl.styles.Border(
     top=CELL_SIDE, left=CELL_SIDE, right=CELL_SIDE, bottom=CELL_SIDE
@@ -504,9 +504,9 @@ def format_for_manual(
                 else:
                     defaults_out.append("")
 
+            # Initialize product specific default values, copying from the filtered rows.
             psd_values_all = []
             for col in row[12:]:
-                # if col.value != None:
                 if col.value:
                     psd_values_all.append(f"{col.value}")
                 else:
