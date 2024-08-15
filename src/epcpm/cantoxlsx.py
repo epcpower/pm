@@ -24,7 +24,8 @@ PATH_SEPARATOR = " -> "
 PARAMETER_QUERY_PREFIX = f"ParameterQuery{PATH_SEPARATOR}"
 # The parameters prefix on a large portion of the parameter paths.
 PARAMETERS_PREFIX = f"Parameters{PATH_SEPARATOR}"
-TABLES_TREE_STR = f"Tables{PATH_SEPARATOR}Tree"
+TABLES_STR = "Tables"
+TABLES_TREE_STR = f"{TABLES_STR}{PATH_SEPARATOR}Tree"
 FILTER_GROUPS = [
     "2. DC",
     "9. Simulation Mode",
@@ -32,11 +33,15 @@ FILTER_GROUPS = [
     "B. Other -> Authorization",
     "B. Other -> Debug",
 ]
+FILTER_NODES = [
+    f"{TABLES_STR}{PATH_SEPARATOR}Before",
+    f"{TABLES_STR}{PATH_SEPARATOR}After",
+]
 CELL_SIDE = openpyxl.styles.Side(border_style="thin", color="000000")
 CELL_BORDER = openpyxl.styles.Border(
     top=CELL_SIDE, left=CELL_SIDE, right=CELL_SIDE, bottom=CELL_SIDE
 )
-CELL_FONT = openpyxl.styles.Font(size=8)
+CELL_FONT = openpyxl.styles.Font(name="Montserrat", size=8)
 CELL_FILL_GROUP = openpyxl.styles.PatternFill("solid", fgColor="AAAAAA")
 CELL_FILL_PARAMETER = openpyxl.styles.PatternFill("solid", fgColor="CCCCCC")
 CELL_FILL_DEFAULTS = openpyxl.styles.PatternFill("solid", fgColor="EEEEEE")
@@ -349,6 +354,59 @@ class GenericNode:
         return output_list
 
 
+class ProductSpecificDefaults(object):
+    def __init__(self, product_specific_defaults: typing.List[str]):
+        """
+        Initializes the product specific defaults information
+        to be used to format the data output.
+
+        Args:
+            product_specific_defaults: List of defaults to be included in the controls manual.
+        """
+        # Field index of each product specific default.
+        self.product_specific_field_indexes = []
+        # Ordered names of products used for product specific defaults output.
+        self.product_specific_names = []
+
+        # Validate/remove defaults that don't have a match and output a warning
+        for default in product_specific_defaults:
+            # Split on the colon to separate the pmvs name and the custom name.
+            default_split = default.split(":")
+            product_specific_field_name = default_split[0].strip()
+            try:
+                index = field_names.defaults.index(product_specific_field_name)
+            except ValueError:
+                print(
+                    f"WARNING: The product specific field name '{product_specific_field_name}' does not exist"
+                )
+                continue
+
+            # Add an index to the field value.
+            self.product_specific_field_indexes.append(index)
+
+            if len(default_split) > 1:
+                self.product_specific_names.append(default_split[1].strip())
+            else:
+                self.product_specific_names.append(product_specific_field_name)
+
+    def get_product_specific_default_values_list(
+        self, field_values_all: typing.List[str]
+    ) -> typing.List[str]:
+        """
+        Generate a list of product specific default values.
+
+        Args:
+            field_values_all: list of values in field order
+
+        Returns:
+            list of values in product specific default order
+        """
+        product_specific_default_values_out = []
+        for field_index in self.product_specific_field_indexes:
+            product_specific_default_values_out.append(field_values_all[field_index])
+        return product_specific_default_values_out
+
+
 def format_for_manual(
     input_path: pathlib.Path,
     parameters_model: epyqlib.attrsmodel.Model,
@@ -361,7 +419,12 @@ def format_for_manual(
     Args:
         input_path: path and filename for input .xlsx file
         parameters_model: parameters model
-        product_specific_defaults: List of defaults to be included in the controls manual
+        product_specific_defaults: List of product specific defaults to be included in the controls manual.
+            Supports two formats for each list entry:
+                pmvs base file name
+                pmvs base file name:custom name used for output
+            Example:
+                HY_Defaults or HY_Defaults:Hydra
 
     Returns:
 
@@ -403,6 +466,10 @@ def format_for_manual(
         for group_parameter_filter in FILTER_GROUPS:
             if parameter_path.startswith(PARAMETERS_PREFIX + group_parameter_filter):
                 filter_out = True
+        # Filter out specific nodes in FILTER_NODES list.
+        for node_parameter_filter in FILTER_NODES:
+            if parameter_path.endswith(PATH_SEPARATOR + node_parameter_filter):
+                filter_out = True
         if filter_out:
             continue
 
@@ -411,22 +478,8 @@ def format_for_manual(
         if access_level_out in ["Service_Tech", "Service_Eng"]:
             filtered_rows.append(row)
 
-    # Validate/remove defaults that don't have a match and output a warning
-    for default in product_specific_defaults:
-        if default not in field_names.defaults:
-            print(f"The default {default} does not exist")
-            product_specific_defaults.remove(default)
-
-    # Figure out which defaults are not specified for controls manual output
-    unincluded_default_indices = []
-    if product_specific_defaults:
-        for default in field_names.defaults:
-            if default not in product_specific_defaults:
-                unincluded_default_indices.append(field_names.defaults.index(default))
-    unincluded_default_indices.sort(reverse=True)
-    # Remove defaults not included in the controls manual output
-    for index in unincluded_default_indices:
-        field_names.defaults.pop(index)
+    # Initialize product specific defaults information.
+    psd = ProductSpecificDefaults(product_specific_defaults)
 
     # Track the current row in the output worksheet.
     current_row = 1
@@ -438,9 +491,6 @@ def format_for_manual(
 
         for row in filtered_rows:
             parameter_path = row[6].value
-            if not parameter_path.startswith(PARAMETERS_PREFIX):
-                # Only output parameters that are in EPyQ.
-                continue
 
             parameter_uuid = row[8].value
             parameter_node = parameter_uuid_finder(uuid.UUID(parameter_uuid))
@@ -452,19 +502,22 @@ def format_for_manual(
             maximum_out = row[11].value
             defaults_out = []
             for col in row[12:]:
-                if col.value != None:
+                if col.value:
                     defaults_out.append(f"{col.value}")
                 else:
                     defaults_out.append("")
 
-            # Remove field_names.defaults values for defaults not specified in controls manual
-            for index in unincluded_default_indices:
-                defaults_out.pop(index)
+            # Initialize product specific default values, copying from the filtered rows.
+            psd_values_all = []
+            for col in row[12:]:
+                if col.value:
+                    psd_values_all.append(f"{col.value}")
+                else:
+                    psd_values_all.append("")
 
-            # Gets the indices of the default and its respective value
-            default_indices = []
-            for default in product_specific_defaults:
-                default_indices.append(field_names.defaults.index(default))
+            product_specific_default_values_out = (
+                psd.get_product_specific_default_values_list(psd_values_all)
+            )
 
             # is_numbered_variant is necessary to distinguish parameters that are similarly named
             # (differ by numbers) from those that aren't (differ by word(s)) since both have
@@ -481,12 +534,14 @@ def format_for_manual(
                     minimum_out = f"{minimum_out} {units_out}"
                 if maximum_out is not None:
                     maximum_out = f"{maximum_out} {units_out}"
-                for i in range(len(defaults_out)):
-                    if defaults_out[i] != "":
-                        defaults_out[i] = f"{defaults_out[i]} {units_out}"
+                for i in range(len(product_specific_default_values_out)):
+                    if product_specific_default_values_out[i] != "":
+                        product_specific_default_values_out[
+                            i
+                        ] = f"{product_specific_default_values_out[i]} {units_out}"
 
             # Discover if all the product defaults are equal.
-            all_defaults_same = len(set(defaults_out)) == 1
+            all_defaults_same = len(set(product_specific_default_values_out)) == 1
 
             # If applicable, add a header description for a set of parameters.
             # Chop off the parameters prefix to match the path that is seen in the EPyQ parameters tab.
@@ -494,17 +549,21 @@ def format_for_manual(
             if parameter_path_to_check != current_parameter_path:
                 # Add the parameter path (group) for this section of parameters.
                 current_parameter_path = parameter_path_to_check
+                # Do not output the "Tree" part of the parameter path.
+                parameter_path_out = current_parameter_path.replace(
+                    TABLES_TREE_STR, TABLES_STR
+                )
                 if parameter_path_to_check in group_manual_description_map:
                     # Add the group's comment, if available.
                     output_worksheet.append(
                         [
-                            current_parameter_path
+                            parameter_path_out
                             + "\n\n"
                             + group_manual_description_map[current_parameter_path]
                         ]
                     )
                 else:
-                    output_worksheet.append([current_parameter_path])
+                    output_worksheet.append([parameter_path_out])
 
                 # Merge cells for header description.
                 output_worksheet.merge_cells(
@@ -542,7 +601,7 @@ def format_for_manual(
                 row = [parameter_name_out, access_level_out] + [
                     minimum_out,
                     maximum_out,
-                    defaults_out[0],
+                    product_specific_default_values_out[0],
                 ]
                 output_worksheet.append(row)
                 rows_used += 1
@@ -587,14 +646,14 @@ def format_for_manual(
                     row2 = ["", access_level_out] + [
                         minimum_out,
                         maximum_out,
-                        defaults_out[0],
+                        product_specific_default_values_out[0],
                     ]
                     # Output single Default cells section.
                     output_worksheet.append(row1)
                     output_worksheet.append(row2)
                     rows_used += 2
                 else:
-                    if len(product_specific_defaults) > 4:
+                    if len(psd.product_specific_names) > 4:
                         # Output multiple Default cells sections, +1 for no default column
                         row1 = [description_out, field_names.access_level] + [
                             field_names.minimum,
@@ -603,18 +662,16 @@ def format_for_manual(
                         row2 = ["", access_level_out] + [minimum_out, maximum_out]
                         output_worksheet.append(row1)
                         output_worksheet.append(row2)
-                        output_worksheet.append([""] + product_specific_defaults[:4])
+                        output_worksheet.append([""] + psd.product_specific_names[:4])
                         output_worksheet.append(
-                            [""]
-                            + [defaults_out[index] for index in default_indices[:4]]
+                            [""] + product_specific_default_values_out[:4]
                         )
-                        output_worksheet.append([""] + product_specific_defaults[4:])
+                        output_worksheet.append([""] + psd.product_specific_names[4:])
                         output_worksheet.append(
-                            [""]
-                            + [defaults_out[index] for index in default_indices[4:]]
+                            [""] + product_specific_default_values_out[4:]
                         )
                         rows_used += 6
-                    elif len(product_specific_defaults) > 1:
+                    elif len(psd.product_specific_names) > 1:
                         # Output multiple Default cells sections, +1 for no default column
                         row1 = [description_out, field_names.access_level] + [
                             field_names.minimum,
@@ -624,24 +681,21 @@ def format_for_manual(
                         # Need to think about the order here
                         output_worksheet.append(row1)
                         output_worksheet.append(row2)
-                        output_worksheet.append([""] + product_specific_defaults)
+                        output_worksheet.append([""] + psd.product_specific_names)
                         output_worksheet.append(
-                            [""] + [defaults_out[index] for index in default_indices]
+                            [""] + product_specific_default_values_out
                         )
                         rows_used += 4
-                    elif len(product_specific_defaults) == 1:
+                    elif len(psd.product_specific_names) == 1:
                         row1 = [description_out, field_names.access_level] + [
                             field_names.minimum,
                             field_names.maximum,
                             "Default",
                         ]
-                        default_index = field_names.defaults.index(
-                            product_specific_defaults[0]
-                        )
                         row2 = ["", access_level_out] + [
                             minimum_out,
                             maximum_out,
-                            defaults_out[default_index],
+                            product_specific_default_values_out[0],
                         ]
                         output_worksheet.append(row1)
                         output_worksheet.append(row2)
@@ -655,10 +709,14 @@ def format_for_manual(
                         row2 = ["", access_level_out] + [minimum_out, maximum_out]
                         output_worksheet.append(row1)
                         output_worksheet.append(row2)
-                        output_worksheet.append([""] + field_names.defaults[:4])
-                        output_worksheet.append([""] + defaults_out[:4])
-                        output_worksheet.append([""] + field_names.defaults[4:])
-                        output_worksheet.append([""] + defaults_out[4:])
+                        output_worksheet.append([""] + psd.product_specific_names[:4])
+                        output_worksheet.append(
+                            [""] + product_specific_default_values_out[:4]
+                        )
+                        output_worksheet.append([""] + psd.product_specific_names[4:])
+                        output_worksheet.append(
+                            [""] + product_specific_default_values_out[4:]
+                        )
                         rows_used += 6
 
                 # Merge cells for parameter description.
