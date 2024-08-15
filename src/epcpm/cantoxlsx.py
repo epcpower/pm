@@ -14,7 +14,6 @@ import epcpm.pm_helper
 import epyqlib.treenode
 import epyqlib.utils.general
 from natsort import natsorted
-from tqdm import tqdm
 
 EXCEL_COLUMN_LETTERS = string.ascii_uppercase
 PMVS_UUID_TO_DECIMAL_LIST = typing.List[typing.Dict[uuid.UUID, decimal.Decimal]]
@@ -445,7 +444,6 @@ def format_for_manual(
     )
     print(f"input spreadsheet: {input_path}")
     print(f"output spreadsheet: {output_path}")
-    print("Be patient. Generation of the output spreadsheet takes a long time.")
 
     output_workbook = openpyxl.Workbook()
     output_workbook.remove(output_workbook.active)
@@ -484,160 +482,207 @@ def format_for_manual(
     # Track the current row in the output worksheet.
     current_row = 1
 
-    # Display a progress bar since the generation of the output takes a long time.
-    with tqdm(total=len(filtered_rows)) as progress_bar:
-        current_parameter_path = ""
-        entered_tables_section = False
+    current_parameter_path = ""
+    entered_tables_section = False
 
-        for row in filtered_rows:
-            parameter_path = row[6].value
+    for row in filtered_rows:
+        parameter_path = row[6].value
 
-            parameter_uuid = row[8].value
-            parameter_node = parameter_uuid_finder(uuid.UUID(parameter_uuid))
-            description_out = parameter_node.manual_description
-            access_level_out = row[3].value
-            units_out = row[4].value
-            parameter_name_out = row[9].value
-            minimum_out = row[10].value
-            maximum_out = row[11].value
-            defaults_out = []
-            for col in row[12:]:
-                if col.value:
-                    defaults_out.append(f"{col.value}")
-                else:
-                    defaults_out.append("")
+        parameter_uuid = row[8].value
+        parameter_node = parameter_uuid_finder(uuid.UUID(parameter_uuid))
+        description_out = parameter_node.manual_description
+        access_level_out = row[3].value
+        units_out = row[4].value
+        parameter_name_out = row[9].value
+        minimum_out = row[10].value
+        maximum_out = row[11].value
+        defaults_out = []
+        for col in row[12:]:
+            if col.value:
+                defaults_out.append(f"{col.value}")
+            else:
+                defaults_out.append("")
 
-            # Initialize product specific default values, copying from the filtered rows.
-            psd_values_all = []
-            for col in row[12:]:
-                if col.value:
-                    psd_values_all.append(f"{col.value}")
-                else:
-                    psd_values_all.append("")
+        # Initialize product specific default values, copying from the filtered rows.
+        psd_values_all = []
+        for col in row[12:]:
+            if col.value:
+                psd_values_all.append(f"{col.value}")
+            else:
+                psd_values_all.append("")
 
-            product_specific_default_values_out = (
-                psd.get_product_specific_default_values_list(psd_values_all)
+        product_specific_default_values_out = (
+            psd.get_product_specific_default_values_list(psd_values_all)
+        )
+
+        # is_numbered_variant is necessary to distinguish parameters that are similarly named
+        # (differ by numbers) from those that aren't (differ by word(s)) since both have
+        # entered_table_section and all_defaults_same set to True
+        is_numbered_variant = (
+            True
+            if re.search(NUMBERED_VARIANT_PATTERN, parameter_name_out)
+            else False
+        )
+
+        if units_out:
+            # If there is a units value, append it to the end of the numeric default value.
+            if minimum_out is not None:
+                minimum_out = f"{minimum_out} {units_out}"
+            if maximum_out is not None:
+                maximum_out = f"{maximum_out} {units_out}"
+            for i in range(len(product_specific_default_values_out)):
+                if product_specific_default_values_out[i] != "":
+                    product_specific_default_values_out[
+                        i
+                    ] = f"{product_specific_default_values_out[i]} {units_out}"
+
+        # Discover if all the product defaults are equal.
+        all_defaults_same = len(set(product_specific_default_values_out)) == 1
+
+        # If applicable, add a header description for a set of parameters.
+        # Chop off the parameters prefix to match the path that is seen in the EPyQ parameters tab.
+        parameter_path_to_check = parameter_path[len(PARAMETERS_PREFIX) :]
+        if parameter_path_to_check != current_parameter_path:
+            # Add the parameter path (group) for this section of parameters.
+            current_parameter_path = parameter_path_to_check
+            # Do not output the "Tree" part of the parameter path.
+            parameter_path_out = current_parameter_path.replace(
+                TABLES_TREE_STR, TABLES_STR
+            )
+            if parameter_path_to_check in group_manual_description_map:
+                # Add the group's comment, if available.
+                output_worksheet.append(
+                    [
+                        parameter_path_out
+                        + "\n\n"
+                        + group_manual_description_map[current_parameter_path]
+                    ]
+                )
+            else:
+                output_worksheet.append([parameter_path_out])
+
+            # Merge cells for header description.
+            output_worksheet.merge_cells(
+                start_row=current_row,
+                start_column=1,
+                end_row=current_row,
+                end_column=COLUMN_COUNT,
             )
 
-            # is_numbered_variant is necessary to distinguish parameters that are similarly named
-            # (differ by numbers) from those that aren't (differ by word(s)) since both have
-            # entered_table_section and all_defaults_same set to True
-            is_numbered_variant = (
-                True
-                if re.search(NUMBERED_VARIANT_PATTERN, parameter_name_out)
-                else False
+            # Set the font size and fill color for header description.
+            for col in EXCEL_COLUMN_LETTERS[:COLUMN_COUNT]:
+                output_worksheet[col + str(current_row)].font = CELL_FONT
+                output_worksheet[col + str(current_row)].fill = CELL_FILL_GROUP
+                output_worksheet[col + str(current_row)].border = CELL_BORDER
+                output_worksheet[
+                    col + str(current_row)
+                ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
+
+            current_row += 1
+            # Reset the tables section logic.
+            entered_tables_section = False
+
+        # Track the rows used for each parameter entry.
+        rows_used = 0
+
+        if entered_tables_section and is_numbered_variant:
+            # Different table defaults for different products would need to keep track of all
+            # table parameters and add the header row with product variants if the defaults differ
+            # in any of them. So far the default is the same for all products so this is not
+            # yet implemented.
+            assert (
+                all_defaults_same
+            ), "Different defaults for table parameters has not been implemented"
+            # Output single Default cells section for additional table row.
+            row = [parameter_name_out, access_level_out] + [
+                minimum_out,
+                maximum_out,
+                product_specific_default_values_out[0],
+            ]
+            output_worksheet.append(row)
+            rows_used += 1
+
+            # Set horizontal & vertical alignment for parameter name.
+            output_worksheet[
+                "A" + str(current_row)
+            ].alignment = openpyxl.styles.alignment.Alignment(
+                horizontal="left", vertical="top"
+            )
+        else:
+            # Check and set if this parameter is the start of table rows section.
+            entered_tables_section = TABLES_TREE_STR in parameter_path
+
+            # Add the parameter name cell.
+            output_worksheet.append([parameter_name_out])
+
+            # Merge cells for parameter name.
+            output_worksheet.merge_cells(
+                start_row=current_row,
+                start_column=1,
+                end_row=current_row,
+                end_column=COLUMN_COUNT,
             )
 
-            if units_out:
-                # If there is a units value, append it to the end of the numeric default value.
-                if minimum_out is not None:
-                    minimum_out = f"{minimum_out} {units_out}"
-                if maximum_out is not None:
-                    maximum_out = f"{maximum_out} {units_out}"
-                for i in range(len(product_specific_default_values_out)):
-                    if product_specific_default_values_out[i] != "":
-                        product_specific_default_values_out[
-                            i
-                        ] = f"{product_specific_default_values_out[i]} {units_out}"
+            # Set the font size and fill color for parameter name.
+            for col in EXCEL_COLUMN_LETTERS[:COLUMN_COUNT]:
+                output_worksheet[col + str(current_row)].font = CELL_FONT
+                output_worksheet[col + str(current_row)].fill = CELL_FILL_PARAMETER
+                output_worksheet[col + str(current_row)].border = CELL_BORDER
+                output_worksheet[
+                    col + str(current_row)
+                ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
+            current_row += 1
 
-            # Discover if all the product defaults are equal.
-            all_defaults_same = len(set(product_specific_default_values_out)) == 1
-
-            # If applicable, add a header description for a set of parameters.
-            # Chop off the parameters prefix to match the path that is seen in the EPyQ parameters tab.
-            parameter_path_to_check = parameter_path[len(PARAMETERS_PREFIX) :]
-            if parameter_path_to_check != current_parameter_path:
-                # Add the parameter path (group) for this section of parameters.
-                current_parameter_path = parameter_path_to_check
-                # Do not output the "Tree" part of the parameter path.
-                parameter_path_out = current_parameter_path.replace(
-                    TABLES_TREE_STR, TABLES_STR
-                )
-                if parameter_path_to_check in group_manual_description_map:
-                    # Add the group's comment, if available.
-                    output_worksheet.append(
-                        [
-                            parameter_path_out
-                            + "\n\n"
-                            + group_manual_description_map[current_parameter_path]
-                        ]
-                    )
-                else:
-                    output_worksheet.append([parameter_path_out])
-
-                # Merge cells for header description.
-                output_worksheet.merge_cells(
-                    start_row=current_row,
-                    start_column=1,
-                    end_row=current_row,
-                    end_column=COLUMN_COUNT,
-                )
-
-                # Set the font size and fill color for header description.
-                for col in EXCEL_COLUMN_LETTERS[:COLUMN_COUNT]:
-                    output_worksheet[col + str(current_row)].font = CELL_FONT
-                    output_worksheet[col + str(current_row)].fill = CELL_FILL_GROUP
-                    output_worksheet[col + str(current_row)].border = CELL_BORDER
-                    output_worksheet[
-                        col + str(current_row)
-                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
-
-                current_row += 1
-                # Reset the tables section logic.
-                entered_tables_section = False
-
-            # Track the rows used for each parameter entry.
-            rows_used = 0
-
-            if entered_tables_section and is_numbered_variant:
-                # Different table defaults for different products would need to keep track of all
-                # table parameters and add the header row with product variants if the defaults differ
-                # in any of them. So far the default is the same for all products so this is not
-                # yet implemented.
-                assert (
-                    all_defaults_same
-                ), "Different defaults for table parameters has not been implemented"
-                # Output single Default cells section for additional table row.
-                row = [parameter_name_out, access_level_out] + [
+            if all_defaults_same:
+                row1 = [description_out, field_names.access_level] + [
+                    field_names.minimum,
+                    field_names.maximum,
+                    "Default",
+                ]
+                row2 = ["", access_level_out] + [
                     minimum_out,
                     maximum_out,
                     product_specific_default_values_out[0],
                 ]
-                output_worksheet.append(row)
-                rows_used += 1
-
-                # Set horizontal & vertical alignment for parameter name.
-                output_worksheet[
-                    "A" + str(current_row)
-                ].alignment = openpyxl.styles.alignment.Alignment(
-                    horizontal="left", vertical="top"
-                )
+                # Output single Default cells section.
+                output_worksheet.append(row1)
+                output_worksheet.append(row2)
+                rows_used += 2
             else:
-                # Check and set if this parameter is the start of table rows section.
-                entered_tables_section = TABLES_TREE_STR in parameter_path
-
-                # Add the parameter name cell.
-                output_worksheet.append([parameter_name_out])
-
-                # Merge cells for parameter name.
-                output_worksheet.merge_cells(
-                    start_row=current_row,
-                    start_column=1,
-                    end_row=current_row,
-                    end_column=COLUMN_COUNT,
-                )
-
-                # Set the font size and fill color for parameter name.
-                for col in EXCEL_COLUMN_LETTERS[:COLUMN_COUNT]:
-                    output_worksheet[col + str(current_row)].font = CELL_FONT
-                    output_worksheet[col + str(current_row)].fill = CELL_FILL_PARAMETER
-                    output_worksheet[col + str(current_row)].border = CELL_BORDER
-                    output_worksheet[
-                        col + str(current_row)
-                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
-                current_row += 1
-
-                if all_defaults_same:
+                if len(psd.product_specific_names) > 4:
+                    # Output multiple Default cells sections, +1 for no default column
+                    row1 = [description_out, field_names.access_level] + [
+                        field_names.minimum,
+                        field_names.maximum,
+                    ]
+                    row2 = ["", access_level_out] + [minimum_out, maximum_out]
+                    output_worksheet.append(row1)
+                    output_worksheet.append(row2)
+                    output_worksheet.append([""] + psd.product_specific_names[:4])
+                    output_worksheet.append(
+                        [""] + product_specific_default_values_out[:4]
+                    )
+                    output_worksheet.append([""] + psd.product_specific_names[4:])
+                    output_worksheet.append(
+                        [""] + product_specific_default_values_out[4:]
+                    )
+                    rows_used += 6
+                elif len(psd.product_specific_names) > 1:
+                    # Output multiple Default cells sections, +1 for no default column
+                    row1 = [description_out, field_names.access_level] + [
+                        field_names.minimum,
+                        field_names.maximum,
+                    ]
+                    row2 = ["", access_level_out] + [minimum_out, maximum_out]
+                    # Need to think about the order here
+                    output_worksheet.append(row1)
+                    output_worksheet.append(row2)
+                    output_worksheet.append([""] + psd.product_specific_names)
+                    output_worksheet.append(
+                        [""] + product_specific_default_values_out
+                    )
+                    rows_used += 4
+                elif len(psd.product_specific_names) == 1:
                     row1 = [description_out, field_names.access_level] + [
                         field_names.minimum,
                         field_names.maximum,
@@ -648,137 +693,87 @@ def format_for_manual(
                         maximum_out,
                         product_specific_default_values_out[0],
                     ]
-                    # Output single Default cells section.
                     output_worksheet.append(row1)
                     output_worksheet.append(row2)
                     rows_used += 2
                 else:
-                    if len(psd.product_specific_names) > 4:
-                        # Output multiple Default cells sections, +1 for no default column
-                        row1 = [description_out, field_names.access_level] + [
-                            field_names.minimum,
-                            field_names.maximum,
-                        ]
-                        row2 = ["", access_level_out] + [minimum_out, maximum_out]
-                        output_worksheet.append(row1)
-                        output_worksheet.append(row2)
-                        output_worksheet.append([""] + psd.product_specific_names[:4])
-                        output_worksheet.append(
-                            [""] + product_specific_default_values_out[:4]
-                        )
-                        output_worksheet.append([""] + psd.product_specific_names[4:])
-                        output_worksheet.append(
-                            [""] + product_specific_default_values_out[4:]
-                        )
-                        rows_used += 6
-                    elif len(psd.product_specific_names) > 1:
-                        # Output multiple Default cells sections, +1 for no default column
-                        row1 = [description_out, field_names.access_level] + [
-                            field_names.minimum,
-                            field_names.maximum,
-                        ]
-                        row2 = ["", access_level_out] + [minimum_out, maximum_out]
-                        # Need to think about the order here
-                        output_worksheet.append(row1)
-                        output_worksheet.append(row2)
-                        output_worksheet.append([""] + psd.product_specific_names)
-                        output_worksheet.append(
-                            [""] + product_specific_default_values_out
-                        )
-                        rows_used += 4
-                    elif len(psd.product_specific_names) == 1:
-                        row1 = [description_out, field_names.access_level] + [
-                            field_names.minimum,
-                            field_names.maximum,
-                            "Default",
-                        ]
-                        row2 = ["", access_level_out] + [
-                            minimum_out,
-                            maximum_out,
-                            product_specific_default_values_out[0],
-                        ]
-                        output_worksheet.append(row1)
-                        output_worksheet.append(row2)
-                        rows_used += 2
-                    else:
-                        # Output multiple Default cells sections, +1 for no default column
-                        row1 = [description_out, field_names.access_level] + [
-                            field_names.minimum,
-                            field_names.maximum,
-                        ]
-                        row2 = ["", access_level_out] + [minimum_out, maximum_out]
-                        output_worksheet.append(row1)
-                        output_worksheet.append(row2)
-                        output_worksheet.append([""] + psd.product_specific_names[:4])
-                        output_worksheet.append(
-                            [""] + product_specific_default_values_out[:4]
-                        )
-                        output_worksheet.append([""] + psd.product_specific_names[4:])
-                        output_worksheet.append(
-                            [""] + product_specific_default_values_out[4:]
-                        )
-                        rows_used += 6
+                    # Output multiple Default cells sections, +1 for no default column
+                    row1 = [description_out, field_names.access_level] + [
+                        field_names.minimum,
+                        field_names.maximum,
+                    ]
+                    row2 = ["", access_level_out] + [minimum_out, maximum_out]
+                    output_worksheet.append(row1)
+                    output_worksheet.append(row2)
+                    output_worksheet.append([""] + psd.product_specific_names[:4])
+                    output_worksheet.append(
+                        [""] + product_specific_default_values_out[:4]
+                    )
+                    output_worksheet.append([""] + psd.product_specific_names[4:])
+                    output_worksheet.append(
+                        [""] + product_specific_default_values_out[4:]
+                    )
+                    rows_used += 6
 
-                # Merge cells for parameter description.
-                output_worksheet.merge_cells(
-                    start_row=current_row,
-                    start_column=1,
-                    end_row=current_row + rows_used - 1,
-                    end_column=1,
-                )
+            # Merge cells for parameter description.
+            output_worksheet.merge_cells(
+                start_row=current_row,
+                start_column=1,
+                end_row=current_row + rows_used - 1,
+                end_column=1,
+            )
 
-                # Set wrap_text, horizontal & vertical alignment for parameter description.
-                output_worksheet[
-                    "A" + str(current_row)
-                ].alignment = openpyxl.styles.alignment.Alignment(
-                    horizontal="left", vertical="top", wrap_text=True
-                )
+            # Set wrap_text, horizontal & vertical alignment for parameter description.
+            output_worksheet[
+                "A" + str(current_row)
+            ].alignment = openpyxl.styles.alignment.Alignment(
+                horizontal="left", vertical="top", wrap_text=True
+            )
 
-                if all_defaults_same:
-                    # Style access level; minimum, maximum, and default
+            if all_defaults_same:
+                # Style access level; minimum, maximum, and default
+                for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
+                    output_worksheet[
+                        col + str(current_row)
+                    ].fill = CELL_FILL_DEFAULTS
+            else:
+                # Style access level; minimum, maximum, and defaults
+                if rows_used > 4:
                     for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
                         output_worksheet[
                             col + str(current_row)
                         ].fill = CELL_FILL_DEFAULTS
+                        output_worksheet[
+                            col + str(current_row + 2)
+                        ].fill = CELL_FILL_DEFAULTS
+                        output_worksheet[
+                            col + str(current_row + 4)
+                        ].fill = CELL_FILL_DEFAULTS
+                elif rows_used > 2:
+                    for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
+                        output_worksheet[
+                            col + str(current_row)
+                        ].fill = CELL_FILL_DEFAULTS
+                        output_worksheet[
+                            col + str(current_row + 2)
+                        ].fill = CELL_FILL_DEFAULTS
                 else:
-                    # Style access level; minimum, maximum, and defaults
-                    if rows_used > 4:
-                        for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
-                            output_worksheet[
-                                col + str(current_row)
-                            ].fill = CELL_FILL_DEFAULTS
-                            output_worksheet[
-                                col + str(current_row + 2)
-                            ].fill = CELL_FILL_DEFAULTS
-                            output_worksheet[
-                                col + str(current_row + 4)
-                            ].fill = CELL_FILL_DEFAULTS
-                    elif rows_used > 2:
-                        for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
-                            output_worksheet[
-                                col + str(current_row)
-                            ].fill = CELL_FILL_DEFAULTS
-                            output_worksheet[
-                                col + str(current_row + 2)
-                            ].fill = CELL_FILL_DEFAULTS
-                    else:
-                        for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
-                            output_worksheet[
-                                col + str(current_row)
-                            ].fill = CELL_FILL_DEFAULTS
+                    for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
+                        output_worksheet[
+                            col + str(current_row)
+                        ].fill = CELL_FILL_DEFAULTS
 
-            # Set the font size and border for non header description rows.
-            for style_row in range(current_row, current_row + rows_used):
-                for col in EXCEL_COLUMN_LETTERS[:COLUMN_COUNT]:
-                    output_worksheet[col + str(style_row)].font = CELL_FONT
-                    output_worksheet[col + str(style_row)].border = CELL_BORDER
-                    output_worksheet[
-                        col + str(style_row)
-                    ].number_format = NUMBER_FORMAT_TEXT
+        # Set the font size and border for non header description rows.
+        for style_row in range(current_row, current_row + rows_used):
+            for col in EXCEL_COLUMN_LETTERS[:COLUMN_COUNT]:
+                output_worksheet[col + str(style_row)].font = CELL_FONT
+                output_worksheet[col + str(style_row)].border = CELL_BORDER
+                output_worksheet[
+                    col + str(style_row)
+                ].number_format = NUMBER_FORMAT_TEXT
 
-            # Update the current row with the number of rows used plus one to go to the next row.
-            current_row += rows_used
-            progress_bar.update(1)
+        # Update the current row with the number of rows used plus one to go to the next row.
+        current_row += rows_used
 
     output_workbook.save(output_path)
 
