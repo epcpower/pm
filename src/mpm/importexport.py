@@ -3,6 +3,7 @@ import math
 import os
 import pathlib
 import subprocess
+import typing
 
 import attr
 import graham
@@ -368,6 +369,7 @@ def generate_docs(
     paths: mpm.importexportdialog.ImportPaths,
     pmvs_path: pathlib.Path,
     generate_formatted_output: bool,
+    product_specific_defaults: typing.List[str],
 ) -> None:
     """
     Generate the CAN model parameter data documentation.
@@ -390,4 +392,6 @@ def generate_docs(
     if generate_formatted_output:
         mpm.cantoxlsx.format_for_manual(
             input_path=paths.spreadsheet_can,
+            parameters_model=project.models.parameters,
+            product_specific_defaults=product_specific_defaults,
         )
