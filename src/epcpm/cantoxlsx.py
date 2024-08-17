@@ -496,17 +496,11 @@ def format_for_manual(
         parameter_name_out = row[9].value
         minimum_out = row[10].value
         maximum_out = row[11].value
-        defaults_out = []
-        for col in row[12:]:
-            if col.value:
-                defaults_out.append(f"{col.value}")
-            else:
-                defaults_out.append("")
 
         # Initialize product specific default values, copying from the filtered rows.
         psd_values_all = []
         for col in row[12:]:
-            if col.value:
+            if col.value is not None:
                 psd_values_all.append(f"{col.value}")
             else:
                 psd_values_all.append("")
