@@ -28,7 +28,8 @@ TABLES_TREE_STR = f"{TABLES_STR}{PATH_SEPARATOR}Tree"
 FILTER_GROUPS = [
     "2. DC",
     "9. Simulation Mode",
-    "A. ABB",
+    "A. ABB",  # Legacy, now it is "Hitachi Energy"
+    "A. Hitachi Energy",
     "B. Other -> Authorization",
     "B. Other -> Debug",
 ]
