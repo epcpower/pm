@@ -69,6 +69,12 @@ class Fields(epcpm.pm_helper.FieldsInterface):
     epyq_can_parameter_name = attr.ib(default=None, type=typing.Union[str, bool])
     minimum = attr.ib(default=None, type=typing.Union[str, bool, decimal.Decimal])
     maximum = attr.ib(default=None, type=typing.Union[str, bool, decimal.Decimal])
+    minimum_computed = attr.ib(
+        default=None, type=typing.Union[str, bool, decimal.Decimal]
+    )
+    maximum_computed = attr.ib(
+        default=None, type=typing.Union[str, bool, decimal.Decimal]
+    )
     defaults = attr.ib(
         default=[], type=typing.List[typing.Union[str, bool, decimal.Decimal]]
     )
@@ -87,6 +93,8 @@ field_names = Fields(
     epyq_can_parameter_name="EPyQ CAN Parameter Name",
     minimum="Minimum",
     maximum="Maximum",
+    minimum_computed="Minimum Computed",
+    maximum_computed="Maximum Computed",
     defaults=[],
 )
 
@@ -239,6 +247,36 @@ class Signal:
                     row.minimum = parameter.minimum
                 if parameter.maximum is not None:
                     row.maximum = parameter.maximum
+
+                # Skip setting computed minimum/maximum for PackedString type.
+                if not (
+                    isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
+                    and parameter.internal_type
+                    and parameter.internal_type == "PackedString"
+                ):
+                    # The math functions below calculate the minimum and maximum extremes
+                    # given the number of bits and signed/unsigned.
+                    if parameter.minimum is not None:
+                        row.minimum_computed = parameter.minimum
+                    else:
+                        if self.wrapped.signed:
+                            row.minimum_computed = (
+                                -1 * 2 ** (self.wrapped.bits - 1)
+                            ) * self.wrapped.factor
+                        else:
+                            row.minimum_computed = 0
+
+                    if parameter.maximum is not None:
+                        row.maximum_computed = parameter.maximum
+                    else:
+                        if self.wrapped.signed:
+                            row.maximum_computed = (
+                                2 ** (self.wrapped.bits - 1) - 1
+                            ) * self.wrapped.factor
+                        else:
+                            row.maximum_computed = (
+                                2 ** self.wrapped.bits - 1
+                            ) * self.wrapped.factor
 
                 if self.wrapped.enumeration_uuid is not None:
                     enumeration = self.parameter_uuid_finder(
@@ -488,19 +526,18 @@ def format_for_manual(
 
     for row in filtered_rows:
         parameter_path = row[6].value
-
         parameter_uuid = row[8].value
         parameter_node = parameter_uuid_finder(uuid.UUID(parameter_uuid))
         description_out = parameter_node.manual_description
         access_level_out = row[3].value
         units_out = row[4].value
         parameter_name_out = row[9].value
-        minimum_out = row[10].value
-        maximum_out = row[11].value
+        minimum_out = row[12].value
+        maximum_out = row[13].value
 
         # Initialize product specific default values, copying from the filtered rows.
         psd_values_all = []
-        for col in row[12:]:
+        for col in row[14:]:
             if col.value is not None:
                 psd_values_all.append(f"{col.value}")
             else:
