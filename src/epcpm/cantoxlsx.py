@@ -254,6 +254,8 @@ class Signal:
                     and parameter.internal_type
                     and parameter.internal_type == "PackedString"
                 ):
+                    # The math functions below calculate the minimum and maximum extremes
+                    # given the number of bits and signed/unsigned.
                     if parameter.minimum is not None:
                         row.minimum_computed = parameter.minimum
                     else:
