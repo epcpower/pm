@@ -164,7 +164,7 @@ def name_from_uuid_and_parent(node, value, model):
     except:
         pass
 
-    return "{} - {}".format(target_node.tree_parent.name, target_node.name)
+    return "{}:{}".format(target_node.tree_parent.name, target_node.name)
 
 
 def bits_to_words(bits):
