@@ -106,17 +106,6 @@ def create_address_attribute(default=0):
     )
 
 
-def create_factor_uuid_attribute():
-    return epyqlib.attrsmodel.attr_uuid(
-        default=None,
-        human_name="Scale Factor",
-        allow_none=True,
-        data_display=name_from_uuid,
-        list_selection_path=("/"),
-        override_delegate=ScaleFactorDelegate,
-    )
-
-
 def create_name_attribute():
     return attr.ib(
         default="",
@@ -253,40 +242,9 @@ class ScaleFactorDelegate(QtWidgets.QStyledItemDelegate):
 @attr.s(hash=False)
 class FunctionData(epyqlib.treenode.TreeNode):
     name = create_name_attribute()
-    factor_uuid = create_factor_uuid_attribute()
     parameter_uuid = create_parameter_uuid_attribute()
-
-    not_implemented = epyqlib.attrsmodel.create_checkbox_attribute(
-        default=False,
-    )
-
-    type_uuid = epyqlib.attrsmodel.attr_uuid(
-        default=None,
-        allow_none=True,
-        human_name="Type",
-        data_display=epyqlib.attrsmodel.name_from_uuid,
-        list_selection_root="staticmodbus types",
-    )
-
     address = create_address_attribute()
-
     size = create_size_attribute()
-
-    enumeration_uuid = epyqlib.attrsmodel.attr_uuid(
-        default=None,
-        allow_none=True,
-    )
-    epyqlib.attrsmodel.attrib(
-        attribute=enumeration_uuid,
-        human_name="Enumeration",
-        data_display=epyqlib.attrsmodel.name_from_uuid,
-        delegate=epyqlib.attrsmodel.RootDelegateCache(
-            list_selection_root="enumerations",
-        ),
-    )
-
-    units = epyqlib.attrsmodel.create_str_or_none_attribute()
-
     uuid = epyqlib.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
@@ -367,14 +325,6 @@ class FunctionDataBitfieldMember(epyqlib.treenode.TreeNode):
     )
 
     bit_length = create_size_attribute(default=1)
-
-    type_uuid = epyqlib.attrsmodel.attr_uuid(
-        default=None,
-        allow_none=True,
-        human_name="Type",
-        data_display=epyqlib.attrsmodel.name_from_uuid,
-        list_selection_root="staticmodbus types",
-    )
 
     uuid = epyqlib.attrsmodel.attr_uuid()
 
@@ -517,7 +467,6 @@ class TableRepeatingBlockReferenceFunctionDataReference(epyqlib.treenode.TreeNod
     name = create_name_attribute()
     parameter_uuid = create_parameter_uuid_attribute()
 
-    factor_uuid = create_factor_uuid_attribute()
     original = epyqlib.attrsmodel.create_reference_attribute()
 
     uuid = epyqlib.attrsmodel.attr_uuid()
@@ -1053,21 +1002,10 @@ columns = epyqlib.attrsmodel.columns(
             FunctionDataBitfieldMember,
         )
     ),
-    merge("not_implemented", FunctionData),
     merge("address", FunctionData, FunctionDataBitfield),
     merge("size", FunctionData, FunctionDataBitfield),
-    merge("repeats", TableRepeatingBlock),
-    merge(
-        "factor_uuid",
-        FunctionData,
-        TableRepeatingBlockReferenceFunctionDataReference,
-    ),
-    merge("units", FunctionData),
-    merge("enumeration_uuid", FunctionData),
-    merge("type_uuid", FunctionData, FunctionDataBitfield, FunctionDataBitfieldMember),
     merge("bit_length", FunctionDataBitfieldMember),
     merge("bit_offset", FunctionDataBitfieldMember),
-    merge("parameter_table_uuid", Table),
     merge("uuid", *types.types.values()),
 )
 
