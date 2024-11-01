@@ -386,10 +386,7 @@ class Models:
         self.staticmodbus.list_selection_roots["enumerations"] = enumerations_root
 
         self.can.list_selection_roots["enumerations"] = enumerations_root
-
-        self.staticmodbus.list_selection_roots["aggregation"] = aggregation
-        self.sunspec1.list_selection_roots["aggregation"] = aggregation
-        self.sunspec2.list_selection_roots["aggregation"] = aggregation
+        self.can.list_selection_roots["aggregation"] = aggregation
 
         self.parameters.update_nodes()
         self.can.update_nodes()

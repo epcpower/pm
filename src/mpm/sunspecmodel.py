@@ -288,19 +288,6 @@ class DataPoint(epyqlib.treenode.TreeNode):
         ),
     )
 
-    modbus_aggregation = epyqlib.attrsmodel.attr_uuid(
-        default=None,
-        allow_none=True,
-    )
-    epyqlib.attrsmodel.attrib(
-        attribute=modbus_aggregation,
-        human_name="Aggregation",
-        data_display=epyqlib.attrsmodel.name_from_uuid,
-        delegate=epyqlib.attrsmodel.RootDelegateCache(
-            list_selection_root="aggregation",
-        ),
-    )
-
     common_table_parameter_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,
         allow_none=True,
@@ -1484,7 +1471,6 @@ columns = epyqlib.attrsmodel.columns(
     merge("parameter_table_uuid", Table),
     merge("common_table_parameter_uuid", DataPoint),
     merge("mandatory", DataPoint),
-    merge("modbus_aggregation", DataPoint),
     merge(
         "offset",
         DataPoint,

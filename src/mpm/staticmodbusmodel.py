@@ -275,20 +275,6 @@ class FunctionData(epyqlib.treenode.TreeNode):
         ),
     )
 
-    # Default aggregation is 'Average'
-    modbus_aggregation = epyqlib.attrsmodel.attr_uuid(
-        default="7cc3ae9c-fa74-4b26-a4c1-616e5d129bc4",
-        allow_none=True,
-    )
-    epyqlib.attrsmodel.attrib(
-        attribute=modbus_aggregation,
-        human_name="Aggregation",
-        data_display=epyqlib.attrsmodel.name_from_uuid,
-        delegate=epyqlib.attrsmodel.RootDelegateCache(
-            list_selection_root="aggregation",
-        ),
-    )
-
     units = epyqlib.attrsmodel.create_str_or_none_attribute()
 
     uuid = epyqlib.attrsmodel.attr_uuid()
@@ -427,20 +413,6 @@ class FunctionDataBitfield(epyqlib.treenode.TreeNode):
         human_name="Type",
         data_display=epyqlib.attrsmodel.name_from_uuid,
         list_selection_root="staticmodbus types",
-    )
-
-    # Default aggregation is 'Average'
-    modbus_aggregation = epyqlib.attrsmodel.attr_uuid(
-        default="7cc3ae9c-fa74-4b26-a4c1-616e5d129bc4",
-        allow_none=True,
-    )
-    epyqlib.attrsmodel.attrib(
-        attribute=modbus_aggregation,
-        human_name="Aggregation",
-        data_display=epyqlib.attrsmodel.name_from_uuid,
-        delegate=epyqlib.attrsmodel.RootDelegateCache(
-            list_selection_root="aggregation",
-        ),
     )
 
     address = create_address_attribute()
@@ -1079,7 +1051,6 @@ columns = epyqlib.attrsmodel.columns(
     ),
     merge("units", FunctionData),
     merge("enumeration_uuid", FunctionData),
-    merge("modbus_aggregation", FunctionData, FunctionDataBitfield),
     merge("type_uuid", FunctionData, FunctionDataBitfield, FunctionDataBitfieldMember),
     merge("bit_length", FunctionDataBitfieldMember),
     merge("bit_offset", FunctionDataBitfieldMember),

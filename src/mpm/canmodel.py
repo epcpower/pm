@@ -134,6 +134,20 @@ class Signal(epyqlib.treenode.TreeNode):
         ),
     )
 
+    # Default aggregation is 'Average'
+    modbus_aggregation = epyqlib.attrsmodel.attr_uuid(
+        default="7cc3ae9c-fa74-4b26-a4c1-616e5d129bc4",
+        allow_none=True,
+    )
+    epyqlib.attrsmodel.attrib(
+        attribute=modbus_aggregation,
+        human_name="Aggregation",
+        data_display=epyqlib.attrsmodel.name_from_uuid,
+        delegate=epyqlib.attrsmodel.RootDelegateCache(
+            list_selection_root="aggregation",
+        ),
+    )
+
     path = attr.ib(
         factory=tuple,
     )
@@ -1251,6 +1265,7 @@ columns = epyqlib.attrsmodel.columns(
     (merge("length", Message, Multiplexer, MultiplexedMessage) + merge("bits", Signal)),
     merge("extended", Message, MultiplexedMessage),
     merge("enumeration_uuid", Signal),
+    merge("modbus_aggregation", Signal),
     merge("cycle_time", Message, Multiplexer),
     merge("table_uuid", CanTable),
     merge("signed", Signal),
