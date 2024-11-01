@@ -117,6 +117,15 @@ def create_factor_uuid_attribute():
     )
 
 
+def create_name_attribute():
+    return attr.ib(
+        default="",
+        converter=str,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
+    )
+
 def create_parameter_uuid_attribute():
     return epyqlib.attrsmodel.attr_uuid(
         default=None,
@@ -243,6 +252,7 @@ class ScaleFactorDelegate(QtWidgets.QStyledItemDelegate):
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class FunctionData(epyqlib.treenode.TreeNode):
+    name = create_name_attribute()
     factor_uuid = create_factor_uuid_attribute()
     parameter_uuid = create_parameter_uuid_attribute()
 
@@ -345,6 +355,7 @@ class FunctionData(epyqlib.treenode.TreeNode):
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class FunctionDataBitfieldMember(epyqlib.treenode.TreeNode):
+    name = create_name_attribute()
     parameter_uuid = create_parameter_uuid_attribute()
 
     bit_offset = attr.ib(
@@ -391,6 +402,7 @@ class FunctionDataBitfieldMember(epyqlib.treenode.TreeNode):
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class FunctionDataBitfield(epyqlib.treenode.TreeNode):
+    name = create_name_attribute()
     parameter_uuid = create_parameter_uuid_attribute()
 
     children = attr.ib(
@@ -502,6 +514,7 @@ class FunctionDataBitfield(epyqlib.treenode.TreeNode):
 )
 @attr.s(hash=False)
 class TableRepeatingBlockReferenceFunctionDataReference(epyqlib.treenode.TreeNode):
+    name = create_name_attribute()
     parameter_uuid = create_parameter_uuid_attribute()
 
     factor_uuid = create_factor_uuid_attribute()

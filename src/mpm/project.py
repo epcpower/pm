@@ -207,6 +207,27 @@ def update_anomaly_enums(
     # Replace the old enumerators
     anomaly_enumeration.children = anoms
 
+def update_staticmodbus_names(
+    staticmodbus: epyqlib.attrsmodel.Model
+) -> None:
+    """
+    Updates the names of static modbus objects to match the can.json objects
+
+    Args:
+        staticmodbus:           Static modbus root object
+
+    Returns:
+        None
+
+    """
+
+    # Don't do anything if static modbus does not exist in the project
+    if not staticmodbus:
+        return
+
+    for child in staticmodbus.root.children:
+        child.name = mpm.staticmodbusmodel.name_from_uuid_and_parent(None, child.parameter_uuid, staticmodbus)
+
 
 @graham.schemify(tag="models")
 @attr.s
@@ -417,6 +438,9 @@ class Project:
             self.models.anomalies,
             self.models.anomalies.list_selection_roots["anomaly_codes"],
         )
+
+        # Update staticmodbus names before saving
+        update_staticmodbus_names(self.models.staticmodbus)
 
         if self.filename is None:
             project_path = epyqlib.utils.qt.file_dialog(
