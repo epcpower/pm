@@ -80,6 +80,7 @@ def _post_load(project):
                 path=project.paths.can,
                 root_type=mpm.canmodel.Root,
                 columns=mpm.canmodel.columns,
+                drop_sources=(models.parameters,),
             )
 
     if models.sunspec1 is None:
