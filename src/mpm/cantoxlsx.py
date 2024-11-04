@@ -37,15 +37,21 @@ FILTER_NODES = [
     f"{TABLES_STR}{PATH_SEPARATOR}Before",
     f"{TABLES_STR}{PATH_SEPARATOR}After",
 ]
+
 CELL_SIDE = openpyxl.styles.Side(border_style="thin", color="000000")
 CELL_BORDER = openpyxl.styles.Border(
     top=CELL_SIDE, left=CELL_SIDE, right=CELL_SIDE, bottom=CELL_SIDE
 )
 CELL_FONT = openpyxl.styles.Font(name="Montserrat", size=8)
+CELL_FILL_GROUP = openpyxl.styles.PatternFill("solid", fgColor="AAAAAA")
+CELL_FILL_PARAMETER = openpyxl.styles.PatternFill("solid", fgColor="CCCCCC")
+CELL_FILL_DEFAULTS = openpyxl.styles.PatternFill("solid", fgColor="EEEEEE")
+
 # All values are stored as text to have consistent left alignment
 NUMBER_FORMAT_TEXT = openpyxl.styles.numbers.FORMAT_TEXT
 NUMBERED_VARIANT_PATTERN = r"_(0[2-9]|1[0-9]|20)$"
 MIN_MANUAL_COLUMN_COUNT = 5  # Name, access level, min, max, default
+COLUMN_COUNT = 5
 
 builders = epyqlib.utils.general.TypeMap()
 
@@ -485,16 +491,13 @@ def format_for_manual(
         entered_tables_section = False
 
         for row in filtered_rows:
-            is_numbered_variant = False
-
             parameter_path = row[6].value
-            description_out = row[2].value
+
+            parameter_uuid = row[8].value
+            parameter_node = parameter_uuid_finder(uuid.UUID(parameter_uuid))
+            description_out = parameter_node.manual_description
             access_level_out = row[3].value
             units_out = row[4].value
-            # can_path = row[5].value
-            # parameter_path = row[6].value
-            enumerator_list = row[7].value
-            # uuid = row[8].value
             parameter_name_out = row[9].value
             minimum_out = row[10].value
             maximum_out = row[11].value
@@ -521,9 +524,7 @@ def format_for_manual(
             # (differ by numbers) from those that aren't (differ by word(s)) since both have
             # entered_table_section and all_defaults_same set to True
             is_numbered_variant = (
-                True
-                if re.search(NUMBERED_VARIANT_PATTERN, parameter_name_out)
-                else False
+                True if re.search(NUMBERED_VARIANT_PATTERN, parameter_name_out) else False
             )
 
             if units_out:
@@ -541,14 +542,11 @@ def format_for_manual(
             # Discover if all the product defaults are equal.
             all_defaults_same = len(set(product_specific_default_values_out)) == 1
 
-            # +1 for parameter name
-            column_count = max(MIN_MANUAL_COLUMN_COUNT, len(defaults_out) + 1)
-
             # If applicable, add a header description for a set of parameters.
             # Chop off the parameters prefix to match the path that is seen in the EPyQ parameters tab.
             parameter_path_to_check = parameter_path[len(PARAMETERS_PREFIX) :]
             if parameter_path_to_check != current_parameter_path:
-                # Add the parameter path for this section of parameters.
+                # Add the parameter path (group) for this section of parameters.
                 current_parameter_path = parameter_path_to_check
                 # Do not output the "Tree" part of the parameter path.
                 parameter_path_out = current_parameter_path.replace(
@@ -571,12 +569,17 @@ def format_for_manual(
                     start_row=current_row,
                     start_column=1,
                     end_row=current_row,
-                    end_column=column_count,
+                    end_column=COLUMN_COUNT,
                 )
 
-                # Set the font size for header description.
-                for col in EXCEL_COLUMN_LETTERS[:column_count]:
+                # Set the font size and fill color for header description.
+                for col in EXCEL_COLUMN_LETTERS[:COLUMN_COUNT]:
                     output_worksheet[col + str(current_row)].font = CELL_FONT
+                    output_worksheet[col + str(current_row)].fill = CELL_FILL_GROUP
+                    output_worksheet[col + str(current_row)].border = CELL_BORDER
+                    output_worksheet[
+                        col + str(current_row)
+                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
 
                 current_row += 1
                 # Reset the tables section logic.
@@ -608,27 +611,30 @@ def format_for_manual(
                 ].alignment = openpyxl.styles.alignment.Alignment(
                     horizontal="left", vertical="top"
                 )
-
-                # Merge access level; minimum, maximum and default stay as 1 column
-                output_worksheet.merge_cells(
-                    start_row=current_row,
-                    start_column=2,
-                    end_row=current_row,
-                    end_column=column_count - 3,
-                )
-
             else:
                 # Check and set if this parameter is the start of table rows section.
                 entered_tables_section = TABLES_TREE_STR in parameter_path
 
-                # Add the parameter name and description cells.
-                output_worksheet.append([parameter_name_out, description_out])
-                rows_used += 1
+                # Add the parameter name cell.
+                output_worksheet.append([parameter_name_out])
 
-                if enumerator_list:
-                    # Add the enumerator list cell / row.
-                    output_worksheet.append(["", enumerator_list])
-                    rows_used += 1
+                # Merge cells for parameter name.
+                output_worksheet.merge_cells(
+                    start_row=current_row,
+                    start_column=1,
+                    end_row=current_row,
+                    end_column=COLUMN_COUNT,
+                )
+
+                # Set the font size and fill color for parameter name.
+                for col in EXCEL_COLUMN_LETTERS[:COLUMN_COUNT]:
+                    output_worksheet[col + str(current_row)].font = CELL_FONT
+                    output_worksheet[col + str(current_row)].fill = CELL_FILL_PARAMETER
+                    output_worksheet[col + str(current_row)].border = CELL_BORDER
+                    output_worksheet[
+                        col + str(current_row)
+                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
+                current_row += 1
 
                 if all_defaults_same:
                     row1 = [description_out, field_names.access_level] + [
@@ -675,9 +681,7 @@ def format_for_manual(
                         output_worksheet.append(row1)
                         output_worksheet.append(row2)
                         output_worksheet.append([""] + psd.product_specific_names)
-                        output_worksheet.append(
-                            [""] + product_specific_default_values_out
-                        )
+                        output_worksheet.append([""] + product_specific_default_values_out)
                         rows_used += 4
                     elif len(psd.product_specific_names) == 1:
                         row1 = [description_out, field_names.access_level] + [
@@ -720,97 +724,47 @@ def format_for_manual(
                     end_column=1,
                 )
 
-                # Set horizontal & vertical alignment for parameter name.
+                # Set wrap_text, horizontal & vertical alignment for parameter description.
                 output_worksheet[
                     "A" + str(current_row)
                 ].alignment = openpyxl.styles.alignment.Alignment(
-                    horizontal="left", vertical="top"
+                    horizontal="left", vertical="top", wrap_text=True
                 )
-
-                # Set alignment of description to wrap text.
-                for col in EXCEL_COLUMN_LETTERS[1:column_count]:
-                    output_worksheet[
-                        col + str(current_row)
-                    ].alignment = openpyxl.styles.alignment.Alignment(wrap_text=True)
-
-                # Merge cells for description.
-                output_worksheet.merge_cells(
-                    start_row=current_row,
-                    start_column=2,
-                    end_row=current_row,
-                    end_column=column_count,
-                )
-
-                if enumerator_list:
-                    # Merge cells for enumerator list cell.
-                    output_worksheet.merge_cells(
-                        start_row=current_row + 1,
-                        start_column=2,
-                        end_row=current_row + 1,
-                        end_column=column_count,
-                    )
 
                 if all_defaults_same:
-                    # Merge access level; minimum, maximum and default stay as 1 column
-                    if enumerator_list:
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=2,
-                            end_row=current_row + 2,
-                            end_column=column_count - 3,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 3,
-                            start_column=2,
-                            end_row=current_row + 3,
-                            end_column=column_count - 3,
-                        )
-                    else:
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 1,
-                            start_column=2,
-                            end_row=current_row + 1,
-                            end_column=column_count - 3,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=2,
-                            end_row=current_row + 2,
-                            end_column=column_count - 3,
-                        )
+                    # Style access level; minimum, maximum, and default
+                    for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
+                        output_worksheet[col + str(current_row)].fill = CELL_FILL_DEFAULTS
                 else:
-                    # Merge access level; minimum and maximum stay as 1 column; no default column.
-                    # The product specific defaults each get their own column.
-                    if enumerator_list:
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=2,
-                            end_row=current_row + 2,
-                            end_column=column_count - 2,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 3,
-                            start_column=2,
-                            end_row=current_row + 3,
-                            end_column=column_count - 2,
-                        )
+                    # Style access level; minimum, maximum, and defaults
+                    if rows_used > 4:
+                        for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
+                            output_worksheet[
+                                col + str(current_row)
+                            ].fill = CELL_FILL_DEFAULTS
+                            output_worksheet[
+                                col + str(current_row + 2)
+                            ].fill = CELL_FILL_DEFAULTS
+                            output_worksheet[
+                                col + str(current_row + 4)
+                            ].fill = CELL_FILL_DEFAULTS
+                    elif rows_used > 2:
+                        for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
+                            output_worksheet[
+                                col + str(current_row)
+                            ].fill = CELL_FILL_DEFAULTS
+                            output_worksheet[
+                                col + str(current_row + 2)
+                            ].fill = CELL_FILL_DEFAULTS
                     else:
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 1,
-                            start_column=2,
-                            end_row=current_row + 1,
-                            end_column=column_count - 2,
-                        )
-                        output_worksheet.merge_cells(
-                            start_row=current_row + 2,
-                            start_column=2,
-                            end_row=current_row + 2,
-                            end_column=column_count - 2,
-                        )
+                        for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
+                            output_worksheet[
+                                col + str(current_row)
+                            ].fill = CELL_FILL_DEFAULTS
 
             # Set the font size and border for non header description rows.
             for style_row in range(current_row, current_row + rows_used):
-                for col in EXCEL_COLUMN_LETTERS[:column_count]:
+                for col in EXCEL_COLUMN_LETTERS[:COLUMN_COUNT]:
                     output_worksheet[col + str(style_row)].font = CELL_FONT
                     output_worksheet[col + str(style_row)].border = CELL_BORDER
                     output_worksheet[
@@ -822,6 +776,7 @@ def format_for_manual(
             progress_bar.update(1)
 
     output_workbook.save(output_path)
+
 
 @builders(epyqlib.pm.parametermodel.Root)
 @attr.s
