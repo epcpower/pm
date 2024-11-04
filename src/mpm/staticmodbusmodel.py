@@ -500,16 +500,16 @@ def update_addresses_below(self, start_node) -> None:
         start_node: Node where the sorting starts.
     """
     index = -1
-    for c in self.children:
-        if c == start_node:
-            index = c.address + 1
+    for child in self.children:
+        if child == start_node:
+            index = child.address + child.size
             continue
         # Start node not yet found, skip
         if index < 0:
             continue
 
-        c.address = index
-        index += 1
+        child.address = index
+        index += child.size
 
 
 def root_can_drop_on(self, node) -> bool:
