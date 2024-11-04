@@ -474,6 +474,44 @@ def find_avail_address(self) -> int:
     return check_children(self, 0, self.children)
 
 
+
+def sort_addresses(self) -> None:
+    """
+    Sort children by address in ascending order.
+
+    Args:
+        self: Root object self-instance.
+    Returns:
+        None
+    """
+    children_copy = self.children.copy()
+    children_copy.sort(key=lambda x: x.address)
+    # Re-add children to trigger the tree update
+    self.recursively_remove_children()
+    for child in children_copy:
+        self.append_child(child)
+
+def update_addresses_below(self, start_node) -> None:
+    """
+    Sort addresses such that they are in ascending order below given node
+
+    Args:
+        self: Root object self-instance.
+        start_node: Node where the sorting starts.
+    """
+    index = -1
+    for c in self.children:
+        if c == start_node:
+            index = c.address + 1
+            continue
+        # Start node not yet found, skip
+        if index < 0:
+            continue
+
+        c.address = index
+        index += 1
+
+
 def root_can_drop_on(self, node) -> bool:
     """
     Function that determines which objects can be dropped on static modbus root.
@@ -586,6 +624,8 @@ Root = epyqlib.attrsmodel.Root(
 Root.can_drop_on = root_can_drop_on
 Root.child_from = root_child_from
 Root.find_avail_address = find_avail_address
+Root.sort_addresses = sort_addresses
+Root.update_addresses_below = update_addresses_below
 
 types = epyqlib.attrsmodel.Types(
     types=(

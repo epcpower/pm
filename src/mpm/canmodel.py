@@ -65,6 +65,13 @@ def find_nodes_by_type(root, type, skip=None) -> list:
     return results
 
 
+def node_multiplexer_id(node) -> int:
+    if (isinstance(node, CanTable)):
+        return node.multiplexer_range_first
+    elif (isinstance(node, Multiplexer)):
+        return node.identifier
+    return -1
+
 class HexadecimalIntegerField(marshmallow.fields.Field):
     def _serialize(self, value, attr, obj):
         if self.allow_none and value is None:
@@ -585,6 +592,22 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
                 child.multiplexer_id_nodes() for child in self.children
             )
         )
+
+    def sort_multiplexer_ids(self) -> None:
+        """
+        Sort children by multiplexer ID
+
+        Args:
+            self: self-instance of this MultiplexedMessage.
+        Returns:
+            None
+        """
+        children_copy = self.children.copy()
+        children_copy.sort(key=lambda x: node_multiplexer_id(x))
+        # Re-add children to trigger the tree update
+        self.recursively_remove_children()
+        for child in children_copy:
+            self.append_child(child)
 
     def optimize_multiplexer_ids(self) -> None:
         """
