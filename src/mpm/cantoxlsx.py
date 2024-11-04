@@ -2,6 +2,7 @@ from __future__ import (
     annotations,
 )  # See PEP 563, check to remove in future Python version higher than 3.7
 import re
+import string
 import attr
 import decimal
 import openpyxl
@@ -15,13 +16,13 @@ import epyqlib.utils.general
 from natsort import natsorted
 from tqdm import tqdm
 
-EXCEL_COLUMN_LETTERS = [c for c in "ABCDEFGHIJKLMNOPQRSTU"]
+EXCEL_COLUMN_LETTERS = string.ascii_uppercase
 PMVS_UUID_TO_DECIMAL_LIST = typing.List[typing.Dict[uuid.UUID, decimal.Decimal]]
 
 PATH_SEPARATOR = " -> "
 
 # The parameter query prefix on a large portion of the CAN parameter paths.
-PARAMETER_QUERY_PREFIX = "ParameterQuery -> "
+PARAMETER_QUERY_PREFIX = f"ParameterQuery{PATH_SEPARATOR}"
 # The parameters prefix on a large portion of the parameter paths.
 PARAMETERS_PREFIX = f"Parameters{PATH_SEPARATOR}"
 TABLES_STR = "Tables"
@@ -51,7 +52,6 @@ CELL_FILL_DEFAULTS = openpyxl.styles.PatternFill("solid", fgColor="EEEEEE")
 # All values are stored as text to have consistent left alignment
 NUMBER_FORMAT_TEXT = openpyxl.styles.numbers.FORMAT_TEXT
 NUMBERED_VARIANT_PATTERN = r"_(0[2-9]|1[0-9]|20)$"
-MIN_MANUAL_COLUMN_COUNT = 5  # Name, access level, min, max, default
 COLUMN_COUNT = 5
 
 builders = epyqlib.utils.general.TypeMap()
@@ -73,6 +73,12 @@ class Fields(mpm.mpm_helper.FieldsInterface):
     epyq_can_parameter_name = attr.ib(default=None, type=typing.Union[str, bool])
     minimum = attr.ib(default=None, type=typing.Union[str, bool, decimal.Decimal])
     maximum = attr.ib(default=None, type=typing.Union[str, bool, decimal.Decimal])
+    minimum_computed = attr.ib(
+        default=None, type=typing.Union[str, bool, decimal.Decimal]
+    )
+    maximum_computed = attr.ib(
+        default=None, type=typing.Union[str, bool, decimal.Decimal]
+    )
     defaults = attr.ib(
         default=[], type=typing.List[typing.Union[str, bool, decimal.Decimal]]
     )
@@ -91,6 +97,8 @@ field_names = Fields(
     epyq_can_parameter_name="EPyQ CAN Parameter Name",
     minimum="Minimum",
     maximum="Maximum",
+    minimum_computed="Minimum Computed",
+    maximum_computed="Maximum Computed",
     defaults=[],
 )
 
@@ -244,6 +252,36 @@ class Signal:
                     row.minimum = parameter.minimum
                 if parameter.maximum is not None:
                     row.maximum = parameter.maximum
+
+                # Skip setting computed minimum/maximum for PackedString type.
+                if not (
+                    isinstance(parameter, epyqlib.pm.parametermodel.Parameter)
+                    and parameter.internal_type
+                    and parameter.internal_type == "PackedString"
+                ):
+                    # The math functions below calculate the minimum and maximum extremes
+                    # given the number of bits and signed/unsigned.
+                    if parameter.minimum is not None:
+                        row.minimum_computed = parameter.minimum
+                    else:
+                        if self.wrapped.signed:
+                            row.minimum_computed = (
+                                -1 * 2 ** (self.wrapped.bits - 1)
+                            ) * self.wrapped.factor
+                        else:
+                            row.minimum_computed = 0
+
+                    if parameter.maximum is not None:
+                        row.maximum_computed = parameter.maximum
+                    else:
+                        if self.wrapped.signed:
+                            row.maximum_computed = (
+                                2 ** (self.wrapped.bits - 1) - 1
+                            ) * self.wrapped.factor
+                        else:
+                            row.maximum_computed = (
+                                2 ** self.wrapped.bits - 1
+                            ) * self.wrapped.factor
 
                 if self.wrapped.enumeration_uuid is not None:
                     enumeration = self.parameter_uuid_finder(
@@ -441,8 +479,8 @@ def format_for_manual(
     parameter_uuid_finder = parameters_model.node_from_uuid
 
     input_workbook = openpyxl.load_workbook(filename=input_path)
-    input_worksheet = input_workbook.active
-    input_worksheet_col_count = input_worksheet.max_column
+    input_parameter_worksheet = input_workbook["Parameters"]
+    input_worksheet_col_count = input_parameter_worksheet.max_column
 
     output_path = input_path.with_name(
         input_path.stem + "_for_manual" + input_path.suffix
@@ -457,7 +495,9 @@ def format_for_manual(
 
     # Perform all filtering activities.
     filtered_rows = []
-    for row in input_worksheet.iter_rows(min_row=2, max_col=input_worksheet_col_count):
+    for row in input_parameter_worksheet.iter_rows(
+        min_row=2, max_col=input_worksheet_col_count
+    ):
         # Only output parameters that are in EPyQ.
         parameter_path = row[6].value
         if not parameter_path.startswith(PARAMETERS_PREFIX):
@@ -500,12 +540,12 @@ def format_for_manual(
             access_level_out = row[3].value
             units_out = row[4].value
             parameter_name_out = row[9].value
-            minimum_out = row[10].value
-            maximum_out = row[11].value
+            minimum_out = row[12].value
+            maximum_out = row[13].value
 
             # Initialize product specific default values, copying from the filtered rows.
             psd_values_all = []
-            for col in row[12:]:
+            for col in row[14:]:
                 if col.value is not None:
                     psd_values_all.append(f"{col.value}")
                 else:
