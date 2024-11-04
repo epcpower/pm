@@ -525,6 +525,8 @@ def root_can_drop_on(self, node) -> bool:
     return isinstance(
         node,
         (
+            FunctionData,
+            FunctionDataBitfield,
             mpm.canmodel.Signal,
             mpm.canmodel.Multiplexer,
             mpm.canmodel.CanTable,
@@ -545,7 +547,9 @@ def root_child_from(self, node) -> typing.Union[FunctionData, list]:
     Returns:
         A new FunctionData object.
     """
-    if isinstance(node, mpm.canmodel.Signal):
+    if isinstance(node, (FunctionData, FunctionDataBitfield)):
+        return node
+    elif isinstance(node, mpm.canmodel.Signal):
         avail_addr = self.find_avail_address()
         return FunctionData(
             parameter_uuid=node.parameter_uuid,
