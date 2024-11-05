@@ -4,6 +4,7 @@ import attr
 import graham
 import marshmallow
 import typing
+import logging
 
 import epyqlib.attrsmodel
 import epyqlib.checkresultmodel
@@ -1011,6 +1012,10 @@ def root_child_from(self, node) -> typing.Union[FunctionData, list]:
                     )
                 )
                 avail_addr += bits_to_words(signal.bits)
+            else:
+                logging.debug(
+                    "Did not drop anything due to wrong access level or zero bit length"
+                )
         return output
     return FunctionData(parameter_uuid=node.uuid)
 
