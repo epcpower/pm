@@ -559,7 +559,9 @@ def format_for_manual(
             # (differ by numbers) from those that aren't (differ by word(s)) since both have
             # entered_table_section and all_defaults_same set to True
             is_numbered_variant = (
-                True if re.search(NUMBERED_VARIANT_PATTERN, parameter_name_out) else False
+                True
+                if re.search(NUMBERED_VARIANT_PATTERN, parameter_name_out)
+                else False
             )
 
             if units_out:
@@ -716,7 +718,9 @@ def format_for_manual(
                         output_worksheet.append(row1)
                         output_worksheet.append(row2)
                         output_worksheet.append([""] + psd.product_specific_names)
-                        output_worksheet.append([""] + product_specific_default_values_out)
+                        output_worksheet.append(
+                            [""] + product_specific_default_values_out
+                        )
                         rows_used += 4
                     elif len(psd.product_specific_names) == 1:
                         row1 = [description_out, field_names.access_level] + [
@@ -769,7 +773,9 @@ def format_for_manual(
                 if all_defaults_same:
                     # Style access level; minimum, maximum, and default
                     for col in EXCEL_COLUMN_LETTERS[1:COLUMN_COUNT]:
-                        output_worksheet[col + str(current_row)].fill = CELL_FILL_DEFAULTS
+                        output_worksheet[
+                            col + str(current_row)
+                        ].fill = CELL_FILL_DEFAULTS
                 else:
                     # Style access level; minimum, maximum, and defaults
                     if rows_used > 4:
@@ -837,6 +843,7 @@ class ParameterModelRoot:
                 }
 
         return group_manual_description_map
+
 
 @builders(epyqlib.pm.parametermodel.Group)
 @attr.s
