@@ -133,11 +133,16 @@ def build(
 @mpm.cli.utils.target_path_option(required=True)
 @mpm.cli.utils.pmvs_overlay_recipes_path_option(required=True)
 @click.option("--generate-formatted-output", "generate_formatted_output", is_flag=True)
+@click.option(
+    "--product-specific-defaults",
+    help="Comma separated list of defaults to be included in the output",
+)
 def docs(
     project: str,
     target_path: str,
     pmvs_overlay_recipes_path: str,
     generate_formatted_output: bool,
+    product_specific_defaults: str,
 ) -> None:
     """
     Export PM documentation to embedded project directory
@@ -161,11 +166,18 @@ def docs(
 
     loaded_project = mpm.project.loadp(project)
 
+    product_specific_defaults_list = []
+    if product_specific_defaults:
+        product_specific_defaults_list = product_specific_defaults.split(",")
+        product_specific_defaults_list = [
+            x.strip() for x in product_specific_defaults_list
+        ]
     mpm.importexport.generate_docs(
         project=loaded_project,
         pmvs_path=pmvs_output_path,
         paths=paths,
         generate_formatted_output=generate_formatted_output,
+        product_specific_defaults=product_specific_defaults_list,
     )
 
     click.echo()
