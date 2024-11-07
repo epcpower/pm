@@ -106,16 +106,14 @@ def create_address_attribute(default=0):
     )
 
 
-def create_factor_uuid_attribute():
-    return epyqlib.attrsmodel.attr_uuid(
-        default=None,
-        human_name="Scale Factor",
-        allow_none=True,
-        data_display=name_from_uuid,
-        list_selection_path=("/"),
-        override_delegate=ScaleFactorDelegate,
+def create_name_attribute():
+    return attr.ib(
+        default="",
+        converter=str,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.String(),
+        ),
     )
-
 
 def create_parameter_uuid_attribute():
     return epyqlib.attrsmodel.attr_uuid(
@@ -164,7 +162,7 @@ def name_from_uuid_and_parent(node, value, model):
     except:
         pass
 
-    return "{} - {}".format(target_node.tree_parent.name, target_node.name)
+    return "{}:{}".format(target_node.tree_parent.name, target_node.name)
 
 
 def bits_to_words(bits):
@@ -243,54 +241,10 @@ class ScaleFactorDelegate(QtWidgets.QStyledItemDelegate):
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class FunctionData(epyqlib.treenode.TreeNode):
-    factor_uuid = create_factor_uuid_attribute()
+    name = create_name_attribute()
     parameter_uuid = create_parameter_uuid_attribute()
-
-    not_implemented = epyqlib.attrsmodel.create_checkbox_attribute(
-        default=False,
-    )
-
-    type_uuid = epyqlib.attrsmodel.attr_uuid(
-        default=None,
-        allow_none=True,
-        human_name="Type",
-        data_display=epyqlib.attrsmodel.name_from_uuid,
-        list_selection_root="staticmodbus types",
-    )
-
     address = create_address_attribute()
-
     size = create_size_attribute()
-
-    enumeration_uuid = epyqlib.attrsmodel.attr_uuid(
-        default=None,
-        allow_none=True,
-    )
-    epyqlib.attrsmodel.attrib(
-        attribute=enumeration_uuid,
-        human_name="Enumeration",
-        data_display=epyqlib.attrsmodel.name_from_uuid,
-        delegate=epyqlib.attrsmodel.RootDelegateCache(
-            list_selection_root="enumerations",
-        ),
-    )
-
-    # Default aggregation is 'Average'
-    modbus_aggregation = epyqlib.attrsmodel.attr_uuid(
-        default="7cc3ae9c-fa74-4b26-a4c1-616e5d129bc4",
-        allow_none=True,
-    )
-    epyqlib.attrsmodel.attrib(
-        attribute=modbus_aggregation,
-        human_name="Aggregation",
-        data_display=epyqlib.attrsmodel.name_from_uuid,
-        delegate=epyqlib.attrsmodel.RootDelegateCache(
-            list_selection_root="aggregation",
-        ),
-    )
-
-    units = epyqlib.attrsmodel.create_str_or_none_attribute()
-
     uuid = epyqlib.attrsmodel.attr_uuid()
 
     def __attrs_post_init__(self):
@@ -359,6 +313,7 @@ class FunctionData(epyqlib.treenode.TreeNode):
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class FunctionDataBitfieldMember(epyqlib.treenode.TreeNode):
+    name = create_name_attribute()
     parameter_uuid = create_parameter_uuid_attribute()
 
     bit_offset = attr.ib(
@@ -370,14 +325,6 @@ class FunctionDataBitfieldMember(epyqlib.treenode.TreeNode):
     )
 
     bit_length = create_size_attribute(default=1)
-
-    type_uuid = epyqlib.attrsmodel.attr_uuid(
-        default=None,
-        allow_none=True,
-        human_name="Type",
-        data_display=epyqlib.attrsmodel.name_from_uuid,
-        list_selection_root="staticmodbus types",
-    )
 
     uuid = epyqlib.attrsmodel.attr_uuid()
 
@@ -405,6 +352,7 @@ class FunctionDataBitfieldMember(epyqlib.treenode.TreeNode):
 @epyqlib.utils.qt.pyqtify()
 @attr.s(hash=False)
 class FunctionDataBitfield(epyqlib.treenode.TreeNode):
+    name = create_name_attribute()
     parameter_uuid = create_parameter_uuid_attribute()
 
     children = attr.ib(
@@ -427,20 +375,6 @@ class FunctionDataBitfield(epyqlib.treenode.TreeNode):
         human_name="Type",
         data_display=epyqlib.attrsmodel.name_from_uuid,
         list_selection_root="staticmodbus types",
-    )
-
-    # Default aggregation is 'Average'
-    modbus_aggregation = epyqlib.attrsmodel.attr_uuid(
-        default="7cc3ae9c-fa74-4b26-a4c1-616e5d129bc4",
-        allow_none=True,
-    )
-    epyqlib.attrsmodel.attrib(
-        attribute=modbus_aggregation,
-        human_name="Aggregation",
-        data_display=epyqlib.attrsmodel.name_from_uuid,
-        delegate=epyqlib.attrsmodel.RootDelegateCache(
-            list_selection_root="aggregation",
-        ),
     )
 
     address = create_address_attribute()
@@ -518,384 +452,6 @@ class FunctionDataBitfield(epyqlib.treenode.TreeNode):
     check = epyqlib.attrsmodel.check_just_children
 
 
-@graham.schemify(
-    tag="staticmodbus_table_repeating_block_reference_function_data_reference",
-    register=True,
-)
-@epyqlib.attrsmodel.ify()
-@epyqlib.utils.qt.pyqtify()
-@epyqlib.utils.qt.pyqtify_passthrough_properties(
-    original="original",
-    field_names=("parameter_uuid",),
-)
-@attr.s(hash=False)
-class TableRepeatingBlockReferenceFunctionDataReference(epyqlib.treenode.TreeNode):
-    parameter_uuid = create_parameter_uuid_attribute()
-
-    factor_uuid = create_factor_uuid_attribute()
-    original = epyqlib.attrsmodel.create_reference_attribute()
-
-    uuid = epyqlib.attrsmodel.attr_uuid()
-
-    def __attrs_post_init__(self):
-        super().__init__()
-
-    def can_drop_on(self, node):
-        return False
-
-    can_delete = epyqlib.attrsmodel.childless_can_delete
-    all_addable_types = epyqlib.attrsmodel.empty_all_addable_types
-    addable_types = epyqlib.attrsmodel.empty_addable_types
-    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
-    child_from = epyqlib.attrsmodel.default_child_from
-    internal_move = epyqlib.attrsmodel.default_internal_move
-    check = epyqlib.attrsmodel.check_just_children
-
-
-@graham.schemify(tag="staticmodbus_table_repeating_block", register=True)
-@epyqlib.attrsmodel.ify()
-@epyqlib.utils.qt.pyqtify()
-@epyqlib.utils.qt.pyqtify_passthrough_properties(
-    original="original",
-    field_names=("name",),
-)
-@attr.s(hash=False)
-class TableRepeatingBlockReference(epyqlib.treenode.TreeNode):
-    name = attr.ib(
-        default="Table Repeating Block Reference",
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
-        ),
-    )
-    children = attr.ib(
-        factory=list,
-        metadata=graham.create_metadata(
-            field=graham.fields.MixedList(
-                fields=(
-                    marshmallow.fields.Nested(
-                        graham.schema(
-                            TableRepeatingBlockReferenceFunctionDataReference,
-                        )
-                    ),
-                )
-            ),
-        ),
-    )
-
-    original = epyqlib.attrsmodel.create_reference_attribute()
-
-    uuid = epyqlib.attrsmodel.attr_uuid()
-
-    def __attrs_post_init__(self):
-        super().__init__()
-
-    @classmethod
-    def all_addable_types(cls):
-        return epyqlib.attrsmodel.create_addable_types(())
-
-    @staticmethod
-    def addable_types():
-        return {}
-
-    def can_drop_on(self, node):
-        return False
-
-    def can_delete(self, node=None):
-        if node is None:
-            return self.tree_parent.can_delete(node=self)
-
-        return False
-
-    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
-    child_from = epyqlib.attrsmodel.default_child_from
-    internal_move = epyqlib.attrsmodel.default_internal_move
-    check = epyqlib.attrsmodel.check_just_children
-
-
-@graham.schemify(tag="table_model_reference", register=True)
-@epyqlib.attrsmodel.ify()
-@epyqlib.utils.qt.pyqtify()
-@attr.s(hash=False)
-class TableRepeatingBlock(epyqlib.treenode.TreeNode):
-    uuid = epyqlib.attrsmodel.attr_uuid()
-    name = attr.ib(
-        default="Table Reference",
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
-        ),
-    )
-
-    children = attr.ib(
-        factory=list,
-        metadata=graham.create_metadata(
-            field=graham.fields.MixedList(
-                fields=(marshmallow.fields.Nested(graham.schema(FunctionData)),)
-            ),
-        ),
-    )
-
-    repeats = attr.ib(
-        default=0,
-        converter=int,
-    )
-
-    path = attr.ib(
-        factory=tuple,
-    )
-    epyqlib.attrsmodel.attrib(
-        attribute=path,
-        no_column=True,
-    )
-    graham.attrib(
-        attribute=path,
-        field=graham.fields.Tuple(marshmallow.fields.UUID()),
-    )
-
-    def __attrs_post_init__(self):
-        super().__init__()
-
-    @classmethod
-    def all_addable_types(cls):
-        return epyqlib.attrsmodel.create_addable_types(())
-
-    @staticmethod
-    def addable_types():
-        return {}
-
-    def can_drop_on(self, node):
-        return False
-
-    def can_delete(self, node=None):
-        if node is None:
-            return self.tree_parent.can_delete(node=self)
-
-        return False
-
-    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
-    child_from = epyqlib.attrsmodel.default_child_from
-    internal_move = epyqlib.attrsmodel.default_internal_move
-    check = epyqlib.attrsmodel.check_just_children
-
-
-@graham.schemify(tag="table", register=True)
-@epyqlib.attrsmodel.ify()
-@epyqlib.utils.qt.pyqtify()
-@attr.s(hash=False)
-class Table(epyqlib.treenode.TreeNode):
-    name = attr.ib(
-        default="New Table",
-        metadata=graham.create_metadata(
-            field=marshmallow.fields.String(),
-        ),
-    )
-
-    parameter_table_uuid = epyqlib.attrsmodel.attr_uuid(
-        default=None,
-        allow_none=True,
-    )
-    epyqlib.attrsmodel.attrib(
-        attribute=parameter_table_uuid,
-        human_name="Table UUID",
-    )
-
-    children = attr.ib(
-        default=attr.Factory(list),
-        metadata=graham.create_metadata(
-            field=graham.fields.MixedList(
-                fields=(
-                    marshmallow.fields.Nested(graham.schema(TableRepeatingBlock)),
-                    marshmallow.fields.Nested(graham.schema(FunctionData)),
-                )
-            ),
-        ),
-    )
-
-    uuid = epyqlib.attrsmodel.attr_uuid()
-
-    def __attrs_post_init__(self):
-        super().__init__()
-
-    @classmethod
-    def all_addable_types(cls):
-        return epyqlib.attrsmodel.create_addable_types(())
-
-    @staticmethod
-    def addable_types():
-        return {}
-
-    @staticmethod
-    def can_drop_on(node):
-        return isinstance(node, epyqlib.pm.parametermodel.Table)
-
-    def can_delete(self, node=None):
-        if node is None:
-            return self.tree_parent.can_delete(node=self)
-
-        return True
-
-    def child_from(self, node):
-        self.parameter_table_uuid = node.uuid
-        return None
-
-    def update(self, table=None):
-        old_nodes = self.recursively_remove_children()
-        old_nodes_by_path = {
-            getattr(node, "path", getattr(node, "parameter_uuid", node.uuid)): node
-            for node in old_nodes
-        }
-
-        if self.parameter_table_uuid is None:
-            return
-
-        root = self.find_root()
-        model = root.model
-
-        if table is None:
-            table = model.node_from_uuid(self.parameter_table_uuid)
-        elif table.uuid != self.table_uuid:
-            raise ConsistencyError()
-
-        master_array_function_data_by_uuid = {}
-
-        for section in table.arrays_and_groups:
-            if isinstance(section, epyqlib.pm.parametermodel.Array):
-                array_element = section.children[0]
-                node = old_nodes_by_path.get(array_element.uuid)
-                if node is None:
-                    node = FunctionData(
-                        parameter_uuid=array_element.uuid,
-                    )
-                self.append_child(node)
-                master_array_function_data_by_uuid[array_element.uuid] = node
-            elif isinstance(section, epyqlib.pm.parametermodel.Group):
-                for element in section.children:
-                    node = old_nodes_by_path.get(element.uuid)
-                    if node is None:
-                        node = FunctionData(
-                            parameter_uuid=element.uuid,
-                        )
-                    self.append_child(node)
-                    master_array_function_data_by_uuid[element.uuid] = node
-
-        for combination in table.combinations:
-            not_first_curve = any(
-                (
-                    layer.tree_parent.name == "Curves"
-                    and layer.name != layer.tree_parent.children[0].name
-                )
-                for layer in combination
-            )
-            if not_first_curve:
-                continue
-
-            curve_enumeration_search = [
-                layer for layer in combination if layer.tree_parent.name == "Curves"
-            ]
-            if len(curve_enumeration_search) == 0:
-                curve_count = 0
-            elif len(curve_enumeration_search) == 1:
-                curve_enumeration = curve_enumeration_search[0].tree_parent
-                curve_count = len(curve_enumeration.children)
-            else:
-                raise blue
-
-            base_path = tuple(node.uuid for node in combination)
-
-            block_node = old_nodes_by_path.get(base_path)
-
-            if block_node is None:
-                block_node = TableRepeatingBlock(
-                    name=" - ".join(
-                        item.name
-                        for item in combination
-                        if item.tree_parent.name != "Curves"
-                    ),
-                    path=base_path,
-                )
-
-            block_node.repeats = curve_count
-
-            self.append_child(block_node)
-
-            (in_tree,) = table.group.nodes_by_attribute(
-                attribute_value=tuple(node.uuid for node in combination),
-                attribute_name="path",
-            )
-
-            group_elements = [[], []]
-            group_of_groups = group_elements[0]
-
-            for child in in_tree.children:
-                if isinstance(child.original, epyqlib.pm.parametermodel.Array):
-                    group_of_groups = group_elements[1]
-                    continue
-
-                group_of_groups.append(child.children)
-
-            for group in group_elements:
-                group[:] = itertools.chain.from_iterable(group)
-
-            # TODO: CAMPid 143707880547014313476753071297360068134
-            for element in group_elements[0]:
-                point_node = old_nodes_by_path.get(element.uuid)
-                reference_function_data = master_array_function_data_by_uuid[
-                    element.original.uuid
-                ]
-                if point_node is None:
-                    point_node = FunctionData(
-                        parameter_uuid=element.uuid,
-                    )
-                point_node.units = reference_function_data.units
-                point_node.type_uuid = reference_function_data.type_uuid
-                point_node.size = reference_function_data.size
-                point_node.enumeration_uuid = reference_function_data.enumeration_uuid
-                block_node.append_child(point_node)
-
-            array_elements = itertools.chain.from_iterable(
-                zip(
-                    *(
-                        array.children
-                        for array in in_tree.children
-                        if isinstance(array.original, epyqlib.pm.parametermodel.Array)
-                    )
-                ),
-            )
-            for element in array_elements:
-                point_node = old_nodes_by_path.get(element.uuid)
-                reference_function_data = master_array_function_data_by_uuid[
-                    element.tree_parent.children[0].original.uuid
-                ]
-                if point_node is None:
-                    point_node = FunctionData(
-                        parameter_uuid=element.uuid,
-                    )
-                point_node.units = reference_function_data.units
-                point_node.type_uuid = reference_function_data.type_uuid
-                point_node.size = reference_function_data.size
-                point_node.enumeration_uuid = reference_function_data.enumeration_uuid
-                block_node.append_child(point_node)
-
-            # TODO: CAMPid 143707880547014313476753071297360068134
-            for element in group_elements[1]:
-                point_node = old_nodes_by_path.get(element.uuid)
-                reference_function_data = master_array_function_data_by_uuid[
-                    element.original.uuid
-                ]
-                if point_node is None:
-                    point_node = FunctionData(
-                        parameter_uuid=element.uuid,
-                    )
-                point_node.units = reference_function_data.units
-                point_node.type_uuid = reference_function_data.type_uuid
-                point_node.size = reference_function_data.size
-                point_node.enumeration_uuid = reference_function_data.enumeration_uuid
-                block_node.append_child(point_node)
-
-    remove_old_on_drop = epyqlib.attrsmodel.default_remove_old_on_drop
-    internal_move = epyqlib.attrsmodel.default_internal_move
-    check = epyqlib.attrsmodel.check_just_children
-
-
 def find_avail_address(self) -> int:
     """
     Finds smallest available modbus address on the static modbus root model.
@@ -918,6 +474,44 @@ def find_avail_address(self) -> int:
     return check_children(self, 0, self.children)
 
 
+
+def sort_addresses(self) -> None:
+    """
+    Sort children by address in ascending order.
+
+    Args:
+        self: Root object self-instance.
+    Returns:
+        None
+    """
+    children_copy = self.children.copy()
+    children_copy.sort(key=lambda x: x.address)
+    # Re-add children to trigger the tree update
+    self.recursively_remove_children()
+    for child in children_copy:
+        self.append_child(child)
+
+def update_addresses_below(self, start_node) -> None:
+    """
+    Sort addresses such that they are in ascending order below given node
+
+    Args:
+        self: Root object self-instance.
+        start_node: Node where the sorting starts.
+    """
+    index = -1
+    for child in self.children:
+        if child == start_node:
+            index = child.address + child.size
+            continue
+        # Start node not yet found, skip
+        if index < 0:
+            continue
+
+        child.address = index
+        index += child.size
+
+
 def root_can_drop_on(self, node) -> bool:
     """
     Function that determines which objects can be dropped on static modbus root.
@@ -931,6 +525,8 @@ def root_can_drop_on(self, node) -> bool:
     return isinstance(
         node,
         (
+            FunctionData,
+            FunctionDataBitfield,
             mpm.canmodel.Signal,
             mpm.canmodel.Multiplexer,
             mpm.canmodel.CanTable,
@@ -951,7 +547,9 @@ def root_child_from(self, node) -> typing.Union[FunctionData, list]:
     Returns:
         A new FunctionData object.
     """
-    if isinstance(node, mpm.canmodel.Signal):
+    if isinstance(node, (FunctionData, FunctionDataBitfield)):
+        return node
+    elif isinstance(node, mpm.canmodel.Signal):
         avail_addr = self.find_avail_address()
         return FunctionData(
             parameter_uuid=node.parameter_uuid,
@@ -1024,14 +622,14 @@ Root = epyqlib.attrsmodel.Root(
     default_name="Static Modbus",
     valid_types=(
         FunctionData,
-        Table,
-        TableRepeatingBlockReference,
         FunctionDataBitfield,
     ),
 )
 Root.can_drop_on = root_can_drop_on
 Root.child_from = root_child_from
 Root.find_avail_address = find_avail_address
+Root.sort_addresses = sort_addresses
+Root.update_addresses_below = update_addresses_below
 
 types = epyqlib.attrsmodel.Types(
     types=(
@@ -1039,10 +637,6 @@ types = epyqlib.attrsmodel.Types(
         FunctionData,
         FunctionDataBitfield,
         FunctionDataBitfieldMember,
-        Table,
-        TableRepeatingBlock,
-        TableRepeatingBlockReference,
-        TableRepeatingBlockReferenceFunctionDataReference,
     ),
 )
 
@@ -1056,34 +650,19 @@ columns = epyqlib.attrsmodel.columns(
     (
         merge(
             "name",
-            Table,
-            TableRepeatingBlock,
-            TableRepeatingBlockReference,
+            FunctionData,
         )
         + merge(
             "parameter_uuid",
             FunctionData,
-            TableRepeatingBlockReferenceFunctionDataReference,
             FunctionDataBitfield,
             FunctionDataBitfieldMember,
         )
     ),
-    merge("not_implemented", FunctionData),
     merge("address", FunctionData, FunctionDataBitfield),
     merge("size", FunctionData, FunctionDataBitfield),
-    merge("repeats", TableRepeatingBlock),
-    merge(
-        "factor_uuid",
-        FunctionData,
-        TableRepeatingBlockReferenceFunctionDataReference,
-    ),
-    merge("units", FunctionData),
-    merge("enumeration_uuid", FunctionData),
-    merge("modbus_aggregation", FunctionData, FunctionDataBitfield),
-    merge("type_uuid", FunctionData, FunctionDataBitfield, FunctionDataBitfieldMember),
     merge("bit_length", FunctionDataBitfieldMember),
     merge("bit_offset", FunctionDataBitfieldMember),
-    merge("parameter_table_uuid", Table),
     merge("uuid", *types.types.values()),
 )
 

@@ -645,14 +645,23 @@ class Window:
         update = menu.addAction("Update")
         update.setEnabled(hasattr(node, "update"))
 
-        optimize = menu.addAction("Optimize multiplexers")
-        optimize.setVisible(isinstance(node, mpm.canmodel.MultiplexedMessage))
+        sort_multiplexer_ids = menu.addAction("Sort multiplexers")
+        sort_multiplexer_ids.setVisible(isinstance(node, mpm.canmodel.MultiplexedMessage))
+
+        optimize_multiplexer_ids = menu.addAction("Optimize multiplexers")
+        optimize_multiplexer_ids.setVisible(isinstance(node, mpm.canmodel.MultiplexedMessage))
 
         copyuuid = menu.addAction("Copy UUID")
         copyuuid.setVisible(hasattr(node, "uuid"))
 
         copyname = menu.addAction("Copy name")
         copyname.setVisible(hasattr(node, "name"))
+
+        sort_addresses = menu.addAction("Sort addresses")
+        sort_addresses.setVisible(isinstance(node, mpm.staticmodbusmodel.FunctionData))
+
+        update_addresses_below = menu.addAction("Update addresses below")
+        update_addresses_below.setVisible(isinstance(node, mpm.staticmodbusmodel.FunctionData))
 
         check_duplicates = menu.addAction("Check for duplicate IDs")
         check_duplicates.setVisible(isinstance(node, mpm.canmodel.MultiplexedMessage))
@@ -690,7 +699,9 @@ class Window:
                 node.tree_parent.remove_child(child=node)
             elif action is update:
                 node.update()
-            elif action is optimize:
+            elif action is sort_multiplexer_ids:
+                node.sort_multiplexer_ids()
+            elif action is optimize_multiplexer_ids:
                 node.optimize_multiplexer_ids()
             elif action is copyname:
                 if hasattr(node, "name"):
@@ -698,6 +709,10 @@ class Window:
             elif action is copyuuid:
                 if hasattr(node, "uuid"):
                     QApplication.clipboard().setText(str(node.uuid))
+            elif action is sort_addresses:
+                node.find_root().sort_addresses()
+            elif action is update_addresses_below:
+                node.find_root().update_addresses_below(node)
             elif action is check_duplicates:
                 duplicates = node.check_duplicate_ids()
                 if len(duplicates) == 0:
