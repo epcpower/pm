@@ -180,7 +180,7 @@ class Root:
         # Adjust column widths in the worksheet in regards of text length
         for column_cells in worksheet.columns:
             length = max(len(as_text(cell.value)) for cell in column_cells)
-            worksheet.column_dimensions[column_cells[0].column].width = length + 5
+            worksheet.column_dimensions[column_cells[0].column_letter].width = length + 5
 
     def generate_enum_info_sheet(
         self,
