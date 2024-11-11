@@ -9,9 +9,11 @@ import epyqlib.utils.general
 import mpm.c
 import mpm.mpm_helper
 import mpm.anomalymodel
+import mpm.cantoxlsx
 
 builders = epyqlib.utils.general.TypeMap()
 
+MAX_COLUMN_WIDTH = 20
 
 @attr.s
 class Fields(mpm.mpm_helper.FieldsInterface):
@@ -104,10 +106,6 @@ class Root:
     trigger_types = attr.ib()
     skip_output = attr.ib(default=False)
 
-    header_font = openpyxl.styles.Font(bold=True)
-    header_fill = openpyxl.styles.PatternFill(
-        start_color="FF8DB4E2", end_color="FF8DB4E2", fill_type="solid"
-    )
     table_alignment = openpyxl.styles.Alignment(
         horizontal="left", vertical="top", wrapText=True
     )
@@ -118,6 +116,7 @@ class Root:
             return None
 
         workbook = openpyxl.Workbook()
+        assert workbook.active != None
         workbook.remove(workbook.active)
 
         # Add sheet for response level descriptions
@@ -156,30 +155,40 @@ class Root:
         # Add and format header row
         worksheet.append(field_names.as_filtered_tuple(self.column_filter))
         for cell in worksheet[1]:
-            cell.font = self.header_font
-            cell.fill = self.header_fill
+            cell.font = mpm.cantoxlsx.CELL_FONT
+            cell.fill = mpm.cantoxlsx.CELL_FILL_GROUP
+            cell.border = mpm.cantoxlsx.CELL_BORDER
+            cell.alignment = self.table_alignment
 
         # Iterate anomaly tables and add new rows from them
+        rows = []
         for anomaly_table in self.wrapped.children:
 
-            rows = builders.wrap(
+            rows += builders.wrap(
                 wrapped=anomaly_table,
                 parameter_uuid_finder=self.parameter_uuid_finder,
             ).gen()
 
-            for row in rows:
-                worksheet.append(
-                    row.as_filtered_tuple(self.column_filter),
-                )
+        # Sort anomalies by code
+        rows.sort(key=lambda x: x.code)
 
-        # Apply text alignment to table
+        # Add the worksheet rows
+        for row in rows:
+            worksheet.append(
+                row.as_filtered_tuple(self.column_filter),
+            )
+
+        # Apply formatting to table
         for row in worksheet.iter_rows(min_row=2):
             for cell in row:
+                cell.font = mpm.cantoxlsx.CELL_FONT
+                cell.border = mpm.cantoxlsx.CELL_BORDER
                 cell.alignment = self.table_alignment
 
         # Adjust column widths in the worksheet in regards of text length
         for column_cells in worksheet.columns:
             length = max(len(as_text(cell.value)) for cell in column_cells)
+            length = min(length, MAX_COLUMN_WIDTH)
             worksheet.column_dimensions[column_cells[0].column_letter].width = length + 5
 
     def generate_enum_info_sheet(
@@ -204,8 +213,9 @@ class Root:
             info_sheet_field_names.as_filtered_tuple(self.column_filter),
         )
         for cell in worksheet[1]:
-            cell.font = self.header_font
-            cell.fill = self.header_fill
+            cell.font = mpm.cantoxlsx.CELL_FONT
+            cell.fill = mpm.cantoxlsx.CELL_FILL_GROUP
+            cell.border = mpm.cantoxlsx.CELL_BORDER
 
         # Add response level descriptions
         row = InfoSheetFields()
@@ -222,6 +232,8 @@ class Root:
                 cell.alignment = openpyxl.styles.Alignment(
                     wrap_text=True, horizontal="left", vertical="top"
                 )
+                cell.font = mpm.cantoxlsx.CELL_FONT
+                cell.border = mpm.cantoxlsx.CELL_BORDER
 
         # Format column widths
         worksheet.column_dimensions["A"].width = 50
