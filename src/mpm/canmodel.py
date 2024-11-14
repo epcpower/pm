@@ -595,19 +595,16 @@ class MultiplexedMessage(epyqlib.treenode.TreeNode):
 
     def sort_multiplexer_ids(self) -> None:
         """
-        Sort children by multiplexer ID
+        Sort children by multiplexer ID. This does not update the tree
+        view so the GUI has to be relaunched to display parameters
+        in new order.
 
         Args:
             self: self-instance of this MultiplexedMessage.
         Returns:
             None
         """
-        children_copy = self.children.copy()
-        children_copy.sort(key=lambda x: node_multiplexer_id(x))
-        # Re-add children to trigger the tree update
-        self.recursively_remove_children()
-        for child in children_copy:
-            self.append_child(child)
+        self.children.sort(key=lambda x: node_multiplexer_id(x))
 
     def optimize_multiplexer_ids(self) -> None:
         """
