@@ -201,6 +201,9 @@ class DataPoint(epyqlib.treenode.TreeNode):
     not_implemented = epyqlib.attrsmodel.create_checkbox_attribute(
         default=False,
     )
+    read_only = epyqlib.attrsmodel.create_checkbox_attribute(
+        default=False,
+    )
 
     type_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,
@@ -241,6 +244,14 @@ class DataPoint(epyqlib.treenode.TreeNode):
     )
 
     size = create_size_attribute()
+
+    constant = attr.ib(
+        default=None,
+        converter=epyqlib.attrsmodel.to_int_or_none,
+        metadata=graham.create_metadata(
+            field=marshmallow.fields.Integer(allow_none=True),
+        ),
+    )
 
     enumeration_uuid = epyqlib.attrsmodel.attr_uuid(
         default=None,
@@ -1456,8 +1467,10 @@ columns = epyqlib.attrsmodel.columns(
     ),
     merge("abbreviation", TableRepeatingBlock),
     merge("not_implemented", DataPoint),
+    merge("read_only", DataPoint),
     merge("length", Model) + merge("size", DataPoint, DataPointBitfield),
     merge("repeats", TableRepeatingBlock),
+    merge("constant", DataPoint),
     merge(
         "factor_uuid",
         DataPoint,
